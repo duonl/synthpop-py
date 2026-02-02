@@ -1,0 +1,42 @@
+[project]
+name = "synthpop-py"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Erina",email = "erina.koomen@duo.nl"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "EUPL-1.2"
+dependencies = [
+    "scikit-learn (>=1.8.0,<2.0.0)",
+    "pandas (>=2.3.3,<3.0.0)",
+]
+
+[dependency-groups]
+docs = [ 
+    "sphinx-rtd-theme (>=3.0.2,<4.0.0)",
+    "myst-parser (>=4.0.1,<5.0.0)",
+    "sphinx (>=7,<9)",
+    "sphinxcontrib-mermaid (>=2.0.0,<3.0.0)",
+]
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry]
+packages = [{include = "synthpop_py", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+addopts = [
+    "--import-mode=importlib",
+]

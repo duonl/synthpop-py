@@ -1,0 +1,70 @@
+from sklearn.base import TransformerMixin,BaseEstimator
+from abc import ABC, abstractmethod,ABCMeta
+import pandas as pd
+from typing import Self
+
+class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
+    """
+    Base class for all synthesis methods in synthpop. It ensures all child classes implement a fit and a transform method.
+
+    A synthesis method in synthpop is an algorithm to synthesise a column of a dataset, based on already synthesised columns. 
+    Specifically, such method learns a conditional distribution of a target column given one or multiple columns. 
+
+    Both fit and transform should work for numeric and categorical variables.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+    
+    def get_feature_names_out(self,input_features = None):
+        """
+        Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.
+        
+        See https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output 
+        and SLEP018 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html) and SLEP007 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html)
+        
+        :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during `fit` are used.
+        """
+        #TODO: Is het nodig zelf een implementatie te maken? Of een implementatie in de base class? Of is het beter om de implementatie aan de child classes over te laten?
+        pass
+
+    @abstractmethod
+    def fit(self,X:pd.DataFrame, y: pd.Series) -> Self:
+        '''
+        The `fit` method must learn all parameters required to synthesise the target variable from the provided features.
+        It does not modify the input data and does not produce any output.
+
+        There should be an implementation of missing values support in case of missing values in feature columns.
+        There should be a binary classifier to predict missing values if the target variable includes missing values.
+        
+        :param X: Dataset of features
+        :param y: Target variable
+        :return: A fitted model
+        '''
+        pass
+    
+    @abstractmethod
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        """
+        The `transform` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
+
+        There should be an implementation of missing values support in case of missing values in feature columns.
+
+        Calling `transform` before `fit` raises an error.
+
+        :param X: Input dataset
+        :return: Input dataset with predicted column.
+        """
+        return pd.DataFrame()
+    
+    # def get_params(self, deep: bool = True) -> dict:
+    #     return super().get_params(deep)
+    
+    # def set_params(self, **params) -> Self:
+    #     return super().set_params(**params)
+    
+
+    # indien nodig kunnen estimators deze functie implementeren.
+    # Als het object gecloned wordt, wordt deze functie aangeroepen, zie https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
+    # def __sklearn_clone__(self):
+    #     pass
