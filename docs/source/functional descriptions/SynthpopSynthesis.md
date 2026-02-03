@@ -23,30 +23,14 @@ The algorithm consists of two phases:
 2. Generating a synthetic dataset
 
 ### 3.1 Fitting the synthesiser
-
-A - Encoding categorical features
-
-Decision trees from scikit-learn do not run with categorical features, therefore those variables must be transformed into numeric variables. The default encoder in the synthpop synthesiser is based on the target variable: a mean encoder when the target is numeric and a PCA encoder when the target is categorical. A custom encoder can be specified when defining a specific regressor or a specific classifier. 
-
-For details about the default encoders, please refer to those pages: [mean encoding](Mean-encoding.md) or [PCA encoding](PCA-encoding.md)
-
-B - Fitting decision tree
-
-A decision tree is fitted for the target variable, with the feature variables as predictors. Rows where the target column is empty are ignored. The decision tree is applied to the original data. The combination of the leaf node and the value of the target column is stored for every row in the original data.
-
-C - Fitting binary classifier
-
-A decision tree classifier is fitted. The predictors are all the features of the target column. The prediction target of this classifier is a Boolean indicating whether the target is empty or not.
+For each column, a model is fitted in the order specified above. All previous columns are the features, the current column is the target.
+The default model is [CART](CART.md)
 
 ### 3.2 Generating a synthetic dataset
 
 The synthetic dataset is generated incrementally, column by column:
 1. The first column is synthesised by taking a sample with replacement of the user specified number of rows. 
-2. Subsequent target columns:
-- Apply the fitted decision tree to the already synthesised data to determine the leaf node that it corresponds to.
-- Draw a random sample from the data associated with the leaf node.
-- Use the fitted binary classifier to predict the probability of the target being empty.
-- Sample from the probability calculated in step 3. If true, the target value is set to missing, else the value from step 2 is used.
+2. For subsequent models, the fitted model is used to generate synthetic data using the data that has already be synthesised. 
 
 ## 4. Mathematical properties and constraints
 
