@@ -1,13 +1,13 @@
 data\_processing
 =======================================
 
-.. py:module:: synthpop_mq.data_processing
+.. py:module:: synthpop_py.data_processing
 
 
 Encoder module
 --------------------------------------------
 
-.. automodule:: synthpop_mq.data_processing.Encoders
+.. automodule:: synthpop_py.data_processing.Encoders
    :members:
    :show-inheritance:
    :undoc-members:
@@ -16,7 +16,7 @@ Encoder module
 NullPredictor module
 --------------------------------------------------
 
-.. automodule:: synthpop_mq.data_processing.NullPredictor
+.. automodule:: synthpop_py.data_processing.MissingValuePredictor
    :members:
    :show-inheritance:
    :undoc-members:

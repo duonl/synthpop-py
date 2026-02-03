@@ -16,7 +16,7 @@ documentation for details.
    :caption: Contents:
 
    intro
-   synthpop_mq
+   synthpop_py
    user guides/examples
    functional descriptions/fd_index
    developing

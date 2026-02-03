@@ -1,6 +1,6 @@
 from numpy.random import RandomState
-from synthpop_mq.data_processing.Encoders import PCAEncoder, MeanEncoder
-from synthpop_mq.methods import base_synth
+from synthpop_py.data_processing.Encoders import PCAEncoder, MeanEncoder
+from synthpop_py.methods import base_synth
 import pandas as pd
 from typing import Literal, Mapping, Self, Sequence
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor

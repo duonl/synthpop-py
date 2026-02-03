@@ -1,4 +1,4 @@
-# Synthpop synthesis
+# CART synthesis model
 
 ## 1. Introduction
 

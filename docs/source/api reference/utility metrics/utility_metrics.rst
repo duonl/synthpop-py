@@ -1,7 +1,7 @@
 Utility metrics
 ---------------------------------------
 
-.. automodule:: synthpop_mq.utility_metrics.spmse
+.. automodule:: synthpop_py.utility_metrics.spmse
    :members:
    :show-inheritance:
    :undoc-members:
