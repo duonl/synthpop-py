@@ -47,6 +47,7 @@ Only the first $k$ principal components are kept as part of the encoding.
 ### 6.1 Missing values
 If the feature is missing, the output of the encoding should be missing.
 If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.
+If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should treat a missing value as a value.
 
 ### 6.2 Zero-variance columns
 If a column in the contingency table has zero variance, scaling cannot be applied. Such columns do not contribute to variance-based component selection and effectively do not influence the PCA result.
