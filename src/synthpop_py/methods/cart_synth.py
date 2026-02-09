@@ -41,12 +41,7 @@ class TreeClassifierMethod(DecisionTreeClassifier, base_synth.BaseSynthMethod):
         :param y: Target variable. Length must be equal to number of rows in X.
         :return: Fitted estimator.
         """
-        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
-        # That method sets the attribute. 
-        # For example:
-        # from sklearn.utils.validation import validate_data
-        # ....
-        # X, y = validate_data(self, X, y)
+        # sklearn.utils.validation.validate_data is called in super().fit(), therefore we don't need to do it here.
         self.random_state_ = check_random_state(self.random_state)#mandated by scikit-learn developer guide since we need the rng after fitting.
         self.encoder.fit(X)
         data_encoded = self.encoder.transform(X)
@@ -103,6 +98,7 @@ class TreeRegressorMethod(DecisionTreeRegressor, base_synth.BaseSynthMethod):
         :param y: Target variable. Length must be equal to number of rows in X.
         :return: Fitted estimator.
         """
+        # sklearn.utils.validation.validate_data is called in super().fit(), therefore we don't need to do it here.
         self.random_state_ = check_random_state(self.random_state)#mandated by scikit-learn developer guide since we need the rng after fitting.
         self.encoder.fit(X)
         data_encoded = self.encoder.transform(X)
