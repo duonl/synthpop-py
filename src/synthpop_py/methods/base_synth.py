@@ -43,7 +43,8 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         :param y: Target variable
         :return: A fitted model
         '''
-        # The attribute feature_names_in_ should be set here, using sklearn.utils.validation.validate_data
+        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
+        # That method sets the attribute. 
         # For example:
         # from sklearn.utils.validation import validate_data
         # ....

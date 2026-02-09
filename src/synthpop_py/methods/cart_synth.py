@@ -151,6 +151,9 @@ class CartMethod(base_synth.BaseSynthMethod):
         """
 
         # maakt eerst een clone van de regressor of classifier
+        # The return values of (TreeRegressorMethod/TreeClassifierMethod).fit() should be stored in an attribute that ends in an underscore.
+        # In this way, the check_is_fitted method still works. See https://scikit-learn.org/stable/modules/generated/sklearn.utils.validation.check_is_fitted.html#sklearn.utils.validation.check_is_fitted
+        
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
@@ -160,8 +163,10 @@ class CartMethod(base_synth.BaseSynthMethod):
         :param X: Input dataset
         :return: Input dataset with predicted column.
         """
+        #should call sklearn.utils.validation.check_is_fitted(self), 
         return pd.DataFrame()
     
+
     def get_feature_names_out(self):
         #delegates to TreeRegressorMethod/TreeClassifierMethod
         pass
