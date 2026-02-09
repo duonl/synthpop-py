@@ -44,6 +44,11 @@ Only the first $k$ principal components are kept as part of the encoding.
 [The number of principle components with non=zero singular values is equal to the rank of the contingency table $C$](https://en.wikipedia.org/wiki/Singular_value_decomposition). [The rank of a matrix is the dimension of the vector space spanned by its columns](https://en.wikipedia.org/wiki/Rank_(linear_algebra)). Since the columns of $C$ are $m$-dimensional, the rank of $C$ is at most $m$. Because $C$ has $q$ columns, the rank is also at most $q$. Therefore, the number of non-zero singular values is less than or equal to $\min(m,q)$.
 
 ## 6. Edge cases and special situations
+
+|feature column | target column| output of encoding|
+|---------------|--------------|-------------------|
+| missing |  not missing| missing|
+|missing | "N.a.N" | missing
 ### 6.1 Missing values
 Traditional PCA does not accept any missing data points. Any missing values in the feature or target variables must be handled prior to constructing the contingency table. Possible strategies include removing observations with missing values, introducing an explicit "missing" category, or variable imputation.
 
