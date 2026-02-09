@@ -17,6 +17,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         super().__init__()
         #If an estimator is given as a parameter, it should be cloned using the clone() method.
     
+    @abstractmethod
     def get_feature_names_out(self,input_features = None):
         """
         Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.

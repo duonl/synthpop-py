@@ -56,6 +56,9 @@ class TreeClassifierMethod(DecisionTreeClassifier, base_synth.BaseSynthMethod):
         :return: Input dataset with predicted column.
         """
         return pd.DataFrame()
+    
+    def get_feature_names_out(self):
+        pass
 
 
 class TreeRegressorMethod(DecisionTreeRegressor, base_synth.BaseSynthMethod):
@@ -107,6 +110,9 @@ class TreeRegressorMethod(DecisionTreeRegressor, base_synth.BaseSynthMethod):
         :return: Input dataset with predicted column.
         """
         return pd.DataFrame()
+    
+    def get_feature_names_out(self):
+        pass
 
     
 
@@ -155,3 +161,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         :return: Input dataset with predicted column.
         """
         return pd.DataFrame()
+    
+    def get_feature_names_out(self):
+        #delegates to TreeRegressorMethod/TreeClassifierMethod
+        pass
