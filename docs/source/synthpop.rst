@@ -1,4 +1,4 @@
-synthpop\_mq package
+synthpop package
 ====================
 
 Subpackages
@@ -7,16 +7,16 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   api reference/data processing/synthpop_mq.data_processing
-   api reference/synthesise methods/synthpop_mq.methods
+   api reference/data processing/synthpop.data_processing
+   api reference/synthesise methods/synthpop.methods
    api reference/utility metrics/utility_metrics
 
 
 
-synthpop\_mq.Synthesiser module
+synthpop.Synthesiser module
 -------------------------------
 
-.. automodule:: synthpop_mq.Synthesiser
+.. automodule:: synthpop.Synthesiser
    :members:
    :show-inheritance:
    :undoc-members:

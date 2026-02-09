@@ -1,4 +1,4 @@
-from synthpop_mq.methods import base_synth
+from synthpop.methods import base_synth
 import pandas as pd
 
 class XGBRegressorSynth(base_synth.BaseSynthMethod):
