@@ -15,7 +15,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
     def __init__(self) -> None:
         super().__init__()
-        #If a estimator is given as a parameter, it should be cloned using the clone() method.
+        #If an estimator is given as a parameter, it should be cloned using the clone() method.
     
     def get_feature_names_out(self,input_features = None):
         """
@@ -43,6 +43,10 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         :return: A fitted model
         '''
         # The attribute feature_names_in_ should be set here, using sklearn.utils.validation.validate_data
+        # For example:
+        # from sklearn.utils.validation import validate_data
+        # ....
+        # X, y = validate_data(self, X, y)
         pass
     
     @abstractmethod
