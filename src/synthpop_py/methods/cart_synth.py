@@ -41,6 +41,12 @@ class TreeClassifierMethod(DecisionTreeClassifier, base_synth.BaseSynthMethod):
         :param y: Target variable. Length must be equal to number of rows in X.
         :return: Fitted estimator.
         """
+        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
+        # That method sets the attribute. 
+        # For example:
+        # from sklearn.utils.validation import validate_data
+        # ....
+        # X, y = validate_data(self, X, y)
         self.random_state_ = check_random_state(self.random_state)#mandated by scikit-learn developer guide since we need the rng after fitting.
         self.encoder.fit(X)
         data_encoded = self.encoder.transform(X)
@@ -55,6 +61,7 @@ class TreeClassifierMethod(DecisionTreeClassifier, base_synth.BaseSynthMethod):
         :param X: Input dataset
         :return: Input dataset with predicted column.
         """
+        # should call sklearn.utils.validation.check_is_fitted(self),
         return pd.DataFrame()
     
     def get_feature_names_out(self):
@@ -109,6 +116,7 @@ class TreeRegressorMethod(DecisionTreeRegressor, base_synth.BaseSynthMethod):
         :param X: Input dataset
         :return: Input dataset with predicted column.
         """
+        # should call sklearn.utils.validation.check_is_fitted(self), 
         return pd.DataFrame()
     
     def get_feature_names_out(self):
@@ -149,6 +157,12 @@ class CartMethod(base_synth.BaseSynthMethod):
         :param y: Target variable. Length must be equal to number of rows in X.
         :return: Fitted estimator.
         """
+        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
+        # That method sets the attribute. 
+        # For example:
+        # from sklearn.utils.validation import validate_data
+        # ....
+        # X, y = validate_data(self, X, y)
 
         # maakt eerst een clone van de regressor of classifier
         # The return values of (TreeRegressorMethod/TreeClassifierMethod).fit() should be stored in an attribute that ends in an underscore.
