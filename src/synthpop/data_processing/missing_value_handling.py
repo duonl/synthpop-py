@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod,ABCMeta
 import pandas as pd
+from sklearn.base import TransformerMixin
+
+from synthpop.data_processing.Encoders import MeanEncoder
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -31,6 +34,9 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
     
 
 class MissingValuePredictor(BaseMissingValueHandler):
+
+    def __init__(self,encoding: TransformerMixin = MeanEncoder()):
+        super().__init__()
     
     def prepare_data_for_fit(self,X:pd.Series, y:pd.Series)-> tuple[pd.DataFrame,pd.Series]:
         """
@@ -38,7 +44,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :param X: the features for the target. 
         :param y: the target.
 
-        :return: a tuple (X,y) of data ready to be further processed and used for fitting a model. 
+        :return: a tuple (X,y). Original data minus the rows where the y is missing.
         """
         
         return(pd.DataFrame(),pd.Series())
@@ -46,6 +52,29 @@ class MissingValuePredictor(BaseMissingValueHandler):
     def post_synth_transform(self,X:pd.DataFrame,y:pd.Series) -> pd.Series:
         """
         Uses a decision tree to determine when y should be missing.
+        :param X: the features for the target.
+        :param y: the target
+
+        :return:  The synthesised target with missing values.
+        """ 
+        return pd.Series()
+    
+class ReplaceNoneWithValue(BaseMissingValueHandler):
+    
+    def prepare_data_for_fit(self,X:pd.Series, y:pd.Series)-> tuple[pd.DataFrame,pd.Series]:
+        """
+        Replaces missing values in the target with "N.a.N"
+        :param X: the features for the target. 
+        :param y: the target.
+
+        :return: a tuple (X,y). Leaves X unchanged. Replaces missing values in the target with "N.a.N"
+        """
+        
+        return(pd.DataFrame(),pd.Series())
+
+    def post_synth_transform(self,X:pd.DataFrame,y:pd.Series) -> pd.Series:
+        """
+        Replaces "N.a.N" with missing values.
         :param X: the features for the target.
         :param y: the target
 
