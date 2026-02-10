@@ -61,6 +61,15 @@ Each observation is then encoded by applying $E$ to its feature value. For obser
 Mean encoding produces exactly one numeric value per feature level. Therefore, the encoded feature has dimension 1, regardless of the number of original categories.
 
 ## 5. Edge cases and special situations
+
+|feature column | target column| output of encoding/expected behaviour|
+|---------------|--------------|-------------------|
+| missing |  not missing| missing|
+| missing | missing | missing|
+| any specific non-missing value| always missing for that specific value | missing|
+| one non-missing value for all rows| many different values| the mean of the target column|
+
+
 ### 5.1 Missing values
 Missing target values are ignored when computing group means. Missing feature values must be handled before encoding. Possible strategies include removing observations with missing values, introducing an explicit "missing" category, or variable imputation.
 

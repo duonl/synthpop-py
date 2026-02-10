@@ -45,10 +45,14 @@ Only the first $k$ principal components are kept as part of the encoding.
 
 ## 6. Edge cases and special situations
 
-|feature column | target column| output of encoding|
+|feature column | target column| output of encoding/expected behaviour|
 |---------------|--------------|-------------------|
 | missing |  not missing| missing|
-|missing | "N.a.N" | missing
+|missing | missing | missing|
+|any specific non-missing value| always missing for that specific value | missing|
+|many different non-missing values| one value for all rows, possibly| The rotation matrix of PCA becomes an identity matrix, so the number of occurences of the feature level should be the encoding (count encoding).|
+| one non-missing value for all rows| many different values| every row is encoded with the same number. This number should be the row count. (this is inline with count encoding)|
+
 ### 6.1 Missing values
 Traditional PCA does not accept any missing data points. Any missing values in the feature or target variables must be handled prior to constructing the contingency table. Possible strategies include removing observations with missing values, introducing an explicit "missing" category, or variable imputation.
 

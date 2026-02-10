@@ -54,6 +54,12 @@ Only numeric and categorical variables are supported. Other data types must be c
 
 ## 5. Edge cases and special situations
 
+### 5.1 Original dataframe is empty
+If the user attempts to make a synthetic version of a empty dataframe, en exception should be raised. 
+
+### 5.2 One column in the dataframe
+If there is only one column in the dataframe, that one column should be sampled.
+
 ## 6. Limitations and considerations
 
 ### 6.1 No prediction matrix
