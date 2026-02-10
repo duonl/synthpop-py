@@ -1,6 +1,6 @@
 # Missing Value Predictor
 ## 1. Introduction
-The Missing Value Predictor is a probabilistic component that models the presence of missing values (Null/NaNs) in a target variable as a function of the feature space. Its purpose is to reproduce realistic missingness patterns in synthetic data.
+The Missing Value Predictor is a probabilistic component that models the presence of missing values (Null/NaNs) in a target variable as a function of the feature space. Its purpose is to reproduce realistic missingness patterns in the synthetic data.
 
 Standard decision tree regressors and classifiers in common machine learning libraries (e.g. CART in scikit-learn) can handle missing values in features but not in targets. As a result, the algorithm throws an exception and the predictors never generate NaN outputs, even when the original data contain missing targets.
 
@@ -26,8 +26,8 @@ This output is later used to decide whether a generated target value should be r
 For each target variable, the synthesis system trains two conceptually separate models. First, a value predictor that generates the target value assuming it is not missing. Then, a Missing Value Predictor that models the probability that the target is missing.
 
 The Missing Value Predictor is trained and used in 4 steps:
-1. Construction of the missingess target
-2. Apply [mean encoding](Mean-encoding.md) to the categorical original data.
+1. Construction of the 'missingness' target vector
+2. Apply [mean encoding](Mean-encoding.md) (based on the 'missingness' target vector) to the categorical variables (if any) in the original data.
 3. Training of the null classifier
 4. Probabilistic sampling
 
@@ -77,7 +77,5 @@ If all target values are NaN, the Missing Value Predictor degenerates to a const
 ### 5.3 Rare missingness
 When the missing values are extremely rare, many candidate splits of the tree isolate only a handful of positive samples. Enforcing a minimum leaf size prevents the tree from creating such degenerate leaves, because any split that would produce a very small child node is rejected. As a result, the model avoids divisions by zero, empty-class estimates, and other ill-defined operations, which in turn may eliminate the generation of NaN values during training or prediction.
 
-## 6. Limitations and considerations
-The Missing Value Predictor assumes that missingness can be explained as a function of the original features (i.e. it models *missing at random* or *missing at random conditional on $X$*). It cannot represent mechanisms where missingness depends on unobserved values of the target itself (*missing not at random*).
 
 

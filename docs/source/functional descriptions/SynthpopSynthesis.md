@@ -24,7 +24,7 @@ The algorithm consists of two phases:
 
 ### 3.1 Fitting the synthesiser
 For each column, a model is fitted in the order specified above. All previous columns are the features, the current column is the target.
-The default model is [CART](CART.md)
+The default model is a sample for the first generated variable, and [CART](CART.md) for all other variables.
 
 ### 3.2 Generating a synthetic dataset
 

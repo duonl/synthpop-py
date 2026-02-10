@@ -13,10 +13,10 @@ Encoder module
    :undoc-members:
 
 
-MissingValuePredictor module
+missing_value_handling module
 --------------------------------------------------
 
-.. automodule:: synthpop.data_processing.MissingValuePredictor
+.. automodule:: synthpop.data_processing.missing_value_handling
    :members:
    :show-inheritance:
    :undoc-members:

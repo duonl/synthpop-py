@@ -36,29 +36,28 @@ The next steps depend on wheter the target is numeric or categorical.
 
 #### 3.1.1 Fitting with a categorical target 
 
-If the target contains missing values, then the missing values are replaced by the value "N.a.N". If that value already occurs, an error should be raised and the process should stop. If there is already a "N.a.N" value and still missing values, there might be a problem with data quality.
-A decision tree classifier is fitted with the encoded feature and the transformed categorical target.
+f the target contains missing values, then the missing values are replaced by the value "N.a.N". If that value already occurs, an error should be raised and the process should stop. This happens because if a variable contains both an existing "N.a.N" value and 'regular' missing values, we assume a data quality problem.
 
 #### 3.1.2 Fitting with a numeric target
-The [Missing Value Predictor](Null predictor.md) is fitted with the feature (without encodings) and target, without any modifications.
-combinations of feature and target where the target is missing are filtered out.
-A Decision tree regressor is fitted using the filtered feature and target. 
+The [Missing Value Predictor](Null predictor.md) is fitted with the features (without encodings) and target, without any modifications.
+After, any rows where the target is missing are filtered out.
+A Decision tree classifier is fitted with the (possibly encoded) features and the transformed categorical target.
 
 
 ### 3.2 Generating a synthetic dataset
 
 #### 3.2.1 Generating a numerical column
-- Use the missing value predictor on the already synthesised data to identify the rows where the target should be missing.
-For the rows for wich the target should not be missing:
+- Use the missing value predictor on the already synthesised variables to generate the rows where the synthetic target variable is missing.
+For the rows for which the synthetic target variable is not missing:
 - Apply the same encoding used when fitting to the already synthesised categorical data.
-- Apply the fitted decision tree to the (encoded) already synthesised data to determine the leaf node that it corresponds to.
+- Apply the fitted decision tree to the (encoded) already synthesised data to determine the leaf node that each row corresponds to.
 - Draw a random sample from the data associated with the leaf node.
 
 #### 3.2.2 Generating a categorical column
-- Apply the same encoding used when fitting to the already synthesised categorical data.
-- Apply the fitted decision tree to the (encoded) already synthesised data to determine the leaf node that it corresponds to.
+- take the PCA encoding from the real data and apply it to any already synthesised categorical variable
+- Apply the fitted decision tree to the (encoded) already synthesised data to determine the leaf node that each row corresponds to.
 - Draw a random sample from the data associated with the leaf node.
-- Replace the value "N.a.N" with missing value. 
+- Replace any "N.a.N" values with missing value. 
 
 
 ## 4. Mathematical properties and constraints
