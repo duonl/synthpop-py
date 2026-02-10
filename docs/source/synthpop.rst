@@ -1,9 +1,5 @@
-<<<<<<<< HEAD:docs/source/synthpop.rst
 synthpop package
 ========
-synthpop\_py package
->>>>>>>> origin/develop:docs/source/synthpop_py.rst
-====================
 
 Subpackages
 -----------
@@ -17,17 +13,10 @@ Subpackages
 
 
 
-<<<<<<<< HEAD:docs/source/synthpop.rst
 synthpop.Synthesiser module
 -------------------------------
 
 .. automodule:: synthpop.Synthesiser
-========
-synthpop\_py.Synthesiser module
--------------------------------
-
-.. automodule:: synthpop_py.Synthesiser
->>>>>>>> origin/develop:docs/source/synthpop_py.rst
    :members:
    :show-inheritance:
    :undoc-members:
