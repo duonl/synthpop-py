@@ -1,6 +1,6 @@
 import pandas as pd
-from synthpop_py.methods.base_synth import BaseSynthMethod
-from synthpop_py.methods.cart_synth import TreeRegressorMethod, CartMethod
+from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.methods.cart_synth import TreeRegressorMethod, CartMethod
 from collections.abc import Callable
 from typing import Self
 
