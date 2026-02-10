@@ -1,4 +1,4 @@
-synthpop\_mq package
+synthpop\_py package
 ====================
 
 Subpackages
@@ -13,10 +13,10 @@ Subpackages
 
 
 
-synthpop\_mq.Synthesiser module
+synthpop\_py.Synthesiser module
 -------------------------------
 
-.. automodule:: synthpop_mq.Synthesiser
+.. automodule:: synthpop_py.Synthesiser
    :members:
    :show-inheritance:
    :undoc-members:
