@@ -16,7 +16,7 @@ documentation for details.
    :caption: Contents:
 
    intro
-   synthpop_py
+   synthpop
    user guides/examples
    functional descriptions/fd_index
    developing

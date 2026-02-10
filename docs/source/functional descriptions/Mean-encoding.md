@@ -61,6 +61,15 @@ Each observation is then encoded by applying $E$ to its feature value. For obser
 Mean encoding produces exactly one numeric value per feature level. Therefore, the encoded feature has dimension 1, regardless of the number of original categories.
 
 ## 5. Edge cases and special situations
+
+|feature column | target column| output of encoding/expected behaviour|
+|---------------|--------------|-------------------|
+| missing |  not missing| missing|
+| missing | missing | missing|
+| any specific non-missing value| always missing for that specific value | missing|
+| one non-missing value for all rows| many different values| the mean of the target column|
+
+
 ### 5.1 Missing values
 If the feature is missing, the output of the encoding should be missing.
 If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.

@@ -44,6 +44,15 @@ Only the first $k$ principal components are kept as part of the encoding.
 [The number of principle components with non=zero singular values is equal to the rank of the contingency table $C$](https://en.wikipedia.org/wiki/Singular_value_decomposition). [The rank of a matrix is the dimension of the vector space spanned by its columns](https://en.wikipedia.org/wiki/Rank_(linear_algebra)). Since the columns of $C$ are $m$-dimensional, the rank of $C$ is at most $m$. Because $C$ has $q$ columns, the rank is also at most $q$. Therefore, the number of non-zero singular values is less than or equal to $\min(m,q)$.
 
 ## 6. Edge cases and special situations
+
+|feature column | target column| output of encoding/expected behaviour|
+|---------------|--------------|-------------------|
+| missing |  not missing| missing|
+|missing | missing | missing|
+|any specific non-missing value| always missing for that specific value | missing|
+|many different non-missing values| one value for all rows, possibly| The rotation matrix of PCA becomes an identity matrix, so the number of occurences of the feature level should be the encoding (count encoding).|
+| one non-missing value for all rows| many different values| every row is encoded with the same number. This number should be the row count. (this is inline with count encoding)|
+
 ### 6.1 Missing values
 If the feature is missing, the output of the encoding should be missing.
 If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.

@@ -1,7 +1,7 @@
-synthpop_py
+synthpop
 ===========
 
 .. toctree::
    :maxdepth: 4
 
-   synthpop_py
+   synthpop
