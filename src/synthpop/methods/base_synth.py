@@ -15,7 +15,9 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
     def __init__(self) -> None:
         super().__init__()
+        #If an estimator is given as a parameter, it should be cloned using the clone() method.
     
+    @abstractmethod
     def get_feature_names_out(self,input_features = None):
         """
         Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.
@@ -41,6 +43,12 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         :param y: Target variable
         :return: A fitted model
         '''
+        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
+        # That method sets the attribute. 
+        # For example:
+        # from sklearn.utils.validation import validate_data
+        # ....
+        # X, y = validate_data(self, X, y)
         pass
     
     @abstractmethod
