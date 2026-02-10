@@ -62,7 +62,10 @@ Mean encoding produces exactly one numeric value per feature level. Therefore, t
 
 ## 5. Edge cases and special situations
 ### 5.1 Missing values
-Missing target values are ignored when computing group means. Missing feature values must be handled before encoding. Possible strategies include removing observations with missing values, introducing an explicit "missing" category, or variable imputation.
+If the feature is missing, the output of the encoding should be missing.
+If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.
+If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should exlude the missing target values when calculating the mean.
+
 
 ## 6. Limitations and considerations
 Mean encoding assumes that the expected value of the target variable is informative for distinguishing between categories. The method is sensitive to outliers, rare categories, and data leakage.

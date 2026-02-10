@@ -45,7 +45,9 @@ Only the first $k$ principal components are kept as part of the encoding.
 
 ## 6. Edge cases and special situations
 ### 6.1 Missing values
-Traditional PCA does not accept any missing data points. Any missing values in the feature or target variables must be handled prior to constructing the contingency table. Possible strategies include removing observations with missing values, introducing an explicit "missing" category, or variable imputation.
+If the feature is missing, the output of the encoding should be missing.
+If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.
+If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should treat a missing value as a value.
 
 ### 6.2 Zero-variance columns
 If a column in the contingency table has zero variance, scaling cannot be applied. Such columns do not contribute to variance-based component selection and effectively do not influence the PCA result.
