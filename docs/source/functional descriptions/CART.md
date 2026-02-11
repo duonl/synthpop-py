@@ -66,4 +66,4 @@ Only numeric and categorical variables are supported. Other data types must be c
 
 ### 6.1 No prediction matrix
 
-In synthpop-R, users can configure a prediction matrix which specifies, for each variable, which previously synthesised variables should be included or excluded as predictors in the synthesis method. In the current version of synthpop-py, this level of control is not available; all variables synthesised earlier are automatically used as features in the model.
+In synthpop-R, users can configure a prediction matrix which specifies, for each variable, which previously synthesised variables should be included or excluded as predictors in the synthesis method. In the current version of synthpop-python, this level of control is not available; all variables synthesised earlier are automatically used as features in the model.
