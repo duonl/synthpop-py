@@ -7,7 +7,7 @@ from typing import Literal, Mapping, Self, Sequence
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin
 
-class TreeClassifierMethod(DecisionTreeClassifier, base_synth.BaseSynthMethod):
+class TreeClassifierMethod(DecisionTreeClassifier):
     '''
     A decision tree classifier algorithm, augmented with PCA encoding and NA predictor.
 
@@ -65,7 +65,7 @@ class TreeClassifierMethod(DecisionTreeClassifier, base_synth.BaseSynthMethod):
         pass
 
 
-class TreeRegressorMethod(DecisionTreeRegressor, base_synth.BaseSynthMethod):
+class TreeRegressorMethod(DecisionTreeRegressor):
     '''
     A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
 
