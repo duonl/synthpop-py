@@ -32,6 +32,9 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
         return pd.DataFrame()
     
+    def get_feature_names_out(self):
+        pass
+    
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
     def __init__(self):
         pass
@@ -41,4 +44,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
     def transform(self,X:pd.Series) -> pd.DataFrame:
         return pd.DataFrame()
+    
+    def get_feature_names_out(self):
+        pass
     

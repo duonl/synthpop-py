@@ -1,22 +1,22 @@
 data\_processing
 =======================================
 
-.. py:module:: synthpop_mq.data_processing
+.. py:module:: synthpop.data_processing
 
 
 Encoder module
 --------------------------------------------
 
-.. automodule:: synthpop_mq.data_processing.Encoders
+.. automodule:: synthpop.data_processing.Encoders
    :members:
    :show-inheritance:
    :undoc-members:
 
 
-NullPredictor module
+missing_value_handling module
 --------------------------------------------------
 
-.. automodule:: synthpop_mq.data_processing.NullPredictor
+.. automodule:: synthpop.data_processing.missing_value_handling
    :members:
    :show-inheritance:
    :undoc-members:

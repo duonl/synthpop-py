@@ -1,7 +1,7 @@
 
 
 
-from synthpop_mq.methods.cart_synth import CartClassifierSynth
+from synthpop.methods.cart_synth import TreeClassifierMethod
 
 
 def func(x):
@@ -12,5 +12,5 @@ def test_answer():
     assert func(3) == 5
 
 def test_datatype_sanity():
-    obj = CartClassifierSynth()
-    assert type(obj) is CartClassifierSynth
+    obj = TreeClassifierMethod()
+    assert type(obj) is TreeClassifierMethod

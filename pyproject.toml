@@ -29,7 +29,7 @@ docs = [
 optional = true
 
 [tool.poetry]
-packages = [{include = "synthpop_py", from = "src"}]
+packages = [{include = "synthpop", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

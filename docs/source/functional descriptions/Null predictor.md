@@ -1,6 +1,6 @@
 # Missing Value Predictor
 ## 1. Introduction
-The Missing Value Predictor is a probabilistic component that models the presence of missing values (Null/NaNs) in a target variable as a function of the feature space. Its purpose is to reproduce realistic missingness patterns in synthetic data.
+The Missing Value Predictor is a probabilistic component that models the presence of missing values (Null/NaNs) in a target variable as a function of the feature space. Its purpose is to reproduce realistic missingness patterns in the synthetic data.
 
 Standard decision tree regressors and classifiers in common machine learning libraries (e.g. CART in scikit-learn) can handle missing values in features but not in targets. As a result, the algorithm throws an exception and the predictors never generate NaN outputs, even when the original data contain missing targets.
 
@@ -8,7 +8,7 @@ The Missing Value Predictor addresses this limitation by explicitly learning the
 
 ## 2. Input and output
 The Missing Value Predictor operates on the same inputs as the standard target predictor:
-- The original dataset $X$ with only numeric variables. Categorical variables need to be encoded before training the Missing Value Predictor.
+- The original dataset $X$.
 - A target vector $y$ that may contain missing values.
 
 The output is a Boolean vector $z \in \{0,1\}^n$, where  
@@ -25,10 +25,11 @@ This output is later used to decide whether a generated target value should be r
 ## 3. Detailed process
 For each target variable, the synthesis system trains two conceptually separate models. First, a value predictor that generates the target value assuming it is not missing. Then, a Missing Value Predictor that models the probability that the target is missing.
 
-The Missing Value Predictor is trained and used in 3 steps:
-1. Construction of the missingess target
-2. Training of the null classifier
-3. Probabilistic sampling
+The Missing Value Predictor is trained and used in 4 steps:
+1. Construction of the 'missingness' target vector
+2. Apply [mean encoding](Mean-encoding.md) (based on the 'missingness' target vector) to the categorical variables (if any) in the original data.
+3. Training of the null classifier
+4. Probabilistic sampling
 
 ### 3.1 Construction of the missingness target
 The target vector $y$ is transformed into a binary indicator vector $z$ such that
@@ -41,14 +42,17 @@ z_i =
 ```
 This new vector becomes the training target for the decision tree of the Missing Value Predictor.
 
-### 3.2 Training of the null classifier
-A binary decision tree classifier is trained on the original dataset $X$ and the binary missingness indicator $z$. For each observation $x$, the classifier estimates a conditional distribution. This is the empirical missingness rate of the training observations that ended up in that leaf:
+### 3.2 Apply mean encoding to the categorical original data.
+See [mean encoding](Mean-encoding.md). The boolean target value is interpreted here as a numeric value that is either 0 or 1. 
+
+### 3.3 Training of the null classifier
+A binary decision tree classifier is trained on the original encoded dataset $X$ and the binary missingness indicator $z$. For each observation $x$, the classifier estimates a conditional distribution. This is the empirical missingness rate of the training observations that ended up in that leaf:
 ```{math}
 P(z = 1 \mid x), \quad P(z = 0 \mid x).
 ```
 
-### 3.3 Probabilistic sampling
-During synthesis, the trained classifier outputs a probability vector for each input observation $x$ based on the leaf node in which $x$ falls. A Bernoulli sample is drawn from this probability vector to decide whether the target should be set to NaN.
+### 3.4 Probabilistic sampling
+During synthesis, the trained classifier outputs a probability vector for each input observation $x$ based on the leaf node in which $x$ falls. A Bernoulli sample is drawn from this probability vector to decide whether the target should be set to NaN. Note that the same encoding as used during fitting needs to be applied to the synthetic data before using the decision tree classifier.
 
 ## 4. Mathematical properties and constraints
 ### 4.1 Separation from value prediction
@@ -62,8 +66,6 @@ The Missing Value Predictor does not generate target values. It only determines 
 ```
 where $\hat{y}_i$ is produced by the standard predictor.
 
-### 4.2 Dependence on feature space
-The missingess model is conditional on the same feature representation used for value prediction. Therefore, any feature transformation or encoding applied to the value predictor must also be applied to the Missing Value Predictor.
 
 ## 5. Edge cases and special situations
 ### 5.1 No missing values
@@ -75,7 +77,5 @@ If all target values are NaN, the Missing Value Predictor degenerates to a const
 ### 5.3 Rare missingness
 When the missing values are extremely rare, many candidate splits of the tree isolate only a handful of positive samples. Enforcing a minimum leaf size prevents the tree from creating such degenerate leaves, because any split that would produce a very small child node is rejected. As a result, the model avoids divisions by zero, empty-class estimates, and other ill-defined operations, which in turn may eliminate the generation of NaN values during training or prediction.
 
-## 6. Limitations and considerations
-The Missing Value Predictor assumes that missingness can be explained as a function of the original features (i.e. it models *missing at random* or *missing at random conditional on $X$*). It cannot represent mechanisms where missingness depends on unobserved values of the target itself (*missing not at random*).
 
 
