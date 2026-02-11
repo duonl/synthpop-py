@@ -51,10 +51,10 @@ For the generation of a categorical column, we apply the following steps:
 
 For the generation of a numeric column, we apply the following steps:
 
-1. Use the Missing Value Predictor on the already synthesised variables (previous columns) to generate the rows where the synthetic target variable is missing. Then, for the rows for which the synthetic target is not missing:
-2. Apply the same mean encoding used when fitting (from the original data) to the already synthesised categorical features.
-3. Apply the fitted decision tree to the (encoded) already synthesised data to determine the leaf node that each row corresponds to.
-4. Draw a random sample from the data associated with the leaf node.
+1. Apply the same mean encoding used when fitting (from the original data) to the already synthesised categorical features.
+2. Apply the fitted decision tree to the (encoded) already synthesised data to determine the leaf node that each row corresponds to.
+3. Draw a random sample from the data associated with the leaf node.
+4. Apply the Missing Value Predictor on the newly generated column
 
 ## 4. Mathematical properties and constraints
 

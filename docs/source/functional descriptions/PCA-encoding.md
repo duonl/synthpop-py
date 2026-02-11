@@ -51,7 +51,7 @@ Only the first $k$ principal components are kept as part of the encoding.
 |missing | missing | missing|
 |any specific non-missing value| always missing for that specific feature value | missing|
 |any specific non-missing value| sometimes but not always missing for that specific feature value|the encoding treats the missing target value as a normal value and the default PCA is applied
-|many different non-missing values| constant (any non-missing value) for that specific feature value| the rotation matrix of PCA becomes an identity matrix, so the number of occurrences of the feature level should be the encoding. Effectively, this is count encoding
+|many different non-missing values| the same constant over all values of the feature (any non-missing value)| the rotation matrix of PCA becomes an identity matrix, so the number of occurrences of the feature level should be the encoding. Effectively, this is count encoding
 |constant (one non-missing value for all rows)| many different non-missing values or constant (any non-missing value) for that specific feature value| every row is encoded with the same number. This number should be the total number of rows
 
 ### 6.1 Missing values
