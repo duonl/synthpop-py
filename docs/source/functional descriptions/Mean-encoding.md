@@ -71,10 +71,10 @@ Mean encoding produces exactly one numeric value per feature level. Therefore, t
 | any specific non-missing value (including a constant) | constant (any non-missing value) for that specific feature value|the mean of the target column, which is here equal to the constant value|
 
 ### 5.1 Missing values
-As seen in the table above, there are different strategies for missing values depending on the context. When the feature is missing, the output of the encoding should always be missing (row 1 and 2). If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well (row 3). If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should exclude the missing target values when calculating the mean (row 4).
+As seen in the table above, there are different strategies for missing values depending on the context. When the feature is missing, the output of the encoding should always be missing (rows 1 and 2). If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well (row 3). If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should exclude the missing target values when calculating the mean (row 4).
 
 ### 5.2 Constant non-missing values
-Constant non-missing values in either the feature or target column should never pose an issue. Combinations of constant and non-missing feature and target columns should return the mean of the target column, even when both are constant.
+Constant non-missing values in either the feature or target column should never pose an issue. Combinations of constant and non-missing feature and target columns should return the mean of the target column, even when both are constant (rows 5 and 6).
 
 
 
