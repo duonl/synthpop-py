@@ -19,7 +19,7 @@ class Synthesiser:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
         
-        For the first column, nothing happens. For the next ones, if the variable name is found in keys of ``special_syn_method``, its corresponding value is the class to be called to fit the synthetizer.
+        For the first column, nothing happens. For the next ones, if the variable name is found in keys of ``special_syn_method``, its corresponding value is the class to be called to fit the synthesiser.
         Otherwise, we use the class defined in ``default_syn_method``.
 
         :param X: An original dataset on which to fit the synthesiser.
@@ -38,7 +38,7 @@ class Synthesiser:
         For the first column, we simple generate a random sample with :py:meth:`pandas.DataFrame.sample`. For the next ones, we use their respective fitted functions. Each column is predicted
         using the previously generated columns as features.
 
-        :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthetizer was fitted.
+        :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted.
         :param random_state: Random seed generator. Default is 42. 
         
         :return: Synthetic dataset
