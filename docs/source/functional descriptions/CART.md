@@ -38,7 +38,7 @@ When these steps are completed, a classification tree can be fit. For details ab
 #### 3.1.2 Fitting with a numeric target
 As mentioned, the categorical features must first be encoded. The default encoder for numeric targets is a [Mean encoder](Mean-encoding.md). Again, a custom encoder can be specified when defining a specific classifier.
 
-Here, if the target contains missing values, the [Missing Value Predictor](Null predictor.md) is fitted with the original unencoded features and target. After, any rows where the target is missing are filtered out. Then a regression tree can be fit using the filtered features and target. For details about the fitting, we refer you again to the [scikit-learn documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html).
+Here, if the target contains missing values, the [Missing Value Predictor](MissingValuePredictor.md) is fitted with the original unencoded features and target. After, any rows where the target is missing are filtered out. Then a regression tree can be fit using the filtered features and target. For details about the fitting, we refer you again to the [scikit-learn documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html).
 
 ### 3.2 Generating a synthetic dataset
 To generate a synthetic dataset, per column is checked to see whether it will be numeric or categorical. For both types, a different scheme is followed.
