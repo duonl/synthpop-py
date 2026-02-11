@@ -79,8 +79,14 @@ This how the user can take the first column directly from the data:
 synth = Synthesiser()
 
 data = pd.DataFrame()
-first_column = data['first_column']
-syn_data = synth.fit(data).transform(x_syn=first_column)
+syn_data = synth.fit(data).transform(x_syn=data['first_column'])
+```
+Starting with 2 columns can be done like this:
+```python
+synth = Synthesiser()
+
+data = pd.DataFrame()
+syn_data = synth.fit(data).transform(x_syn=data['first_column','second_column'])
 ```
 
 ## Different number of rows in the synthetic dataset

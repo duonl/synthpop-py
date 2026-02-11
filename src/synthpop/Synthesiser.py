@@ -51,7 +51,7 @@ class Synthesiser(TransformerMixin,BaseEstimator):
         If ``X_syn`` is not ``None``, it is used as features to predict the first column. It will be included as features for all thereafter. 
         Note that the columns in ``X_syn`` should be present in the data used for fitting.
 
-        Setting both ``X_syn`` and ``n`` raises and exception.
+        Setting both ``X_syn`` and ``n`` raises an exception.
 
         :param X_syn:  Data that should be included in the output and can be included as features for all columns seen in fitting.
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthetizer was fitted.
