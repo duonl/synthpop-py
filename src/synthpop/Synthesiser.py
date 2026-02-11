@@ -3,8 +3,9 @@ from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import TreeRegressorMethod, CartMethod
 from collections.abc import Callable
 from typing import Self
+from sklearn.base import TransformerMixin,BaseEstimator
 
-class Synthesiser:
+class Synthesiser(TransformerMixin,BaseEstimator):
     """
     Delegates synthesis tasks to the appropriate synthesis method classes. 
 
@@ -27,20 +28,39 @@ class Synthesiser:
 
         :return: Fitted synthesiser.
         """
+        self.random_state_ = check_random_state(self.random_state)#mandated by scikit-learn developer guide since we need the rng after fitting.
+
+        #Stores the probability distribution of the first column in self.
+
+        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
+        # That method sets the attribute. 
+        # For example:
+        # from sklearn.utils.validation import validate_data
+        # ....
+        # X, y = validate_data(self, X, y)
         return self
 
-    def generate(self, n: int | None = None, random_state: int = 42) -> pd.DataFrame:
+    def transform(self, X_syn:pd.DataFrame |None = None,n: int | None = None) -> pd.DataFrame:
         """
-        Generate a synthetic dataset of ``n`` rows. 
+        Generate a synthetic dataset of ``n`` rows if ``n`` is given and ``X_syn`` is None. 
 
-        This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method classes from ``default_syn_method`` and ``special_syn_method``.
+        This method loops through the columns of the data used for fitting, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method classes from ``default_syn_method`` and ``special_syn_method``.
         
-        For the first column, we simple generate a random sample with :py:meth:`pandas.DataFrame.sample`. For the next ones, we use their respective fitted functions. Each column is predicted
+        If ``X_syn`` is ``None``, then for the first column, we simple take a random sample with :py:meth:`pandas.DataFrame.sample`. For the next ones, we use their respective fitted models. Each column is predicted
         using the previously generated columns as features.
+        If ``X_syn`` is not ``None``, it is used as features to predict the first column. It will be included as features for all thereafter. 
+        Note that the columns in ``X_syn`` should be present in the data used for fitting.
 
+        Setting both ``X_syn`` and ``n`` raises and exception.
+
+        :param X_syn:  Data that should be included in the output and can be included as features for all columns seen in fitting.
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthetizer was fitted.
-        :param random_state: Random seed generator. Default is 42. 
-        
+
         :return: Synthetic dataset
         """
+
+        # should call sklearn.utils.validation.check_is_fitted(self), 
         return pd.DataFrame()
+    
+    def get_feature_names_out(self,input_features = None):
+        pass

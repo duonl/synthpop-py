@@ -69,3 +69,29 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
         return pd.DataFrame()
     
 ```
+
+## Custom start of the synthesis
+The default behaviour is that the first column is synthesised by sampling from the first column.
+If the user wants something else, the user can provide the first few columns.
+This how the user can take the first column directly from the data:
+
+```python
+synth = Synthesiser()
+
+data = pd.DataFrame()
+first_column = data['first_column']
+syn_data = synth.fit(data).transform(x_syn=first_column)
+```
+
+## Different number of rows in the synthetic dataset
+
+The default behaviour is to generate as much rows in the synthetic dataset as there are rows in the observed dataset.
+If the user wants a different number of rows (90 in this example) in the synthetic dataset, this can be done as follows:
+
+```python
+synth = Synthesiser()
+
+data = pd.DataFrame()
+first_column = data['first_column']
+syn_data = synth.fit(data).transform(n=90)
+```
