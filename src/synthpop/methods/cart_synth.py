@@ -17,7 +17,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
 
     def __init__(self, *, 
                  encoder: TransformerMixin = PCAEncoder(),
-                 NaNHandling: BaseMissingValueHandler = ReplaceNoneWithValue(),
+                 MissingHandling: BaseMissingValueHandler = ReplaceNoneWithValue(),
                  criterion: Literal['gini'] | Literal['entropy'] | Literal['log_loss'] = "gini", 
                  splitter: Literal['best'] | Literal['random'] = "best", 
                  max_depth: None | int  = None, 
@@ -76,7 +76,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
     #De vscode autocomplete was erg specifiek met typehints. Het was op het niveau van hoeveel bits sommige numeric velden mogen zijn. Die heb ik weg gehaald, omdat we niet zo gedetailleerd werken.
     def __init__(self, *,
                 encoder: TransformerMixin = MeanEncoder(),
-                NaNHandling: BaseMissingValueHandler = MissingValuePredictor(),
+                MissingHandling: BaseMissingValueHandler = MissingValuePredictor(),
                 criterion: Literal['squared_error'] | Literal['friedman_mse'] | Literal['absolute_error'] | Literal['poisson'] = "squared_error", 
                 splitter: Literal['best'] | Literal['random'] = "best", 
                 max_depth: None | int  = None, 
