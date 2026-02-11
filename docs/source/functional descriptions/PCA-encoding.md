@@ -49,17 +49,17 @@ Only the first $k$ principal components are kept as part of the encoding.
 |---------------|--------------|-------------------|
 | missing |  not missing| missing|
 |missing | missing | missing|
-|any specific non-missing value| always missing for that specific value | missing|
-|many different non-missing values| one value for all rows, possibly| The rotation matrix of PCA becomes an identity matrix, so the number of occurences of the feature level should be the encoding (count encoding).|
-| one non-missing value for all rows| many different values| every row is encoded with the same number. This number should be the row count. (this is inline with count encoding)|
+|any specific non-missing value| always missing for that specific feature value | missing|
+|any specific non-missing value| sometimes but not always missing for that specific feature value|the encoding treats the missing target value as a normal value and the default PCA is applied
+|many different non-missing values| the same constant over all values of the feature (any non-missing value)| the rotation matrix of PCA becomes an identity matrix, so the number of occurrences of the feature level should be the encoding. Effectively, this is count encoding
+|constant (one non-missing value for all rows)| many different non-missing values or constant (any non-missing value) for that specific feature value| every row is encoded with the same number. This number should be the total number of rows
 
 ### 6.1 Missing values
-If the feature is missing, the output of the encoding should be missing.
-If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.
-If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should treat a missing value as a value.
+As seen in the table above, there are different strategies for missing values depending on the context. When the feature is missing, the output of the encoding should always be missing (rows 1 and 2). If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well (row 3).
+If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should treat a missing value as a value (row 4).
 
-### 6.2 Zero-variance columns
-If a column in the contingency table has zero variance, scaling cannot be applied. Such columns do not contribute to variance-based component selection and effectively do not influence the PCA result.
+### 6.2 Constant non-missing values
+Constant non-missing values create zero-variance columns. If a column in the contingency table has zero variance, scaling cannot be applied. Such columns do not contribute to variance-based component selection and effectively do not influence the PCA result. When the feature column is non-missing non-constant, but the target is constant, the PCA encoding decays to count encoding (row 5). If the feature column is constant and the target column is not missing, then the encoding becomes the total number of rows (row 6).
 
 ## 7. Limitations and considerations
 PCA encoding assumes that relationships between feature levels and target classes can be meaningfully captured by linear combinations of contingency table columns. The method may be sensitive to rare categories, strong class imbalance, and the choice of variance preservation threshold. Additionally, the resulting components may be less interpretable than simpler encoding schemes.

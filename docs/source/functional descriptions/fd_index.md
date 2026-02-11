@@ -7,7 +7,7 @@ SynthpopSynthesis.md
 CART.md
 Mean-encoding.md
 PCA-encoding.md
-Null predictor.md
+MissingValuePredictor.md
 S_pMSE.md
 plotting.md
 ```
