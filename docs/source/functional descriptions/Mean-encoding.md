@@ -61,19 +61,21 @@ Each observation is then encoded by applying $E$ to its feature value. For obser
 Mean encoding produces exactly one numeric value per feature level. Therefore, the encoded feature has dimension 1, regardless of the number of original categories.
 
 ## 5. Edge cases and special situations
-
 |feature column | target column| output of encoding/expected behaviour|
 |---------------|--------------|-------------------|
 | missing |  not missing| missing|
 | missing | missing | missing|
-| any specific non-missing value| always missing for that specific value | missing|
-| one non-missing value for all rows| many different values| the mean of the target column|
-
+| any specific non-missing value| always missing for that specific feature value | missing|
+| any specific non-missing value| sometimes but not always missing for that specific feature value | the mean of the target column excluding the missing targets
+| constant (one non-missing value for all rows)| many different values| the mean of the target column|
+| any specific non-missing value (including a constant) | constant (any non-missing value) for that specific feature value|the mean of the target column, which is here equal to the constant value|
 
 ### 5.1 Missing values
-If the feature is missing, the output of the encoding should be missing.
-If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well.
-If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should exlude the missing target values when calculating the mean.
+As seen in the table above, there are different strategies for missing values depending on the context. When the feature is missing, the output of the encoding should always be missing (row 1 and 2). If there is a non-missing value of the feature for which the target is always missing, the encoding should produce a missing value as well (row 3). If there is a non-missing value of the feature for which the target is sometimes but not always missing, the encoding should exclude the missing target values when calculating the mean (row 4).
+
+### 5.2 Constant non-missing values
+Constant non-missing values in either the feature or target column should never pose an issue. Combinations of constant and non-missing feature and target columns should return the mean of the target column, even when both are constant.
+
 
 
 ## 6. Limitations and considerations
