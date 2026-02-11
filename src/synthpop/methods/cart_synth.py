@@ -95,7 +95,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
         """
-        Fit PCA encoder on X, build a decision tree regressor on (encoded_X, y), and build a decision tree classifier to forecast missing values in y. 
+        Fit mean encoder on X, build a decision tree regressor on (encoded_X, y), and build a decision tree classifier to forecast missing values in y. 
         
         :param X: Features dataset.
         :param y: Target variable. Length must be equal to number of rows in X.
