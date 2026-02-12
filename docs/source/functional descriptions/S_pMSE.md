@@ -77,9 +77,13 @@ The statistic is invariant under swapping the original and synthetic datasets, s
 
 Missing values are treated as an explicit category. While this preserves information about missingness, it may inflate the influence of missing data patterns on the S_pMSE.
 
-### 5.2 Sparse joint distributions
+### 5.2 Constant variables
 
 If both variables are constant, the statistic is undefined due to division by zero. The function sends a warning, ignores the variable pair and continues with the next ones.
+
+### 5.3 Inequal number of categories
+
+If some combinations of variables exist in the original dataset, but not in the synthetic dataset, the synthetic frequency is 0. And vice-versa.
 
 ## 6. Limitations and considerations
 
