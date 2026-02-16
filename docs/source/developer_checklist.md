@@ -4,4 +4,4 @@ This document specifies which steps a developer should follow to contribute to t
 This checklist is meant to ensure code quality and optimal code workflow. 
 
 ## Before you begin
-[] test
+- [ ] test
