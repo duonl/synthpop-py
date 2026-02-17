@@ -26,7 +26,7 @@ However, there are a few things that need to be tested in many situations. Take 
     - Is the returned value a list, numpy array, pandas dataframe, pandas series?
     - Are the columns/key-value pairs/items of the correct type?
     - Are any names (of columns or keys) correct?
-
+- For estimators (in the sense of scikit-learn), there is a [pre-made set of test](https://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.parametrize_with_checks.html#sklearn.utils.estimator_checks.parametrize_with_checks) for compatibility met scikit-learn. Also see [this](https://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.check_estimator.html#sklearn.utils.estimator_checks.check_estimator). You can look [here](https://scikit-learn.org/stable/api/sklearn.utils.html) for more general tools.
 - Obvious cases, for example:
     - taking the mean of a set with one value. 
     - sorting an already sorted list.
@@ -44,7 +44,10 @@ However, there are a few things that need to be tested in many situations. Take 
 
 ## Useful tools for testing and code quality
 
+
+
 - Code Spell Checker extension for vscode.
 - autopep8 extension for vscode. 
 - pytest-cov for code coverage of the unit tests. (installed if you installed this package with the dev dependency group)
+- pylint for code feedback and code analysis. 
     
