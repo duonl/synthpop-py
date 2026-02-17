@@ -37,10 +37,27 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
     def __init__(self):
+        self.mapping_ = {}
         pass
 
     def fit(self,X:pd.Series, y: pd.Series):
-        pass
+        """
+        Calculate average y value for each X category.
+        
+        :param X: Feature column.
+        :param y: Target column.
+
+        Examples
+        X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
+        y = pd.Series([1, 0, 2, 0, 3], name='score')
+
+        encoder = MeanEncoder()
+        encoder.fit(X, y)
+        """
+        data = pd.concat([X, y], axis=1)
+        self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
+
+        return self
 
     def transform(self,X:pd.Series) -> pd.DataFrame:
         return pd.DataFrame()
@@ -48,3 +65,8 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     def get_feature_names_out(self):
         pass
     
+X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
+y = pd.Series([1, 0, 2, 0, 3], name='score')
+
+encoder = MeanEncoder()
+encoder.fit(X, y)
