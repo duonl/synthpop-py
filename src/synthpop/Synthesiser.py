@@ -1,8 +1,10 @@
 import pandas as pd
-from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.methods.base_synth import BaseSynthMethod,BaseSynthesisStartMethod
 from synthpop.methods.cart_synth import TreeRegressorMethod, CartMethod
 from collections.abc import Callable
 from typing import Self
+
+from synthpop.methods.sample_synth import SampleMethod
 
 class Synthesiser:
     """
@@ -12,7 +14,11 @@ class Synthesiser:
     :param default_syn_method: BaseSynth object. Synthesis method to apply to each column, except the first one and the ones defined in special_syn_method. Default synthesis method is CartSynth. 
     :param special_syn_method: Dictionary of special synthesis method per variable. If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynth objects. By default, there is no special synthesis method.
     """
-    def __init__(self, column_order: list[str] | list[int] | None = None, default_syn_method: BaseSynthMethod = CartMethod(), special_syn_method: dict[str, BaseSynthMethod] | None = None) -> None:
+    def __init__(self, 
+                 column_order: list[str] | list[int] | None = None, 
+                 default_syn_method: BaseSynthMethod = CartMethod(), 
+                 special_syn_method: dict[str, BaseSynthMethod] | None = None,
+                 first_column_method: BaseSynthesisStartMethod = SampleMethod()) -> None:
         pass
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:
@@ -35,10 +41,10 @@ class Synthesiser:
 
         This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method classes from ``default_syn_method`` and ``special_syn_method``.
         
-        For the first column, we simple generate a random sample with :py:meth:`pandas.DataFrame.sample`. For the next ones, we use their respective fitted functions. Each column is predicted
+        For the first column, the method specified in ``first_column_method`` is used. For the next ones, we use their respective fitted functions. Each column is predicted
         using the previously generated columns as features.
 
-        :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted.
+        :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
         :param random_state: Random seed generator. Default is 42. 
         
         :return: Synthetic dataset

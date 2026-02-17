@@ -76,3 +76,34 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     # Als het object gecloned wordt, wordt deze functie aangeroepen, zie https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
     # def __sklearn_clone__(self):
     #     pass
+
+class BaseSynthesisStartMethod(BaseSynthMethod):
+    """
+    Base class for synthesis methods that can be used to synthesise the first column.
+    These methods can not use any other data than the target column.
+    These methods are supposed to deal with missing values, categorical and nummeric data.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def transform(self, X):
+        return self.generate(len(X))
+    
+    def fit(self,X:pd.DataFrame, y:pd.Series):
+        return self.fit_for_first_column(y)
+    
+    @abstractmethod
+    def fit_for_first_column(self,y:pd.Series) -> Self:
+        """
+        Fit the model based only on the target column.
+        :param y: the target column
+        """
+        pass
+
+    @abstractmethod
+    def generate(self,n: int | None = None)->pd.Series:
+        """
+        Generate synthetic data without any pre-synthesised input.
+        """
+        pass
