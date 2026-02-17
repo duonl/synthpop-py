@@ -8,7 +8,7 @@ The Standardised Propensity Mean Squared Error (S_pMSE) is a statistical utility
 
 The computation of S_pMSE requires the following inputs:
 - An original dataset X with $n_o$ rows and $p$ variables
-- A synthetic dataset with $n_s$ rows and the same $p$ variables. The order of the columns is not relevant, but the column names must be controlled.
+- A synthetic dataset with $n_s$ rows and the same $p$ variables. The order of the columns is not relevant, but there needs to be a check that the column names match between both datasets.
 - A maximum number of groups $\text{max_bins} \in \mathbb{N}$ used to discretise numeric variables.
 
 Let $X$ and $Y$ be any columns of the original dataset. The output of the S_pMSE function is a dataset containing all pairs of variables $(X, Y)$ with their corresponding S_pMSE value. Because $\text{S_pMSE}(X, Y)$ and $\text{S_pMSE}(Y, X)$ are equal, $\text{S_pMSE}(Y, X)$ is neither calculated or included in the output dataset.
@@ -54,7 +54,7 @@ Only category pairs with strictly positive expected frequency are retained for s
 
 ### 3.5 Calculation of the S_pMSE
 
-Let $k$ be the number of unique category pair $(x, y)$, for which $f_{orig}(x, y)$ or $f_{syn}(x, y)$ is not null.
+Let $k$ be the number of unique category pair $(x, y)$, for which $f_{orig}(x, y)$ or $f_{syn}(x, y)$ is not 0.
 
 The S_pMSE for the variable pair $(X, Y)$ is computed, for $k>1$:
 
