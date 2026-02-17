@@ -26,7 +26,7 @@ The computation of S_pMSE for a given pair of variables $(X, Y)$ (from the origi
 
 For each variable pair $(X, Y)$:
 - If a variable is numeric, it is discretised into at most $\text{max_bins}$ bins.
-- Missing values in either variable are replaced with the value "N.a.N."
+- Missing values in either variable are replaced with the value "N.a.N.". If that value is already used, an error is raised.
 
 After preprocessing, both variables are treated as categorical variables with a finite number of levels.
 
