@@ -8,9 +8,8 @@ The Standardised Propensity Mean Squared Error (S_pMSE) is a statistical utility
 
 The computation of S_pMSE requires the following inputs:
 - An original dataset X with $n_o$ rows and $p$ variables
-- A synthetic dataset with $n_s$ rows and the same $p$ variables, in the same column order.
+- A synthetic dataset with $n_s$ rows and the same $p$ variables. The order of the columns is not relevant, but the column names must be controlled.
 - A maximum number of groups $\text{max_groups} \in \mathbb{N}$ used to discretise numeric variables
-- A label $\text{na_label}$ used to represent missing values as an explicit category.
 
 Let $X$ and $Y$ be any columns of the original dataset. The output of the S_pMSE function is a dataset containing all pairs of variables $(X, Y)$ with their corresponding S_pMSE value. Because $\text{S_pMSE}(X, Y)$ and $\text{S_pMSE}(Y, X)$ are equal, $\text{S_pMSE}(Y, X)$ is neither calculated or included in the output dataset.
 
@@ -26,8 +25,8 @@ The computation of S_pMSE for a given pair of variables $(X, Y)$ (from the origi
 ### 3.1 Preprocessing 
 
 For each variable pair $(X, Y)$:
-- If a variable is numeric, it is discretised into at most $\text{max_groups}$ bins.
-- Missing values in either variable are replaced with the explicit category defined by $\text{na_label}$
+- If a variable is numeric, it is discretised into at most $\text{max_bins}$ bins.
+- Missing values in either variable are replaced with the value "N.a.N."
 
 After preprocessing, both variables are treated as categorical variables with a finite number of levels.
 
@@ -55,7 +54,9 @@ Only category pairs with strictly positive expected frequency are retained for s
 
 ### 3.5 Calculation of the S_pMSE
 
-The S_pMSE for the variable pair $(X, Y)$ is computed as:
+Let $k$ be the number of unique category pair $(x, y)$, for which $f_{orig}(x, y)$ or $f_{syn}(x, y)$ is not null.
+
+The S_pMSE for the variable pair $(X, Y)$ is computed, for $k>1$:
 
 $$ \text{S_pMSE}(X, Y) = \frac{1}{k - 1} \sum_{x, y} \frac{\Delta(x, y)^2}{\mathbb{E}(x, y)} $$
 
@@ -75,15 +76,17 @@ The statistic is invariant under swapping the original and synthetic datasets, s
 
 ### 5.1 Missing values
 
-Missing values are treated as an explicit category. While this preserves information about missingness, it may inflate the influence of missing data patterns on the S_pMSE.
+Missing values are treated as an explicit category (N.a.N.). While this preserves information about missingness, it may inflate the influence of missing data patterns on the S_pMSE.
+
+If one dataset only has missing values, the S_pMSE is still defined.
 
 ### 5.2 Constant variables
 
-If both variables are constant, the statistic is undefined due to division by zero. The function sends a warning, ignores the variable pair and continues with the next ones.
+If both variables are constant and equal, $k=1$ so the statistic is undefined due to division by zero. The function sends a warning and returns 0 for the variable pair.
 
-### 5.3 Inequal number of categories
+### 5.3 Different unique categories
 
-If some combinations of variables exist in the original dataset, but not in the synthetic dataset, the synthetic frequency is 0. And vice-versa.
+If some combinations of categories exist in the original dataset, but not in the synthetic dataset, the synthetic frequency is 0. And vice-versa.
 
 ## 6. Limitations and considerations
 
