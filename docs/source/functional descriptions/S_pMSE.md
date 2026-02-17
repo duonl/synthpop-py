@@ -9,7 +9,7 @@ The Standardised Propensity Mean Squared Error (S_pMSE) is a statistical utility
 The computation of S_pMSE requires the following inputs:
 - An original dataset X with $n_o$ rows and $p$ variables
 - A synthetic dataset with $n_s$ rows and the same $p$ variables. The order of the columns is not relevant, but the column names must be controlled.
-- A maximum number of groups $\text{max_groups} \in \mathbb{N}$ used to discretise numeric variables
+- A maximum number of groups $\text{max_bins} \in \mathbb{N}$ used to discretise numeric variables.
 
 Let $X$ and $Y$ be any columns of the original dataset. The output of the S_pMSE function is a dataset containing all pairs of variables $(X, Y)$ with their corresponding S_pMSE value. Because $\text{S_pMSE}(X, Y)$ and $\text{S_pMSE}(Y, X)$ are equal, $\text{S_pMSE}(Y, X)$ is neither calculated or included in the output dataset.
 
