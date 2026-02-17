@@ -12,26 +12,27 @@ This checklist is meant to ensure code quality and optimal code workflow.
 ## During development
 
 - [ ] Work on a branch based on the develop branch.
-- [ ] Only implement the feature on this branch. Found other things that need to be done first? Make a different branch.
+- [ ] Only implement the feature on this branch. Found other things that need to be done first? Open a new issue and make a different branch.
 - [ ] Apply Test Driven Development. 
-- [ ] Use the GIVEN, WHEN, THEN format for unit tests. Specify the GIVEN, WHEN, THEN in the docstring of the unit tests.
+- [ ] Use the [GIVEN, WHEN, THEN format] (https://martinfowler.com/bliki/GivenWhenThen.html) for unit tests. Specify the GIVEN, WHEN, THEN in the docstring of the unit tests.
 - [ ] Apply the PEP8 standard when useful. 
-- [ ] Use British english.
+- [ ] Use British English.
 
 ## Before making a pull request
 
 - [ ] You can demonstrate that it works on your machine.
 - [ ] It works on your machine like it would on a users machine.
-- [ ] All tests ar passing.
+- [ ] All tests are passing.
 - [ ] Warnings are resolved. 
-- [ ] The in-code docstrings accurately describe the methods and classes and how to use it.
+- [ ] The in-code docstrings accurately describe the methods and classes and how to use them.
 - [ ] Any other relevant documentation has been updated. 
 - [ ] Any irrelevant files are excluded from the branch (untrack/deleted).
 
 ## After making a pull request, before asking review
-- [ ] The pull requests merges into develop.
-- [ ] The title of the pull requests is descriptive and reflects issue numbers.
-- [ ] The description of the pull requests gives a short summary what has been changed and highlights areas that need more attention (if applicable).
+- [ ] The pull request merges into develop.
+- [ ] The title of the pull request is descriptive and reflects issue numbers.
+- [ ] The description of the pull request gives a short summary what has been changed and highlights areas that need more attention (if applicable). It also includes a description of the scope and intended user
+Or just a link to the right issues
 - [ ] Any merge conflicts have been resolved.
 - [ ] All previous checks need to be rechecked after resolving merge conflicts. 
 
