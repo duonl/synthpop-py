@@ -25,6 +25,9 @@ docs = [
     "sphinx (>=7,<9)",
     "sphinxcontrib-mermaid (>=2.0.0,<3.0.0)",
 ]
+dev = [
+    "pytest-cov (>=7.0.0,<8.0.0)"
+]
 [tool.poetry.group.docs]
 optional = true
 
