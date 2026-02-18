@@ -3,3 +3,5 @@
 /docs/build/
 /dist/
 .vscode
+.coverage
+classes.dot
