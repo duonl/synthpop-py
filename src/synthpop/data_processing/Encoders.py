@@ -1,6 +1,7 @@
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
 from sklearn.utils.validation import check_is_fitted
 import pandas as pd
+import numpy as np
 from typing import Self
 
 class PCAEncoder(TransformerMixin, BaseEstimator): 
@@ -54,9 +55,15 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         encoder = MeanEncoder()
         encoder.fit(X, y)
         """
+        # Required for get_feature_names_out
+        self.feature_names_in_ = np.array([X.name], dtype=object)
+        self.n_features_in_ = 1
+
+        # Raises exception if y is not numeric
         if not pd.api.types.is_numeric_dtype(y):
             raise TypeError(f"Column '{y.name}' must be numeric, got {y.dtype}")
         
+        # Calculates encoding map
         data = pd.concat([X, y], axis=1)
         self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
 
@@ -79,17 +86,14 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
         check_is_fitted(self, 'mapping_')
 
+        # Raises error if X has new values compared to fitting data
+        unseen_X_categories = set(X.unique()) - set(self.mapping_.keys())
+        if unseen_X_categories:
+            raise ValueError(f"Column to be encoded has unseen values: {unseen_X_categories}")
+        
+        # Apply encoding map to X
         X_transformed = X.map(self.mapping_)
-        # TODO: what if X has unseen values?
+
         return X_transformed.to_frame()
     
-    def get_feature_names_out(self):
-        pass
     
-X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
-y = pd.Series([1, 0, 2, 0, 3], name='score')
-
-encoder = MeanEncoder()
-encoder.fit(X, y)
-X_transformed = encoder.transform(X)
-print('hi')
