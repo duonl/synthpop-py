@@ -46,21 +46,18 @@ def test_fit_returns_self():
 
 def test_is_transformed_into_numeric():
     X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series([1, 0, 2], name='score')
 
     encoder = MeanEncoder()
-    encoder.fit(X, y)
+    encoder.mapping_ = {"red": 1.5, "blue": 0}
     X_transformed = encoder.transform(X)
 
     assert pd.api.types.is_numeric_dtype(X_transformed.iloc[:,0]), "Transformed column should be numeric"
 
 def test_transform_returns_series_of_same_length():
     X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series([1, 0, 2], name='score')
 
     encoder = MeanEncoder()
-    encoder.fit(X, y)
-
+    encoder.mapping_ = {"red": 1.5, "blue": 0}
     X_transformed = encoder.transform(X)
 
     assert isinstance(X_transformed, pd.DataFrame), "Output should be a pandas DataFrame"
@@ -117,11 +114,8 @@ def test_constant_encoding_with_constant_target():
     assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant target should lead to constant encoding"
 
 def test_error_if_X_has_unseen_values():
-    X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series([1, 0, 2,], name='score')
-    
     encoder = MeanEncoder()
-    encoder.fit(X, y)    
+    encoder.mapping_ = {"red": 1.5, "blue": 0}
 
     Z = pd.Series(["red", "blue", "green"], name='color')
     with pytest.raises(ValueError):
