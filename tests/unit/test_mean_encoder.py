@@ -78,7 +78,7 @@ def test_empty_target_gives_NaN():
 
 def test_empty_target_category_gives_NaN():
     X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series([np.nan, 1, np.nan], name='score')
+    y = pd.Series([np.nan, 1, None], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
@@ -88,7 +88,7 @@ def test_empty_target_category_gives_NaN():
 
 def test_some_missing_target_values_are_ignored():
     X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
-    y = pd.Series([1, 0, 2, np.nan, np.nan], name='score')
+    y = pd.Series([1, 0, 2, np.nan, None], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
