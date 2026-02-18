@@ -20,17 +20,19 @@ def test_calculate_means():
     encoder = MeanEncoder()
     encoder.fit(X, y)
 
-    assert encoder.mapping_['red'] == 2
-    assert encoder.mapping_['blue'] == 0
+    assert any(encoder.mapping_), "Mapping_ parameter should be filled during fitting"
+    assert encoder.mapping_['red'] == 2, "Encoder calculates incorrect mean values"
+    assert encoder.mapping_['blue'] == 0, "Encoder calculates incorrect mean values"
 
-def test_is_fitted():
-    X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
-    y = pd.Series([1, 0, 2, 0, 3], name='score')
+def test_fit_returns_self():
+    X = pd.Series(["red", "blue", "red"], name="color")
+    y = pd.Series([1, 0, 2], name="score")
 
     encoder = MeanEncoder()
-    encoder.fit(X, y)
 
-    assert any(encoder.mapping_)
+    returned = encoder.fit(X, y)
+
+    assert returned is encoder, "Fit should return self"
 
 def test_is_transformed_into_numeric():
     X = pd.Series(["red", "blue", "red"], name='color')
@@ -56,7 +58,7 @@ def test_transform_returns_series_of_same_length():
 
 def test_empty_target_gives_NaN():
     X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series([np.nan, np.nan, np.nan], name='score')
+    y = pd.Series([np.nan, np.nan, None], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
@@ -84,7 +86,7 @@ def test_some_missing_target_values_are_ignored():
     X_transformed = encoder.transform(X)
     assert X_transformed.equals(pd.DataFrame({'color':[1.5, 0, 1.5, 0, 1.5]})), "If some values are missing for a specific X category, they are ignored."
 
-def test_no_error_with_constant_feature():
+def test_constant_encoding_by_constant_feature():
     X = pd.Series(["red", "red", "red"], name='color')
     y = pd.Series([1, 2, 3], name='score')
 
@@ -92,9 +94,9 @@ def test_no_error_with_constant_feature():
     encoder.fit(X, y)
 
     X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant feature does not trigger error"
+    assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant feature should lead to constant encoding"
 
-def test_no_error_with_constant_target():
+def test_constant_encoding_with_constant_target():
     X = pd.Series(["red", "blue", "red"], name='color')
     y = pd.Series([2, 2, 2], name='score')
 
@@ -102,7 +104,7 @@ def test_no_error_with_constant_target():
     encoder.fit(X, y)
 
     X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant target does not trigger error"
+    assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant target should lead to constant encoding"
 
 def test_error_if_X_has_unseen_values():
     X = pd.Series(["red", "blue", "red"], name='color')
