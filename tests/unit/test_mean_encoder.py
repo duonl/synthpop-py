@@ -24,6 +24,16 @@ def test_calculate_means():
     assert encoder.mapping_['red'] == 2, "Encoder calculates incorrect mean values"
     assert encoder.mapping_['blue'] == 0, "Encoder calculates incorrect mean values"
 
+def test_calculate_means_with_fractional_values():
+    X = pd.Series(["red", "blue", "red"], name='color')
+    y = pd.Series([1/3, 2/3, 1/2], name='score')
+
+    encoder = MeanEncoder()
+    encoder.fit(X, y)
+
+    assert encoder.mapping_['red'] == pytest.approx(5/12), "Encoder calculates incorrect mean values with fractional values"
+    assert encoder.mapping_['blue'] == pytest.approx(2/3), "Encoder calculates incorrect mean values with fractional values"
+
 def test_fit_returns_self():
     X = pd.Series(["red", "blue", "red"], name="color")
     y = pd.Series([1, 0, 2], name="score")
