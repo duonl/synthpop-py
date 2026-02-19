@@ -3,7 +3,9 @@ from abc import ABC, abstractmethod,ABCMeta
 import pandas as pd
 from typing import Self
 
-class CopyMethod(base_synth.BaseSynthesisStartMethod):
+from synthpop.methods import base_synth
+
+class CopyMethod(base_synth.BaseSynthMethod):
     """
     Synthesis method that samples from the target column. 
     """
@@ -11,7 +13,7 @@ class CopyMethod(base_synth.BaseSynthesisStartMethod):
     def __init__(self,random_state: RandomState | None | int = None):
         self.random_state = random_state #mandated by scikit-learn developer guide
 
-    def fit_for_first_column(self,y:pd.Series) -> Self:
+    def fit(self,X:pd.DataFrame | None, y: pd.Series) -> Self:
         """
         Stores the entire column in this object
 
@@ -19,7 +21,7 @@ class CopyMethod(base_synth.BaseSynthesisStartMethod):
         """
         return self
     
-    def generate(self,n: int | None = None):
+    def transform(self, X: pd.DataFrame| None) -> pd.DataFrame:
         """
         Returns an exact copy of the training data.
 

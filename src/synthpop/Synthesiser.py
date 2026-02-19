@@ -1,5 +1,5 @@
 import pandas as pd
-from synthpop.methods.base_synth import BaseSynthMethod,BaseSynthesisStartMethod
+from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import TreeRegressorMethod, CartMethod
 from collections.abc import Callable
 from typing import Self
@@ -18,8 +18,7 @@ class Synthesiser:
     def __init__(self, 
                  column_order: list[str] | list[int] | None = None, 
                  default_syn_method: BaseSynthMethod = CartMethod(), 
-                 special_syn_method: dict[str, BaseSynthMethod] | None = None,
-                 first_column_method: BaseSynthesisStartMethod = SampleMethod()) -> None:
+                 special_syn_method: dict[str, BaseSynthMethod] | None = None) -> None:
         pass
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:

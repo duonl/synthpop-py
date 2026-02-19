@@ -77,7 +77,9 @@ If you want to copy the first column instead of sampling, it would look like thi
 from synthpop.methods.copy_synth import CopyMethod
 
 data = pd.Dataframe()
-synth = Synthesiser(first_column_method=CopyMethod())
+synth = Synthesiser(special_syn_method={
+        "name_of_first_column": CopyMethod()
+        })
 syn_data = synth.fit(data).generate()
 ```
 
