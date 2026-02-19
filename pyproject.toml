@@ -25,9 +25,10 @@ docs = [
     "sphinx (>=7,<9)",
     "sphinxcontrib-mermaid (>=2.0.0,<3.0.0)",
 ]
-[tool.poetry.group.docs]
-optional = true
-
+dev = [
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "pylint (>=4.0.4,<5.0.0)",
+]
 [tool.poetry]
 packages = [{include = "synthpop", from = "src"}]
 
