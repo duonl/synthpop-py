@@ -28,6 +28,9 @@ The algorithm consists of two phases:
 
 How the synthesiser is fit depends on whether the target column contains a numeric or categorical variable. Below we will explain the different approaches.
 
+#### 3.1.0 The first column
+The first column is a special case for CART. If there are no predictors, a sample with replacement should be taken from the distribution of the observed data. 
+
 #### 3.1.1 Fitting with a categorical target 
 Decision trees from scikit-learn cannot run with categorical features, therefore those variables must first be transformed into numeric variables. The default encoder in the synthpop synthesiser for categorical targets is a [PCA encoder](PCA-encoding.md). A custom encoder can be specified when defining a specific classifier.
 

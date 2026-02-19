@@ -69,3 +69,33 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
         return pd.DataFrame()
     
 ```
+
+## Copy the first column
+
+If you want to copy the first column instead of sampling, it would look like this:
+```python
+from synthpop.methods.copy_synth import CopyMethod
+
+data = pd.Dataframe()
+synth = Synthesiser(special_syn_method={
+        "name_of_first_column": CopyMethod()
+        })
+syn_data = synth.fit(data).generate()
+```
+
+## Copy an other column than the first
+
+If you want to copy the any other column than the first, it would look like this:
+```python
+from synthpop.methods.copy_synth import CopyMethod
+
+data = pd.Dataframe()
+synth = Synthesiser(
+    special_syn_method={
+        "other_column_name": CopyMethod()
+        }
+    )
+syn_data = synth.fit(data).generate()
+```
+
+Note that ``synth.fit(data).generate(10)`` would raise an exception, unless the column being copied has exactly 10 rows. 

@@ -31,7 +31,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def fit(self,X:pd.DataFrame, y: pd.Series) -> Self:
+    def fit(self,X:pd.DataFrame | None, y: pd.Series) -> Self:
         '''
         The `fit` method must learn all parameters required to synthesise the target variable from the provided features.
         It does not modify the input data and does not produce any output.
@@ -52,7 +52,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         pass
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame| None) -> pd.DataFrame:
         """
         The `transform` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
 
