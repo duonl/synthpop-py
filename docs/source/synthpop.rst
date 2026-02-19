@@ -1,5 +1,5 @@
 synthpop package
-========
+================
 
 Subpackages
 -----------
