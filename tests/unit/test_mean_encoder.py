@@ -39,7 +39,6 @@ def test_fit_returns_self():
     y = pd.Series([1, 0, 2], name="score")
 
     encoder = MeanEncoder()
-
     returned = encoder.fit(X, y)
 
     assert returned is encoder, "Fit should return self"
@@ -53,7 +52,7 @@ def test_is_transformed_into_numeric():
 
     assert pd.api.types.is_numeric_dtype(X_transformed.iloc[:,0]), "Transformed column should be numeric"
 
-def test_transform_returns_series_of_same_length():
+def test_transform_returns_dataframe_of_same_length():
     X = pd.Series(["red", "blue", "red"], name='color')
 
     encoder = MeanEncoder()
@@ -63,35 +62,65 @@ def test_transform_returns_series_of_same_length():
     assert isinstance(X_transformed, pd.DataFrame), "Output should be a pandas DataFrame"
     assert len(X_transformed) == len(X), "Output should have same length as input"
 
-def test_empty_target_gives_NaN():
+def test_empty_target_gives_mapping_with_NaN(): 
     X = pd.Series(["red", "blue", "red"], name='color')
     y = pd.Series([np.nan, np.nan, None], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
 
-    X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[np.nan, np.nan, np.nan]})), "y has only missing values. Output should have only missing values."
+    assert np.isnan(encoder.mapping_["red"]), "y has only missing values. Mapping should have only missing values."
+    assert np.isnan(encoder.mapping_["blue"]), "y has only missing values. Mapping should have only missing values."
 
-def test_empty_target_category_gives_NaN():
+def test_empty_target_category_gives_NaN_only_for_that_category(): 
     X = pd.Series(["red", "blue", "red"], name='color')
     y = pd.Series([np.nan, 1, None], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
 
-    X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[np.nan, 1, np.nan]})), "If y is always empty for a specific X category, encoding must be empty."
+    assert np.isnan(encoder.mapping_["red"]), "If y is always empty for a specific X category, encoding map must be empty for that category only."
+    assert encoder.mapping_["blue"] == 1, "If y is always empty for a specific X category, encoding map must be empty for that category only."
 
-def test_some_missing_target_values_are_ignored():
+
+def test_some_missing_target_values_are_ignored():  
     X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
     y = pd.Series([1, 0, 2, np.nan, None], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
 
-    X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[1.5, 0, 1.5, 0, 1.5]})), "If some values are missing for a specific X category, they are ignored."
+    assert encoder.mapping_ == {'red': 1.5, 'blue': 0}, "If some values are missing for a specific X category, they should be ignored."
+
+def test_partially_empty_feature_ignores_missing_values():
+    X = pd.Series(['red', np.nan, None], name='color')
+    y = pd.Series([1, 0, 2], name='score')
+
+    encoder = MeanEncoder()
+    encoder.fit(X, y)
+
+    assert encoder.mapping_ == {'red': 1}, "Encoder should ignore missing values in the feature column"
+
+def test_empty_feature_gives_empty_encoding_map():
+    X = pd.Series([np.nan, np.nan, None], name='color')
+    y = pd.Series([1, 0, 2], name='score')
+
+    encoder = MeanEncoder()
+    encoder.fit(X, y)
+
+    assert encoder.mapping_ == {}, "If X has only missing values, the mapping dictionary should be empty"
+
+
+def test_empty_mapping_and_empty_input_transforms_into_only_NaNs():
+    encoder = MeanEncoder()
+    encoder.mapping_ = {}
+
+    Z = pd.Series([np.nan, None], name='color')
+    Z_transformed = encoder.transform(Z)
+    
+    assert Z_transformed.shape == (2,1), 'With empty mapping, transform should give the right object (DataFrame(2,1))'
+    assert Z_transformed.isna().all().iloc[0], 'With empty mapping, transform should give only NaNs.'
+
 
 def test_constant_encoding_by_constant_feature():
     X = pd.Series(["red", "red", "red"], name='color')
@@ -100,18 +129,16 @@ def test_constant_encoding_by_constant_feature():
     encoder = MeanEncoder()
     encoder.fit(X, y)
 
-    X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant feature should lead to constant encoding"
+    assert encoder.mapping_ == {'red': 2.0}, "Constant feature should lead to constant encoding"
 
-def test_constant_encoding_with_constant_target():
+def test_constant_encoding_with_constant_target():  
     X = pd.Series(["red", "blue", "red"], name='color')
     y = pd.Series([2, 2, 2], name='score')
 
     encoder = MeanEncoder()
     encoder.fit(X, y)
 
-    X_transformed = encoder.transform(X)
-    assert X_transformed.equals(pd.DataFrame({'color':[2.0, 2.0, 2.0]})), "Constant target should lead to constant encoding"
+    assert encoder.mapping_ == {'red': 2.0, 'blue': 2.0}, "Constant target should lead to constant encoding"
 
 def test_error_if_X_has_unseen_values():
     encoder = MeanEncoder()
@@ -121,12 +148,12 @@ def test_error_if_X_has_unseen_values():
     with pytest.raises(ValueError):
         encoder.transform(Z)    
 
-def test_get_feature_names_out():
+def test_features_parameters_updated_during_fit():
     X = pd.Series(["red", "blue"], name="color")
     y = pd.Series([1, 0], name="score")
 
     encoder = MeanEncoder()
-    names = encoder.fit(X, y).get_feature_names_out()
+    names = encoder.fit(X, y)
 
-    assert isinstance(names, np.ndarray), "Output must be an numpy array"
-    assert names.tolist() == ["color"], "Output has incorrect name"
+    assert encoder.n_features_in_==1, "self.n_featured_in_ must equal 1 after fitting"
+    assert encoder.feature_names_in_ == ["color"], "self.feature_names_in_ has incorrect name"

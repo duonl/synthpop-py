@@ -1,5 +1,5 @@
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
-from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.validation import check_is_fitted, validate_data
 import pandas as pd
 import numpy as np
 from typing import Self
@@ -86,14 +86,19 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
         check_is_fitted(self, 'mapping_')
 
-        # Raises error if X has new values compared to fitting data
         unseen_X_categories = set(X.unique()) - set(self.mapping_.keys())
+
         if unseen_X_categories:
-            raise ValueError(f"Column to be encoded has unseen values: {unseen_X_categories}")
+            # Returns only NaNs if new values are all "missing" 
+            if all(pd.isna(val) for val in unseen_X_categories):
+                return pd.DataFrame(np.nan, index=X.index, columns=[X.name])
+            # Raises error otherwise
+            else:
+                raise ValueError(f"Column to be encoded has unseen values: {unseen_X_categories}")
         
         # Apply encoding map to X
         X_transformed = X.map(self.mapping_)
 
         return X_transformed.to_frame()
     
-    
+
