@@ -14,7 +14,7 @@ This checklist is meant to ensure code quality and optimal code workflow.
 - [ ] Work on a branch based on the develop branch.
 - [ ] Only implement the feature on this branch. Found other things that need to be done first? Open a new issue and make a different branch.
 - [ ] Apply Test Driven Development. 
-- [ ] Use the [GIVEN, WHEN, THEN format] (https://martinfowler.com/bliki/GivenWhenThen.html) for unit tests. Specify the GIVEN, WHEN, THEN in the docstring of the unit tests.
+- [ ] Use the [GIVEN, WHEN, THEN format](https://martinfowler.com/bliki/GivenWhenThen.html) for unit tests. Specify the GIVEN, WHEN, THEN in the docstring of the unit tests.
 - [ ] Apply the PEP8 standard when useful. 
 - [ ] Use British English.
 
