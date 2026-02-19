@@ -1051,7 +1051,7 @@ version = "4.0.0"
 description = "Manipulate well-formed Roman numerals"
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "docs"]
+groups = ["docs"]
 files = [
     {file = "roman_numerals-4.0.0-py3-none-any.whl", hash = "sha256:4131feb23ba1a542494873e4cee7844ec8d226a750134efc65ceb20939ed33c9"},
     {file = "roman_numerals-4.0.0.tar.gz", hash = "sha256:231287018a8788bf8c0718482a08c15b90458523ea1d840a18a791a86d4583b3"},
@@ -1465,4 +1465,4 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "891c7f7a6dcd1f57f2e69994a1f0311935c5c223d3f8df966ffc39052cafc1fa"
+content-hash = "506c0747d5a79feac3abe1eacac7f83ce7c931167877af6f918c5f5b80b80053"

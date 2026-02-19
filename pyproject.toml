@@ -16,7 +16,6 @@ license = "EUPL-1.2"
 dependencies = [
     "scikit-learn (>=1.8.0,<2.0.0)",
     "pandas (>=2.3.3,<3.0.0)",
-    "roman-numerals (==4.0.0)",
 ]
 
 [dependency-groups]
@@ -25,6 +24,7 @@ docs = [
     "sphinxcontrib-mermaid (>=2.0.0,<3.0.0)",
     "myst-parser (>=5.0.0,<6.0.0)",
     "sphinx (>=9.1.0,<10.0.0)",
+    "roman-numerals (==4.0.0)",
 ]
 dev = [
     "pytest-cov (>=7.0.0,<8.0.0)",
