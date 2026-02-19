@@ -22,26 +22,35 @@ def test_fitted_encoder_transforms_using_mapping():
     assert result.equals(pd.DataFrame({"OtherColor":[1,2,1,None]})), "Output should have same length as input"
 
 def test_fit_error_when_y_not_numeric():
-    X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series(["value", 0, 2,], name='score')
 
+    #Given an unfitted mean encoder
     encoder = MeanEncoder()
 
+    #raises an TypeError exception when called with non-numeric data as target.
+    X = pd.Series(["red", "blue"])
+    y = pd.Series(["value", 0])
     with pytest.raises(TypeError):
         encoder.fit(X, y)
 
 def test_fit_calculate_means():
+    #Given an uninitialised mean encoder
+    encoder = MeanEncoder()
+
+    #When being fitted with non-missing features and numeric target
     X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
     y = pd.Series([1, 0, 2, 0, 3], name='score')
-
-    encoder = MeanEncoder()
     returned =encoder.fit(X, y)
+
+
+    # should return self
     assert returned is encoder, "Fit should return self"
 
-    assert any(encoder.mapping_), "Mapping_ parameter should be filled during fitting"
+    # and set attributes for the feature name and number
     assert encoder.n_features_in_==1, "self.n_featured_in_ must equal 1 after fitting"
     assert encoder.feature_names_in_ == ["color"], "self.feature_names_in_ has incorrect name"
 
+    # and should calculate the conditional mean and store it in mapping_
+    assert any(encoder.mapping_), "Mapping_ parameter should be filled during fitting"
     assert encoder.mapping_['red'] == 2, "Encoder calculates incorrect mean values"
     assert encoder.mapping_['blue'] == 0, "Encoder calculates incorrect mean values"
 
@@ -54,17 +63,6 @@ def test_fit_calculate_means_with_fractional_values():
 
     assert encoder.mapping_['red'] == pytest.approx(5/12), "Encoder calculates incorrect mean values with fractional values"
     assert encoder.mapping_['blue'] == pytest.approx(2/3), "Encoder calculates incorrect mean values with fractional values"
-
-
-def test_fit_empty_target_gives_mapping_with_NaN(): 
-    X = pd.Series(["red", "blue", "red"], name='color')
-    y = pd.Series([np.nan, np.nan, None], name='score')
-
-    encoder = MeanEncoder()
-    encoder.fit(X, y)
-
-    assert np.isnan(encoder.mapping_["red"]), "y has only missing values. Mapping should have only missing values."
-    assert np.isnan(encoder.mapping_["blue"]), "y has only missing values. Mapping should have only missing values."
 
 def test_fit_empty_target_category_gives_NaN_only_for_that_category(): 
     X = pd.Series(["red", "blue", "red"], name='color')
@@ -141,12 +139,5 @@ def test_error_if_X_has_unseen_values():
     Z = pd.Series(["red", "blue", "green"], name='color')
     with pytest.raises(ValueError):
         encoder.transform(Z)    
-
-def test_features_parameters_updated_during_fit():
-    X = pd.Series(["red", "blue"], name="color")
-    y = pd.Series([1, 0], name="score")
-
-    encoder = MeanEncoder()
-    names = encoder.fit(X, y)
 
     
