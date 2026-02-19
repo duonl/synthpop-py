@@ -2,6 +2,7 @@ from sklearn.base import TransformerMixin,BaseEstimator
 from abc import ABC, abstractmethod,ABCMeta
 import pandas as pd
 from typing import Self
+from numpy.random import RandomState
 
 from synthpop.methods.base_synth import BaseSynthMethod
 
