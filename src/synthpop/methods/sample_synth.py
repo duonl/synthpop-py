@@ -1,7 +1,6 @@
-from sklearn.base import TransformerMixin,BaseEstimator
-from abc import ABC, abstractmethod,ABCMeta
-import pandas as pd
 from typing import Self
+import pandas as pd
+
 from numpy.random import RandomState
 
 from synthpop.methods.base_synth import BaseSynthMethod
@@ -12,6 +11,7 @@ class SampleMethod(BaseSynthMethod):
     """
 
     def __init__(self,random_state: RandomState | None | int = None):
+        super().__init__()
         self.random_state = random_state #mandated by scikit-learn developer guide
 
     def fit(self,X:pd.DataFrame | None, y: pd.Series) -> Self:
