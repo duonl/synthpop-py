@@ -2,8 +2,9 @@
 This module contains the base class for all synthesis methods. 
 """ 
 from typing import Self
+from abc import abstractmethod,ABCMeta
 from sklearn.base import TransformerMixin,BaseEstimator
-from abc import ABC, abstractmethod,ABCMeta
+
 import pandas as pd
 
 
