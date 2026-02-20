@@ -43,7 +43,7 @@ The first step is to read the functional documentation. Is it clear what needs t
 6. Create a merge request to merge the feature branch into **develop**. 
 7. Check for merge conflicts and resolve them in your feature branch. In general, the develop branch takes precedence.
 8. Test again after resolving conflicts. Verify that no functionality was lost, that the example code still works, and that all automated tests are present and passing.
-9. Request a code review and incorporate any feedback. Test again, as changed may introduce new issues.
+9. Request a code review and incorporate any feedback. Test again, as changed may introduce new issues. Request review again. One reviewer is enough for small things. For more complex or high-impact features it might be a good idea to have it reviewed by multiple people. 
 10. If everything is in order, merge the feature branch into **develop** and close it. 
 
 **Tip:** regularly merge **develop** into your feature branch. This reduces the risk of complex conflicts towards the end of development.
