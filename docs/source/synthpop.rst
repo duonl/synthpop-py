@@ -10,6 +10,7 @@ Subpackages
    api reference/data processing/synthpop.data_processing
    api reference/synthesise methods/synthpop.methods
    api reference/utility metrics/utility_metrics
+   api reference/plotting/synthpop.plotting
 
 
 
