@@ -1,6 +1,6 @@
 """
 This module contains classes for different strategies for handling missing (None) values in the target during synthesis. 
-""" 
+"""
 from abc import abstractmethod,ABCMeta
 import pandas as pd
 from sklearn.base import TransformerMixin
@@ -18,7 +18,6 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         Prepare the feature and/or target for fitting.
         :param X: the features for the target. Implementers should accept both categoric and numeric data, and should accept missing values here.
         :param y: the target. May contain missing values. Implementers do not need to accept both categorical and numeric targets, but should accept one of them.
-
         :return: a tuple (X,y) of data ready to be further processed and used for fitting a model. the second item of the tuple (y) may not contain missing values.
         X may contain missing values.
         """

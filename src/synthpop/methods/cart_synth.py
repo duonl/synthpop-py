@@ -12,16 +12,16 @@ from synthpop.methods import base_synth
 
 
 class TreeClassifierMethod(DecisionTreeClassifier):
-    '''
+    """
     A decision tree classifier algorithm, augmented with PCA encoding and NA predictor.
 
     :param encoder: an transformer object. Default is PCA encoder.
     :param rest: Parameters inherent to DecisionTreeClassifier
-    '''
+    """
 
     def __init__(self, *,
                  encoder: TransformerMixin = PCAEncoder(),
-                 MissingHandling: BaseMissingValueHandler = ReplaceNoneWithValue(),
+                 missing_handling: BaseMissingValueHandler = ReplaceNoneWithValue(),
                  criterion: Literal['gini'] | Literal['entropy'] | Literal['log_loss'] = "gini",
                  splitter: Literal['best'] | Literal['random'] = "best",
                  max_depth: None | int = None,
@@ -29,7 +29,6 @@ class TreeClassifierMethod(DecisionTreeClassifier):
                  min_samples_leaf: float = 1,
                  min_weight_fraction_leaf: float = 0,
                  max_features: float | None | Literal['auto'] | Literal['sqrt'] | Literal['log2'] = None,
-                 # mandated by scikit-learn developer guide
                  random_state: RandomState | None | int = None,
                  max_leaf_nodes: None | int = None,
                  min_impurity_decrease: float = 0,
@@ -72,17 +71,17 @@ class TreeClassifierMethod(DecisionTreeClassifier):
 
 
 class TreeRegressorMethod(DecisionTreeRegressor):
-    '''
+    """
     A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
 
     :param encoder: an transformer object. Default is PCA encoder.
     :param rest: Parameters inherent to DecisionTreeRegressor
-    '''
+    """
 
 
     def __init__(self, *,
                  encoder: TransformerMixin = MeanEncoder(),
-                 MissingHandling: BaseMissingValueHandler = MissingValuePredictor(),
+                 missing_handling: BaseMissingValueHandler = MissingValuePredictor(),
                  criterion: Literal['squared_error'] | Literal['friedman_mse'] | Literal[
                      'absolute_error'] | Literal['poisson'] = "squared_error",
                  splitter: Literal['best'] | Literal['random'] = "best",
