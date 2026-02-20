@@ -1,7 +1,8 @@
+from typing import Self
 from sklearn.base import TransformerMixin,BaseEstimator
 from abc import ABC, abstractmethod,ABCMeta
 import pandas as pd
-from typing import Self
+
 
 class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     """
@@ -11,6 +12,8 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     Specifically, such method learns a conditional distribution of a target column given one or multiple columns. 
 
     Both fit and transform should work for numeric and categorical variables.
+
+    Note for child classes: consider cloning behaviour (https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html)
     """
 
     def __init__(self) -> None:
@@ -27,7 +30,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         
         :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during `fit` are used.
         """
-        #TODO: Is het nodig zelf een implementatie te maken? Of een implementatie in de base class? Of is het beter om de implementatie aan de child classes over te laten?
+        
         pass
 
     @abstractmethod
@@ -71,8 +74,3 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     # def set_params(self, **params) -> Self:
     #     return super().set_params(**params)
     
-
-    # indien nodig kunnen estimators deze functie implementeren.
-    # Als het object gecloned wordt, wordt deze functie aangeroepen, zie https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
-    # def __sklearn_clone__(self):
-    #     pass
