@@ -33,9 +33,12 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         :return:  The synthesised target with missing values.
         """ 
         pass
-    
+
 
 class MissingValuePredictor(BaseMissingValueHandler):
+    """
+    Use a decision tree to predict which values are missing.
+    """
 
     def __init__(self,encoding: TransformerMixin = MeanEncoder()):
         super().__init__()
@@ -60,8 +63,11 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """ 
         return pd.Series()
-    
+   
 class ReplaceNoneWithValue(BaseMissingValueHandler):
+    """
+    Replace missing values by a specified value, and remove after synthesis.
+    """
     
     def prepare_data_for_fit(self,X:pd.Series, y:pd.Series)-> tuple[pd.DataFrame,pd.Series]:
         """
