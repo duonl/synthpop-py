@@ -1,8 +1,11 @@
-from abc import ABC, abstractmethod,ABCMeta
+"""
+This module contains classes for different strategies for handling missing (None) values in the target during synthesis. 
+""" 
+from abc import abstractmethod,ABCMeta
 import pandas as pd
 from sklearn.base import TransformerMixin
 
-from synthpop.data_processing.Encoders import MeanEncoder
+from synthpop.data_processing.encoders import MeanEncoder
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """

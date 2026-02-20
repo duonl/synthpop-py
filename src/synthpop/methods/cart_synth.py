@@ -1,9 +1,12 @@
+"""
+This module contains the CART method for synthesising data. 
+"""
 from typing import Literal, Mapping, Self, Sequence
 from numpy.random import RandomState
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin
-from synthpop.data_processing.Encoders import PCAEncoder, MeanEncoder
+from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth
 

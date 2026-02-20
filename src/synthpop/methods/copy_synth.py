@@ -1,3 +1,6 @@
+"""
+Synthesis method that copies the original data.
+"""
 from typing import Self
 import pandas as pd
 from numpy.random import RandomState
@@ -5,12 +8,11 @@ from synthpop.methods import base_synth
 
 class CopyMethod(base_synth.BaseSynthMethod):
     """
-    Synthesis method that samples from the target column. 
+    Synthesis method that copies from the target column. 
     """
 
-    def __init__(self,random_state: RandomState | None | int = None):
+    def __init__(self):
         super().__init__()
-        self.random_state = random_state #mandated by scikit-learn developer guide
 
     def fit(self,X:pd.DataFrame | None, y: pd.Series) -> Self:
         """

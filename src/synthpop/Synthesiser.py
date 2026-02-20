@@ -1,3 +1,6 @@
+"""
+module for generating synthetic data
+"""
 from typing import Self
 import pandas as pd
 from synthpop.methods.base_synth import BaseSynthMethod

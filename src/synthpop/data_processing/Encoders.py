@@ -1,3 +1,7 @@
+"""
+This module contains classes to encode categorical data to numeric data. 
+
+"""
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
 import pandas as pd
 from typing import Self

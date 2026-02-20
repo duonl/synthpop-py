@@ -7,7 +7,7 @@ data\_processing
 Encoder module
 --------------------------------------------
 
-.. automodule:: synthpop.data_processing.Encoders
+.. automodule:: synthpop.data_processing.encoders
    :members:
    :show-inheritance:
    :undoc-members:

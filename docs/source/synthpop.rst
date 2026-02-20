@@ -13,10 +13,10 @@ Subpackages
 
 
 
-synthpop.Synthesiser module
+synthpop.synthesiser module
 -------------------------------
 
-.. automodule:: synthpop.Synthesiser
+.. automodule:: synthpop.synthesiser
    :members:
    :show-inheritance:
    :undoc-members:

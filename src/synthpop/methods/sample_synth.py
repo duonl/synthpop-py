@@ -1,8 +1,9 @@
+"""
+Synthesis method that samples from the target column. 
+"""
 from typing import Self
 import pandas as pd
-
 from numpy.random import RandomState
-
 from synthpop.methods.base_synth import BaseSynthMethod
 
 class SampleMethod(BaseSynthMethod):
