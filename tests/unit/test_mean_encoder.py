@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pytest 
 
-from synthpop.data_processing.Encoders import MeanEncoder
+from synthpop.data_processing.encoders import MeanEncoder
 
 def test_fitted_encoder_transforms_using_mapping():
     #Given a fitted estimator

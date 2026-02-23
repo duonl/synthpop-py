@@ -2,11 +2,14 @@
 This module contains classes to encode categorical data to numeric data. 
 
 """
+from typing import Self
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
-from sklearn.utils.validation import check_is_fitted, validate_data
+from sklearn.utils.validation import check_is_fitted
+from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
-from typing import Self
+
+
 
 class PCAEncoder(TransformerMixin, BaseEstimator): 
     """
@@ -16,7 +19,8 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
     :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
     """
-    def __init__(self, PCA_threshold:int = 30, explained_variance:float = 0.95):
+    def __init__(self, PCA_threshold:int = 30, explained_variance:float = 0.95,pca_transform:PCA = PCA()):
+        self._pca_transform = pca_transform #TODO: parameters??
         pass
 
     def fit(self,X:pd.Series, y: pd.Series) -> Self:
@@ -28,6 +32,9 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         :return: fitted encoder.
         """
+
+        contingency_table = pd.crosstab(X,y)
+        self._pca_transform.fit_transform(X=contingency_table,y=None)
         return self
 
     def transform(self,X:pd.Series) -> pd.DataFrame:
