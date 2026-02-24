@@ -19,7 +19,7 @@ documentation for details.
    synthpop
    user guides/examples
    functional descriptions/fd_index
-   developing
+   developer/developer_index.md
 
 Indices and tables
 ==================

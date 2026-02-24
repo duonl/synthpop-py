@@ -1,10 +1,11 @@
+"""
+module for generating synthetic data
+"""
+from typing import Self
 import pandas as pd
 from synthpop.methods.base_synth import BaseSynthMethod
-from synthpop.methods.cart_synth import TreeRegressorMethod, CartMethod
-from collections.abc import Callable
-from typing import Self
+from synthpop.methods.cart_synth import CartMethod
 
-from synthpop.methods.sample_synth import SampleMethod
 
 class Synthesiser:
     """
@@ -16,8 +17,8 @@ class Synthesiser:
     :param first_column_method: The method for synthesising the first column. This is a special case, since there are no predictors available.
     """
     def __init__(self, 
-                 column_order: list[str] | list[int] | None = None, 
-                 default_syn_method: BaseSynthMethod = CartMethod(), 
+                 column_order: list[str] | list[int] | None = None,
+                 default_syn_method: BaseSynthMethod = CartMethod(),
                  special_syn_method: dict[str, BaseSynthMethod] | None = None) -> None:
         pass
 

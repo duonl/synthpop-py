@@ -1,8 +1,11 @@
-from abc import ABC, abstractmethod,ABCMeta
+"""
+This module contains classes for different strategies for handling missing (None) values in the target during synthesis. 
+"""
+from abc import abstractmethod,ABCMeta
 import pandas as pd
 from sklearn.base import TransformerMixin
 
-from synthpop.data_processing.Encoders import MeanEncoder
+from synthpop.data_processing.encoders import MeanEncoder
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -15,7 +18,6 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         Prepare the feature and/or target for fitting.
         :param X: the features for the target. Implementers should accept both categoric and numeric data, and should accept missing values here.
         :param y: the target. May contain missing values. Implementers do not need to accept both categorical and numeric targets, but should accept one of them.
-
         :return: a tuple (X,y) of data ready to be further processed and used for fitting a model. the second item of the tuple (y) may not contain missing values.
         X may contain missing values.
         """
@@ -31,9 +33,12 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         :return:  The synthesised target with missing values.
         """ 
         pass
-    
+
 
 class MissingValuePredictor(BaseMissingValueHandler):
+    """
+    Use a decision tree to predict which values are missing.
+    """
 
     def __init__(self,encoding: TransformerMixin = MeanEncoder()):
         super().__init__()
@@ -58,8 +63,11 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """ 
         return pd.Series()
-    
+   
 class ReplaceNoneWithValue(BaseMissingValueHandler):
+    """
+    Replace missing values by a specified value, and remove after synthesis.
+    """
     
     def prepare_data_for_fit(self,X:pd.Series, y:pd.Series)-> tuple[pd.DataFrame,pd.Series]:
         """

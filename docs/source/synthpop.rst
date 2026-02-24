@@ -1,5 +1,5 @@
 synthpop package
-========
+================
 
 Subpackages
 -----------
@@ -10,13 +10,14 @@ Subpackages
    api reference/data processing/synthpop.data_processing
    api reference/synthesise methods/synthpop.methods
    api reference/utility metrics/utility_metrics
+   api reference/plotting/synthpop.plotting
 
 
 
-synthpop.Synthesiser module
+synthpop.synthesiser module
 -------------------------------
 
-.. automodule:: synthpop.Synthesiser
+.. automodule:: synthpop.synthesiser
    :members:
    :show-inheritance:
    :undoc-members:

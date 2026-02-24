@@ -1,3 +1,6 @@
+"""
+This module contains utilities to visually inspect synthetic data and evaluate its quality. 
+"""
 import pandas as pd
 
 def plot_univariate_distributions(obs_df: pd.DataFrame, syn_df: pd.DataFrame, target_folder: str | None) -> None:
