@@ -19,7 +19,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
     :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
     """
-    def __init__(self, PCA_threshold:int = 30, explained_variance:float = 0.95,pca_transform:PCA = PCA()):#TODO set_output??
+    def __init__(self, PCA_threshold:int = 30, explained_variance:float = 0.95,pca_transform:PCA = PCA().set_output(transform="pandas")):#TODO set_output??
         self._pca_transform = pca_transform #TODO: parameters??
         pass
 
@@ -37,6 +37,13 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         contingency_table = pd.crosstab(X,y)
         pca_result = self._pca_transform.fit_transform(X=contingency_table,y=None)
         self.mapping_ = { k: list(v.values()) for (k,v) in pca_result.to_dict('index').items()}
+
+        missing_contingency_table = pd.crosstab(X,y.isna())
+        x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
+        n_components = len(pca_result.columns)
+
+        mapping_for_missing = {k:[None for i in range(n_components)] for k in x_such_that_y_is_always_missing}
+        self.mapping_ = self.mapping_ | mapping_for_missing
         
         return self
 

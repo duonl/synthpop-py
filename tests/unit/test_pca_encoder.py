@@ -68,3 +68,35 @@ def test_pca_fit_when_given_full_features_and_targets():
     assert result.feature_names_in_ == ["input_feature"]
     
 
+def test_pca_fit_when_target_is_missing():
+
+    X = pd.Series(["a", "a","b","b","c","c"],name="input_feature")
+    y = pd.Series(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
+
+    expected_contingency_table = pd.DataFrame(
+        [#   x  y  z Note that the expected behaviour is that C is not in the contingency table. 
+            [1, 0, 0],# a
+            [0, 1, 1] #b
+        ]
+        ,columns= ["x","y","z"]
+        ,index=["a","b"]
+        )
+    
+    pca_return_value = pd.DataFrame(
+        [   #pc1, pc2, pc3
+            [1.2, 3.4, 5],#a
+            [11.22,33.44,6]#b
+        ],columns=["pca0","pca1","pca2"],index=["a","b"]
+        )
+    
+    stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
+    encoder = PCAEncoder(pca_transform = stub_pca_transform )
+
+    result = encoder.fit(X=X,y=y)
+
+    assert np.array_equal(stub_pca_transform.transform_X_.columns,expected_contingency_table.columns), f"columns do not match. Expected:{str(expected_contingency_table.columns)}, actual: {str(stub_pca_transform.transform_X_.columns)}"
+    assert len(result.mapping_["b"])==3
+    assert len(result.mapping_["c"]) == 3
+    assert result.mapping_["c"].count(None) == 3
+
+    
