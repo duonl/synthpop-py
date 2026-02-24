@@ -7,11 +7,11 @@ The Standardised Propensity Mean Squared Error (S_pMSE) is a statistical utility
 ## 2. Input and output
 
 The computation of S_pMSE requires the following inputs:
-- An original dataset X with $n_o$ rows and $p$ variables
-- A synthetic dataset with $n_s$ rows and the same $p$ variables. The order of the columns is not relevant, but there needs to be a check that the column names match between both datasets.
-- A maximum number of groups $\text{max\_bins} \in \mathbb{N}$ used to discretise numeric variables.
+- An original dataset X with $n_o$ rows and $p$ columns.
+- A synthetic dataset with $n_s$ rows and the same $p$ columns. The order of the columns is not relevant, but there needs to be a check that the column names match between both datasets.
+- A maximum number of groups $\text{max\_bins} \in \mathbb{N}$ used to discretise numeric columns.
 
-Let $X$ and $Y$ be any columns of the original dataset. The output of the S_pMSE function is a dataset containing all pairs of variables $(X, Y)$ with their corresponding S_pMSE value. Because $\text{S\_pMSE}(X, Y)$ and $\text{S\_pMSE}(Y, X)$ are equal, $\text{S\_pMSE}(Y, X)$ is neither calculated or included in the output dataset.
+Let $X$ and $Y$ be any variables (=columns) of the original dataset. The output of the S_pMSE function is a dataset containing all pairs of variables $(X, Y)$ with their corresponding S_pMSE value. Because $\text{S\_pMSE}(X, Y)$ and $\text{S\_pMSE}(Y, X)$ are equal, $\text{S\_pMSE}(Y, X)$ is neither calculated or included in the output dataset.
 
 ## 3. Detailed process
 
@@ -32,7 +32,7 @@ After preprocessing, both variables are treated as categorical variables with a 
 
 ### 3.2 Construction of joint frequency tables
 
-Let X and Y be any columns of the original dataset. 
+Let X and Y be any variables of the original dataset. 
 
 For the original and synthetic datasets, joint frequency tables are constructed. Let:
 - $f_{orig}(x, y)$ denote the number of observations in the original dataset for which $X=x$ and $Y=y$.
@@ -90,8 +90,8 @@ If some combinations of categories exist in the original dataset, but not in the
 
 ## 6. Limitations and considerations
 
-This metric evaluates similarity at the level of pairwise joint distributions and does not capture higher-order dependencies among more than two variables. The measure is sensitive to discretisation choices for numeric variables. 
-
+- This metric evaluates similarity at the level of pairwise joint distributions and does not capture higher-order dependencies among more than two variables. The measure is sensitive to discretisation choices for numeric variables. 
+- The S_pMSE metric uses a test of significance, therefore interpreting the results is dependent on the size of the dataset: utility of a dataset can better be measured if the number of observations is large enough. 
 
 ## 7. References
 (references)=
