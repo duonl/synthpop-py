@@ -1,5 +1,11 @@
+"""
+This module contains classes to encode categorical data to numeric data. 
+
+"""
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
+from sklearn.utils.validation import check_is_fitted, validate_data
 import pandas as pd
+import numpy as np
 from typing import Self
 
 class PCAEncoder(TransformerMixin, BaseEstimator): 
@@ -37,7 +43,6 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
     def __init__(self):
-        self.mapping_ = {}
         pass
 
     def fit(self,X:pd.Series, y: pd.Series):
@@ -54,19 +59,50 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         encoder = MeanEncoder()
         encoder.fit(X, y)
         """
+        # Required for get_feature_names_out
+        self.feature_names_in_ = np.array([X.name], dtype=object)
+        self.n_features_in_ = 1
+
+        # Raises exception if y is not numeric
+        if not pd.api.types.is_numeric_dtype(y):
+            raise TypeError(f"Column '{y.name}' must be numeric, got {y.dtype}")
+        
+        # Calculates encoding map
         data = pd.concat([X, y], axis=1)
         self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
 
         return self
 
     def transform(self,X:pd.Series) -> pd.DataFrame:
-        return pd.DataFrame()
-    
-    def get_feature_names_out(self):
-        pass
-    
-X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
-y = pd.Series([1, 0, 2, 0, 3], name='score')
+        """
+        Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
+        
+        :param X: Original column to be encoded
+        :return: Encoded column
 
-encoder = MeanEncoder()
-encoder.fit(X, y)
+        Examples
+        X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
+        y = pd.Series([1, 0, 2, 0, 3], name='score')
+
+        encoder = MeanEncoder()
+        encoder.fit(X, y)
+        X_transformed = encoder.transform(X)
+        """
+        check_is_fitted(self, 'mapping_')
+
+        unseen_X_categories = set(X.unique()) - set(self.mapping_.keys())
+
+        if unseen_X_categories:
+            # Returns only NaNs if new values are all "missing" 
+            if all(pd.isna(val) for val in unseen_X_categories):
+                return pd.DataFrame(np.nan, index=X.index, columns=[X.name])
+            # Raises error otherwise
+            else:
+                raise ValueError(f"Column to be encoded has unseen values: {unseen_X_categories}")
+        
+        # Apply encoding map to X
+        X_transformed = X.map(self.mapping_)
+
+        return X_transformed.to_frame()
+    
+

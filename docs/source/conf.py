@@ -33,7 +33,7 @@ extensions = [
     'myst_parser',
     "sphinxcontrib.mermaid",
 ]
-myst_enable_extensions = ["dollarmath", "amsmath"]
+myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
 autodoc_typehints = "both"
 
 autodoc_mock_imports = ['matplotlib', 'typing_extensions',]

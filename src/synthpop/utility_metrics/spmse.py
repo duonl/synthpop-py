@@ -1,3 +1,6 @@
+"""
+This module contains utilities to evaluate the utility of synthetic data.
+"""
 import pandas as pd
 
 def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_groups: int = 25, na_label: str = "__NA__") -> pd.DataFrame:
