@@ -19,8 +19,10 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
     :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
     """
-    def __init__(self, PCA_threshold:int = 30, explained_variance:float = 0.95,pca_transform:PCA = PCA().set_output(transform="pandas")):#TODO set_output??
-        self._pca_transform = pca_transform #TODO: parameters??
+    def __init__(self, pca_threshold:int = 30, minimum_explained_variance:float = 0.95,_pca_transform:PCA = PCA().set_output(transform="pandas")):#TODO set_output??
+        self._pca_transform = _pca_transform #TODO: parameters??
+        self.pca_threshold= pca_threshold
+        self.minimum_explained_variance= minimum_explained_variance
         pass
 
     def fit(self,X:pd.Series, y: pd.Series) -> Self:
@@ -32,18 +34,21 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         :return: fitted encoder.
         """
-        self.n_features_in_ = 1
-        self.feature_names_in_ = [X.name]
+        #X,y = validate_data(self,X,y,dtype="category",skip_check_array=True)
         contingency_table = pd.crosstab(X,y)
         pca_result = self._pca_transform.fit_transform(X=contingency_table,y=None)
-        self.mapping_ = { k: list(v.values()) for (k,v) in pca_result.to_dict('index').items()}
+
+        self.n_features_out_ = len(pca_result.columns)
+        self.n_features_in_ = 1
+        self.feature_names_in_ = [X.name]
+
+        value_mapping = { k: list(v.values()) for (k,v) in pca_result.to_dict('index').items()}
 
         missing_contingency_table = pd.crosstab(X,y.isna())
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
-        n_components = len(pca_result.columns)
+        mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}
 
-        mapping_for_missing = {k:[None for i in range(n_components)] for k in x_such_that_y_is_always_missing}
-        self.mapping_ = self.mapping_ | mapping_for_missing
+        self.mapping_ = value_mapping | mapping_for_missing
         
         return self
 
@@ -53,10 +58,23 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         :param X: the feature to be encoded.
         """
-        return pd.DataFrame()
+        mapping_including_missing = self.mapping_ | {None:[None]*self.n_features_out_}
+
+        return pd.DataFrame(
+            [
+                mapping_including_missing[v] for v in X
+            ],
+            columns=self.get_feature_names_out(),
+            index=X.index
+        )
     
-    def get_feature_names_out(self):
-        pass
+    def get_feature_names_out(self,input_features=None):
+
+        if input_features is None:
+            return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
+        if input_features != self.feature_names_in_:
+            raise ValueError(f"input_features is not feature_names_in_. Expected: {self.feature_names_in_}, actual: {input_features}")
+        return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
     
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
     def __init__(self):

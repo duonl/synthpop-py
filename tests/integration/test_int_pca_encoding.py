@@ -1,6 +1,8 @@
 import pytest
 import pandas as pd
 from synthpop.data_processing.encoders import PCAEncoder
+from sklearn.utils.estimator_checks import parametrize_with_checks,check_estimator
+
 
 def test_pca_encoding_fit_full_data():
     X = pd.Series(["a", "a","b","b","c"],name="input_feature")
@@ -39,3 +41,17 @@ def test_pca_encoding_fit_constant_feature():
     assert len(encoder.mapping_["a"]) == 1
     # The behaviour is different as described in the functional descriptions.
     # Instead of the number of rows, it is encoded by the value 0.0
+
+def test_pca_encoding_fit_transform_regular_feature():
+    X = pd.Series(["a", "a","b","b","c"],name="input_feature")
+    y = pd.Series(["x", "x","y","z","w"])
+
+    encoder = PCAEncoder()
+
+    result = encoder.fit_transform(X=X,y=y)
+    assert result.shape[0]== 5
+
+def test_pca_encode_sklearn_compatible_estimator():
+    result = check_estimator(PCAEncoder(),on_fail="warn",legacy=False)
+    print(result)
+    assert len(result) == 0, str(result)
