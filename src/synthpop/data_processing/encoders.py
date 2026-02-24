@@ -23,7 +23,17 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         self._pca_transform = _pca_transform #TODO: parameters??
         self.pca_threshold= pca_threshold
         self.minimum_explained_variance= minimum_explained_variance
+        self.set_output(transform="pandas")
         pass
+
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.target_tags.required=True
+        tags.target_tags.one_d_labels = True
+        tags.input_tags.categorical = True
+        tags.input_tags.allow_nan= True
+        tags.estimator_type = "transformer"
+        return tags
 
     def fit(self,X:pd.Series, y: pd.Series) -> Self:
         """
@@ -35,6 +45,13 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         :return: fitted encoder.
         """
         #X,y = validate_data(self,X,y,dtype="category",skip_check_array=True)
+        check_X_params = dict(
+                dtype=None, ensure_all_finite=False,ensure_2d=False
+            )
+        check_y_params = dict(ensure_2d=False, dtype=None)
+        validate_data(
+                self, X, y, validate_separately=(check_X_params, check_y_params)
+            )
         contingency_table = pd.crosstab(X,y)
         pca_result = self._pca_transform.fit_transform(X=contingency_table,y=None)
 

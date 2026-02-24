@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pytest
 from sklearn.base import BaseEstimator,TransformerMixin
+from sklearn import set_config
 
 from synthpop.data_processing.encoders import PCAEncoder
 
@@ -33,7 +34,7 @@ class TransformStub(TransformerMixin, BaseEstimator):
 #TODO: test constant feature and constant target
 #TODO: validation in fit and transform. (check feature names, check is fitted)
 #TODO: test with different index
-
+set_config(transform_output="pandas")
 def test_pca_fit_when_given_full_features_and_targets():
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
     X = pd.Series(["a", "a","b","b"],name="input_feature")
@@ -204,5 +205,9 @@ def test_pca_encoder_get_freature_names_out_incorrect_input():
     with pytest.raises(ValueError):
         result = encoder.get_feature_names_out(["wrong_feature_name"])
 
-
+def test_pca_encoder_sklearn_tags():
+    # sklearn tags help with the compatibility with sklearn
+    # They are used to communicate the capabilities of the estimator. See https://scikit-learn.org/stable/developers/develop.html#estimator-tags
+    # They are used when running generic sklearn tests, such as check_estimator
+    pass
 
