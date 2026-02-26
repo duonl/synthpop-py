@@ -5,7 +5,7 @@ flowchart TD
       U(["User"])-->|Step 1| S["Synthesiser()"]
       U-->|Step 2
       x: pd.DataFrame
-      y=None|SF["Synthesiser.fit(x)"]-->
+      y=None|SF["Synthesiser.fit(x: pd.DataFrame)"]-->
       i1{{Loops through x to pick column y each time}}-->CMF["CartMethod.fit(X: pd.DataFrame, y: pd.Series)"]-->
       TCM["TreeClassifierMethod.fit(X: pd.DataFrame, y: pd.Series)"]-->i2{{Loops through pd.DataFrame X to find categorical X. Sends this as pd.Series to the encoder.}}-->
       PCAF["PCAEncoder.fit(X: pd.Series, y: pd.Series)"]--> PCAT["PCAEncoder.transform(X: pd.Series)"]-->|"X: pd.DataFrame (encoded)"|TCM---->DTC["DecisionTreeClassifier.fit(X (encoded), y(missing handled))
