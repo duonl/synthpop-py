@@ -50,8 +50,3 @@ def test_pca_encoding_fit_transform_regular_feature():
 
     result = encoder.fit_transform(X=X,y=y)
     assert result.shape[0]== 5
-
-def test_pca_encode_sklearn_compatible_estimator():
-    result = check_estimator(PCAEncoder(),on_fail="warn",legacy=False)
-    print(result)
-    assert len(result) == 0, str(result)

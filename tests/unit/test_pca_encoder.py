@@ -188,7 +188,7 @@ def test_pca_encoder_get_freature_names_out_no_input():
     result = encoder.get_feature_names_out()
     assert result == ["test_feature_name_pca0","test_feature_name_pca1","test_feature_name_pca2"]
 
-def test_pca_encoder_get_freature_names_out_correct_input():
+def test_pca_encoder_get_feature_names_out_correct_input():
 
     encoder = PCAEncoder(_pca_transform=None)
     encoder.feature_names_in_ = ["test_feature_name"]
@@ -197,7 +197,7 @@ def test_pca_encoder_get_freature_names_out_correct_input():
     result = encoder.get_feature_names_out(["test_feature_name"])
     assert result == ["test_feature_name_pca0","test_feature_name_pca1"]
 
-def test_pca_encoder_get_freature_names_out_incorrect_input():
+def test_pca_encoder_get_feature_names_out_incorrect_input():
 
     encoder = PCAEncoder(_pca_transform=None)
     encoder.feature_names_in_ = ["test_feature_name"]
