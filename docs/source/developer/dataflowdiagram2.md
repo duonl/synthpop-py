@@ -1,26 +1,6 @@
-```{mermaid}
-flowchart TD
-obs_features[("observed data features: **DataFrame**")] -->homogenise["split in categorical and numeric features"]
-obs_target[("observed data target: **Series**")] --> RorC["differentiate in regression or classification"]
-homogenise-->cat_f[("Categorical features: **np.Array(string)**")]
-homogenise-->num_f[("Numeric features: **np.Array(float)**")]
-RorC-->num_target[("numeric target: **np.Array(float)**")]
-RorC-->cat_target[("categorical target: **np.Array(string)**")]
+# more dataflow diagrams
 
-cat_f-->mean_encoding["mean encoding"]
-num_target -->mean_encoding --> encoded_features[("encoded features: **np.Array(float)**")]
-cat_f-->pca_encoding["pca encoding"]
-cat_target-->pca_encoding --> encoded_features --> combining_features["combining features"]
-num_f -->combining_features-->combined_features[("combined features: **np.Array(float)**")]
-
-combined_features-->fit_tree_cls["fit decision tree classifier"]
-cat_target-->fit_tree_cls
-
-combined_features-->fit_tree_reg["fit decision tree regressor"]
-num_target-->fit_tree_reg
-
-```
-## flow for numeric target
+## fit flow for numeric target
 ```{mermaid}
 flowchart TD
 
@@ -53,7 +33,7 @@ missing_target-->fit_missing["fit tree for missing values"]
 ft_missing-->fit_missing
 ```
 
-## flow for categorical targets
+## fit flow for categorical targets
 ```{mermaid}
 flowchart TD
 
@@ -74,46 +54,44 @@ combined_features-->fit_tree_cls["fit decision tree classifier"]
 np_target-->fill_na["replace missing values with 'N.a.N.'"]-->no_na_target[("target without missing values: **np.Array(string)**")]-->fit_tree_cls
 ```
 
-## unified diagram:
+## generating categorical column
 ```{mermaid}
 flowchart TD
 
-subgraph numeric_target
-subgraph input
-obs_features[("observed data features: **DataFrame**")]
-obs_target[("observed data target: **Series(numeric)**")]
-end
-obs_features-->homogenise["split in categorical and numeric features"]
-
+prev_syn[("previously synthesised data: **Dataframe**")]
+prev_syn-->homogenise["split in categorical and numeric features"]
 homogenise-->cat_f[("Categorical features: **np.Array(string)**")]
 homogenise-->num_f[("Numeric features: **np.Array(float)**")]
-
-cat_f-->mean_encoding["mean encoding"]
-obs_target-->to_np["convert to numpy array"] -->np_target[("converted target: **np.array(string)**")]
-np_target -->mean_encoding --> encoded_features[("encoded features: **np.Array(float)**")]-->combining_features["combining features"]
+cat_f-->pca_encoding["pca encoding"]
+pca_encoding --> encoded_features[("encoded features: **np.Array(float)**")]-->combining_features
 num_f -->combining_features-->combined_features[("combined features: **np.Array(float)**")]
+combined_features-->sample_from_tree["sample from tree"]-->sample_res[("sampled data: **np.Array(string)**")]
+sample_res-->replace_missing["replace 'N.a.N.' with None"]-->new_column[("new synthetic column: **np.Array(string)**")]
+new_column --> to_df["convert to series/dataframe"] -->prev_syn
+```
+## generate numeric column
 
-combined_features-->fit_tree_reg["fit decision tree regressor"]
-np_target-->fit_tree_reg
-end
+```{mermaid}
+flowchart TD
 
-subgraph categorical_target
-subgraph input_cat_target
-cat_obs_features[("observed data features: **DataFrame**")]
-cat_obs_target[("observed data target: **Series(numeric)**")]
-end
-cat_obs_features-->cat_homogenise["split in categorical and numeric features"]
+prev_syn[("previously synthesised data: **Dataframe**")]
 
-cat_homogenise-->cat_cat_f[("Categorical features: **np.Array(string)**")]
-cat_homogenise-->cat_num_f[("Numeric features: **np.Array(float)**")]
+prev_syn-->homogenise["split in categorical and numeric features"]
+homogenise-->cat_f[("Categorical features: **np.Array(string)**")]
+homogenise-->num_f[("Numeric features: **np.Array(float)**")]
+cat_f-->mean_encoding["mean encoding"]
+mean_encoding --> encoded_features[("encoded features: **np.Array(float)**")]-->combining_features["combining features"]
+num_f -->combining_features-->combined_features[("combined features: **np.Array(float)**")]
+combined_features-->sample_from_tree["sample from tree"]-->sample_res[("sampled data: **np.Array(float)**")]
 
-cat_cat_f-->pca_encoding["pca encoding"]
-cat_obs_target-->cat_to_np["convert to numpy array"] -->cat_np_target[("converted target: **np.array(string)**")]-->pca_encoding --> cat_encoded_features[("encoded features: **np.Array(float)**")]-->cat_combining_features["combining features"]
-cat_num_f -->cat_combining_features-->cat_combined_features[("combined features: **np.Array(float)**")]
+cat_f-->mean_enc_missing["mean encoding for missing values"] --> encoded_missing[("encoded features for missing values: **np.Array(float)**")]
+encoded_missing --> combining_features_for_missing["combining features for missing"] --> combined_features_for_missing[("combined features for missing: **np.Array(float)**")]
+num_f-->combining_features_for_missing
+combined_features_for_missing-->predict_missing["generate missing"]-->missing_mask[("indicator for missing: **np.Array(bool)**")]
 
-cat_combined_features-->fit_tree_cls["fit decision tree classifier"]
-cat_np_target-->fit_tree_cls
-end
+sample_res-->replace_missing["remove values where it should be missing"]-->new_column[("new synthetic column: **np.Array(string)**")]
+missing_mask-->replace_missing
+new_column --> to_df["convert to series/dataframe"] -->prev_syn
 ```
 
 ## abstract diagram:
