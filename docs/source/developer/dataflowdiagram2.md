@@ -1,7 +1,7 @@
 # more dataflow diagrams
 
 ## fit flow for numeric target
-```{mermaid}
+```mermaid
 flowchart TD
 
 subgraph input
