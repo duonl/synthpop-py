@@ -34,7 +34,7 @@ ft_missing-->fit_missing
 ```
 
 ## fit flow for categorical targets
-```{mermaid}
+```mermaid
 flowchart TD
 
 subgraph input
@@ -55,7 +55,7 @@ np_target-->fill_na["replace missing values with 'N.a.N.'"]-->no_na_target[("tar
 ```
 
 ## generating categorical column
-```{mermaid}
+```mermaid
 flowchart TD
 
 prev_syn[("previously synthesised data: **Dataframe**")]
@@ -71,7 +71,7 @@ new_column --> to_df["convert to series/dataframe"] -->prev_syn
 ```
 ## generate numeric column
 
-```{mermaid}
+```mermaid
 flowchart TD
 
 prev_syn[("previously synthesised data: **Dataframe**")]
@@ -95,7 +95,7 @@ new_column --> to_df["convert to series/dataframe"] -->prev_syn
 ```
 
 ## abstract diagram:
-```{mermaid}
+```mermaid
 flowchart LR
 
 subgraph input
