@@ -44,24 +44,34 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         :return: fitted encoder.
         """
-        #X,y = validate_data(self,X,y,dtype="category",skip_check_array=True)
+        #
+        # self.n_features_in_ = 1
+        # if hasattr(X,"name"):
+        #     self.feature_names_in_ = [X.name]
+
+        #X,y = validate_data(self,X,y,dtype=None,reset=True)
         check_X_params = dict(
                 dtype=None, ensure_all_finite=False,ensure_2d=False
             )
-        check_y_params = dict(ensure_2d=False, dtype=None)
-        validate_data(
-                self, X, y, validate_separately=(check_X_params, check_y_params)
+        check_y_params = dict(ensure_2d=True, dtype=None)
+        if isinstance(X,pd.Series):
+            X = X.to_frame()
+        if isinstance(y,pd.Series):
+            y = y.to_frame()
+        X,y=validate_data(
+                self, X, y, validate_separately=(check_X_params, check_y_params),reset=True
             )
+        X = X.flatten()
+        y = y.flatten()
         contingency_table = pd.crosstab(X,y)
         pca_result = self._pca_transform.fit_transform(X=contingency_table,y=None)
 
         self.n_features_out_ = len(pca_result.columns)
-        self.n_features_in_ = 1
-        self.feature_names_in_ = [X.name]
+        
 
         value_mapping = { k: list(v.values()) for (k,v) in pca_result.to_dict('index').items()}
 
-        missing_contingency_table = pd.crosstab(X,y.isna())
+        missing_contingency_table = pd.crosstab(X,[v is None for v in y])
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
         mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}
 

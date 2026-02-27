@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator,TransformerMixin
 from sklearn import set_config
 
 from synthpop.data_processing.encoders import PCAEncoder
+from sklearn.utils.estimator_checks import parametrize_with_checks
 
 class TransformStub(TransformerMixin, BaseEstimator):
 
@@ -33,7 +34,6 @@ class TransformStub(TransformerMixin, BaseEstimator):
 #TODO: test empty mapping
 #TODO: test constant feature and constant target
 #TODO: validation in fit and transform. (check feature names, check is fitted)
-#TODO: test with different index
 set_config(transform_output="pandas")
 def test_pca_fit_when_given_full_features_and_targets():
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
@@ -74,7 +74,8 @@ def test_pca_fit_when_given_full_features_and_targets():
     assert result.n_features_in_ == 1
     assert result.feature_names_in_ == ["input_feature"]
     assert result.n_features_out_ == 3
-    
+
+
 def test_pca_fit_when_target_is_missing():
 
     X = pd.Series(["a", "a","b","b","c","c"],name="input_feature")
@@ -211,3 +212,9 @@ def test_pca_encoder_sklearn_tags():
     # They are used when running generic sklearn tests, such as check_estimator
     pass
 
+@parametrize_with_checks([PCAEncoder()],expected_failed_checks={
+    "check_fit_score_takes_y":"no scoring"
+
+})
+def test_pca_encoder_is_sklearn_compatible(estimator,check):
+    check(estimator)
