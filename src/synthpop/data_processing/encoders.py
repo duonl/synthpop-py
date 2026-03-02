@@ -8,6 +8,7 @@ from sklearn.utils.validation import check_is_fitted, validate_data
 from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
+import numpy.typing as npt
 
 
 
@@ -19,11 +20,11 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
     :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
     """
-    def __init__(self, pca_threshold:int = 30, minimum_explained_variance:float = 0.95,_pca_transform:PCA = PCA().set_output(transform="pandas")):#TODO set_output??
+    def __init__(self, pca_threshold:int = 30, minimum_explained_variance:float = 0.95,_pca_transform:PCA = PCA()):#TODO set_output??
         self._pca_transform = _pca_transform #TODO: parameters??
         self.pca_threshold= pca_threshold
         self.minimum_explained_variance= minimum_explained_variance
-        self.set_output(transform="pandas")
+        #self.set_output(transform="pandas")
         pass
 
     def __sklearn_tags__(self):
@@ -42,52 +43,43 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         tags.array_api_support = True
         return tags
 
-    def fit(self,X:pd.Series, y: pd.Series) -> Self:
-        """
-        Determines for each level of ``X`` the corresponding numerical values to encode them with. 
-
-        :param X: The categorical feature that is to be encoded.
-        :param y: The target used to encode the feature.
-
-        :return: fitted encoder.
-        """
-        #
-        # self.n_features_in_ = 1
-        # if hasattr(X,"name"):
-        #     self.feature_names_in_ = [X.name]
-
-        #X,y = validate_data(self,X,y,dtype=None,reset=True)
-        check_X_params = dict(
-                dtype=None, ensure_all_finite=False,ensure_2d=False
-            )
-        check_y_params = dict(ensure_2d=False, dtype=None)
-        if isinstance(X,pd.Series):
-            X = X.to_frame()
-        if isinstance(y,pd.Series):
-            y = y.to_frame()
-        X,y=validate_data(
-                self, X, y, validate_separately=(check_X_params, check_y_params),reset=True
-            )
+    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
+        
         self.n_features_in_ = 1
-        #X = X.flatten()
-        y = y.flatten()
-        contingency_table = pd.crosstab(X,y)
-        pca_result = self._pca_transform.fit_transform(X=contingency_table,y=None)
+
+        X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
+            dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan")
+            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan") 
+            ))
+        
+        if isinstance(X,pd.Series):
+            self.feature_names_in_ = [X.name]
+        if X_val.ndim != 1:
+            raise ValueError("X should by 1D")
+        if y_val.ndim != 1:
+            raise ValueError("Y should by 1D")
+        
+        #The alternative to using pandas here is either use scipy or DIY. 
+        contingency_table = pd.crosstab(X_val,y_val,)
+
+        pca_result = self._pca_transform.fit_transform(X=contingency_table.to_numpy(),y=None)
+        if isinstance(pca_result,pd.DataFrame):
+            pca_result = pca_result.to_numpy()
 
         self.n_features_out_ = pca_result.shape[1]
-        
 
-        value_mapping = { k: list(v.values()) for (k,v) in pca_result.to_dict('index').items()}
+        value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(pca_result.shape[0])}
 
-        missing_contingency_table = pd.crosstab(X,[v is None for v in y])
+        #The alternative to using pandas here is either use scipy or DIY. 
+        missing_contingency_table = pd.crosstab(X_val,[v is None for v in y_val])
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
         mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}
 
         self.mapping_ = value_mapping | mapping_for_missing
-        
+
         return self
 
-    def transform(self,X:pd.Series) -> pd.DataFrame:
+    def transform(self,X:npt.ArrayLike) -> npt.ArrayLike:
         """
         replaces each level of ``X`` with the numerical values determined in :py:meth:`fit`
 
@@ -95,12 +87,12 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
         mapping_including_missing = self.mapping_ | {None:[None]*self.n_features_out_}
 
-        return pd.DataFrame(
+        return np.array(
             [
                 mapping_including_missing[v] for v in X
             ],
-            columns=self.get_feature_names_out(),
-            index=X.index
+            #columns=self.get_feature_names_out(),
+            #index=X.index
         )
     
     def get_feature_names_out(self,input_features=None):
