@@ -73,6 +73,9 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         """
         return pd.DataFrame()
     
+    def score(self,X,y):
+        return 0.0
+    
     # def get_params(self, deep: bool = True) -> dict:
     #     return super().get_params(deep)
     

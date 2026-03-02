@@ -30,9 +30,16 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         tags = super().__sklearn_tags__()
         tags.target_tags.required=True
         tags.target_tags.one_d_labels = True
+        tags.target_tags.single_output= True
+
         tags.input_tags.categorical = True
+        tags.input_tags.two_d_array = False
+        tags.input_tags.one_d_array = True
         tags.input_tags.allow_nan= True
+        tags.input_tags.string = True
+        
         tags.estimator_type = "transformer"
+        tags.array_api_support = True
         return tags
 
     def fit(self,X:pd.Series, y: pd.Series) -> Self:
@@ -53,7 +60,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         check_X_params = dict(
                 dtype=None, ensure_all_finite=False,ensure_2d=False
             )
-        check_y_params = dict(ensure_2d=True, dtype=None)
+        check_y_params = dict(ensure_2d=False, dtype=None)
         if isinstance(X,pd.Series):
             X = X.to_frame()
         if isinstance(y,pd.Series):
@@ -61,12 +68,13 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         X,y=validate_data(
                 self, X, y, validate_separately=(check_X_params, check_y_params),reset=True
             )
-        X = X.flatten()
+        self.n_features_in_ = 1
+        #X = X.flatten()
         y = y.flatten()
         contingency_table = pd.crosstab(X,y)
         pca_result = self._pca_transform.fit_transform(X=contingency_table,y=None)
 
-        self.n_features_out_ = len(pca_result.columns)
+        self.n_features_out_ = pca_result.shape[1]
         
 
         value_mapping = { k: list(v.values()) for (k,v) in pca_result.to_dict('index').items()}

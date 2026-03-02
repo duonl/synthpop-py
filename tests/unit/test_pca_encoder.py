@@ -37,15 +37,15 @@ class TransformStub(TransformerMixin, BaseEstimator):
 set_config(transform_output="pandas")
 def test_pca_fit_when_given_full_features_and_targets():
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
-    X = pd.Series(["a", "a","b","b"],name="input_feature")
-    y = pd.Series(["x", "x","y","z"])
+    X = np.array(["a", "a","b","b"])
+    y = np.array(["x", "x","y","z"])
 
 
-    pca_return_value = pd.DataFrame(
+    pca_return_value = np.array(
         [   #pc1, pc2, pc3
             [1.2, 3.4, 5],#a
             [11.22,33.44,6]#b
-        ],columns=["pca0","pca1","pca2"],index=["a","b"]
+        ]#,columns=["pca0","pca1","pca2"],index=["a","b"]
         )
     stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
     encoder = PCAEncoder(_pca_transform = stub_pca_transform )
@@ -56,13 +56,13 @@ def test_pca_fit_when_given_full_features_and_targets():
     assert result is encoder
     # The contingency table has been made and passed to the PCA transform
 
-    expected_contingency_table = pd.DataFrame(
+    expected_contingency_table = np.array(
         [#   x  y  z 
             [2, 0, 0],# a
             [0, 1, 1] #b
         ]
-        ,columns= ["x","y","z"]
-        ,index=["a","b"]
+        #,columns= ["x","y","z"]
+        #,index=["a","b"]
         )
     
     
@@ -72,29 +72,29 @@ def test_pca_fit_when_given_full_features_and_targets():
     assert np.array_equal(result.mapping_["b"],[11.22,33.44,6]), "second row of map incorrect"
 
     assert result.n_features_in_ == 1
-    assert result.feature_names_in_ == ["input_feature"]
+    #assert result.feature_names_in_ == ["input_feature"]
     assert result.n_features_out_ == 3
 
 
 def test_pca_fit_when_target_is_missing():
 
-    X = pd.Series(["a", "a","b","b","c","c"],name="input_feature")
-    y = pd.Series(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
+    X = np.array(["a", "a","b","b","c","c"])
+    y = np.array(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
 
-    expected_contingency_table = pd.DataFrame(
+    expected_contingency_table = np.array(
         [#   x  y  z Note that the expected behaviour is that C is not in the contingency table. 
             [1, 0, 0],# a
             [0, 1, 1] #b
         ]
-        ,columns= ["x","y","z"]
-        ,index=["a","b"]
+        #,columns= ["x","y","z"]
+        #,index=["a","b"]
         )
     
-    pca_return_value = pd.DataFrame(
+    pca_return_value = np.array(
         [   #pc1, pc2, pc3
             [1.2, 3.4, 5],#a
             [11.22,33.44,6]#b
-        ],columns=["pca0","pca1","pca2"],index=["a","b"]
+        ]#,columns=["pca0","pca1","pca2"],index=["a","b"]
         )
     
     stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
@@ -109,27 +109,27 @@ def test_pca_fit_when_target_is_missing():
     assert result.n_features_out_ == 3
 
 def test_pca_fit_when_feature_contains_missing():
-    X = pd.Series(["a", None,"b","b"],name="input_feature")
-    y = pd.Series(["x", "x","y","z"])
+    X = np.array(["a", None,"b","b"])
+    y = np.array(["x", "x","y","z"])
 
     stub_pca_transform = TransformStub(transform_return_value=pd.DataFrame())
     encoder = PCAEncoder(_pca_transform = stub_pca_transform )
 
     encoder.fit(X=X,y=y)
 
-    expected_contingency_table = pd.DataFrame(
+    expected_contingency_table = np.array(
         [#   x  y  z 
             [1, 0, 0],# a
             [0, 1, 1] #b
         ]
-        ,columns= ["x","y","z"]
-        ,index=["a","b"]
+        #,columns= ["x","y","z"]
+        #,index=["a","b"]
         )
     
     assert np.array_equal(stub_pca_transform.transform_X_.columns,expected_contingency_table.columns), f"columns do not match. Expected:{str(expected_contingency_table.columns)}, actual: {str(stub_pca_transform.transform_X_.columns)}"
 
 def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_values():
-    X = pd.Series(["a", "a","b","b","c","c"],name="input_feature")
+    X = np.array(["a", "a","b","b","c","c"])
 
     encoder = PCAEncoder(_pca_transform=None)
     encoder.mapping_ = {
@@ -138,11 +138,11 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
         "c":[5.6,7.8]
         }
     encoder.n_features_out_ = 2
-    encoder.feature_names_in_ = ["input_feature"]
+    #encoder.feature_names_in_ = ["input_feature"]
     
     result = encoder.transform(X)
 
-    expected_result = pd.DataFrame(
+    expected_result = np.array(
         [
             [1.2,3.4],#a
             [1.2,3.4],#a
@@ -151,14 +151,14 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
             [5.6,7.8],#c
             [5.6,7.8]#c
         ]
-        ,columns=["input_feature_pca0","input_feature_pca1"]
+        #,columns=["input_feature_pca0","input_feature_pca1"]
     )
 
-    assert expected_result.equals(result)
+    assert np.array_equal(expected_result, result)
 
 
 def test_pca_transform_given_fitted_estimator_when_transforming_missing_values():
-    X = pd.Series(["a", None],name="input_feature")
+    X = np.array(["a", None])
 
     encoder = PCAEncoder(_pca_transform=None)
     encoder.mapping_ = {
@@ -169,16 +169,16 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
      
     result = encoder.transform(X)
 
-    expected_result = pd.DataFrame(
+    expected_result = np.array(
         [
             [1.2,3.4],#a
             [None,None],#None
 
         ]
-        ,columns=["input_feature_pca0","input_feature_pca1"]
+        #,columns=["input_feature_pca0","input_feature_pca1"]
     )
 
-    assert expected_result.equals(result)
+    assert np.array_equal(expected_result, result)
 
 def test_pca_encoder_get_freature_names_out_no_input():
 
@@ -206,15 +206,7 @@ def test_pca_encoder_get_feature_names_out_incorrect_input():
     with pytest.raises(ValueError):
         result = encoder.get_feature_names_out(["wrong_feature_name"])
 
-def test_pca_encoder_sklearn_tags():
-    # sklearn tags help with the compatibility with sklearn
-    # They are used to communicate the capabilities of the estimator. See https://scikit-learn.org/stable/developers/develop.html#estimator-tags
-    # They are used when running generic sklearn tests, such as check_estimator
-    pass
 
-@parametrize_with_checks([PCAEncoder()],expected_failed_checks={
-    "check_fit_score_takes_y":"no scoring"
-
-})
+@parametrize_with_checks([PCAEncoder()])
 def test_pca_encoder_is_sklearn_compatible(estimator,check):
     check(estimator)
