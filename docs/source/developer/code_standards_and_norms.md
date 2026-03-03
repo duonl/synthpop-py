@@ -18,7 +18,8 @@ See this document as a tie-breaker when there are multiple equally well options,
 - Use numpy arrays where possible. 
 - The user of this package should be able to use pandas
 
-A synthesis method should accept pandas dataframes/series and heterogenous data.
+A synthesis method should accept pandas dataframes/series and heterogeneous data.
+Making the data homogeneous should happen within the synthesis method.
 It is best to use numpy within a synthesis method. See [#45](https://github.com/Synthpop-data/synthpop-py/issues/45).
 
 

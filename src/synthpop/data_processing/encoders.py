@@ -31,7 +31,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
         return self
 
-    def transform(self,X:npt.ArrayLike) -> npt.ArrayLike:
+    def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         replaces each level of ``X`` with the numerical values determined in :py:meth:`fit`
 
@@ -74,7 +74,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self,X:npt.ArrayLike) -> npt.ArrayLike:
+    def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
         
