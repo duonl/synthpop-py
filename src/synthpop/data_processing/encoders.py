@@ -20,7 +20,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
     :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
     """
-    def __init__(self, pca_threshold:int = 30, minimum_explained_variance:float = 0.95,_pca_transform:PCA = PCA()):#TODO set_output??
+    def __init__(self, pca_threshold:int = 30, minimum_explained_variance:float = 0.95,_pca_transform:PCA = PCA()):
         self._pca_transform = _pca_transform #TODO: parameters??
         self.pca_threshold= pca_threshold
         self.minimum_explained_variance= minimum_explained_variance
@@ -47,6 +47,13 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         
         self.n_features_in_ = 1
 
+        if X.shape[0] == 0 and y.shape[0]==0:
+            self.mapping_ = {}
+            if isinstance(X,pd.Series):
+                self.feature_names_in_ = [X.name]
+
+            return self
+
         X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
             dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan")
             ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan") 
@@ -71,7 +78,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(pca_result.shape[0])}
 
         #The alternative to using pandas here is either use scipy or DIY. 
-        missing_contingency_table = pd.crosstab(X_val,[v is None for v in y_val])
+        missing_contingency_table = pd.crosstab(X_val,[v is None or v is pd.NA or v is np.nan for v in y_val])
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
         mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}
 
@@ -91,8 +98,6 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             [
                 mapping_including_missing[v] for v in X
             ],
-            #columns=self.get_feature_names_out(),
-            #index=X.index
         )
     
     def get_feature_names_out(self,input_features=None):
