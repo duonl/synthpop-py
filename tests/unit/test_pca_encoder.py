@@ -34,10 +34,32 @@ class TransformStub(TransformerMixin, BaseEstimator):
 #TODO: test empty mapping/empty input
 
 #TODO: validation in fit and transform. (check feature names, check is fitted)
-#TODO: test with np.Nan, pd.Nan
 #TODO: parameters
+#TODO: fitting idempotence
+
+def validate_mapping(result_mapping,pca_result,expected_keys):
+    for (i,key) in enumerate(expected_keys):
+        assert np.array_equal(result_mapping[key],pca_result[i]), f"invalid mapping for {key}. Expected {pca_result[i]}, actual: {result_mapping[key]}"
+
+def validate_set_inout_count(result_encoder,expected_n_feat):
+    assert result_encoder.n_features_in_ == 1
+    assert result_encoder.n_features_out_ == expected_n_feat
 
 def test_pca_fit_when_given_full_features_and_targets():
+    """
+    Given that 
+        the feature and target are strings only
+        and that PCA returns 3 columns
+    When
+        I fit the PCA encoder
+    Then 
+        a correct contingency table should be passed to PCA
+        and the rows of the principle components form the encoding stored in self.mapping_
+        and self.n_features_in_ should be set to 1
+        and self.n_features_out_ should be set to 3
+        and self is returned
+
+    """
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
     X = np.array(["a", "a","b","b"])
     y = np.array(["x", "x","y","z"])
@@ -47,7 +69,7 @@ def test_pca_fit_when_given_full_features_and_targets():
         [   #pc1, pc2, pc3
             [1.2, 3.4, 5],#a
             [11.22,33.44,6]#b
-        ]#,columns=["pca0","pca1","pca2"],index=["a","b"]
+        ]
         )
     stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
     encoder = PCAEncoder(_pca_transform = stub_pca_transform )
@@ -63,21 +85,24 @@ def test_pca_fit_when_given_full_features_and_targets():
             [2, 0, 0],# a
             [0, 1, 1] #b
         ]
-        #,columns= ["x","y","z"]
-        #,index=["a","b"]
         )
-    
-    
-   
-    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
-    assert np.array_equal(result.mapping_["a"],[1.2, 3.4, 5]), "first row of map incorrect"
-    assert np.array_equal(result.mapping_["b"],[11.22,33.44,6]), "second row of map incorrect"
 
-    assert result.n_features_in_ == 1
-    #assert result.feature_names_in_ == ["input_feature"]
-    assert result.n_features_out_ == 3
+    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
+    validate_mapping(result.mapping_,pca_return_value,["a","b"])
+
+    validate_set_inout_count(result,expected_n_feat=3)
 
 def test_pca_output_api():
+    """
+    Given that
+        The features are a pandas series with name
+        and that PCA returns 3 columns
+
+    When the encoder is being fit
+
+    then self.feature_names_in_ should be set to a one item array containing the name of X
+        the result should be equal as if the features are a numpy array.
+    """
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
     X = pd.Series(["a", "a","b","b"],name="input_feature")
     y = np.array(["x", "x","y","z"])
@@ -97,27 +122,24 @@ def test_pca_output_api():
     # Then the return value is self
     assert result is encoder
     # The contingency table has been made and passed to the PCA transform
-
     expected_contingency_table = np.array(
         [#   x  y  z 
             [2, 0, 0],# a
             [0, 1, 1] #b
         ]
-        #,columns= ["x","y","z"]
-        #,index=["a","b"]
         )
     
-    
-   
     assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
-    assert np.array_equal(result.mapping_["a"],[1.2, 3.4, 5]), "first row of map incorrect"
-    assert np.array_equal(result.mapping_["b"],[11.22,33.44,6]), "second row of map incorrect"
+    validate_mapping(result.mapping_,pca_return_value.to_numpy(),expected_keys=["a","b"])
+    validate_set_inout_count(result,expected_n_feat=3)
 
-    assert result.n_features_in_ == 1
     assert result.feature_names_in_ == ["input_feature"]
-    assert result.n_features_out_ == 3
+
 
 def test_pca_fit_when_target_is_missing():
+    """
+    Given
+    """
 
     X = np.array(["a", "a","b","b","c","c"])
     y = np.array(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
@@ -127,15 +149,13 @@ def test_pca_fit_when_target_is_missing():
             [1, 0, 0],# a
             [0, 1, 1] #b
         ]
-        #,columns= ["x","y","z"]
-        #,index=["a","b"]
         )
     
     pca_return_value = np.array(
         [   #pc1, pc2, pc3
             [1.2, 3.4, 5],#a
             [11.22,33.44,6]#b
-        ]#,columns=["pca0","pca1","pca2"],index=["a","b"]
+        ]
         )
     
     stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
@@ -147,7 +167,8 @@ def test_pca_fit_when_target_is_missing():
     assert len(result.mapping_["b"])==3
     assert len(result.mapping_["c"]) == 3
     assert result.mapping_["c"].count(None) == 3
-    assert result.n_features_out_ == 3
+
+    validate_set_inout_count(result,expected_n_feat=3)
 
 def test_pca_fit_when_feature_contains_missing():
     X = np.array(["a", None,"b","b"])
@@ -163,11 +184,10 @@ def test_pca_fit_when_feature_contains_missing():
             [1, 0, 0],# a
             [0, 1, 1] #b
         ]
-        #,columns= ["x","y","z"]
-        #,index=["a","b"]
         )
     
     assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), f"contingency tables do not match."
+    validate_set_inout_count(encoder,expected_n_feat=0)
 
 def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_values():
     X = np.array(["a", "a","b","b","c","c"])
@@ -179,7 +199,6 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
         "c":[5.6,7.8]
         }
     encoder.n_features_out_ = 2
-    #encoder.feature_names_in_ = ["input_feature"]
     
     result = encoder.transform(X)
 
@@ -192,7 +211,6 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
             [5.6,7.8],#c
             [5.6,7.8]#c
         ]
-        #,columns=["input_feature_pca0","input_feature_pca1"]
     )
 
     assert np.array_equal(expected_result, result)
@@ -203,6 +221,7 @@ def test_pca_fit_empty_input():
     encoder.fit(X=np.array([]),y=np.array([]))
 
     assert encoder.mapping_ == {}
+    validate_set_inout_count(encoder,expected_n_feat=0)
 
 def test_pca_transform_empty_input():
     encoder = PCAEncoder(_pca_transform=None)
@@ -213,6 +232,22 @@ def test_pca_transform_empty_input():
 
     assert len(result) == 0
     
+def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
+    encoder = PCAEncoder(_pca_transform=None)
+    encoder.mapping_={}
+    encoder.n_features_out_=0
+
+    result = encoder.transform(X=np.array([]))
+    assert len(result) == 0 
+
+def test_pca_transform_exception_on_new_value():
+    encoder = PCAEncoder(_pca_transform=None)
+    encoder.mapping_={"a":[1.1,2.2]}
+    encoder.n_features_out_=2
+
+    with pytest.raises(ValueError,match="no mapping for"):
+        result = encoder.transform(np.array(["b"]))
+
 
 def test_pca_fit_exception_on_not_1d_datatype():
 
@@ -248,7 +283,6 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
             [None,None],#None
 
         ]
-        #,columns=["input_feature_pca0","input_feature_pca1"]
     )
 
     assert np.array_equal(expected_result, result)
@@ -292,9 +326,9 @@ def test_pca_fit_when_target_is_missing_with_np_pd_nan():
         )
     
     pca_return_value = np.array(
-        [   #pc1, pc2, pc3
-            [1.2, 3.4, 5],#a
-            [11.22,33.44,6]#b
+        [   #pc1, pc2, 
+            [1.2, 3.4],#a
+            [11.22,33.44]#b
         ]
         )
     
@@ -304,10 +338,11 @@ def test_pca_fit_when_target_is_missing_with_np_pd_nan():
     result = encoder.fit(X=X,y=y)
 
     assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), f"contingency table not calculated correctly with missing target"
-    assert len(result.mapping_["b"])==3
-    assert len(result.mapping_["c"]) == 3
-    assert result.mapping_["c"].count(None) == 3
-    assert result.n_features_out_ == 3
+    assert len(result.mapping_["b"])==2
+    assert len(result.mapping_["c"]) == 2
+    assert result.mapping_["c"].count(None) == 2
+
+    validate_set_inout_count(result,expected_n_feat=2)
 
 @parametrize_with_checks([PCAEncoder()])
 def test_pca_encoder_is_sklearn_compatible(estimator,check):

@@ -52,6 +52,8 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             if isinstance(X,pd.Series):
                 self.feature_names_in_ = [X.name]
 
+            self.n_features_out_ = 0
+
             return self
 
         X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
