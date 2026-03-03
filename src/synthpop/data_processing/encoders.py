@@ -46,7 +46,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     def __init__(self):
         pass
 
-    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) :
+    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Calculate average y value for each X category.
         

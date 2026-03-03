@@ -15,6 +15,8 @@ See this document as a tie-breaker when there are multiple equally well options,
 - [SOLID](https://en.wikipedia.org/wiki/SOLID)
 - It should always be possible to generate synthetic data within 5 lines of code. 
 - All classes that inherit from BaseEstimator should follow [the developer guides of scikit-learn](https://scikit-learn.org/stable/developers/develop.html)
+- Use numpy arrays where possible. 
+- The user of this package should be able to use pandas
 
 
 ## Standard topics in testing
