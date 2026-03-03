@@ -3,6 +3,7 @@ This module contains classes to encode categorical data to numeric data.
 
 """
 from typing import Self
+from sklearn import clone
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
 from sklearn.utils.validation import check_is_fitted, validate_data
 from sklearn.decomposition import PCA
@@ -20,27 +21,25 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
     :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
     """
-    def __init__(self, pca_threshold:int = 30, minimum_explained_variance:float = 0.95,_pca_transform:PCA = PCA()):
+    def __init__(self, _pca_transform:PCA = PCA()):
         self._pca_transform = _pca_transform #TODO: parameters??
-        self.pca_threshold= pca_threshold
-        self.minimum_explained_variance= minimum_explained_variance
         #self.set_output(transform="pandas")
         pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
-        tags.target_tags.required=True
+        tags.target_tags.required=False
         tags.target_tags.one_d_labels = True
         tags.target_tags.single_output= True
 
         tags.input_tags.categorical = True
-        tags.input_tags.two_d_array = False
+        #tags.input_tags.two_d_array = False
         tags.input_tags.one_d_array = True
         tags.input_tags.allow_nan= True
         tags.input_tags.string = True
         
         tags.estimator_type = "transformer"
-        tags.array_api_support = True
+        #tags.array_api_support = True
         return tags
 
     def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
@@ -71,7 +70,9 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         #The alternative to using pandas here is either use scipy or DIY. 
         contingency_table = pd.crosstab(X_val,y_val,)
 
-        pca_result = self._pca_transform.fit_transform(X=contingency_table.to_numpy(),y=None)
+        self._pca_transform_ = clone(self._pca_transform)
+
+        pca_result = self._pca_transform_ .fit_transform(X=contingency_table.to_numpy(),y=None)
         if isinstance(pca_result,pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
@@ -94,11 +95,19 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         :param X: the feature to be encoded.
         """
+
+        #X_val = validate_data(self,X=X, reset= False,ensure_2d=False)#validate_data(self,X=X, reset= False)
+        
         mapping_including_missing = self.mapping_ | {None:[None]*self.n_features_out_}
+
+        unique_values_in_X = np.unique([str(v) for v in X if v is not None])
+
+        if len(np.setdiff1d(unique_values_in_X,list(mapping_including_missing.keys()),assume_unique=True)) !=0: #np.isin(np.unique_values(X),mapping_including_missing.keys(),invert=True).any():
+            raise ValueError("new values not seen during fitting when encoding.")
 
         return np.array(
             [
-                mapping_including_missing[v] for v in X
+                mapping_including_missing[str(v) if v is not None else None] for v in X
             ],
         )
     

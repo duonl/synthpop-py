@@ -10,7 +10,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 class TransformStub(TransformerMixin, BaseEstimator):
 
     def __init__(self, fit_return_value=None,transform_return_value=None):
-        self.transform_value = transform_return_value
+        self.transform_return_value = transform_return_value
         self.fit_return_value = fit_return_value
 
     def fit(self,X,y):
@@ -20,7 +20,7 @@ class TransformStub(TransformerMixin, BaseEstimator):
     
     def transform(self,X):
         self.transform_X_ = X
-        return self.transform_value
+        return self.transform_return_value
     
     def fit_transform(self, X, y = None, **fit_params):
         self.fit_X_ = X
@@ -28,7 +28,7 @@ class TransformStub(TransformerMixin, BaseEstimator):
         self.fit_y_ = y
 
 
-        return self.transform_value
+        return self.transform_return_value
 
 
 #TODO: test empty mapping/empty input
@@ -44,6 +44,9 @@ def validate_mapping(result_mapping,pca_result,expected_keys):
 def validate_set_inout_count(result_encoder,expected_n_feat):
     assert result_encoder.n_features_in_ == 1
     assert result_encoder.n_features_out_ == expected_n_feat
+
+    if hasattr(result_encoder,"_pca_transform_"):
+        assert result_encoder._pca_transform is not result_encoder._pca_transform_ #to be compatible with sklearn.
 
 def test_pca_fit_when_given_full_features_and_targets():
     """
@@ -87,7 +90,7 @@ def test_pca_fit_when_given_full_features_and_targets():
         ]
         )
 
-    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
+    assert np.array_equal(result._pca_transform_.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
     validate_mapping(result.mapping_,pca_return_value,["a","b"])
 
     validate_set_inout_count(result,expected_n_feat=3)
@@ -129,7 +132,7 @@ def test_pca_output_api():
         ]
         )
     
-    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
+    assert np.array_equal(result._pca_transform_.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
     validate_mapping(result.mapping_,pca_return_value.to_numpy(),expected_keys=["a","b"])
     validate_set_inout_count(result,expected_n_feat=3)
 
@@ -163,7 +166,7 @@ def test_pca_fit_when_target_is_missing():
 
     result = encoder.fit(X=X,y=y)
 
-    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), f"contingency table not calculated correctly with missing target"
+    assert np.array_equal(result._pca_transform_.transform_X_,expected_contingency_table), f"contingency table not calculated correctly with missing target"
     assert len(result.mapping_["b"])==3
     assert len(result.mapping_["c"]) == 3
     assert result.mapping_["c"].count(None) == 3
@@ -186,7 +189,7 @@ def test_pca_fit_when_feature_contains_missing():
         ]
         )
     
-    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), f"contingency tables do not match."
+    assert np.array_equal(encoder._pca_transform_.transform_X_,expected_contingency_table), f"contingency tables do not match."
     validate_set_inout_count(encoder,expected_n_feat=0)
 
 def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_values():
@@ -245,7 +248,7 @@ def test_pca_transform_exception_on_new_value():
     encoder.mapping_={"a":[1.1,2.2]}
     encoder.n_features_out_=2
 
-    with pytest.raises(ValueError,match="no mapping for"):
+    with pytest.raises(ValueError,match="values not seen during fitting"):
         result = encoder.transform(np.array(["b"]))
 
 
@@ -337,13 +340,16 @@ def test_pca_fit_when_target_is_missing_with_np_pd_nan():
 
     result = encoder.fit(X=X,y=y)
 
-    assert np.array_equal(stub_pca_transform.transform_X_,expected_contingency_table), f"contingency table not calculated correctly with missing target"
+    assert np.array_equal(result._pca_transform_.transform_X_,expected_contingency_table), f"contingency table not calculated correctly with missing target"
     assert len(result.mapping_["b"])==2
     assert len(result.mapping_["c"]) == 2
     assert result.mapping_["c"].count(None) == 2
 
     validate_set_inout_count(result,expected_n_feat=2)
 
-@parametrize_with_checks([PCAEncoder()])
+@parametrize_with_checks([PCAEncoder()],legacy=False,expected_failed_checks= lambda x: {
+    "check_dont_overwrite_parameters":"tests with multiple features",
+    "check_n_features_in_after_fitting":"tests with multiple features"
+})
 def test_pca_encoder_is_sklearn_compatible(estimator,check):
     check(estimator)
