@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.base import TransformerMixin
 
 from synthpop.data_processing.encoders import MeanEncoder
+import numpy.typing as npt
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -24,7 +25,7 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def post_synth_transform(self,x:pd.DataFrame,y:pd.Series) -> pd.Series:
+    def post_synth_transform(self,X:pd.DataFrame,y:pd.Series) -> pd.Series:
         """
         Process synthesised data to include missing values.
         :param X: the features for the target. Implementers should accept both categoric and numeric data, and should accept missing values here.
@@ -43,7 +44,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
     def __init__(self,encoding: TransformerMixin = MeanEncoder()):
         super().__init__()
     
-    def prepare_data_for_fit(self,X:pd.Series, y:pd.Series)-> tuple[pd.DataFrame,pd.Series]:
+    def prepare_data_for_fit(self,X:npt.ArrayLike, y:npt.ArrayLike)-> tuple[npt.ArrayLike,npt.ArrayLike]:
         """
         Trains a decision tree to predict when y is missing. Removes rows from both X and y when y is missing.
         :param X: the features for the target. 
@@ -54,7 +55,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         
         return(pd.DataFrame(),pd.Series())
 
-    def post_synth_transform(self,X:pd.DataFrame,y:pd.Series) -> pd.Series:
+    def post_synth_transform(self,X:npt.ArrayLike,y:npt.ArrayLike) -> npt.ArrayLike:
         """
         Uses a decision tree to determine when y should be missing.
         :param X: the features for the target.
@@ -69,7 +70,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     Replace missing values by a specified value, and remove after synthesis.
     """
     
-    def prepare_data_for_fit(self,X:pd.Series, y:pd.Series)-> tuple[pd.DataFrame,pd.Series]:
+    def prepare_data_for_fit(self,X:npt.ArrayLike, y:npt.ArrayLike)-> tuple[npt.ArrayLike,npt.ArrayLike]:
         """
         Replaces missing values in the target with "N.a.N."
         :param X: the features for the target. 
@@ -80,7 +81,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         
         return(pd.DataFrame(),pd.Series())
 
-    def post_synth_transform(self,X:pd.DataFrame,y:pd.Series) -> pd.Series:
+    def post_synth_transform(self,X:npt.ArrayLike,y:npt.ArrayLike) -> npt.ArrayLike:
         """
         Replaces "N.a.N." with missing values.
         :param X: the features for the target.

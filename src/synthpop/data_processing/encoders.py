@@ -131,7 +131,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     def __init__(self):
         pass
 
-    def fit(self,X:pd.Series, y: pd.Series):
+    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Calculate average y value for each X category.
         
@@ -159,7 +159,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self,X:pd.Series) -> pd.DataFrame:
+    def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
         

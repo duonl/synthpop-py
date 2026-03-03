@@ -47,7 +47,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         There should be an implementation of missing values support in case of missing values in feature columns.
         There should be a binary classifier to predict missing values if the target variable includes missing values.
         
-        :param X: Dataset of features
+        :param X: Dataset of features, may be heterogeneous
         :param y: Target variable
         :return: A fitted model
         '''
@@ -68,7 +68,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
         Calling `transform` before `fit` raises an error.
 
-        :param X: Input dataset
+        :param X: Input dataset, may be heterogeneous
         :return: Input dataset with predicted column.
         """
         return pd.DataFrame()
