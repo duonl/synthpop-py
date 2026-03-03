@@ -141,7 +141,10 @@ def test_pca_output_api():
 
 def test_pca_fit_when_target_is_missing():
     """
-    Given
+    Given an unfitted estimator and target variable which contains missing values
+        and is always missing if X=s
+    when fitting the estimator
+    then the value 'c' should be mapped to Nones.
     """
 
     X = np.array(["a", "a","b","b","c","c"])
@@ -174,6 +177,9 @@ def test_pca_fit_when_target_is_missing():
     validate_set_inout_count(result,expected_n_feat=3)
 
 def test_pca_fit_when_feature_contains_missing():
+    """
+    If there is a None in the feature, it should be ignored during fitting.
+    """
     X = np.array(["a", None,"b","b"])
     y = np.array(["x", "x","y","z"])
 
@@ -193,6 +199,7 @@ def test_pca_fit_when_feature_contains_missing():
     validate_set_inout_count(encoder,expected_n_feat=0)
 
 def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_values():
+    "When a value is mapped to an array of Nones, the mapping should still apply when transforming."
     X = np.array(["a", "a","b","b","c","c"])
 
     encoder = PCAEncoder(_pca_transform=None)
@@ -220,6 +227,9 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
     assert np.array_equal(expected_result, result,equal_nan=True)
 
 def test_pca_fit_empty_input():
+    """
+    fitting on empty data should result in an empty mapping.
+    """
     encoder = PCAEncoder(_pca_transform=None)
 
     encoder.fit(X=np.array([]),y=np.array([]))
@@ -228,6 +238,9 @@ def test_pca_fit_empty_input():
     validate_set_inout_count(encoder,expected_n_feat=0)
 
 def test_pca_transform_empty_input():
+    """
+    transforming an empty X should always result in an empty array, even if the mapping is not empty.
+    """
     encoder = PCAEncoder(_pca_transform=None)
     encoder.mapping_={"a":[1.1,2.2]}
     encoder.n_features_out_=2
@@ -237,6 +250,9 @@ def test_pca_transform_empty_input():
     assert len(result) == 0
     
 def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
+    """
+    transforming an empty X should always result in an empty array, even if the mapping is empty.
+    """
     encoder = PCAEncoder(_pca_transform=None)
     encoder.mapping_={}
     encoder.n_features_out_=0
@@ -245,6 +261,9 @@ def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
     assert len(result) == 0 
 
 def test_pca_transform_exception_on_new_value():
+    """
+    An informative exception should be raised when the user attempts to encode a value that was not in the data during fitting.
+    """
     encoder = PCAEncoder(_pca_transform=None)
     encoder.mapping_={"a":[1.1,2.2]}
     encoder.n_features_out_=2
@@ -254,6 +273,9 @@ def test_pca_transform_exception_on_new_value():
 
 
 def test_pca_fit_exception_on_not_1d_datatype():
+    """
+    The PCA encoder expects 1D inputs for both X and y.
+    """
 
     encoder = PCAEncoder(_pca_transform= None)
 
@@ -270,6 +292,9 @@ def test_pca_fit_exception_on_not_1d_datatype():
         encoder.fit(np.array(["a", None,"b","b"]),np.array([["a", None,"b","b"]]))
 
 def test_pca_transform_given_fitted_estimator_when_transforming_missing_values():
+    """
+    When transforming a X that contains Nones, it should always be mapped to an array of Nones.
+    """
     X = np.array(["a", None])
 
     encoder = PCAEncoder(_pca_transform=None)
@@ -319,6 +344,9 @@ def test_pca_encoder_get_feature_names_out_incorrect_input():
         result = encoder.get_feature_names_out(["wrong_feature_name"])
 
 def test_pca_fit_when_target_is_missing_with_np_pd_nan():
+    """
+    Numpy.nan, None, and pd.NA should all be treated as None. 
+    """
 
     X = np.array(["a", "a","b","b","c","c"])
     y = np.array(["x", np.nan,"y","z",pd.NA,None])#Target is always missing for X=c, but not always missing for X=a
