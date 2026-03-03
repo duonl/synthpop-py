@@ -13,18 +13,14 @@ import numpy.typing as npt
 
 
 
-class PCAEncoder(TransformerMixin, BaseEstimator): 
+class PCAEncoder(TransformerMixin, BaseEstimator):
     """
     Transforms categorical data to one or more numeric columns.
-
-
-    :param PCA_threshold: maximum number of columns used to encode the feature. explained_variance_threshold has precedence above PCA_threshold.
-    :param explained_variance: parameter indicating how much of the total variance should be explained by the principle components. A value of 1 returns all principle components.
+    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to _pca_transform
     """
+
     def __init__(self, _pca_transform:PCA = PCA()):
-        self._pca_transform = _pca_transform #TODO: parameters??
-        #self.set_output(transform="pandas")
-        pass
+        self._pca_transform = _pca_transform
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
@@ -37,16 +33,22 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         tags.input_tags.one_d_array = True
         tags.input_tags.allow_nan= True
         tags.input_tags.string = True
-        
+
         tags.estimator_type = "transformer"
         #tags.array_api_support = True
         return tags
 
     def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
-        
+        """
+        Calculate the encoding.
+
+        :param X: 1D array of categorical data. This is contains the data to be encoded.
+        :param y: 1D array of categorical data. The encoding is based on this data.
+        """
+
         self.n_features_in_ = 1
 
-        if X.shape[0] == 0 and y.shape[0]==0:
+        if X.shape[0] == 0 and y.shape[0]==0:#validate_data does not work well when there is no data
             self.mapping_ = {}
             if isinstance(X,pd.Series):
                 self.feature_names_in_ = [X.name]
@@ -57,33 +59,38 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
             dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan")
-            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan") 
+            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan")
             ))
-        
-        if isinstance(X,pd.Series):
+
+        if isinstance(X,pd.Series):#validate data does not seem to get the name of the feature when it is a pd.Series instead of a pd.Dataframe.
             self.feature_names_in_ = [X.name]
         if X_val.ndim != 1:
             raise ValueError("X should by 1D")
         if y_val.ndim != 1:
             raise ValueError("Y should by 1D")
-        
-        #The alternative to using pandas here is either use scipy or DIY. 
-        contingency_table = pd.crosstab(X_val,y_val,)
+   
+        #The alternative to using pandas here is either use scipy or DIY.
+        contingency_table = pd.crosstab(X_val,y_val,) #the result of pd.crosstab is a pandas dataframe
 
-        self._pca_transform_ = clone(self._pca_transform)
+        self._pca_transform_ = clone(self._pca_transform)# for compatibility with sklearn we need to do this.
 
-        pca_result = self._pca_transform_ .fit_transform(X=contingency_table.to_numpy(),y=None)
+        pca_result = self._pca_transform_ .fit_transform(
+            X=contingency_table.to_numpy()
+            ,y=None)
+
+        #sklearn.decomposition.PCA implements the set_output api
+        # that means that the user might configure globally that all transformers return pandas dataframes.
         if isinstance(pca_result,pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
-        self.n_features_out_ = pca_result.shape[1]
+        self.n_features_out_ = pca_result.shape[1] #needed for get_feature_names_out
 
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(pca_result.shape[0])}
 
-        #The alternative to using pandas here is either use scipy or DIY. 
+        #The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val,[v is None or v is pd.NA or v is np.nan for v in y_val])
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
-        mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}
+        mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing.
 
         self.mapping_ = value_mapping | mapping_for_missing
 
@@ -96,21 +103,22 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         :param X: the feature to be encoded.
         """
 
-        #X_val = validate_data(self,X=X, reset= False,ensure_2d=False)#validate_data(self,X=X, reset= False)
-        
         mapping_including_missing = self.mapping_| {None:[None]*self.n_features_out_}
 
-        unique_values_in_X = np.unique([str(v) for v in X if v is not None])
+        # if X contains Nones, then the dtype of X is object.
+        # In that case, X cannot be sorted.
+        # many routines of numpy for finding differences between lists depend on the items being sortable.
+        unique_values_in_x = np.unique([str(v) for v in X if v is not None])
 
-        if len(np.setdiff1d(unique_values_in_X,list(mapping_including_missing.keys()),assume_unique=True)) !=0: #np.isin(np.unique_values(X),mapping_including_missing.keys(),invert=True).any():
+        if len(np.setdiff1d(unique_values_in_x,list(mapping_including_missing.keys()),assume_unique=True)) !=0:
             raise ValueError("new values not seen during fitting when encoding.")
 
         return np.array(
-            [
+            [# if the categorical data is represented as integers (as floats) (as in the standard sklearn tests), floating point errors can emerge when indexing the dictionary.
                 mapping_including_missing[str(v) if v is not None else None] for v in X
             ],dtype=np.float32
         )
-    
+
     def get_feature_names_out(self,input_features=None):
 
         if input_features is None:
