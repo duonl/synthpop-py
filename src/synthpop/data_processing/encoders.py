@@ -89,7 +89,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self,X:npt.ArrayLike) -> npt.ArrayLike:
+    def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         replaces each level of ``X`` with the numerical values determined in :py:meth:`fit`
 
@@ -98,7 +98,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         #X_val = validate_data(self,X=X, reset= False,ensure_2d=False)#validate_data(self,X=X, reset= False)
         
-        mapping_including_missing = self.mapping_ | {None:[None]*self.n_features_out_}
+        mapping_including_missing = self.mapping_| {None:[None]*self.n_features_out_}
 
         unique_values_in_X = np.unique([str(v) for v in X if v is not None])
 
@@ -108,7 +108,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         return np.array(
             [
                 mapping_including_missing[str(v) if v is not None else None] for v in X
-            ],
+            ],dtype=np.float32
         )
     
     def get_feature_names_out(self,input_features=None):

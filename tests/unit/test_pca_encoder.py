@@ -209,14 +209,15 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
         [
             [1.2,3.4],#a
             [1.2,3.4],#a
-            [None,None],#b
+            [None,None],#b, note that numpy turns these Nones to nans when casting to float32
             [None,None],#b
             [5.6,7.8],#c
             [5.6,7.8]#c
-        ]
+        ],
+        dtype=np.float32
     )
 
-    assert np.array_equal(expected_result, result)
+    assert np.array_equal(expected_result, result,equal_nan=True)
 
 def test_pca_fit_empty_input():
     encoder = PCAEncoder(_pca_transform=None)
@@ -285,10 +286,11 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
             [1.2,3.4],#a
             [None,None],#None
 
-        ]
+        ],
+        dtype=np.float32
     )
 
-    assert np.array_equal(expected_result, result)
+    assert np.array_equal(expected_result, result,equal_nan=True)
 
 def test_pca_encoder_get_freature_names_out_no_input():
 
