@@ -9,7 +9,7 @@ from sklearn.base import TransformerMixin
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth
-
+import numpy.typing as npt
 
 class TreeClassifierMethod(DecisionTreeClassifier):
     """
@@ -40,7 +40,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
                          )
         self.random_state = random_state  # mandated by scikit-learn developer guide
 
-    def fit(self, X: pd.DataFrame, y: pd.Series):
+    def fit(self, X: dict[str,npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
         Fit PCA encoder on X, build a decision tree classifier on (encoded_X, y), and build a decision tree classifier to forecast missing values in y. 
 
@@ -56,7 +56,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         # super().fit(data_encoded, y)
         return self
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
         """
         Go through decision tree classifier using the encoded X and sample from the corresponding leaf node. Use the NullPredictor to determine which output values should be missing.
 
@@ -100,7 +100,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
                          max_features=max_features, random_state=random_state, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, ccp_alpha=ccp_alpha)
         self.random_state = random_state  # mandated by scikit-learn developer guide
 
-    def fit(self, X: pd.DataFrame, y: pd.Series):
+    def fit(self, X: dict[str,npt.ArrayLike], y: npt.ArrayLike)->Self:
         """
         Fit mean encoder on X, build a decision tree regressor on (encoded_X, y), and build a decision tree classifier to forecast missing values in y. 
 
@@ -116,7 +116,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         super().fit(data_encoded, y)
         return self
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
         """
         Go through decision tree classifier using the encoded X and sample from the corresponding leaf node. Use the NullPredictor to determine which output values should be missing.
 

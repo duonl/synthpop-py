@@ -7,6 +7,7 @@ from sklearn.utils.validation import check_is_fitted, validate_data
 import pandas as pd
 import numpy as np
 from typing import Self
+import numpy.typing as npt
 
 class PCAEncoder(TransformerMixin, BaseEstimator): 
     """
@@ -19,7 +20,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     def __init__(self, PCA_threshold:int = 30, explained_variance:float = 0.95):
         pass
 
-    def fit(self,X:pd.Series, y: pd.Series) -> Self:
+    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Determines for each level of ``X`` the corresponding numerical values to encode them with. 
 
@@ -30,7 +31,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
         return self
 
-    def transform(self,X:pd.Series) -> pd.DataFrame:
+    def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         replaces each level of ``X`` with the numerical values determined in :py:meth:`fit`
 
@@ -45,7 +46,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     def __init__(self):
         pass
 
-    def fit(self,X:pd.Series, y: pd.Series):
+    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Calculate average y value for each X category.
         
@@ -73,7 +74,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self,X:pd.Series) -> pd.DataFrame:
+    def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
         
