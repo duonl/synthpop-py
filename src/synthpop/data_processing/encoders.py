@@ -16,7 +16,40 @@ import numpy.typing as npt
 class PCAEncoder(TransformerMixin, BaseEstimator):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to _pca_transform
+    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to ``_pca_transform``
+
+    :param _pca_transform: The pca transform used. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.
+
+    Examples
+    ========
+
+        >>> from synthpop.data_processing.encoders import PCAEncoder
+        >>> import numpy as np
+        >>> X = np.array(["a", "a","b","b","c"])
+        >>> y = np.array(["x", "x","y","z","w"])
+        >>> pca_encoder = PCAEncoder() 
+        >>> pca_encoder.fit(X=X,y=y)
+        PCAEncoder()
+        >>> pca_encoder.transform(X)
+        array([[ 1.4437655e+00, -1.6325523e-01,  2.1175776e-17],
+            [ 1.4437655e+00, -1.6325523e-01,  2.1175776e-17],
+            [-9.3231344e-01, -7.5844318e-01,  2.1175776e-17],
+            [-9.3231344e-01, -7.5844318e-01,  2.1175776e-17],
+            [-5.1145202e-01,  9.2169839e-01,  2.1175776e-17]], dtype=float32)
+
+        >>> from synthpop.data_processing.encoders import PCAEncoder
+        >>> import pandas as pd
+        >>> X = pd.Series(["a", "a","b","b","c"],name="input_feature")
+        >>> y = pd.Series(["x", "x","y","z","w"])
+        >>> encoder = PCAEncoder().set_output(transform="pandas")
+        >>> encoder.fit_transform(X=X,y=y)
+        input_feature_pca0  input_feature_pca1  input_feature_pca2
+        0            1.443766           -0.163255        2.117578e-17
+        1            1.443766           -0.163255        2.117578e-17
+        2           -0.932313           -0.758443        2.117578e-17
+        3           -0.932313           -0.758443        2.117578e-17
+        4           -0.511452            0.921698        2.117578e-17
+    
     """
 
     def __init__(self, _pca_transform:PCA = PCA()):
@@ -179,7 +212,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         unseen_X_categories = set(X.unique()) - set(self.mapping_.keys())
 
         if unseen_X_categories:
-            # Returns only NaNs if new values are all "missing" 
+            # Returns only NaNs if new values are all "missing"
             if all(pd.isna(val) for val in unseen_X_categories):
                 return pd.DataFrame(np.nan, index=X.index, columns=[X.name])
             # Raises error otherwise
@@ -190,5 +223,3 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         X_transformed = X.map(self.mapping_)
 
         return X_transformed.to_frame()
-    
-

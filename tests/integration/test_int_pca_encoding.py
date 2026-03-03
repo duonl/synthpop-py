@@ -28,7 +28,7 @@ def test_pca_encoding_fit_constant_target():
     assert encoder.mapping_["a"][0] == pytest.approx(encoder.mapping_["b"][0])
 
     # The behaviour is different as described in the functional descriptions.
-    # Instead of a pure count encoding, it is count encoding + scaling + centering. 
+    # Instead of a pure count encoding, it is count encoding + scaling + centring. 
 
 def test_pca_encoding_fit_constant_feature():
     X = pd.Series(["a", "a","a","a","a"],name="input_feature")

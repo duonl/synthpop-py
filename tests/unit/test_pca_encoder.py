@@ -317,7 +317,7 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
 
     assert np.array_equal(expected_result, result,equal_nan=True)
 
-def test_pca_encoder_get_freature_names_out_no_input():
+def test_pca_encoder_get_feature_names_out_no_input():
 
     encoder = PCAEncoder(_pca_transform=None)
     encoder.feature_names_in_ = ["test_feature_name"]
