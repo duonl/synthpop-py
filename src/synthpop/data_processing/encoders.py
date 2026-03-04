@@ -60,17 +60,18 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         encoder = MeanEncoder()
         encoder.fit(X, y)
         """
-        # Required for get_feature_names_out
-        self.feature_names_in_ = np.array([X.name], dtype=object)
-        self.n_features_in_ = 1
-
-        # Raises exception if y is not numeric
-        if not pd.api.types.is_numeric_dtype(y):
-            raise TypeError(f"Column '{y.name}' must be numeric, got {y.dtype}")
         
-        # Calculates encoding map
-        data = pd.concat([X, y], axis=1)
-        self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
+        # # Required for get_feature_names_out
+        # self.feature_names_in_ = np.array([X.name], dtype=object)
+        # self.n_features_in_ = 1
+
+        # # Raises exception if y is not numeric
+        # if not pd.api.types.is_numeric_dtype(y):
+        #     raise TypeError(f"Column '{y.name}' must be numeric, got {y.dtype}")
+        
+        # # Calculates encoding map
+        # data = pd.concat([X, y], axis=1)
+        # self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
 
         return self
 
