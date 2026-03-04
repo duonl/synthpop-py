@@ -16,9 +16,9 @@ import numpy.typing as npt
 class PCAEncoder(TransformerMixin, BaseEstimator):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to ``_pca_transform``
+    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to ``pca_transform``
 
-    :param _pca_transform: The pca transform used. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.
+    :param pca_transform: The pca transform used. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.
 
     Examples
     ========
@@ -50,10 +50,34 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         3           -0.932313           -0.758443        2.117578e-17
         4           -0.511452            0.921698        2.117578e-17
     
+        with a different number of principle components (only the first):
+        
+        >>> import numpy as np
+        >>> from synthpop.data_processing.encoders import PCAEncoder
+        >>> from sklearn.decomposition import PCA
+        >>> pca_encoder = PCAEncoder(pca_transform = PCA(n_components=1))
+        >>> X = np.array(["a", "a","b","b","c"])
+        >>> y = np.array(["x", "x","y","z","w"])
+        >>> pca_encoder.fit_transform(X,y)
+        array([[ 1.4437655 ],
+            [ 1.4437655 ],
+            [-0.93231344],
+            [-0.93231344],
+            [-0.511452  ]], dtype=float32)
+        
+        preserving 75% of variance:
+
+        >>> pca_encoder2 = PCAEncoder(pca_transform = PCA(n_components=0.75)) 
+        >>> pca_encoder2.fit_transform(X,y) 
+        array([[ 1.4437655 , -0.16325523],
+            [ 1.4437655 , -0.16325523],
+            [-0.93231344, -0.7584432 ],
+            [-0.93231344, -0.7584432 ],
+            [-0.511452  ,  0.9216984 ]], dtype=float32)
     """
 
-    def __init__(self, _pca_transform:PCA = PCA()):
-        self._pca_transform = _pca_transform
+    def __init__(self, pca_transform:PCA|None = None):
+        self.pca_transform = pca_transform
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
@@ -62,13 +86,11 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         tags.target_tags.single_output= True
 
         tags.input_tags.categorical = True
-        #tags.input_tags.two_d_array = False
         tags.input_tags.one_d_array = True
         tags.input_tags.allow_nan= True
         tags.input_tags.string = True
 
         tags.estimator_type = "transformer"
-        #tags.array_api_support = True
         return tags
 
     def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
@@ -80,6 +102,8 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
 
         self.n_features_in_ = 1
+
+        # Input validation
 
         if X.shape[0] == 0 and y.shape[0]==0:#validate_data does not work well when there is no data
             self.mapping_ = {}
@@ -102,12 +126,16 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         if y_val.ndim != 1:
             raise ValueError("Y should by 1D")
    
+        # the core of this implementation
         #The alternative to using pandas here is either use scipy or DIY.
         contingency_table = pd.crosstab(X_val,y_val,) #the result of pd.crosstab is a pandas dataframe
 
-        self._pca_transform_ = clone(self._pca_transform)# for compatibility with sklearn we need to do this.
+        if self.pca_transform is None:
+            self.pca_transform_ = PCA()
+        else:
+            self.pca_transform_ = clone(self.pca_transform)# for compatibility with sklearn we need to do this.
 
-        pca_result = self._pca_transform_ .fit_transform(
+        pca_result = self.pca_transform_ .fit_transform(
             X=contingency_table.to_numpy()
             ,y=None)
 
