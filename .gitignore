@@ -2,7 +2,6 @@
 /docs/api reference/
 /docs/build/
 /dist/
-.vscode
 
 .coverage
 classes.dot
