@@ -37,6 +37,111 @@ class TransformStub(TransformerMixin, BaseEstimator):
 #TODO: parameters
 #TODO: fitting idempotence
 
+def get_pca_return_and_dict():
+    pca_return_value = np.array(
+        [   #pc1, pc2, pc3
+            [1.2, 3.4, 5],#a
+            [11.22,33.44,6]#b
+        ]
+        )
+    expected_dict = {
+        "a": np.array([1.2, 3.4, 5]),
+        "b": np.array([11.22,33.44,6])
+    }
+    return [(pca_return_value,expected_dict),(pd.DataFrame(pca_return_value,columns=["pca0","pca1","pca2"],index=["a","b"]),expected_dict)]
+     
+
+def get_test_data_full():
+     # full data 
+
+    X = np.array(["a", "a","b","b"])
+    y = np.array(["x", "x","y","z"])
+    
+    ## contingency table
+    # x   y  z
+    # [2, 0, 0],# a
+    # [0, 1, 1] #b
+
+    ## centred table
+    #   x   y    z 
+    # [1, -0.5, -0.5],# a
+    # [-1, 0.5, 0.5] #b
+    #  1   1/2,   1/2 = sigma
+
+    ## scaled
+    expected_input_pca = np.array([
+        #x y z
+        [1,-1,-1],#a 
+        [-1,1,1]#b
+    ])
+
+   
+    return [(X,y,expected_input_pca,pca_result,expected_dict) for pca_result,expected_dict in get_pca_return_and_dict()]
+
+def get_test_data_missing_target():
+    missing_types = [None,np.nan,pd.NA]
+    X = np.array(["a", "a","b","b","c","c"])
+    y = np.array(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
+
+     ## contingency table
+    # x   y  z
+    # [1, 0, 0],# a
+    # [0, 1, 1] #b
+    #           # no row for c
+
+    ## centred table
+    #   x   y    z 
+    # [0.5, -0.5, -0.5],# a
+    # [-0.5, 0.5, 0.5] #b
+    #  1/2   1/2,   1/2 = sigma
+
+    ## scaled
+    expected_input_pca = np.array([
+        #x y z
+        [1,-1,-1],#a 
+        [-1,1,1]#b
+    ])
+    return [(X,np.array(["x", missing,"y","z",missing,missing])
+             ,expected_input_pca
+             ,pca_result
+             ,expected_dict | {"c":[None]*len(expected_dict["a"])}) 
+             for pca_result,expected_dict in get_pca_return_and_dict()
+             for missing in missing_types]
+
+def get_test_data_feature_missing():
+    X = np.array(["a", None,"b","b"])
+    y = np.array(["x", "x","y","z"])
+    
+    ## contingency table
+    # x   y  z
+    # [1, 0, 0],# a
+    # [0, 1, 1] #b
+
+    ## centred table
+    #   x   y    z 
+    # [0.5, -0.5, -0.5],# a
+    # [-0.5, 0.5, 0.5] #b
+    #  1/2   1/2,   1/2 = sigma
+
+    ## scaled
+    expected_input_pca = np.array([
+        #x y z
+        [1,-1,-1],#a 
+        [-1,1,1]#b
+    ])
+    missing_types = [None,np.nan,pd.NA]
+    return [(np.array(["a", missing,"b","b"]),
+             y,
+             expected_input_pca,
+             pca_result,
+             expected_dict) for pca_result,expected_dict in get_pca_return_and_dict() for missing in missing_types]
+
+
+def get_test_data():
+    return [*get_test_data_full(),*get_test_data_missing_target(),*get_test_data_feature_missing()]
+
+   
+
 def validate_mapping(result_mapping,pca_result,expected_keys):
     for (i,key) in enumerate(expected_keys):
         assert np.array_equal(result_mapping[key],pca_result[i]), f"invalid mapping for {key}. Expected {pca_result[i]}, actual: {result_mapping[key]}"
@@ -48,7 +153,8 @@ def validate_set_inout_count(result_encoder,expected_n_feat):
     if hasattr(result_encoder,"pca_transform_"):
         assert result_encoder.pca_transform is not result_encoder.pca_transform_ #to be compatible with sklearn.
 
-def test_pca_fit_when_given_full_features_and_targets():
+@pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict",get_test_data())
+def test_pca_fit_when_given_full_features_and_targets(X,y,expected_input_for_PCA,pca_result,expected_dict):
     """
     Given that 
         the feature and target are strings only
@@ -64,17 +170,11 @@ def test_pca_fit_when_given_full_features_and_targets():
 
     """
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
-    X = np.array(["a", "a","b","b"])
-    y = np.array(["x", "x","y","z"])
+    # X = np.array(["a", "a","b","b"])
+    # y = np.array(["x", "x","y","z"])
 
 
-    pca_return_value = np.array(
-        [   #pc1, pc2, pc3
-            [1.2, 3.4, 5],#a
-            [11.22,33.44,6]#b
-        ]
-        )
-    stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
+    stub_pca_transform = TransformStub(transform_return_value=pca_result)
     encoder = PCAEncoder(pca_transform = stub_pca_transform )
 
     result = encoder.fit(X=X,y=y)
@@ -83,19 +183,20 @@ def test_pca_fit_when_given_full_features_and_targets():
     assert result is encoder
     # The contingency table has been made and passed to the PCA transform
 
-    expected_contingency_table = np.array(
-        [#   x  y  z 
-            [2, 0, 0],# a
-            [0, 1, 1] #b
-        ]
-        )
+    # expected_contingency_table = np.array(
+    #     [#   x  y  z 
+    #         [2, 0, 0],# a
+    #         [0, 1, 1] #b
+    #     ]
+    #     )
 
-    assert np.array_equal(result.pca_transform_.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
-    validate_mapping(result.mapping_,pca_return_value,["a","b"])
+    assert np.array_equal(result.pca_transform_.transform_X_,expected_input_for_PCA), "input for PCA not calculated correctly"
+    assert result.mapping_ == expected_dict
 
     validate_set_inout_count(result,expected_n_feat=3)
 
-def test_pca_output_api():
+@pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict",get_test_data())
+def test_pca_output_api(X,y,expected_input_for_PCA,pca_result,expected_dict):
     """
     Given that
         The features are a pandas series with name
@@ -107,17 +208,10 @@ def test_pca_output_api():
         the result should be equal as if the features are a numpy array.
     """
     #Given features and targets that are nowhere missing and an unfitted pcaEncoder
-    X = pd.Series(["a", "a","b","b"],name="input_feature")
-    y = np.array(["x", "x","y","z"])
+    X = pd.Series(X,name="input_feature")
 
 
-    pca_return_value = pd.DataFrame(
-        [   #pc1, pc2, pc3
-            [1.2, 3.4, 5],#a
-            [11.22,33.44,6]#b
-        ],columns=["pca0","pca1","pca2"],index=["a","b"]
-        )
-    stub_pca_transform = TransformStub(transform_return_value=pca_return_value)
+    stub_pca_transform = TransformStub(transform_return_value=pca_result)
     encoder = PCAEncoder(pca_transform = stub_pca_transform )
 
     result = encoder.fit(X=X,y=y)
@@ -125,15 +219,15 @@ def test_pca_output_api():
     # Then the return value is self
     assert result is encoder
     # The contingency table has been made and passed to the PCA transform
-    expected_contingency_table = np.array(
-        [#   x  y  z 
-            [2, 0, 0],# a
-            [0, 1, 1] #b
-        ]
-        )
+    # expected_contingency_table = np.array(
+    #     [#   x  y  z 
+    #         [2, 0, 0],# a
+    #         [0, 1, 1] #b
+    #     ]
+    #     )
     
-    assert np.array_equal(result.pca_transform_.transform_X_,expected_contingency_table), "contingency table not calculated correctly when no missing values in target or feature."
-    validate_mapping(result.mapping_,pca_return_value.to_numpy(),expected_keys=["a","b"])
+    assert np.array_equal(result.pca_transform_.transform_X_,expected_input_for_PCA), "input for PCA not calculated correctly"
+    assert result.mapping_ == expected_dict
     validate_set_inout_count(result,expected_n_feat=3)
 
     assert result.feature_names_in_ == ["input_feature"]

@@ -24,9 +24,34 @@ def test_pca_encoding_fit_constant_target():
 
     encoder.fit(X=X,y=y)
 
+    # Contingency table:
+    #   |x|
+    #   |-|
+    # a |2|
+    # b |2|
+    # c |1|
+
+    # centering (mean = 5/3 = 1 2/3):
+    #   |x|
+    #   |-|
+    # a |1/3|
+    # b |1/3|
+    # c |-2/3|
+
+    # The variance is ((1/3)^2 + (1/3)^2 + (-2/3)^2)/3 = (6/9)/3 = 2/9
+
+    # scaling:
+    #   |x|
+    #   |-|
+    # a |3/2|
+    # b |3/2|
+    # c |-3|
+
     assert len(encoder.mapping_) == 3
-    assert len(encoder.mapping_["b"]) == 1
-    assert encoder.mapping_["a"][0] == pytest.approx(encoder.mapping_["b"][0])
+    assert encoder.mapping_["a"] == [1.5]
+    assert encoder.mapping_["b"] == [1.5]
+    assert encoder.mapping_["c"] == [-3]
+    
 
     # The behaviour is different as described in the functional descriptions.
     # Instead of a pure count encoding, it is count encoding + scaling + centring. 
@@ -41,6 +66,7 @@ def test_pca_encoding_fit_constant_feature():
 
     assert len(encoder.mapping_) == 1
     assert len(encoder.mapping_["a"]) == 1
+    assert np.array_equal(encoder.mapping_["a"],np.array([0]))
     # The behaviour is different as described in the functional descriptions.
     # Instead of the number of rows, it is encoded by the value 0.0
 
