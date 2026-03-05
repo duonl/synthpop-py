@@ -76,7 +76,10 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
 
         # Required sklearn attributes
-        X, y = validate_data(X, y, ensure_2d=False, ensure_min_samples=1, y_numeric=True)
+        X, y = validate_data(self, X=X, y=y, validate_separately = (
+             dict(ensure_2d=False, ensure_min_samples=1, dtype=["str", "object"], ensure_all_finite="allow-nan"),
+             dict(ensure_2d=False, ensure_min_samples=1, dtype='numeric', ensure_all_finite="allow-nan")
+        ))
 
         self.n_features_in_ = 1
         self.feature_names_in_ = np.array(["x"], dtype=object)
@@ -92,14 +95,15 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
             raise TypeError(f"Target column y must be numeric, got {y.dtype}.")        
 
         # Identify missing
-        X_missing = np.equal(X, None)
-        if X.dtype.kind == "f":
-            X_missing = X_missing | np.isnan(X)
+        X_missing = np.zeros(len(X), dtype=bool)
+        if X.dtype.kind in ("f", "i"):
+            X_missing |= np.isnan(X)
+        X_missing |= np.equal(X, None)
         y_missing = np.isnan(y)
         
         # Fit encoder
         self.mapping_ = {}
-        unique_categories = np.unique(X[~X_missing])
+        unique_categories = np.unique(X[~X_missing].astype(str))
         for cat in unique_categories:
             mask = (X == cat)
             valid_targets = y[mask & ~y_missing]
@@ -135,14 +139,17 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
         if X.ndim != 1:
             raise ValueError(f"X must be a 1D array, got shape {X.shape}.")
+        if len(self.mapping_) == 0:
+            return np.full(len(X), np.nan, dtype=np.float32).reshape(-1, 1) #2D output with only nans
         
         # Start transform
         result = np.full(len(X), np.nan, dtype=np.float32)
 
         # Detect missing
-        X_missing = np.equal(X, None)
-        if X.dtype.kind == "f":
-            X_missing = X_missing | np.isnan(X)
+        X_missing = np.zeros(len(X), dtype=bool)
+        if X.dtype.kind in ("f", "i"):
+            X_missing |= np.isnan(X)
+        X_missing |= np.equal(X, None)
         
         # Detect unseen categories
         unseen_categories = set(X[~X_missing]) - set(self.mapping_.keys())
