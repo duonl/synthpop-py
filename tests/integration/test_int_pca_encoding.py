@@ -38,19 +38,23 @@ def test_pca_encoding_fit_constant_target():
     # b |1/3|
     # c |-2/3|
 
-    # The variance is ((1/3)^2 + (1/3)^2 + (-2/3)^2)/3 = (6/9)/3 = 2/9
+    # The variance is ((1/3)^2 + (1/3)^2 + (-2/3)^2)/3 = 
+    #                 ( 1/9 + 1/9 + 4/9)/3 =
+    #                 (6/9)/3 = 2/9
+    # sigma = (1/3)sqrt(2)
 
     # scaling:
     #   |x|
     #   |-|
-    # a |3/2|
-    # b |3/2|
-    # c |-3|
+    # a |1/sqrt(2)|   (1/2)sqrt(2)
+    # b |1/sqrt(2)|   (1/2)sqrt(2)
+    # c |-sqrt(2)|    -sqrt(2)
 
+    sqrt2 = np.sqrt(2)
     assert len(encoder.mapping_) == 3
-    assert encoder.mapping_["a"] == [1.5]
-    assert encoder.mapping_["b"] == [1.5]
-    assert encoder.mapping_["c"] == [-3]
+    assert encoder.mapping_["a"] == pytest.approx([1/sqrt2])#floating point errors occur.
+    assert encoder.mapping_["b"] == pytest.approx( [1/sqrt2])
+    assert encoder.mapping_["c"] == pytest.approx([-1*sqrt2])
     
 
     # The behaviour is different as described in the functional descriptions.
@@ -59,6 +63,7 @@ def test_pca_encoding_fit_constant_target():
 def test_pca_encoding_fit_constant_feature():
     X = pd.Series(["a", "a","a","a","a"],name="input_feature")
     y = pd.Series(["x", "y","y","w","q"])
+
 
     encoder = PCAEncoder()
 

@@ -7,6 +7,7 @@ from sklearn import clone
 from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
 from sklearn.utils.validation import check_is_fitted, validate_data
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import scale
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
@@ -127,8 +128,12 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             raise ValueError("Y should by 1D")
    
         # the core of this implementation
+
+
         #The alternative to using pandas here is either use scipy or DIY.
         contingency_table = pd.crosstab(X_val,y_val,) #the result of pd.crosstab is a pandas dataframe
+
+        pca_input = scale(contingency_table,axis=0)
 
         if self.pca_transform is None:
             self.pca_transform_ = PCA()
@@ -136,7 +141,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             self.pca_transform_ = clone(self.pca_transform)# for compatibility with sklearn we need to do this.
 
         pca_result = self.pca_transform_ .fit_transform(
-            X=contingency_table.to_numpy()
+            X=pca_input
             ,y=None)
 
         #sklearn.decomposition.PCA implements the set_output api
@@ -146,7 +151,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_out_ = pca_result.shape[1] #needed for get_feature_names_out
 
-        value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(pca_result.shape[0])}
+        value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(contingency_table.shape[0])}
 
         #The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val,[v is None or v is pd.NA or v is np.nan for v in y_val])
