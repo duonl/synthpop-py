@@ -46,6 +46,20 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     def __init__(self):
         pass
 
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.target_tags.required = True
+        tags.target_tags.one_d_labels = True
+        tags.target_tags.single_output = True
+        
+        tags.input_tags.categorical = True
+        tags.input_tags.string = True
+        tags.input_tags.one_d_array = True
+        tags.input_tags.allow_nan = True
+        
+        tags.estimator_type = "transformer"
+        return tags
+
     def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Calculate average y value for each X category.
@@ -54,25 +68,48 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :param y: Target column.
 
         Examples
-        X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
-        y = pd.Series([1, 0, 2, 0, 3], name='score')
+        X = np.array(["a", "a", "b", "b", "c"])
+        y = np.array([1, 0, 2, 0, 3])
 
         encoder = MeanEncoder()
         encoder.fit(X, y)
         """
-        
-        # # Required for get_feature_names_out
-        # self.feature_names_in_ = np.array([X.name], dtype=object)
-        # self.n_features_in_ = 1
 
-        # # Raises exception if y is not numeric
-        # if not pd.api.types.is_numeric_dtype(y):
-        #     raise TypeError(f"Column '{y.name}' must be numeric, got {y.dtype}")
-        
-        # # Calculates encoding map
-        # data = pd.concat([X, y], axis=1)
-        # self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
+        # Required sklearn attributes
+        X, y = validate_data(X, y, ensure_2d=False, ensure_min_samples=1, y_numeric=True)
 
+        self.n_features_in_ = 1
+        self.feature_names_in_ = np.array(["x"], dtype=object)
+
+        # Input validation
+        #if X.ndim != 1:
+        #    raise ValueError("X must be a 1D array.")
+        #if y.ndim != 1:
+        #    raise ValueError("y must be a 1D array.")
+        #if X.shape[0] != y.shape[0]:
+        #    raise ValueError("X and y must have the same length.")
+        if not np.issubdtype(y.dtype, np.number):
+            raise TypeError(f"Target column y must be numeric, got {y.dtype}.")        
+
+        # Identify missing
+        X_missing = np.equal(X, None)
+        if X.dtype.kind == "f":
+            X_missing = X_missing | np.isnan(X)
+        y_missing = np.isnan(y)
+        
+        # Fit encoder
+        self.mapping_ = {}
+        unique_categories = np.unique(X[~X_missing])
+        for cat in unique_categories:
+            mask = (X == cat)
+            valid_targets = y[mask & ~y_missing]
+            if valid_targets.size == 0:
+                mean_val = np.nan
+            else:
+                mean_val = valid_targets.mean()
+            
+            self.mapping_[cat] = np.float32(mean_val)
+        
         return self
 
     def transform(self,X:npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
@@ -83,28 +120,45 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :return: Encoded column
 
         Examples
-        X = pd.Series(["red", "blue", "red", "blue", "red"], name='color')
-        y = pd.Series([1, 0, 2, 0, 3], name='score')
+        X = np.array(["a", "a", "b", "b", "c"])
+        y = np.array([1, 0, 2, 0, 3])
 
         encoder = MeanEncoder()
         encoder.fit(X, y)
         X_transformed = encoder.transform(X)
         """
+
         check_is_fitted(self, 'mapping_')
 
-        unseen_X_categories = set(X.unique()) - set(self.mapping_.keys())
+        # Input validation
+        X = np.asarray(X)
 
-        if unseen_X_categories:
-            # Returns only NaNs if new values are all "missing" 
-            if all(pd.isna(val) for val in unseen_X_categories):
-                return pd.DataFrame(np.nan, index=X.index, columns=[X.name])
-            # Raises error otherwise
-            else:
-                raise ValueError(f"Column to be encoded has unseen values: {unseen_X_categories}")
+        if X.ndim != 1:
+            raise ValueError(f"X must be a 1D array, got shape {X.shape}.")
         
-        # Apply encoding map to X
-        X_transformed = X.map(self.mapping_)
+        # Start transform
+        result = np.full(len(X), np.nan, dtype=np.float32)
 
-        return X_transformed.to_frame()
+        # Detect missing
+        X_missing = np.equal(X, None)
+        if X.dtype.kind == "f":
+            X_missing = X_missing | np.isnan(X)
+        
+        # Detect unseen categories
+        unseen_categories = set(X[~X_missing]) - set(self.mapping_.keys())
+        if unseen_categories:
+            raise ValueError(f"Column to be encoded X ({self.feature_names_in_[0]}) has unseen categories: {unseen_categories}")
+        
+        # Apply mapping
+        for i, val in enumerate(X):
+            if not X_missing[i]:
+                result[i] = self.mapping_[val]
+
+        return result
+    
+    def get_feature_names_out(self, input_features = None):
+        check_is_fitted(self, "mapping_")
+        return np.array([f"{f}_mean" for f in super().get_feature_names_out(input_features)])
+
     
 
