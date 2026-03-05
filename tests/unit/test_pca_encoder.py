@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from sklearn.base import BaseEstimator,TransformerMixin
 from sklearn import set_config
+from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.encoders import PCAEncoder
 from sklearn.utils.estimator_checks import parametrize_with_checks
@@ -259,14 +260,7 @@ def test_pca_output_api(X,y,expected_input_for_PCA,pca_result,expected_dict):
 
     # Then the return value is self
     assert result is encoder
-    # The contingency table has been made and passed to the PCA transform
-    # expected_contingency_table = np.array(
-    #     [#   x  y  z 
-    #         [2, 0, 0],# a
-    #         [0, 1, 1] #b
-    #     ]
-    #     )
-    
+
     assert np.array_equal(result.pca_transform_.transform_X_,expected_input_for_PCA), "input for PCA not calculated correctly"
     assert_dict(expected_dict,result.mapping_)
     validate_set_inout_count(result,expected_n_feat=len(expected_dict["a"]))
@@ -426,3 +420,9 @@ def test_pca_encoder_get_feature_names_out_incorrect_input():
 })
 def test_pca_encoder_is_sklearn_compatible(estimator,check):
     check(estimator)
+
+def test_error_when_transforming_not_fitted():
+
+    encoder = PCAEncoder()
+    with pytest.raises(NotFittedError):
+        encoder.transform(X=np.array(["a","b"]))

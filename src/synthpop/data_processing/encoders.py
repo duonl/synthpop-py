@@ -82,7 +82,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
-        tags.target_tags.required=False
+        tags.target_tags.required=True
         tags.target_tags.one_d_labels = True
         tags.target_tags.single_output= True
 
@@ -154,7 +154,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(contingency_table.shape[0])}
 
         #The alternative to using pandas here is either use scipy or DIY.
-        missing_contingency_table = pd.crosstab(X_val,[v is None or v is pd.NA or v is np.nan for v in y_val])
+        missing_contingency_table = pd.crosstab(X_val,[v is None or pd.isna(v) or v == np.nan for v in y_val])
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
         mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing.
 
@@ -169,6 +169,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         :param X: the feature to be encoded.
         """
 
+        check_is_fitted(self)
         mapping_including_missing = self.mapping_| {None:[None]*self.n_features_out_}
 
         # if X contains Nones, then the dtype of X is object.
