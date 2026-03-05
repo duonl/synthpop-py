@@ -32,11 +32,11 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         >>> pca_encoder.fit(X=X,y=y)
         PCAEncoder()
         >>> pca_encoder.transform(X)
-        array([[ 1.4437655e+00, -1.6325523e-01,  2.1175776e-17],
-            [ 1.4437655e+00, -1.6325523e-01,  2.1175776e-17],
-            [-9.3231344e-01, -7.5844318e-01,  2.1175776e-17],
-            [-9.3231344e-01, -7.5844318e-01,  2.1175776e-17],
-            [-5.1145202e-01,  9.2169839e-01,  2.1175776e-17]], dtype=float32)
+        array([[-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
+        [-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
+        [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
+        [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
+        [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
 
         >>> from synthpop.data_processing.encoders import PCAEncoder
         >>> import pandas as pd
@@ -45,11 +45,11 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         >>> encoder = PCAEncoder().set_output(transform="pandas")
         >>> encoder.fit_transform(X=X,y=y)
         input_feature_pca0  input_feature_pca1  input_feature_pca2
-        0            1.443766           -0.163255        2.117578e-17
-        1            1.443766           -0.163255        2.117578e-17
-        2           -0.932313           -0.758443        2.117578e-17
-        3           -0.932313           -0.758443        2.117578e-17
-        4           -0.511452            0.921698        2.117578e-17
+        0           -1.118034       -1.500000e+00       -1.201987e-16
+        1           -1.118034       -1.500000e+00       -1.201987e-16
+        2            2.236068       -1.295326e-15       -1.201987e-16
+        3            2.236068       -1.295326e-15       -1.201987e-16
+        4           -1.118034        1.500000e+00       -1.201987e-16
     
         with a different number of principle components (only the first):
         
@@ -60,21 +60,21 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         >>> X = np.array(["a", "a","b","b","c"])
         >>> y = np.array(["x", "x","y","z","w"])
         >>> pca_encoder.fit_transform(X,y)
-        array([[ 1.4437655 ],
-            [ 1.4437655 ],
-            [-0.93231344],
-            [-0.93231344],
-            [-0.511452  ]], dtype=float32)
+        array([[-1.118034],
+        [-1.118034],
+        [ 2.236068],
+        [ 2.236068],
+        [-1.118034]], dtype=float32)
         
         preserving 75% of variance:
 
         >>> pca_encoder2 = PCAEncoder(pca_transform = PCA(n_components=0.75)) 
         >>> pca_encoder2.fit_transform(X,y) 
-        array([[ 1.4437655 , -0.16325523],
-            [ 1.4437655 , -0.16325523],
-            [-0.93231344, -0.7584432 ],
-            [-0.93231344, -0.7584432 ],
-            [-0.511452  ,  0.9216984 ]], dtype=float32)
+        array([[-1.1180340e+00, -1.5000000e+00],
+        [-1.1180340e+00, -1.5000000e+00],
+        [ 2.2360680e+00, -1.2953263e-15],
+        [ 2.2360680e+00, -1.2953263e-15],
+        [-1.1180340e+00,  1.5000000e+00]], dtype=float32)
     """
 
     def __init__(self, pca_transform:PCA|None = None):
