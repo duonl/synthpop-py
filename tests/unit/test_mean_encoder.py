@@ -4,18 +4,6 @@ import pytest
 
 from synthpop.data_processing.encoders import MeanEncoder
 
-# ----- test data fixtures -----
-@pytest.fixture
-def simple_data():
-    X = np.array(["a", "a", "b", "b", "c"])
-    y = np.array([1, 0, 2, 0, 3])
-    return X, y
-
-@pytest.fixture
-def fractional_data():
-    X = np.array(["a", "b", "c"])
-    y = np.array([3/2, 5/2, 7/2])
-
 # ----- fit test cases -----
 def test_fit_raises_for_non_numeric_target():
     X = np.array(["a", "b", "c"])
@@ -24,8 +12,9 @@ def test_fit_raises_for_non_numeric_target():
     with pytest.raises(TypeError):
         enc.fit(X, y)
 
-def test_fit_calculates_means(simple_data):
-    X, y = simple_data
+def test_fit_calculates_means():
+    X = np.array(["a", "a", "b", "b", "c"])
+    y = np.array([1, 0, 2, 0, 3])
     enc = MeanEncoder()
     result = enc.fit(X, y)
     expected_mapping = {"a": 0.5, "b": 1, "c": 3}
@@ -33,8 +22,9 @@ def test_fit_calculates_means(simple_data):
     assert enc.n_features_in_ == 1, "self.n_features_in_ must equal 1 after fitting"
     assert result.mapping_ == expected_mapping
 
-def test_fit_calculates_means_fractional(fractional_data):
-    X, y = fractional_data
+def test_fit_calculates_means_fractional():
+    X = np.array(["a", "b", "c"])
+    y = np.array([3/2, 5/2, 7/2])
     enc = MeanEncoder()
     result = enc.fit(X, y)
     expected_mapping = {"a": 1.5, "b": 2.5, "c": 3.5}
