@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 import pytest
 from sklearn.base import BaseEstimator,TransformerMixin
-from sklearn import set_config
 from sklearn.exceptions import NotFittedError
 
-from synthpop.data_processing.encoders import PCAEncoder
 from sklearn.utils.estimator_checks import parametrize_with_checks
+from synthpop.data_processing.encoders import PCAEncoder
+
 
 class TransformStub(TransformerMixin, BaseEstimator):
 
@@ -32,10 +32,7 @@ class TransformStub(TransformerMixin, BaseEstimator):
         return self.transform_return_value
 
 
-#TODO: test empty mapping/empty input
 
-#TODO: validation in fit and transform. (check feature names, check is fitted)
-#TODO: parameters
 #TODO: fitting idempotence
 
 def get_pca_return_and_dict():
@@ -50,10 +47,10 @@ def get_pca_return_and_dict():
         "b": np.array([11.22,33.44,6])
     }
     return [(pca_return_value,expected_dict),(pd.DataFrame(pca_return_value,columns=["pca0","pca1","pca2"],index=["a","b"]),expected_dict)]
-     
+
 
 def get_test_data_full():
-     # full data 
+     # full data
 
     X = np.array(["a", "a","b","b"])
     y = np.array(["x", "x","y","z"])
@@ -64,7 +61,7 @@ def get_test_data_full():
     # [0, 1, 1] #b
 
     ## centred table
-    #   x   y    z 
+    #   x   y    z
     # [1, -0.5, -0.5],# a
     # [-1, 0.5, 0.5] #b
     #  1   1/2,   1/2 = sigma
@@ -72,31 +69,31 @@ def get_test_data_full():
     ## scaled
     expected_input_pca = np.array([
         #x y z
-        [1,-1,-1],#a 
+        [1,-1,-1],#a
         [-1,1,1]#b
     ])
 
-   
+
     return [(X,y,expected_input_pca,pca_result,expected_dict) for pca_result,expected_dict in get_pca_return_and_dict()]
 
 def get_test_data_feature_constants():
 #   constant feature
     X = np.array(["a", "a","a","a"])
     y = np.array(["x", "x","y","z"])
-    
+
     ## contingency table
     # x   y  z
     # [2, 1, 1],# a
 
 
     ## centred table
-    #   x y  z 
+    #   x y  z
     # [0, 0, 0],# a
 
     ## scaled
     expected_input_pca = np.array([
         #x y z
-        [0,0,0],#a 
+        [0,0,0],#a
     ])
     return [(X,y,expected_input_pca,expected_input_pca,{"a":[0,0,0]})]
 
@@ -104,15 +101,15 @@ def get_test_data_target_constants():
 #   constant feature
     X = np.array(["a", "a","a","b"])
     y = np.array(["x", "x","x","x"])
-    
+
     ## contingency table
-    # x  
+    # x
     # [3,], a
     # [1] b
 
 
     ## centred table
-    # x  
+    # x
     # [1,], a
     # [-1] b
     #  1 = sigma
@@ -120,8 +117,8 @@ def get_test_data_target_constants():
     ## scaled
     expected_input_pca = np.array([
         #x y z
-        [1],#a 
-        [-1],#a 
+        [1],#a
+        [-1],#a
     ])
     return [(X,y,expected_input_pca,expected_input_pca,{"a":[1],"b":[-1]})]
 
@@ -130,7 +127,7 @@ def get_test_data_target_constants():
 def get_test_data_missing_target():
     missing_types = [None,np.nan,pd.NA]
     X = np.array(["a", "a","b","b","c","c"])
-    y = np.array(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
+    #y = np.array(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
 
      ## contingency table
     # x   y  z
@@ -139,17 +136,15 @@ def get_test_data_missing_target():
     #           # no row for c
 
     ## centred table
-    #   x   y    z 
+    #   x   y    z
     # [0.5, -0.5, -0.5],# a
     # [-0.5, 0.5, 0.5] #b
     #  1/2   1/2,   1/2 = sigma
 
-    v = np.sqrt(0.5)
-
     ## scaled
     expected_input_pca = np.array([
         #x y z
-        [1,-1,-1],#a 
+        [1,-1,-1],#a
         [-1,1,1]#b
     ])
 
@@ -157,21 +152,21 @@ def get_test_data_missing_target():
     return [(X,np.array(["x", missing,"y","z",missing,missing],dtype=np.object_)
              ,expected_input_pca
              ,pca_result
-             ,expected_dict | {"c":[None]*len(expected_dict["a"])}) 
+             ,expected_dict | {"c":[None]*len(expected_dict["a"])})
              for pca_result,expected_dict in get_pca_return_and_dict()
              for missing in missing_types]
 
 def get_test_data_feature_missing():
-    X = np.array(["a", None,"b","b"])
+    #X = np.array(["a", None,"b","b"])
     y = np.array(["x", "x","y","z"])
-    
+
     ## contingency table
     # x   y  z
     # [1, 0, 0],# a
     # [0, 1, 1] #b
 
     ## centred table
-    #   x   y    z 
+    #   x   y    z
     # [0.5, -0.5, -0.5],# a
     # [-0.5, 0.5, 0.5] #b
     #  1/2   1/2,   1/2 = sigma
@@ -179,7 +174,7 @@ def get_test_data_feature_missing():
     ## scaled
     expected_input_pca = np.array([
         #x y z
-        [1,-1,-1],#a 
+        [1,-1,-1],#a
         [-1,1,1]#b
     ])
     missing_types = [None,np.nan,pd.NA]
@@ -199,7 +194,7 @@ def get_test_data():
 
    
 def assert_dict(expected, actual):
-    for (k,v) in expected.items():
+    for k in expected.keys():
         assert np.array_equal(expected[k],actual[k]), "values do not match"
 
     assert len(expected.keys()) == len(actual.keys()), "keys don't match"
@@ -279,7 +274,7 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
         "c":[5.6,7.8]
         }
     encoder.n_features_out_ = 2
-    
+
     result = encoder.transform(X)
 
     expected_result = np.array(
@@ -318,7 +313,7 @@ def test_pca_transform_empty_input():
     result = encoder.transform(np.array([]))
 
     assert len(result) == 0
-    
+
 def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
     """
     transforming an empty X should always result in an empty array, even if the mapping is empty.
@@ -328,7 +323,7 @@ def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
     encoder.n_features_out_=0
 
     result = encoder.transform(X=np.array([]))
-    assert len(result) == 0 
+    assert len(result) == 0
 
 def test_pca_transform_exception_on_new_value():
     """
@@ -373,7 +368,7 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
         }
     encoder.n_features_out_ = 2
     encoder.feature_names_in_ = ["input_feature"]
-     
+
     result = encoder.transform(X)
 
     expected_result = np.array(

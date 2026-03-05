@@ -1,9 +1,8 @@
 import pytest
 import pandas as pd
 import numpy as np
-from synthpop.data_processing.encoders import PCAEncoder
-from sklearn.utils.estimator_checks import parametrize_with_checks,check_estimator
 from sklearn.decomposition import PCA
+from synthpop.data_processing.encoders import PCAEncoder
 
 
 def test_pca_encoding_fit_full_data():
@@ -31,14 +30,14 @@ def test_pca_encoding_fit_constant_target():
     # b |2|
     # c |1|
 
-    # centering (mean = 5/3 = 1 2/3):
+    # centring (mean = 5/3 = 1 2/3):
     #   |x|
     #   |-|
     # a |1/3|
     # b |1/3|
     # c |-2/3|
 
-    # The variance is ((1/3)^2 + (1/3)^2 + (-2/3)^2)/3 = 
+    # The variance is ((1/3)^2 + (1/3)^2 + (-2/3)^2)/3 =
     #                 ( 1/9 + 1/9 + 4/9)/3 =
     #                 (6/9)/3 = 2/9
     # sigma = (1/3)sqrt(2)
@@ -55,10 +54,10 @@ def test_pca_encoding_fit_constant_target():
     assert encoder.mapping_["a"] == pytest.approx([1/sqrt2])#floating point errors occur.
     assert encoder.mapping_["b"] == pytest.approx( [1/sqrt2])
     assert encoder.mapping_["c"] == pytest.approx([-1*sqrt2])
-    
+
 
     # The behaviour is different as described in the functional descriptions.
-    # Instead of a pure count encoding, it is count encoding + scaling + centring. 
+    # Instead of a pure count encoding, it is count encoding + scaling + centring.
 
 def test_pca_encoding_fit_constant_feature():
     X = pd.Series(["a", "a","a","a","a"],name="input_feature")

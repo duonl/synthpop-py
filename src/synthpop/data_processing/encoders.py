@@ -126,7 +126,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             raise ValueError("X should by 1D")
         if y_val.ndim != 1:
             raise ValueError("Y should by 1D")
-   
+
         # the core of this implementation
 
 
@@ -194,7 +194,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             raise ValueError(f"input_features is not feature_names_in_. Expected: {self.feature_names_in_}, actual: {input_features}")
         return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
     
-class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
+class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     def __init__(self):
         pass
 
@@ -219,7 +219,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         # Raises exception if y is not numeric
         if not pd.api.types.is_numeric_dtype(y):
             raise TypeError(f"Column '{y.name}' must be numeric, got {y.dtype}")
-        
+      
         # Calculates encoding map
         data = pd.concat([X, y], axis=1)
         self.mapping_ = data.groupby(X.name)[y.name].mean().to_dict()
@@ -252,7 +252,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
             # Raises error otherwise
             else:
                 raise ValueError(f"Column to be encoded has unseen values: {unseen_X_categories}")
-        
+    
         # Apply encoding map to X
         X_transformed = X.map(self.mapping_)
 
