@@ -16,14 +16,22 @@ See this document as a tie-breaker when there are multiple equally well options,
 - It should always be possible to generate synthetic data within 5 lines of code. 
 - All classes that inherit from BaseEstimator should follow [the developer guides of scikit-learn](https://scikit-learn.org/stable/developers/develop.html)
 - Use numpy arrays where possible. 
-- The user of this package should be able to use pandas
+- The user of this package should be able to use pandas.
+
+## Informative issues and pull requests
+| issue/pull request number | topic |
+| ------------------------- | ----- |
+| [#1](https://github.com/Synthpop-data/synthpop-py/issues/1), [#2](https://github.com/Synthpop-data/synthpop-py/pull/2)| Missing values |
+| [#13](https://github.com/Synthpop-data/synthpop-py/issues/13), [#17](https://github.com/Synthpop-data/synthpop-py/issues/17), [#19](https://github.com/Synthpop-data/synthpop-py/pull/19), [#26](https://github.com/Synthpop-data/synthpop-py/pull/26)| user expectations|
+| [#45](https://github.com/Synthpop-data/synthpop-py/issues/45) | relation to scikit-learn |
+
+#### Handling missing values 
+Issue [#1](https://github.com/Synthpop-data/synthpop-py/issues/1) and pull request [#2] is about 
+
 
 A synthesis method should accept pandas dataframes/series and heterogeneous data.
 Making the data homogeneous should happen within the synthesis method.
 It is best to use numpy within a synthesis method. See [#45](https://github.com/Synthpop-data/synthpop-py/issues/45).
-
-
-
 
 ## Standard topics in testing
 
@@ -51,8 +59,6 @@ However, there are a few things that need to be tested in many situations. Take 
     - One input specifies the number of principle components, a second input specifies a threshold to select principle components. What happens when both are given?
 
 ## Useful tools for testing and code quality
-
-
 
 - Code Spell Checker extension for vscode.
 - autopep8 extension for vscode. 
