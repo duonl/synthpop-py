@@ -126,8 +126,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
 
         #The alternative to using pandas here is either use scipy or DIY.
-        missing_contingency_table = pd.crosstab(X_val,[v is None or pd.isna(v) or v == np.nan for v in y_val])
-        
+        missing_contingency_table = pd.crosstab(X_val,[v is None or pd.isna(v) for v in y_val])     
         x_such_that_y_is_not_always_missing = missing_contingency_table[missing_contingency_table[False]!=0].index
         
         contingency_table = pd.crosstab(X_val,y_val,dropna=False).loc[x_such_that_y_is_not_always_missing]#the result of pd.crosstab is a pandas dataframe

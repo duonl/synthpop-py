@@ -127,7 +127,7 @@ def get_test_data_feature_missing():
              expected_dict) for pca_result,expected_dict in get_pca_return_and_dict() for missing in missing_types]
 
 
-def get_test_data():
+def get_test_fit_data():
     return [*get_test_data_full(),
             *get_test_data_missing_target(),
             *get_test_data_feature_missing(),
@@ -152,7 +152,7 @@ def validate_set_inout_count(result_encoder,expected_n_feat):
         assert result_encoder.pca_transform is not result_encoder.pca_transform_ #to be compatible with sklearn.
 
 # test fitting pca encoder ------------------------------------------------------------------------
-@pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict",get_test_data())
+@pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict",get_test_fit_data())
 def test_pca_fit_numeric_correctness(X,y,expected_input_for_PCA,pca_result,expected_dict):
     """
     test that the correct numeric output is produced for each numeric input.
@@ -175,7 +175,7 @@ def test_pca_fit_numeric_correctness(X,y,expected_input_for_PCA,pca_result,expec
 
     validate_set_inout_count(result,expected_n_feat=len(expected_dict["a"]))
 
-@pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict",get_test_data())
+@pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict",get_test_fit_data())
 def test_pca_fit_output_api(X,y,expected_input_for_PCA,pca_result,expected_dict):
     """
     Given that
@@ -237,6 +237,11 @@ def test_pca_fit_exception_on_not_1d_datatype():
 
 # testing transform--------------------------------------------------------------------------------
 
+def get_test_data_transform():
+    [
+        ()#TODO
+    ]
+
 def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_values():
     "When a value is mapped to an array of Nones, the mapping should still apply when transforming."
     X = np.array(["a", "a","b","b","c","c"])
@@ -264,7 +269,6 @@ def test_pca_transform_given_fitted_estimator_when_transforming_non_missing_valu
     )
 
     assert np.array_equal(expected_result, result,equal_nan=True)
-
 
 def test_pca_transform_empty_input():
     """
