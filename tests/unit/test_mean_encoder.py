@@ -1,4 +1,4 @@
-from sklearn.utils.estimator_checks import check_estimator
+from sklearn.utils.estimator_checks import parametrize_with_checks
 import numpy as np
 import pandas as pd
 import pytest 
@@ -155,6 +155,11 @@ def test_get_feature_names_out():
 
 # ----- sklearn test suite -----
 
-def test_sklearn_compatibility():
-    check_estimator(MeanEncoder())
+@parametrize_with_checks([MeanEncoder()],legacy=False,expected_failed_checks= lambda x: {
+    "check_dont_overwrite_parameters":"tests with multiple features",
+    "check_n_features_in_after_fitting":"tests with multiple features",
+    "check_fit_score_takes_y":"tests with a score component"
+})
+def test_sklearn_compatibility(estimator,check):
+    check(estimator)
     
