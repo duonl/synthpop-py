@@ -23,7 +23,7 @@ A contingency table $C$ is constructed with rows corresponding to the $m$ levels
 The contingency table is centred column-wise. For each column, the mean across all rows is computed, resulting in an $m$ dimensional vector. This mean vector is subtracted from the corresponding column so that each column has zero mean.
 
 ### 3.3 Scaling
-Each column of the centred contingency table is scaled by its variance. For every column, the variance of the entries (the numbers) is computed and the column is divided by this variance. If the variance of a column is zero, no scaling is applied to that column.
+Each column of the centred contingency table is scaled by its standard deviation. For every column, the standard deviation of the entries (the numbers) is computed and the column is divided by this standard deviation. If the standard deviation of a column is zero, no scaling is applied to that column.
 
 ### 3.4 Principal Component Analysis
 Principal Component Analysis is applied to the centred and scaled contingency table. PCA computes a rotation matrix that aligns the principal components with the coordinate axes and produces the associated singular values $sigma_i$, with $i \in \{1, \dots \min(m,q)\}$. 

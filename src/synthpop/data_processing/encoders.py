@@ -104,20 +104,9 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_in_ = 1
 
-        # Input validation
-
-        if X.shape[0] == 0 and y.shape[0]==0:#validate_data does not work well when there is no data
-            self.mapping_ = {}
-            if isinstance(X,pd.Series):
-                self.feature_names_in_ = [X.name]
-
-            self.n_features_out_ = 0
-
-            return self
-
         X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
-            dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan")
-            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan")
+            dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
+            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
             ))
 
         if isinstance(X,pd.Series):#validate data does not seem to get the name of the feature when it is a pd.Series instead of a pd.Dataframe.
@@ -131,6 +120,12 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
 
         #The alternative to using pandas here is either use scipy or DIY.
+        if X.shape[0] == 0 and y.shape[0]==0:
+            self.mapping_ = {}
+            self.n_features_out_ = 0
+
+            return self
+        
         contingency_table = pd.crosstab(X_val,y_val,) #the result of pd.crosstab is a pandas dataframe
 
         pca_input = scale(contingency_table,axis=0)
