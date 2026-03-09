@@ -97,10 +97,10 @@ def get_test_data_missing_target():
     #y = np.array(["x", None,"y","z",None,None])#Target is always missing for X=c, but not always missing for X=a
 
     expected_input_pca = np.array([ ## centred table        contingency table
-        #x y z                      #   x   y    z              x   y  z
-        [1,-1,-1],#a                 a [0.5, -0.5, -0.5],      a [1, 0, 0]
-        [-1,1,1]#b                   b [-0.5, 0.5, 0.5]        b [0, 1, 1]
-    ])#                        sigma=   1   1/2,   1/2
+        #x  y  z  'None'                   x      y        z    'None'                  x  y  z  'None'
+        [1,-1,-1,1],#a                 a [0.5, -0.5, -0.5,     0.5 ],               a [1, 0, 0,    1   ]
+        [-1,1,1,-1] #b                   b [-0.5, 0.5, 0.5,     -0.5 ]                b [0, 1, 1,    0   ]
+    ])#                        sigma=   1/2   1/2,   1/2      1/2
 
 
     return [(X,np.array(["x", missing,"y","z",missing,missing],dtype=np.object_)

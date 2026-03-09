@@ -115,18 +115,22 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             raise ValueError("X should by 1D")
         if y_val.ndim != 1:
             raise ValueError("Y should by 1D")
-
-        # the core of this implementation
-
-
-        #The alternative to using pandas here is either use scipy or DIY.
+        
         if X.shape[0] == 0 and y.shape[0]==0:
             self.mapping_ = {}
             self.n_features_out_ = 0
 
             return self
+
+        # the core of this implementation
+
+
+        #The alternative to using pandas here is either use scipy or DIY.
+        missing_contingency_table = pd.crosstab(X_val,[v is None or pd.isna(v) or v == np.nan for v in y_val])
         
-        contingency_table = pd.crosstab(X_val,y_val,) #the result of pd.crosstab is a pandas dataframe
+        x_such_that_y_is_not_always_missing = missing_contingency_table[missing_contingency_table[False]!=0].index
+        
+        contingency_table = pd.crosstab(X_val,y_val,dropna=False).loc[x_such_that_y_is_not_always_missing]#the result of pd.crosstab is a pandas dataframe
 
         pca_input = scale(contingency_table,axis=0)
 
@@ -148,8 +152,6 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(contingency_table.shape[0])}
 
-        #The alternative to using pandas here is either use scipy or DIY.
-        missing_contingency_table = pd.crosstab(X_val,[v is None or pd.isna(v) or v == np.nan for v in y_val])
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
         mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing.
 
