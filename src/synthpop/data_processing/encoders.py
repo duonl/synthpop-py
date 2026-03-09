@@ -68,44 +68,35 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :param y: Target column.
 
         Examples
-        X = np.array(["a", "a", "b", "b", "c"])
-        y = np.array([1, 0, 2, 0, 3])
+        >>> X = np.array(["a", "a", "b", "b", "c"])
+        >>> y = np.array([1, 0, 2, 0, 3])
 
-        encoder = MeanEncoder()
-        encoder.fit(X, y)
+        >>> encoder = MeanEncoder()
+        >>> encoder.fit(X, y)
         """
 
         # Required sklearn attributes
+        if isinstance(X,pd.Series):
+            self.feature_names_in_ = [X.name]
+        self.n_features_in_ = 1
+
+        y = np.array([np.nan if (v is pd.NA or v is None) else v for v in y], dtype=float) #for pd.NA compatibility
+
         X, y = validate_data(self, X=X, y=y, validate_separately = (
              dict(ensure_2d=False, ensure_min_samples=1, dtype=["str", "object"], ensure_all_finite="allow-nan"),
              dict(ensure_2d=False, ensure_min_samples=1, dtype='numeric', ensure_all_finite="allow-nan")
         ))
 
-        self.n_features_in_ = 1
-        self.feature_names_in_ = np.array(["x"], dtype=object)
-
-        # Input validation
-        #if X.ndim != 1:
-        #    raise ValueError("X must be a 1D array.")
-        #if y.ndim != 1:
-        #    raise ValueError("y must be a 1D array.")
-        #if X.shape[0] != y.shape[0]:
-        #    raise ValueError("X and y must have the same length.")
-        if not np.issubdtype(y.dtype, np.number):
-            raise TypeError(f"Target column y must be numeric, got {y.dtype}.")        
-
         # Identify missing
         X_missing = np.zeros(len(X), dtype=bool)
-        if X.dtype.kind in ("f", "i"):
-            X_missing |= np.isnan(X)
-        X_missing |= np.equal(X, None)
-        y_missing = np.isnan(y)
+        X_missing |= pd.isna(X)
+        y_missing = pd.isna(y)
         
         # Fit encoder
         self.mapping_ = {}
         unique_categories = np.unique(X[~X_missing].astype(str))
         for cat in unique_categories:
-            mask = (X == cat)
+            mask = (~X_missing) & (X.astype(str) == cat)
             valid_targets = y[mask & ~y_missing]
             if valid_targets.size == 0:
                 mean_val = np.nan
@@ -124,12 +115,12 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :return: Encoded column
 
         Examples
-        X = np.array(["a", "a", "b", "b", "c"])
-        y = np.array([1, 0, 2, 0, 3])
+        >>> X = np.array(["a", "a", "b", "b", "c"])
+        >>> y = np.array([1, 0, 2, 0, 3])
 
-        encoder = MeanEncoder()
-        encoder.fit(X, y)
-        X_transformed = encoder.transform(X)
+        >>> encoder = MeanEncoder()
+        >>> encoder.fit(X, y)
+        >>> X_transformed = encoder.transform(X)
         """
 
         check_is_fitted(self, 'mapping_')
@@ -154,7 +145,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         # Detect unseen categories
         unseen_categories = set(X[~X_missing]) - set(self.mapping_.keys())
         if unseen_categories:
-            raise ValueError(f"Column to be encoded X ({self.feature_names_in_[0]}) has unseen categories: {unseen_categories}")
+            raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
         
         # Apply mapping
         for i, val in enumerate(X):

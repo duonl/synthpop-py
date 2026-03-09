@@ -1,5 +1,6 @@
 from sklearn.utils.estimator_checks import check_estimator
 import numpy as np
+import pandas as pd
 import pytest 
 
 from synthpop.data_processing.encoders import MeanEncoder
@@ -12,50 +13,49 @@ def test_fit_raises_for_non_numeric_target():
     with pytest.raises(ValueError): #validate_data gives a ValueError instead of a TypeError
         enc.fit(X, y)
 
-def test_fit_calculates_means():
-    X = np.array(["a", "a", "b", "b", "c"])
-    y = np.array([1, 0, 2, 0, 3])
+@pytest.mark.parametrize(
+    "X, y, expected_mapping",
+    [
+        (np.array(["a", "a", "b", "b", "c"]), np.array([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
+        (np.array(["a", "b", "c"]), np.array([3/2, 5/2, 7/2]), {"a": 1.5, "b": 2.5, "c": 3.5}),
+        (pd.Series(["a", "a", "b", "b", "c"]), pd.Series([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
+        (pd.Series(["a", "a", "b", "b"]), pd.Series([1, -1, 6, -4]), {"a": 0, "b": 1}),
+    ]
+)
+def test_fit_calculates_means(X, y, expected_mapping):
     enc = MeanEncoder()
     result = enc.fit(X, y)
-    expected_mapping = {"a": 0.5, "b": 1, "c": 3}
     assert result is enc, "Fit should return self"
     assert enc.n_features_in_ == 1, "self.n_features_in_ must equal 1 after fitting"
-    assert result.mapping_ == expected_mapping
-
-def test_fit_calculates_means_fractional():
-    X = np.array(["a", "b", "c"])
-    y = np.array([3/2, 5/2, 7/2])
-    enc = MeanEncoder()
-    result = enc.fit(X, y)
-    expected_mapping = {"a": 1.5, "b": 2.5, "c": 3.5}
-    assert result is enc, "Fit should return self"
-    assert enc.n_features_in_ == 1, "self.n_features_in_ must equal 1 after fitting"
-    assert result.mapping_ == expected_mapping, "Encoder calculates incorrect mean values with fractional values"
+    assert result.mapping_ == expected_mapping, "Encoder calculates incorrect mean values"
 
 def test_fit_empty_target_category():
-    X = np.array(["a", "b", "c", "d"])
-    y = np.array([1, 2, np.nan, None])
+    X = np.array(["a", "b", "c", "d", "e", "f", "f", "f"])
+    y = np.array([1, 2, np.nan, None, pd.NA, np.nan, None, pd.NA])
     enc = MeanEncoder()
     enc.fit(X, y)
     assert enc.mapping_["a"] == 1
     assert enc.mapping_["b"] == 2
-    assert np.isnan(enc.mapping_["c"]), "When y is always empty for a specific X category, encoding map must be empty for that category only."
-    assert np.isnan(enc.mapping_["d"]), "When y is always empty for a specific X category, encoding map must be empty for that category only."
+    assert np.isnan(enc.mapping_["c"]), "When y is always None for a specific X category, encoding map must be empty for that category only."
+    assert np.isnan(enc.mapping_["d"]), "When y is always np.nan for a specific X category, encoding map must be empty for that category only."
+    assert np.isnan(enc.mapping_["e"]), "When y is always pd.NA for a specific X category, encoding map must be empty for that category only"
+    assert np.isnan(enc.mapping_["f"]), "When y is always empty for a specific X category, encoding map must be empty for that category only"
 
 def test_fit_ignores_some_missing_targets():
-    X = np.array(["a", "a", "b", "b"])
-    y = np.array([1, np.nan, 2, np.nan])
+    X = np.array(["a", "a", "a", "a", "b", "b"])
+    y = np.array([1, np.nan, None, pd.NA, 2, np.nan])
     enc = MeanEncoder().fit(X, y)
     assert enc.mapping_["a"] == 1, "When some values are missing for a specific X category, they should be ignored."
     assert enc.mapping_["b"] == 2, "When some values are missing for a specific X category, they should be ignored."
 
 def test_fit_ignores_missing_features():
-    X = np.array(["a", None, "b", None])
-    y = np.array([1, 2, 3, 4])
+    X = np.array(["a", None, "b", np.nan, pd.NA])
+    y = np.array([1, 2, 3, 4, 5])
     enc = MeanEncoder().fit(X, y)
-    assert enc.mapping_["a"] ==  1
-    assert enc.mapping_["b"] == 3.0
-    assert None not in enc.mapping_, "Encoder should ignore missing values in the feature column"
+    expected_mapping = {"a": 1, "b": 3}
+    assert enc.mapping_ == expected_mapping
+    for missing in [None, np.nan, pd.NA]:
+        assert missing not in enc.mapping_, f"Encoder should ignore missing values {missing} in the feature column"
 
 def test_fit_all_missing_feature():
     X = np.array([None, None, None])
