@@ -20,6 +20,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to ``pca_transform``
 
     :param pca_transform: The pca transform used. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.
+    With the default parameters, all principle components are computed and used.
 
     Examples
     ========
