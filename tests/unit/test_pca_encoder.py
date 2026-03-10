@@ -31,8 +31,6 @@ class TransformStub(TransformerMixin, BaseEstimator):
         return self.transform_return_value
 
 
-# TODO: fitting idempotence
-
 def get_pca_return_and_dict():
     pca_return_value = np.array(
         [  # pc1, pc2, pc3
@@ -243,6 +241,7 @@ def test_pca_fit_exception_on_not_1d_datatype():
     with pytest.raises(ValueError):
         encoder.fit(np.array(["a", None, "b", "b"]),
                     np.array([["a", None, "b", "b"]]))
+
 
 # testing transform--------------------------------------------------------------------------------
 
