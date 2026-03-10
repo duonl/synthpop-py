@@ -1,4 +1,5 @@
 from sklearn.utils.estimator_checks import parametrize_with_checks
+from sklearn.utils.validation import NotFittedError
 import numpy as np
 import pandas as pd
 import pytest 
@@ -98,10 +99,8 @@ def test_fit_with_mixed_types():
 def test_transforms_uses_mapping():
     #Given a fitted estimator
     encoder = MeanEncoder()
-    encoder.mapping_ = {"red": 1, "blue": 2, "green": None}
-    encoder.feature_names_in_ = np.array(["colour"])
-    encoder.n_features_in_ = 1
-    X = np.array(["red", "blue","red", "green"])
+    encoder.mapping_ = {"a": 1, "b": 2, "c": None}
+    X = np.array(["a", "b", "a", "c"])
     result = encoder.transform(X)
     expected_result = np.array([1, 2, 1, np.nan], dtype=np.float32)
     assert np.allclose(expected_result, result, equal_nan=True), "Transform does not apply mapping correctly"
@@ -131,27 +130,53 @@ def test_constant_target_gives_constant_encoding():
     assert np.all(X_transformed == 5), "Constant target should lead to constant encoding"
 
 def test_transform_raises_for_unseen_categories():
-    X = np.array(["a", "a", "b", "b", "c"])
-    y = np.array([1, 0, 2, 0, 3])
-    enc = MeanEncoder().fit(X, y)
-    X_new = np.array(["a", "b", "z"])  # 'z' is unseen
+    enc = MeanEncoder()
+    enc.mapping_ = {"a": 1, "b": 2}
+    X = np.array(["a", "b", "z"])  # 'z' is unseen
     with pytest.raises(ValueError):
-        enc.transform(X_new)
+        enc.transform(X)
 
 def test_transform_wrong_shape():
-    X = np.array(["a", "a", "b", "b", "c"])
-    y = np.array([1, 0, 2, 0, 3])
-    enc = MeanEncoder().fit(X, y)
+    enc = MeanEncoder()
     with pytest.raises(ValueError):
         enc.transform(np.array([["a"], ["b"]]))  # 2D instead of 1D
 
+def test_transform_raises_not_fitted():
+    enc = MeanEncoder()
+    with pytest.raises(NotFittedError):
+        enc.transform(np.array([1, 2, 3]))
+
 # ----- get_feature_names_out test cases -----
-def test_get_feature_names_out():
-    X = np.array(["a", "a", "b", "b", "c"])
-    y = np.array([1, 0, 2, 0, 3])
+def test_get_feature_names_out_no_input():
+    X = pd.Series([1, 2, 3, 4], name="feature")
+    y = np.array([1, 0, 2, 0])
     enc = MeanEncoder().fit(X, y)
     names = enc.get_feature_names_out()
-    assert names[0].endswith("_mean")
+    assert len(names) == enc.n_features_in_
+    assert names[0] == "feature_mean"
+
+def test_get_feature_names_from_input():
+    enc = MeanEncoder()
+    enc.mapping_ = {}
+    enc.n_features_in_ = 1
+    names = enc.get_feature_names_out(["feature"])
+    expected = "feature_mean"
+    assert names[0] == expected
+    assert len(names) == enc.n_features_in_
+
+def test_get_feature_names_raises_input_features():
+    X = pd.Series([1, 2, 3, 4], name="feature")
+    y = np.array([1, 2, 3, 4])
+    enc = MeanEncoder()
+    enc.fit(X, y)
+
+    with pytest.raises(ValueError):
+        enc.get_feature_names_out(["wrong_feature"])
+
+def test_get_feature_name_raises_not_fitted():
+    enc = MeanEncoder()
+    with pytest.raises(NotFittedError):
+        enc.get_feature_names_out()
 
 # ----- sklearn test suite -----
 
