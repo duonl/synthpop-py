@@ -126,7 +126,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
 
         #The alternative to using pandas here is either use scipy or DIY.
-        missing_contingency_table = pd.crosstab(X_val,[v is None or pd.isna(v) for v in y_val])     
+        missing_contingency_table = pd.crosstab(X_val,[pd.isna(v) for v in y_val])     
         x_such_that_y_is_not_always_missing = missing_contingency_table[missing_contingency_table[False]!=0].index
         
         contingency_table = pd.crosstab(X_val,y_val,dropna=False).loc[x_such_that_y_is_not_always_missing]#the result of pd.crosstab is a pandas dataframe
@@ -152,7 +152,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(contingency_table.shape[0])}
 
         x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
-        mapping_for_missing = {k:[None]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing.
+        mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing.
 
         self.mapping_ = value_mapping | mapping_for_missing
 
@@ -166,19 +166,19 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        mapping_including_missing = self.mapping_| {None:[None]*self.n_features_out_}
+        mapping_including_missing = self.mapping_| {None:[np.nan]*self.n_features_out_, pd.NA:[np.nan]*self.n_features_out_}
 
         # if X contains Nones, then the dtype of X is object.
         # In that case, X cannot be sorted.
         # many routines of numpy for finding differences between lists depend on the items being sortable.
-        unique_values_in_x = np.unique([str(v) for v in X if v is not None])
+        unique_values_in_x = np.unique([str(v) for v in X if not pd.isna(v)])
 
-        if len(np.setdiff1d(unique_values_in_x,list(mapping_including_missing.keys()),assume_unique=True)) !=0:
+        if len(np.setdiff1d(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True)) !=0:
             raise ValueError("new values not seen during fitting when encoding.")
 
         return np.array(
             [# if the categorical data is represented as integers (as floats) (as in the standard sklearn tests), floating point errors can emerge when indexing the dictionary.
-                mapping_including_missing[str(v) if v is not None else None] for v in X
+                mapping_including_missing[str(v) if not pd.isna(v) else None] for v in X
             ],dtype=np.float32
         )
 
