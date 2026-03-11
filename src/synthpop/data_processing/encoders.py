@@ -89,14 +89,14 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
 
         # Required sklearn attributes
-        y = np.array([np.nan if (v is pd.NA or v is None) else v for v in y], dtype=float) #for pd.NA compatibility
+        y = np.array([np.nan if (v is pd.NA ) else v for v in y], dtype=float) #for pd.NA compatibility
 
         X_val, y_val = validate_data(self, X=X, y=y, validate_separately = (
              dict(ensure_2d=False, ensure_min_samples=1, dtype=["str", "object"], ensure_all_finite="allow-nan"),
              dict(ensure_2d=False, ensure_min_samples=1, dtype='numeric', ensure_all_finite="allow-nan")
         ))
 
-        if isinstance(X,pd.Series) and ~pd.isna(X.name):
+        if isinstance(X,pd.Series) and X.name is not None:
             self.feature_names_in_ = [X.name]
         self.n_features_in_ = 1
 
