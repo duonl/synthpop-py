@@ -378,6 +378,16 @@ def test_pca_encoder_get_feature_names_out_no_input():
     assert result == ["test_feature_name_pca0",
                       "test_feature_name_pca1", "test_feature_name_pca2"]
 
+def test_pca_encoder_get_feature_names_out_no_names():
+
+    encoder = PCAEncoder(pca_transform=None)
+    encoder.n_features_out_ = 3
+
+    result = encoder.get_feature_names_out()
+    assert result == ["x0","x1", "x2"]
+    result = encoder.get_feature_names_out(["test_feature_name"])
+    assert result == ["test_feature_name_pca0", "test_feature_name_pca1", "test_feature_name_pca2"]
+
 
 def test_pca_encoder_get_feature_names_out_correct_input():
 

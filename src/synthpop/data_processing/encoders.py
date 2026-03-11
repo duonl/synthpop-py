@@ -110,7 +110,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
             ))
 
-        if isinstance(X,pd.Series):.
+        if isinstance(X,pd.Series):
             self.feature_names_in_ = [X.name]
         if X_val.ndim != 1:
             raise ValueError("X should by 1D")
@@ -191,6 +191,11 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         )
 
     def get_feature_names_out(self,input_features=None):
+        if not hasattr(self,"feature_names_in_"):
+            if input_features is  None:
+                return [f"x{i}" for i in range(self.n_features_out_)]
+            else:
+                return [f"{input_features[0]}_pca{i}" for i in range(self.n_features_out_)]
 
         if input_features is None:
             return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
