@@ -174,15 +174,21 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
+        if pd.isna(X).all():
+            return np.zeros(X.shape[0])
         mapping_including_missing = self.mapping_| {None:[np.nan]*self.n_features_out_, pd.NA:[np.nan]*self.n_features_out_}
 
         # if X contains Nones, then the dtype of X is object.
         # In that case, X cannot be sorted.
         # many routines of numpy for finding differences between lists depend on the items being sortable.
         unique_values_in_x = np.unique([str(v) for v in X if not pd.isna(v)])
+        
 
-        if len(np.setdiff1d(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True)) !=0:
+        if np.isin(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True,invert=True).all():
             raise ValueError("new values not seen during fitting when encoding.")
+
+        #if len(np.setdiff1d(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True)) !=0:
+        #    raise ValueError("new values not seen during fitting when encoding.")
 
         return np.array(
             [# if the categorical data is represented as integers (as floats) (as in the standard sklearn tests), floating point errors can emerge when indexing the dictionary.
