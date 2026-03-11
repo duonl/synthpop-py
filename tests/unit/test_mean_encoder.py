@@ -109,8 +109,6 @@ def test_transform_with_empty_mapping_returns_nans():
     X = np.array([np.nan, None])
     enc = MeanEncoder()
     enc.mapping_ = {}
-    enc.feature_names_in_ = np.array(["Missing"])
-    enc.n_features_in_ = 1
     X_transformed = enc.transform(X)
     assert X_transformed.shape == (2,1), "With an empty mapping, transform should preserve the number of rows when all values are missing"
     assert np.all(np.isnan(X_transformed)), "With an empty mapping, transform should give only NaNs"

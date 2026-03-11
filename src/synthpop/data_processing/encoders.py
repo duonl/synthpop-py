@@ -43,6 +43,19 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         pass
     
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
+    """
+    Transforms categorical data to numeric using mean encoding. The feature column `X` is encoded based on a numeric target column `y`.
+
+    Examples
+        >>> X = np.array(["a", "a", "b", "b", "c"])
+        >>> y = np.array([1, 0, 2, 0, 3])
+
+        >>> encoder = MeanEncoder()
+        >>> encoder.fit(X, y)
+        >>> X_transformed = encoder.transform(X)
+        >>> X_transformed
+        array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
+    """
     def __init__(self):
         pass
 
@@ -68,12 +81,11 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :param y: Target column.
 
         Examples
-        >>> X = np.array(["a", "a", "b", "b", "c"])
-        >>> y = np.array([1, 0, 2, 0, 3])
+            >>> X = np.array(["a", "a", "b", "b", "c"])
+            >>> y = np.array([1, 0, 2, 0, 3])
 
-        >>> encoder = MeanEncoder()
-        >>> encoder.fit(X, y)
-        array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
+            >>> encoder = MeanEncoder()
+            >>> encoder.fit(X, y)
         """
 
         # Required sklearn attributes
@@ -84,7 +96,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
              dict(ensure_2d=False, ensure_min_samples=1, dtype='numeric', ensure_all_finite="allow-nan")
         ))
 
-        if isinstance(X,pd.Series) and X.name is not None:
+        if isinstance(X,pd.Series) and ~pd.isna(X.name):
             self.feature_names_in_ = [X.name]
         self.n_features_in_ = 1
 
@@ -116,12 +128,14 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :return: Encoded column
 
         Examples
-        >>> X = np.array(["a", "a", "b", "b", "c"])
-        >>> y = np.array([1, 0, 2, 0, 3])
+            >>> X = np.array(["a", "a", "b", "b", "c"])
+            >>> y = np.array([1, 0, 2, 0, 3])
 
-        >>> encoder = MeanEncoder()
-        >>> encoder.fit(X, y)
-        >>> X_transformed = encoder.transform(X)
+            >>> encoder = MeanEncoder()
+            >>> encoder.fit(X, y)
+            >>> X_transformed = encoder.transform(X)
+            >>> X_transformed
+            array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
         """
 
         check_is_fitted(self, 'mapping_')
