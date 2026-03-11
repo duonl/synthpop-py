@@ -49,6 +49,6 @@ For each unit test:
 ## 4. Reviewing the form, style, and documentation
 
 - [ ] PEP8 code standard.
-- [ ] British english.
+- [ ] British English.
 - [ ] The docstrings tell how to use the code. 
 - [ ] There are examples of how to use the code, and those examples run. 
