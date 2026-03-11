@@ -69,7 +69,7 @@ def get_test_data_feature_constants():
         # x y z                             x  y  z              x  y  z
         [0, 0, 0],  # a                      a [0, 0, 0]            [2, 1, 1]
     ])
-    return [(X, y, expected_input_pca, expected_input_pca, {"a": [0, 0, 0]})]
+    return [(X, y, None, None, {"a": [0, 0, 0]})]
 
 
 def get_test_data_target_constants():
@@ -124,7 +124,6 @@ def get_test_fit_data():
     return [*get_test_data_full(),
             *get_test_data_missing_target(),
             *get_test_data_feature_missing(),
-            *get_test_data_feature_constants(),
             *get_test_data_target_constants()]
 
 
@@ -175,7 +174,23 @@ def test_pca_fit_numeric_correctness(X, y, expected_input_for_PCA, pca_result, e
 
     validate_set_inout_count(result, expected_n_feat=len(expected_dict["a"]))
 
+def test_pca_fit_constant_feature():
+    X = np.array(["a", "a", "a", "a"])
+    y = np.array(["x", "x", "y", "z"])
 
+    stub_pca_transform = TransformStub()
+
+    encoder = PCAEncoder(pca_transform=stub_pca_transform)
+
+    result = encoder.fit(X,y)
+
+    assert result is encoder
+    assert result.n_features_in_ == 1
+    assert result.n_features_out_ == 1
+    assert result.pca_transform is stub_pca_transform
+    assert not hasattr(result.pca_transform,"transform_X_")
+    assert np.array_equal(result.mapping_["a"], np.array([0],dtype=np.float32))
+    
 @pytest.mark.parametrize("X,y,expected_input_for_PCA,pca_result,expected_dict", get_test_fit_data())
 def test_pca_fit_output_api(X, y, expected_input_for_PCA, pca_result, expected_dict):
     """

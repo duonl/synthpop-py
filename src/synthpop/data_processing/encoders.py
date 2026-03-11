@@ -19,7 +19,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     Transforms categorical data to one or more numeric columns.
     The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to ``pca_transform``
 
-    :param pca_transform: The pca transform used. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.
+    :param pca_transform: The pca transform used. The default value is ``sklearn.decomposition.PCA()``. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.
     With the default parameters, all principle components are computed and used.
 
     Examples
@@ -110,7 +110,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
             ))
 
-        if isinstance(X,pd.Series):#validate data does not seem to get the name of the feature when it is a pd.Series instead of a pd.Dataframe.
+        if isinstance(X,pd.Series):.
             self.feature_names_in_ = [X.name]
         if X_val.ndim != 1:
             raise ValueError("X should by 1D")
@@ -132,6 +132,13 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         
         contingency_table = pd.crosstab(X_val,y_val,dropna=False).loc[x_such_that_y_is_not_always_missing]#the result of pd.crosstab is a pandas dataframe
 
+        if contingency_table.shape[0] == 1:
+            print(y)
+            print(contingency_table)
+            self.mapping_ = {contingency_table.index[0]: np.zeros(1)}
+            self.n_features_out_ = 1
+            return self
+            
         pca_input = scale(contingency_table,axis=0)
 
         if self.pca_transform is None:
