@@ -262,7 +262,7 @@ def test_pca_fit_exception_on_not_1d_datatype():
 
 
 def get_test_data_transform():
-    missing_types = [None, np.nan]# pd.NA is not included, since pd.NA is neither numeric nor object dtype
+    missing_types_in_mapping = [None, np.nan]# pd.NA is not included, since pd.NA is neither numeric nor object dtype
     data = [
 
         (
@@ -286,7 +286,7 @@ def get_test_data_transform():
                 dtype=np.float32
             )
         )
-     for missing_mapping in missing_types for missing_x in [None,pd.NA]]
+     for missing_mapping in missing_types_in_mapping  for missing_x in [None,pd.NA]]
 
     return data
 
