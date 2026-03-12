@@ -95,3 +95,11 @@ def test_pca_encoding_changed_number_of_components():
     assert result.shape[0]== 5
     assert isinstance(result,pd.DataFrame)
     assert result.columns.equals(pd.Index(["input_feature_pca0","input_feature_pca1"]))
+
+def test_pca_encoding_numeric_and_string():
+    X = np.array(["1",1,None])
+    y = pd.Series(["a","b","c"])
+
+    encoder = PCAEncoder()
+    result = encoder.fit_transform(X,y)
+    assert not np.equal(result[0],result[1]).all()

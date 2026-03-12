@@ -290,7 +290,29 @@ def get_test_data_transform():
 
     return data
 
-@pytest.mark.parametrize("X,mapping,expected_output", get_test_data_transform())
+def get_test_data_mixed_input():
+    data = [
+
+        (
+            np.array([1,"1",missing_x],dtype=np.object_), #X
+            {  # mapping_
+                "1": [1.2, 3.4],
+                 1: [5.6, 7.8],
+            },
+            np.array(#Expected output
+                [
+                    [5.6, 7.8], # 1 (numeric)
+                    [1.2, 3.4], # "1" (string)
+                    [np.nan, np.nan] 
+                ],
+                dtype=np.float32
+            )
+        )
+     for missing_x in [None,pd.NA,np.nan]]
+
+    return data
+
+@pytest.mark.parametrize("X,mapping,expected_output", [*get_test_data_transform(),*get_test_data_mixed_input()])
 def test_pca_transform_numeric_correctness(X,mapping,expected_output):
     #X = np.array(["a", "a", "b", "b", "c", "c"])
 

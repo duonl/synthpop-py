@@ -113,9 +113,9 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         if isinstance(X,pd.Series):
             self.feature_names_in_ = [X.name]
         if X_val.ndim != 1:
-            raise ValueError("X should by 1D")
+            raise ValueError("X should be 1D")
         if y_val.ndim != 1:
-            raise ValueError("Y should by 1D")
+            raise ValueError("Y should be 1D")
         
         if X.shape[0] == 0 and y.shape[0]==0:
             self.mapping_ = {}
@@ -192,7 +192,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         return np.array(
             [# if the categorical data is represented as integers (as floats) (as in the standard sklearn tests), floating point errors can emerge when indexing the dictionary.
-                mapping_including_missing[str(v) if not pd.isna(v) else None] for v in X
+                mapping_including_missing[v if not pd.isna(v) else None] for v in X
             ],dtype=np.float32
         )
 
