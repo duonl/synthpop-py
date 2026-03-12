@@ -5,7 +5,7 @@ It also provides tools to check some of these norms.
 See this document as a tie-breaker when there are multiple equally well options, but a consistent choice is preferred. 
 
 ## Language and form
-- British english
+- British English
 - [PEP8](https://peps.python.org/pep-0008/)
 - Use the term "original data" to refer to the data that is not synthetic. 
 - Use typehints where appropriate. 
