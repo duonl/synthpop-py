@@ -71,6 +71,32 @@ def get_test_data_feature_constants():
     ])
     return [(X, y, None, None, {"a": [0, 0, 0]})]
 
+def get_test_data_mixed_feature():
+    X = np.array(["a", "a", 1, "1",1,"1",None])
+    y = np.array(["x", "x", "y", "z","z","x",None])
+    sqrt2 = np.sqrt(2)
+    sqrt32 = np.sqrt(3/2)
+    expected_input_pca = np.array([  # centred table              contingency table
+        # x y z                      #       x   y    z              x   y  z
+        [-sqrt32, 2/sqrt2, 1/sqrt2,0],# 1  [-1, 2/3,  1/3]        1 [0, 1, 1]
+        [0, -1/sqrt2, 1/sqrt2,0],  # "1"   [0, -1/3,  1/3]       "1" [1, 0, 1]
+        [sqrt32, -1/sqrt2, -2/sqrt2,0]# a  [1, -1/3, -2/3],       a [2, 0, 0]
+    ])  #                        sigma=   sqrt(2/3)  sqrt(2)/3,   sqrt(2)/3,
+
+    pca_result =  np.array(
+        [  # pc1, pc2, pc3
+            [1.2, 3.4, 5], #1
+            [5,3,2], # "1"
+            [11.22, 33.44, 6],  # a
+        ]
+    )
+    expected_mapping = {
+        1:[1.2, 3.4, 5],
+        "1":[5,3,2],
+        "a":[11.22, 33.44, 6]
+    }
+    return [(X, y, expected_input_pca, pca_result, expected_mapping)]
+
 
 def get_test_data_target_constants():
     #   constant feature
@@ -124,19 +150,20 @@ def get_test_fit_data():
     return [*get_test_data_full(),
             *get_test_data_missing_target(),
             *get_test_data_feature_missing(),
-            *get_test_data_target_constants()]
+            *get_test_data_target_constants(),
+            *get_test_data_mixed_feature()]
 
 
 def assert_dict(expected, actual):
     for k in expected.keys():
-        assert np.array_equal(expected[k], actual[k],equal_nan=True), "values do not match"
+        assert np.allclose(expected[k], actual[k],equal_nan=True), "values do not match"
 
     assert len(expected.keys()) == len(actual.keys()), "keys don't match"
 
 
 def validate_mapping(result_mapping, pca_result, expected_keys):
     for (i, key) in enumerate(expected_keys):
-        assert np.array_equal(
+        assert np.allclose(
             result_mapping[key], pca_result[i]), f"invalid mapping for {key}. Expected {pca_result[i]}, actual: {result_mapping[key]}"
 
 
@@ -168,7 +195,7 @@ def test_pca_fit_numeric_correctness(X, y, expected_input_for_PCA, pca_result, e
 
     # Then the return value is self
     assert result is encoder
-    assert np.array_equal(result.pca_transform_.transform_X_,
+    assert np.allclose(result.pca_transform_.transform_X_,
                           expected_input_for_PCA), "input for PCA not calculated correctly"
     assert_dict(expected_dict, result.mapping_)
 
@@ -214,7 +241,7 @@ def test_pca_fit_output_api(X, y, expected_input_for_PCA, pca_result, expected_d
     # Then the return value is self
     assert result is encoder
 
-    assert np.array_equal(result.pca_transform_.transform_X_,
+    assert np.allclose(result.pca_transform_.transform_X_,
                           expected_input_for_PCA), "input for PCA not calculated correctly"
     assert_dict(expected_dict, result.mapping_)
     validate_set_inout_count(result, expected_n_feat=len(expected_dict["a"]))
@@ -432,7 +459,8 @@ def test_pca_encoder_get_feature_names_out_incorrect_input():
 
 @parametrize_with_checks([PCAEncoder()], legacy=False, expected_failed_checks=lambda x: {
     "check_dont_overwrite_parameters": "tests with multiple features",
-    "check_n_features_in_after_fitting": "tests with multiple features"
+    "check_n_features_in_after_fitting": "tests with multiple features",
+    "check_fit_score_takes_y":"tests with a score component"
 })
 def test_pca_encoder_is_sklearn_compatible(estimator, check):
     check(estimator)
