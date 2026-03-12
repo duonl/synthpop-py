@@ -57,7 +57,9 @@ def get_test_data_full():
         [-1, 1, 1]  # b                   b [-1, 0.5, 0.5]        b [0, 1, 1]
     ])  # sigma=   1   1/2,   1/2
 
-    return [(X, y, expected_input_pca, pca_result, expected_dict) for pca_result, expected_dict in get_pca_return_and_dict()]
+    input_with_np_arrays = [(X, y, expected_input_pca, pca_result, expected_dict) for pca_result, expected_dict in get_pca_return_and_dict()]
+    input_with_lists = [(X.tolist(), y.tolist(), expected_input_pca, pca_result, expected_dict) for pca_result, expected_dict in get_pca_return_and_dict()]
+    return [*input_with_np_arrays,*input_with_lists]
 
 
 def get_test_data_feature_constants():
@@ -124,9 +126,14 @@ def get_test_data_missing_target():
         [-1, 1, 1, -1]
     ])  # sigma=   1/2   1/2,   1/2      1/2
 
-    return [(X, np.array(["x", missing, "y", "z", missing, missing], dtype=np.object_), expected_input_pca, pca_result, expected_dict | {"c": [np.nan]*len(expected_dict["a"])})
+    regular_target = [(X, np.array(["x", missing, "y", "z", missing, missing], dtype=np.object_), expected_input_pca, pca_result, expected_dict | {"c": [np.nan]*len(expected_dict["a"])})
             for pca_result, expected_dict in get_pca_return_and_dict()
             for missing in missing_types]
+    
+    small_target = [(np.array(["a","a","b"]), np.array(["x", "y", missing], dtype=np.object_),None, None, {"a":[0],"b": [np.nan]})
+            for missing in missing_types]
+
+    return [*regular_target,*small_target]
 
 
 def get_test_data_feature_missing():
@@ -195,7 +202,8 @@ def test_pca_fit_numeric_correctness(X, y, expected_input_for_PCA, pca_result, e
 
     # Then the return value is self
     assert result is encoder
-    assert np.allclose(result.pca_transform_.transform_X_,
+    if expected_input_for_PCA is not None:
+        assert np.allclose(result.pca_transform_.transform_X_,
                           expected_input_for_PCA), "input for PCA not calculated correctly"
     assert_dict(expected_dict, result.mapping_)
 
@@ -240,8 +248,8 @@ def test_pca_fit_output_api(X, y, expected_input_for_PCA, pca_result, expected_d
 
     # Then the return value is self
     assert result is encoder
-
-    assert np.allclose(result.pca_transform_.transform_X_,
+    if expected_input_for_PCA is not None:
+        assert np.allclose(result.pca_transform_.transform_X_,
                           expected_input_for_PCA), "input for PCA not calculated correctly"
     assert_dict(expected_dict, result.mapping_)
     validate_set_inout_count(result, expected_n_feat=len(expected_dict["a"]))
@@ -376,17 +384,30 @@ def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
     result = encoder.transform(X=np.array([]))
     assert len(result) == 0
 
+@pytest.mark.parametrize("missing", [None,pd.NA,np.nan])
+def test_pca_transform_when_mapping_is_empty_transform_missing_to_nan(missing):
+    """
+    transforming an empty X should always result in an empty array, even if the mapping is empty.
+    """
+    encoder = PCAEncoder(pca_transform=None)
+
+    encoder.n_features_out_ = 2
+
+    result = encoder.transform(X=np.array([missing,missing]))
+    assert len(result) == 2
+    assert np.isnan(result).all()
+
 
 def test_pca_transform_exception_on_new_value():
     """
     An informative exception should be raised when the user attempts to encode a value that was not in the data during fitting.
     """
     encoder = PCAEncoder(pca_transform=None)
-    encoder.mapping_ = {"a": [1.1, 2.2]}
+    encoder.mapping_ = {"a": [1.1, 2.2], "c":[3.3,4.4]}
     encoder.n_features_out_ = 2
 
     with pytest.raises(ValueError, match="values not seen during fitting"):
-        result = encoder.transform(np.array(["b"]))
+        result = encoder.transform(np.array(["b","c"]))
 
 
 def test_pca_transform_given_fitted_estimator_when_transforming_missing_values():

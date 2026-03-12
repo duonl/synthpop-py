@@ -117,7 +117,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         if y_val.ndim != 1:
             raise ValueError("Y should be 1D")
         
-        if X.shape[0] == 0 and y.shape[0]==0:
+        if X_val.shape[0] == 0 and y_val.shape[0]==0:
             self.mapping_ = {}
             self.n_features_out_ = 0
 
@@ -132,10 +132,10 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         
         contingency_table = pd.crosstab(X_val,y_val,dropna=False).loc[x_such_that_y_is_not_always_missing]#the result of pd.crosstab is a pandas dataframe
 
+        x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
+       
         if contingency_table.shape[0] == 1:
-            print(y)
-            print(contingency_table)
-            self.mapping_ = {contingency_table.index[0]: np.zeros(1)}
+            self.mapping_ = {contingency_table.index[0]: np.zeros(1)}|{k:[np.nan] for k in x_such_that_y_is_always_missing}
             self.n_features_out_ = 1
             return self
             
@@ -156,11 +156,12 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             pca_result = pca_result.to_numpy()
 
         self.n_features_out_ = pca_result.shape[1] #needed for get_feature_names_out
+    
+        mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing
 
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(contingency_table.shape[0])}
 
-        x_such_that_y_is_always_missing = missing_contingency_table[missing_contingency_table[False]==0].index
-        mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing.
+       
 
         self.mapping_ = value_mapping | mapping_for_missing
 
@@ -174,18 +175,21 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        if pd.isna(X).all():
-            return np.zeros(X.shape[0])
-        mapping_including_missing = self.mapping_| {None:[np.nan]*self.n_features_out_, pd.NA:[np.nan]*self.n_features_out_}
+        # if pd.isna(X).all():
+        #     return np.zeros(X.shape[0])
+        missing_mapping =  {None:[np.nan]*self.n_features_out_, pd.NA:[np.nan]*self.n_features_out_, np.nan:[np.nan]*self.n_features_out_}
+        mapping_including_missing = self.mapping_|missing_mapping if hasattr(self,"mapping_") else missing_mapping
 
         # if X contains Nones, then the dtype of X is object.
         # In that case, X cannot be sorted.
         # many routines of numpy for finding differences between lists depend on the items being sortable.
-        unique_values_in_x = np.unique([str(v) for v in X if not pd.isna(v)])
+        
         
 
-        if np.isin(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True,invert=True).all():
-            raise ValueError("new values not seen during fitting when encoding.")
+        if hasattr(self,"mapping_"):
+            unique_values_in_x = np.unique([v for v in X if not pd.isna(v)])
+            if np.isin(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True,invert=True).any():
+                raise ValueError("new values not seen during fitting when encoding.")
 
         #if len(np.setdiff1d(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True)) !=0:
         #    raise ValueError("new values not seen during fitting when encoding.")
