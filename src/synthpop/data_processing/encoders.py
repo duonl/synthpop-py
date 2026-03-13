@@ -127,7 +127,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
 
         #The alternative to using pandas here is either use scipy or DIY.
-        missing_contingency_table = pd.crosstab(X_val,[pd.isna(v) for v in y_val])     
+        missing_contingency_table = pd.crosstab(X_val,pd.isna(y_val))#[pd.isna(v) for v in y_val])     
         x_such_that_y_is_not_always_missing = missing_contingency_table[missing_contingency_table[False]!=0].index
         
         contingency_table = pd.crosstab(X_val,y_val,dropna=False).loc[x_such_that_y_is_not_always_missing]#the result of pd.crosstab is a pandas dataframe
@@ -161,8 +161,6 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(contingency_table.shape[0])}
 
-       
-
         self.mapping_ = value_mapping | mapping_for_missing
 
         return self
@@ -184,21 +182,18 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         # In that case, X cannot be sorted.
         # many routines of numpy for finding differences between lists depend on the items being sortable.
         
-        
-
         if hasattr(self,"mapping_"):
-            unique_values_in_x = np.unique([v for v in X if not pd.isna(v)])
-            if np.isin(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True,invert=True).any():
+            unique_values_in_x =set(X[~pd.isna(X)])#np.unique([v for v in X if not pd.isna(v)])
+            if unique_values_in_x.issubset(set(self.mapping_.keys())) == False:
                 raise ValueError("new values not seen during fitting when encoding.")
 
-        #if len(np.setdiff1d(unique_values_in_x,list(self.mapping_.keys()),assume_unique=True)) !=0:
-        #    raise ValueError("new values not seen during fitting when encoding.")
+        x_na = pd.isna(X)
 
-        return np.array(
-            [# if the categorical data is represented as integers (as floats) (as in the standard sklearn tests), floating point errors can emerge when indexing the dictionary.
-                mapping_including_missing[v if not pd.isna(v) else None] for v in X
-            ],dtype=np.float32
-        )
+        keys = np.where(x_na,None,X)
+        mapping_to_np_array = {k: np.array(v,dtype=np.float32) for (k,v) in mapping_including_missing.items()}
+        f = np.frompyfunc(mapping_to_np_array.get,nin=1,nout=1)
+        return np.array(np.asanyarray(f(keys)).tolist())
+
 
     def get_feature_names_out(self,input_features=None):
         if not hasattr(self,"feature_names_in_"):
