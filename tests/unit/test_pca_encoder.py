@@ -112,6 +112,9 @@ def get_test_data_target_constants():
     ])  # 1 = sigma
     return [(X, y, expected_input_pca, expected_input_pca, {"a": [1], "b": [-1]})]
 
+def get_test_data_target_constant_missing():
+    return [(np.array(["a", "a","b","b","c"]), np.array([missing]*5,dtype=np.object_), None, None, {"a": [np.nan], "b": [np.nan], "c":[np.nan]}) for missing in [None,pd.NA,np.nan]]
+
 
 def get_test_data_missing_target():
     missing_types = [None, np.nan, pd.NA]
@@ -158,7 +161,8 @@ def get_test_fit_data():
             *get_test_data_missing_target(),
             *get_test_data_feature_missing(),
             *get_test_data_target_constants(),
-            *get_test_data_mixed_feature()]
+            *get_test_data_mixed_feature(),
+            *get_test_data_target_constant_missing()]
 
 
 def assert_dict(expected, actual):
