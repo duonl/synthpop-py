@@ -150,7 +150,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         else:
             self.pca_transform_ = clone(self.pca_transform)# for compatibility with sklearn we need to do this.
 
-        pca_result = self.pca_transform_ .fit_transform(
+        pca_result = self.pca_transform_.fit_transform(
             X=pca_input
             ,y=None)
 
@@ -188,7 +188,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         
         if hasattr(self,"mapping_"):
             unique_values_in_x =set(X[~pd.isna(X)])#np.unique([v for v in X if not pd.isna(v)])
-            if unique_values_in_x.issubset(set(self.mapping_.keys())) == False:
+            if not unique_values_in_x.issubset(self.mapping_.keys()):
                 raise ValueError("new values not seen during fitting when encoding.")
 
         x_na = pd.isna(X)
