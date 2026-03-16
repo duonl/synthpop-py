@@ -4,10 +4,11 @@ from numpy.random import RandomState
 from typing import Self, Dict, Mapping, TypeVar, Generic
 import numpy.typing as npt
 from sklearn.tree import BaseDecisionTree
+from sklearn.utils.validation import check_is_fitted
 
 T = TypeVar("T")
 
-class LeafNodeSamplerMixin:
+class LeafNodeSampler:
     """
     Adds a leaf-based synthetic sampling functionality to any fitted
     decision tree estimator. The sampler generates synthetic target values based on 
@@ -26,17 +27,27 @@ class LeafNodeSamplerMixin:
         leaf_id -> {target_value -> count}
 
     Usage:
-    class TreeMethod(LeafNodeSamplerMixin, BaseDecisionTree):
+    class TreeMethod(BaseDecisionTree):
+        def __init(tree_sampler: LeafNodeSampler | None = None):
+            self.tree_sampler = tree_sampler
+            
         def fit(self, X, y):
             super().fit(X, y)
-            self.fit_sampler(X, y)
+            if self.tree_sampler is None:
+                self.tree_sampler_= LeafNodeSampler()
+            else:
+                self.tree_sampler_ = clone(self.tree_sampler)
+            self.tree_sampler_.fit_sampler(self, X, y)
             return self
         
         def transform(self, X_syn):
-            return self.sample_from_leaves(X_syn)
+            return self.tree_sampler_.sample_from_leaves(X_syn)
     """
+    def __init__(self, random_state: int | None = None):
+        self.random_state = random_state
+        pass
 
-    def fit_sampler(self, X: npt.ArrayLike, y: npt.ArrayLike) -> Self:
+    def fit_sampler(self, tree: BaseDecisionTree, X: npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Build the leaf node histogram mapping from observed data.
 
@@ -55,9 +66,12 @@ class LeafNodeSamplerMixin:
         --------
         
         """
+        check_is_fitted(tree)
+        self.tree_ = tree
+        
         pass
 
-    def sample_from_leaves(self, X_syn: npt.ArrayLike, random_state: int | None) -> np.ndarray:
+    def sample_from_leaves(self, X_syn: npt.ArrayLike) -> np.ndarray:
         """
         Generate synthetic target values for new samples.
 

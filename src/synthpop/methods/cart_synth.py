@@ -8,10 +8,10 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
-from synthpop.methods import base_synth, LeafNodeSamplerMixin
+from synthpop.methods import base_synth, LeafNodeSampler
 import numpy.typing as npt
 
-class TreeClassifierMethod(LeafNodeSamplerMixin, DecisionTreeClassifier):
+class TreeClassifierMethod(DecisionTreeClassifier):
     """
     A decision tree classifier algorithm, augmented with PCA encoding and NA predictor.
 
@@ -22,6 +22,7 @@ class TreeClassifierMethod(LeafNodeSamplerMixin, DecisionTreeClassifier):
     def __init__(self, *,
                  encoder: TransformerMixin = PCAEncoder(),
                  missing_handling: BaseMissingValueHandler = ReplaceNoneWithValue(),
+                 tree_sampler: LeafNodeSampler | None = None,
                  criterion: Literal['gini'] | Literal['entropy'] | Literal['log_loss'] = "gini",
                  splitter: Literal['best'] | Literal['random'] = "best",
                  max_depth: None | int = None,
@@ -39,6 +40,7 @@ class TreeClassifierMethod(LeafNodeSamplerMixin, DecisionTreeClassifier):
                          max_features=max_features, random_state=random_state, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha
                          )
         self.random_state = random_state  # mandated by scikit-learn developer guide
+        self.tree_sampler = tree_sampler
 
     def fit(self, X: dict[str,npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
@@ -54,7 +56,11 @@ class TreeClassifierMethod(LeafNodeSamplerMixin, DecisionTreeClassifier):
         # self.encoder.fit(X)
         # data_encoded = self.encoder.transform(X)
         # super().fit(data_encoded, y)
-        # self.fit_sampler(data_encoded, y)
+        # if self.tree_sampler is None:
+        #     self.tree_sampler_= LeafNodeSampler()
+        # else:
+        #     self.tree_sampler_ = clone(self.tree_sampler)
+        # self.tree_sampler_.fit_sampler(self, data_encoded, y)
         return self
 
     def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
@@ -65,14 +71,14 @@ class TreeClassifierMethod(LeafNodeSamplerMixin, DecisionTreeClassifier):
         :return: Input dataset with predicted column.
         """
         # should call sklearn.utils.validation.check_is_fitted(self),
-        # return self.sample_from_leaves(X, random_state)
+        # return self.tree_sampler_.sample_from_leaves(X, random_state)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
         pass
 
 
-class TreeRegressorMethod(LeafNodeSamplerMixin, DecisionTreeRegressor):
+class TreeRegressorMethod(DecisionTreeRegressor):
     """
     A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
 
@@ -84,6 +90,7 @@ class TreeRegressorMethod(LeafNodeSamplerMixin, DecisionTreeRegressor):
     def __init__(self, *,
                  encoder: TransformerMixin = MeanEncoder(),
                  missing_handling: BaseMissingValueHandler = MissingValuePredictor(),
+                 tree_sampler: LeafNodeSampler | None = None,
                  criterion: Literal['squared_error'] | Literal['friedman_mse'] | Literal[
                      'absolute_error'] | Literal['poisson'] = "squared_error",
                  splitter: Literal['best'] | Literal['random'] = "best",
@@ -116,7 +123,11 @@ class TreeRegressorMethod(LeafNodeSamplerMixin, DecisionTreeRegressor):
         self.encoder.fit(X)
         data_encoded = self.encoder.transform(X)
         super().fit(data_encoded, y)
-        self.fit_sampler(data_encoded, y)
+        if self.tree_sampler is None:
+            self.tree_sampler_= LeafNodeSampler()
+        else:
+            self.tree_sampler_ = clone(self.tree_sampler)
+        self.tree_sampler_.fit_sampler(self, data_encoded, y)
         return self
 
     def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
@@ -127,7 +138,7 @@ class TreeRegressorMethod(LeafNodeSamplerMixin, DecisionTreeRegressor):
         :return: Input dataset with predicted column.
         """
         # should call sklearn.utils.validation.check_is_fitted(self),
-        # return self.sample_from_leaves(X, random_state)
+        # return self.tree_sampler_.sample_from_leaves(X, random_state)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
