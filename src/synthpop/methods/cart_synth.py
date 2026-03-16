@@ -57,7 +57,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         # data_encoded = self.encoder.transform(X)
         # super().fit(data_encoded, y)
         # if self.tree_sampler is None:
-        #     self.tree_sampler_= LeafNodeSampler()
+        #     self.tree_sampler_= LeafNodeSampler(random_state = self.random_state_)
         # else:
         #     self.tree_sampler_ = clone(self.tree_sampler)
         # self.tree_sampler_.fit_sampler(self, data_encoded, y)
@@ -71,7 +71,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         :return: Input dataset with predicted column.
         """
         # should call sklearn.utils.validation.check_is_fitted(self),
-        # return self.tree_sampler_.sample_from_leaves(X, random_state)
+        # return self.tree_sampler_.sample_from_leaves(X)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
@@ -124,7 +124,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         data_encoded = self.encoder.transform(X)
         super().fit(data_encoded, y)
         if self.tree_sampler is None:
-            self.tree_sampler_= LeafNodeSampler()
+            self.tree_sampler_= LeafNodeSampler(random_state=self.random_state_)
         else:
             self.tree_sampler_ = clone(self.tree_sampler)
         self.tree_sampler_.fit_sampler(self, data_encoded, y)
@@ -138,7 +138,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         :return: Input dataset with predicted column.
         """
         # should call sklearn.utils.validation.check_is_fitted(self),
-        # return self.tree_sampler_.sample_from_leaves(X, random_state)
+        # return self.tree_sampler_.sample_from_leaves(X)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
