@@ -7,10 +7,12 @@ from sklearn.tree import BaseDecisionTree
 
 T = TypeVar("T")
 
-class LeafNodeSampler(Generic[T]):
+class LeafNodeSamplerMixin:
     """
-    Sampler that generates synthetic target values based on the empirical
-    target distributions observed in the leaf nodes of a fitted decision tree.
+    Adds a leaf-based synthetic sampling functionality to any fitted
+    decision tree estimator. The sampler generates synthetic target values based on 
+    the empirical target distributions observed in the leaf nodes of a 
+    fitted decision tree.
 
     The class implements a tree-based sampling strategy:
     - During the fitting phase, each leaf node stores a histogram of 
@@ -22,15 +24,19 @@ class LeafNodeSampler(Generic[T]):
         leaf_map: Dict[int, Dict[T, int]]
     where:
         leaf_id -> {target_value -> count}
-    """
-    def __init__(self, 
-                 tree: BaseDecisionTree,
-                 random_state: RandomState | None | int = None) -> None:
-        self.tree: BaseDecisionTree = tree
-        self.leaf_map: Dict[int, Dict[T, int]] = {}
-        self.random_state = random_state
 
-    def fit(self, X: npt.ArrayLike, y: npt.ArrayLike) -> Self:
+    Usage:
+    class TreeMethod(LeafNodeSamplerMixin, BaseDecisionTree):
+        def fit(self, X, y):
+            super().fit(X, y)
+            self.fit_sampler(X, y)
+            return self
+        
+        def transform(self, X_syn):
+            return self.sample_from_leaves(X_syn)
+    """
+
+    def fit_sampler(self, X: npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Build the leaf node histogram mapping from observed data.
 
@@ -38,7 +44,7 @@ class LeafNodeSampler(Generic[T]):
         decision tree and records the frequency of each target value `y` observed
         in that leaf.
 
-        The resulting mapping has the form:
+        The resulting mapping is stored in `self._leaf_map` and has the form:
             leaf_id -> {target_value -> count}
 
         :param X: Feature matrix used to determine leaf membership
@@ -51,7 +57,7 @@ class LeafNodeSampler(Generic[T]):
         """
         pass
 
-    def sample(self, X_syn: npt.ArrayLike) -> npt.ArrayLike:
+    def sample_from_leaves(self, X_syn: npt.ArrayLike, random_state: int | None) -> np.ndarray:
         """
         Generate synthetic target values for new samples.
 
@@ -64,6 +70,7 @@ class LeafNodeSampler(Generic[T]):
 
         :param X_syn: Feature matrix of synthetic samples for which target values
             should be generated.
+        :param random_state: Seed used to reproduce randomness
         :return: Sampled synthetic target values
         """
         pass

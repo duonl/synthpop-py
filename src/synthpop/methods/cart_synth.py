@@ -8,10 +8,10 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
-from synthpop.methods import base_synth
+from synthpop.methods import base_synth, LeafNodeSamplerMixin
 import numpy.typing as npt
 
-class TreeClassifierMethod(DecisionTreeClassifier):
+class TreeClassifierMethod(LeafNodeSamplerMixin, DecisionTreeClassifier):
     """
     A decision tree classifier algorithm, augmented with PCA encoding and NA predictor.
 
@@ -54,6 +54,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         # self.encoder.fit(X)
         # data_encoded = self.encoder.transform(X)
         # super().fit(data_encoded, y)
+        # self.fit_sampler(data_encoded, y)
         return self
 
     def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
@@ -64,13 +65,14 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         :return: Input dataset with predicted column.
         """
         # should call sklearn.utils.validation.check_is_fitted(self),
+        # return self.sample_from_leaves(X, random_state)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
         pass
 
 
-class TreeRegressorMethod(DecisionTreeRegressor):
+class TreeRegressorMethod(LeafNodeSamplerMixin, DecisionTreeRegressor):
     """
     A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
 
@@ -114,6 +116,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         self.encoder.fit(X)
         data_encoded = self.encoder.transform(X)
         super().fit(data_encoded, y)
+        self.fit_sampler(data_encoded, y)
         return self
 
     def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
@@ -124,6 +127,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         :return: Input dataset with predicted column.
         """
         # should call sklearn.utils.validation.check_is_fitted(self),
+        # return self.sample_from_leaves(X, random_state)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
