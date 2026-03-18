@@ -93,6 +93,7 @@ If some combinations of categories exist in the original dataset, but not in the
 - This metric evaluates similarity at the level of pairwise joint distributions and does not capture higher-order dependencies among more than two variables. The measure is sensitive to discretisation choices for numeric variables. 
 - The S_pMSE metric uses a test of significance, therefore interpreting the results is dependent on the size of the dataset: utility of a dataset can better be measured if the number of observations is large enough. 
 
+
 ## 7. References
 (references)=
 [1] Joshua Snoke, Gillian M. Raab, Beata Nowok, Chris Dibben, Aleksandra Slavković, General and Specific Utility Measures for Synthetic Data,

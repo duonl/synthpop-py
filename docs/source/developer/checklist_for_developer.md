@@ -6,7 +6,7 @@ This checklist is meant to ensure code quality and optimal code workflow.
 ## Before you begin
 - [ ] Fully understand the feature request. 
 - [ ] Fully understand the proof of concept code. 
-- [ ] Fully understand how this feature should be implemented
+- [ ] Fully understand how this feature should be implemented. Read the functional descriptions.
 - [ ] Think of any edge cases or exceptions.
 
 ## During development
@@ -41,6 +41,6 @@ Or just a link to the right issues
 - [ ] Any merge conflicts have been resolved.
 - [ ] All previous checks need to be rechecked after resolving merge conflicts. 
 
-You are done when the reviewer has no more feedback on the most recent state of the feature branch. 
+You are done when the reviewer has no more feedback on the most recent state of the feature branch. After approval from a reviewer with write access, the pull request can be merged into develop. **Make sure the commits are first squashed before it is merged.** This can be done by clicking on *Squash and merge* on Github at the bottom of the pull request. Make sure to click on the dropdown menu if you only see a button with *Merge pull request*. To squash merge in the command line you first run `git checkout target_branch` to make sure you are on the branch you want to merge into. Then perform the squash merge by running `git merge --squash feature_branch` and finally commit the changes `git commit -m "Commit message"`.
 
 

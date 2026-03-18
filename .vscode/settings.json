@@ -1,0 +1,14 @@
+{
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+                "./src/",
+                "./tests/",
+                "--cov=./src/",
+            ],
+            "cSpell.words": [
+                "crosstab",
+                "docstrings",
+                "setdiff"
+            ]
+}
