@@ -2,6 +2,23 @@
 
 This package is currently being developed. It mostly contains placeholders and documentation.
 
+## What is synthpop?
+Synthpop is a package to generate synthetic data for use in data analysis. The package exists in both R and python.
+The aim is to generate synthetic data that is as close to the observed data as possible without disclosing the actual data.
+This allows for analysis of sensitive data while adhering to the GDPR. 
+
+The [R package](https://www.synthpop.org.uk/) has been used some time for this purpose.
+
+## The goals of this project
+The goal of this project is to make it easier to generate synthetic data for data analysis. 
+For now, we aim to make it easier for two groups of people.
+One group are people who are just starting out with synthetic data.
+The other group are people that want to provide synthetic data to third parties or want to include synthetic data in their standard toolbox.
+
+## General roadmap
+The first aim is to make a package that is comparable to synthpop. 
+This should attract enough active users to decide what the next aim should be.
+
 ## Contributing
 
 If you wish to contribute to synthpop, start by cloning the repository.
