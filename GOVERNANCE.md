@@ -1,6 +1,6 @@
 # Governance 
 
-We are happy to consider any suggestions. However, consensus-based governance is not possible at this since this is project is temporarily funded by the Dutch government (specifically the [PGDI](https://pgdi.nl/)), and we made commitments to them in advance. We hope to have a more consensus-based approach in the future.
+We are happy to consider any suggestions. However, consensus-based governance is not possible at this time since this is project is temporarily funded by the Dutch government (specifically the [PGDI](https://pgdi.nl/)), and we made commitments to them in advance. We hope to have a more consensus-based approach in the future.
 Since we are a small team for now, we chose the [Benevolent Dictator for Life structure (BDFL)](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life). The "for life" part should not be taken literally since the governance model is open for change. 
 
 ## Roles
