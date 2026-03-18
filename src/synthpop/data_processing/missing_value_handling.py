@@ -7,6 +7,7 @@ from sklearn.base import TransformerMixin
 
 from synthpop.data_processing.encoders import MeanEncoder
 import numpy.typing as npt
+import numpy as np
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -69,6 +70,10 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     """
     Replace missing values by a specified value, and remove after synthesis.
     """
+
+    def __init__(self):
+        super().__init__()
+        self.missing_replacement = "N.a.N."
     
     def prepare_data_for_fit(self,X:npt.ArrayLike, y:npt.ArrayLike)-> tuple[npt.ArrayLike,npt.ArrayLike]:
         """
@@ -78,8 +83,13 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return: a tuple (X,y). Leaves X unchanged. Replaces missing values in the target with "N.a.N."
         """
-        
-        return(pd.DataFrame(),pd.Series())
+
+        missing_mask = pd.isna(y)
+        if self.missing_replacement in y[~missing_mask]:
+            raise ValueError(f"the value {self.missing_replacement} already occurs in y")
+
+        y[missing_mask] = self.missing_replacement
+        return(X,y)
 
     def post_synth_transform(self,X:npt.ArrayLike,y:npt.ArrayLike) -> npt.ArrayLike:
         """
@@ -89,4 +99,10 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return:  The synthesised target with missing values.
         """ 
-        return pd.Series()
+        mask = y == self.missing_replacement
+        if not mask.any():
+            return y
+        
+        result = y.astype(np.object_)
+        result[y == self.missing_replacement] = None
+        return result
