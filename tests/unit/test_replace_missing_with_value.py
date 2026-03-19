@@ -29,6 +29,12 @@ def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,X_exp,y_exp):
     assert np.array_equal(X_exp,X_res)
     assert np.array_equal(y_exp,y_res)
 
+    assert isinstance(y_res,pd.Series)
+    assert isinstance(X_res,pd.Series)
+
+    assert y_res.name == "someName_y"
+    assert X_res.name == "someName_X"
+
 def test_prepare_data_for_fit_error_when_nan_is_a_value():
     X = np.array(["a","b"])
     y = np.array(["x","N.a.N."])
