@@ -26,7 +26,7 @@ This should attract enough active users to decide what the next aim should be.
 
 ## About the team
 There are 3 maintainers, all of which work for the dutch ministry of education, culture, and science. 
-There is a commitment of about 1.5 fte for at leat a year.
+There is a commitment of about 1.5 fte for at least a year.
 
 ## Contributing
 
