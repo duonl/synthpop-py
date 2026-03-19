@@ -1,19 +1,3 @@
-
-from standard of public code:
-The codebase MUST include contribution guidelines explaining what kinds of contributions are welcome and how contributors can get involved, for example in a CONTRIBUTING file.
-
-The contribution guidelines SHOULD document who is expected to cover the costs of reviewing contributions.
-The codebase SHOULD advertise the committed engagement of involved organizations in the development and maintenance.
-The codebase SHOULD have a publicly available roadmap.
-
-
-## Types of contributions that we accept
-
-- improvements in readability and grammar.
-- improvements in performance. We are happy to hear from you if you know something that can make the code do the same things but faster and/or with less memory. Reach out to us via a feature request before you invest your effort if the improvement means that the users of this package need to alter their code.  
-- Additional documentation and guides. If something would had helped you to understand this package, then it will help other people. 
-
-<!-- omit in toc -->
 # Contributing to Synthpop
 
 First off, thanks for taking the time to contribute! ❤️
@@ -22,15 +6,15 @@ All types of contributions are encouraged and valued. See below for different wa
 
 ## I Have a Question
 
-> If you want to ask a question, we assume that you have read the available [Documentation]().
+> If you want to ask a question, we assume that you have read the available [Documentation](https://github.com/Synthpop-data/synthpop-py/tree/develop/docs/source).
 
 Before you ask a question, it is best to search for existing [Issues](https://github.com/Synthpop-data/synthpop-py/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.
 
 If you then still feel the need to ask a question and need clarification, we recommend the following:
 
-- Open an [Issue](/issues/new).
+- Open an [Issue](https://github.com/Synthpop-data/synthpop-py/issues/new).
 - Provide as much context as you can about what you're running into.
-- Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
+- Provide project and platform versions, depending on what seems relevant.
 
 We will then take care of the issue as soon as possible.
 
@@ -66,16 +50,16 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 - To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/Synthpop-data/synthpop-py/issues).
 - Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
-- Stack trace (Traceback)
-- OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
-- Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
-- Possibly your input and the output
-- Can you reliably reproduce the issue? And can you also reproduce it with older versions?
+    - Stack trace (Traceback)
+    - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
+    - Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
+    - Possibly your input and the output
+    - Can you reliably reproduce the issue? And can you also reproduce it with older versions?
 
 <!-- omit in toc -->
 #### How Do I Submit a Good Bug Report?
 
-> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <>.
+> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <synthetische.data@duo.nl>.
 <!-- You may add a PGP key to allow the messages to be sent encrypted as well. -->
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
@@ -98,7 +82,8 @@ Once it's filed:
 
 This section guides you through submitting an enhancement suggestion for Synthpop, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
 
-<!-- omit in toc -->
+#### What kind of enhancements can I do
+We are always happy with improvements to readability and language. We would accept improvements in the efficiency of the code that should not break the code of users. We would like to hear improvements that would break code of users of this package as well. Let us know if you feel that there is some guide or documentation missing. If it would had been useful for you, it will be useful for others.
 #### Before Submitting an Enhancement
 
 - Make sure that you are using the latest version.
@@ -115,18 +100,23 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/Synthp
 
 - Use a **clear and descriptive title** for the issue to identify the suggestion.
 - Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
-- **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
+- **Describe the current behaviour** and **explain which behaviour you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
 - You may want to **include screenshots or screen recordings** which help you demonstrate the steps or point out the part which the suggestion is related to. 
 - **Explain why this enhancement would be useful** to most Synthpop users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
 
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
 ### Your First Code Contribution
-TODO
-<!-- TODO
-include Setup of env, IDE and typical getting started instructions?
 
--->
+#### Setting up your development environment
+This package uses [**Poetry**](https://python-poetry.org/docs/) for dependency management. The first step is installing Poetry. We recommend installing Poetry using [**pipx**](https://pipx.pypa.io/stable/installation/#on-windows).
+Run ```poetry --version``` in a terminal to see if Poetry is installed. Run ```pipx --version``` to see if pipx is installed.
+
+The next step is to clone this repository using git: ```git clone https://github.com/Synthpop-data/synthpop-py.git```.
+The final step is to install the project. Open a terminal in the repository and run ```poetry install --with docs,dev```.
+
+#### workflow to implement something
+TODO
 
 ### Improving The Documentation
 TODO
@@ -136,8 +126,5 @@ Updating, improving and correcting the documentation
 -->
 
 ## Styleguides
-TODO
-### Commit Messages
-<!-- TODO
-
--->
+See [here](https://github.com/Synthpop-data/synthpop-py/blob/develop/docs/source/developer/code_standards_and_norms.md) for style guides and conventions.
+We have checklist that can be used when [developing](https://github.com/Synthpop-data/synthpop-py/blob/develop/docs/source/developer/checklist_for_developer.md) and when [reviewing](https://github.com/Synthpop-data/synthpop-py/blob/develop/docs/source/developer/checklist_for_review.md) code.

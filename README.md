@@ -24,6 +24,10 @@ The other group are people that want to provide synthetic data to third parties 
 The first aim is to make a package that is comparable to synthpop. 
 This should attract enough active users to decide what the next aim should be.
 
+## About the team
+There are 3 maintainers, all of which work for the dutch ministry of education, culture, and science. 
+There is a commitment of about 1.5 fte for at leat a year.
+
 ## Contributing
 
 If you wish to contribute to synthpop, start by cloning the repository.
