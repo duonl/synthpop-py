@@ -6,17 +6,26 @@ import pytest
 from synthpop.data_processing.missing_value_handling import ReplaceNoneWithValue
 
 
-
-@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp", [
+def get_test_data():
+    return [
 #               X_in                y_in                          X_exp               y_exp
     (np.array(["a","b"]),      np.array(["x","y"]),np.array(["a","b"]),np.array(["x","y"])),
     *[(np.array(["a","b","a"]),np.array(["x","y",missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array(["x","y","N.a.N."])) for missing_target in [None,pd.NA,np.nan]],
     *[(np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]))],
-])
+]
+@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp", get_test_data())
 def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,X_exp,y_exp):
     replace_nan = ReplaceNoneWithValue()
 
     X_res,y_res = replace_nan.prepare_data_for_fit(X_in,y_in)
+    assert np.array_equal(X_exp,X_res)
+    assert np.array_equal(y_exp,y_res)
+
+@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp", get_test_data())
+def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,X_exp,y_exp):
+    replace_nan = ReplaceNoneWithValue()
+
+    X_res,y_res = replace_nan.prepare_data_for_fit(pd.Series(X_in,name="someName_X"),pd.Series(y_in,name="someName_y"))
     assert np.array_equal(X_exp,X_res)
     assert np.array_equal(y_exp,y_res)
 
