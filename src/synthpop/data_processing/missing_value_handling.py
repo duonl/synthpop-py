@@ -8,6 +8,7 @@ from sklearn.base import TransformerMixin
 from synthpop.data_processing.encoders import MeanEncoder
 import numpy.typing as npt
 import numpy as np
+import copy
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -88,8 +89,9 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         if self.missing_replacement in y[~missing_mask]:
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
-        y[missing_mask] = self.missing_replacement
-        return(X,y)
+        result = copy.copy(y)
+        result[missing_mask] = self.missing_replacement
+        return(X,result)
 
     def post_synth_transform(self,X:npt.ArrayLike,y:npt.ArrayLike) -> npt.ArrayLike:
         """

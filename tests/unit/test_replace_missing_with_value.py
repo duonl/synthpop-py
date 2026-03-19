@@ -1,8 +1,6 @@
-from sklearn.utils.estimator_checks import parametrize_with_checks
-from sklearn.utils.validation import NotFittedError
 import numpy as np
 import pandas as pd
-import pytest 
+import pytest
 from synthpop.data_processing.missing_value_handling import ReplaceNoneWithValue
 
 
@@ -20,8 +18,19 @@ def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,X_exp,y_exp,missing_
     replace_nan = ReplaceNoneWithValue(missing_marker = missing_indicator)
 
     X_res,y_res = replace_nan.prepare_data_for_fit(X_in,y_in)
-    assert np.array_equal(X_exp,X_res)
+    assert X_res is X_in
+    #assert np.array_equal(X_exp,X_res)
     assert np.array_equal(y_exp,y_res)
+
+def test_prepare_data_for_fit_does_not_change_arguments():
+    x_orig = np.array(["a","b"])
+    y = np.array(["x",None])
+    replace_nan = ReplaceNoneWithValue()
+
+    x_res,y_res = replace_nan.prepare_data_for_fit(x_orig,y)
+
+    assert y[1] is None
+    assert y_res[1] == "N.a.N."
 
 @pytest.mark.parametrize("X_in,y_in,X_exp,y_exp,missing_indicator", get_test_data())
 def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,X_exp,y_exp,missing_indicator):
