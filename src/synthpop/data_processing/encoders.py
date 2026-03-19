@@ -98,6 +98,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
         Calculate the encoding.
+        
 
         :param X: 1D array of categorical data. This is contains the data to be encoded.
         :param y: 1D array of categorical data. The encoding is based on this data.

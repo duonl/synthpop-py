@@ -9,7 +9,7 @@ def get_test_data():
     return [
 #               X_in                y_in                          X_exp               y_exp
     (np.array(["a","b"]),      np.array(["x","y"]),np.array(["a","b"]),np.array(["x","y"]),"N.a.N."),
-    *[(np.array(["a","b","a"]),np.array(["x","y",missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array(["x","y",missing_indicator]),missing_indicator) for missing_target in [None,pd.NA,np.nan] for missing_indicator in missing_indicators],
+    *[(np.array(["a","b","a"]),np.array(["x","y",missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array(["x","y",missing_indicator],dtype=np.str_),missing_indicator) for missing_target in [None,pd.NA,np.nan] for missing_indicator in missing_indicators],
     *[(np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),"N.a.N.") ]
     
 ]
@@ -21,6 +21,7 @@ def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,X_exp,y_exp,missing_
     assert X_res is X_in
     #assert np.array_equal(X_exp,X_res)
     assert np.array_equal(y_exp,y_res)
+    assert y_exp.dtype == y_res.dtype
 
 def test_prepare_data_for_fit_does_not_change_arguments():
     x_orig = np.array(["a","b"])
