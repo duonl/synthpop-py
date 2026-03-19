@@ -71,9 +71,9 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     Replace missing values by a specified value, and remove after synthesis.
     """
 
-    def __init__(self):
+    def __init__(self,missing_marker= "N.a.N."):
         super().__init__()
-        self.missing_replacement = "N.a.N."
+        self.missing_replacement = missing_marker
     
     def prepare_data_for_fit(self,X:npt.ArrayLike, y:npt.ArrayLike)-> tuple[npt.ArrayLike,npt.ArrayLike]:
         """

@@ -7,23 +7,25 @@ from synthpop.data_processing.missing_value_handling import ReplaceNoneWithValue
 
 
 def get_test_data():
+    missing_indicators = ["missing","N.a.N."]
     return [
 #               X_in                y_in                          X_exp               y_exp
-    (np.array(["a","b"]),      np.array(["x","y"]),np.array(["a","b"]),np.array(["x","y"])),
-    *[(np.array(["a","b","a"]),np.array(["x","y",missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array(["x","y","N.a.N."])) for missing_target in [None,pd.NA,np.nan]],
-    *[(np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]))],
+    (np.array(["a","b"]),      np.array(["x","y"]),np.array(["a","b"]),np.array(["x","y"]),"N.a.N."),
+    *[(np.array(["a","b","a"]),np.array(["x","y",missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array(["x","y",missing_indicator]),missing_indicator) for missing_target in [None,pd.NA,np.nan] for missing_indicator in missing_indicators],
+    *[(np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),"N.a.N.") ]
+    
 ]
-@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp", get_test_data())
-def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,X_exp,y_exp):
-    replace_nan = ReplaceNoneWithValue()
+@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp,missing_indicator", get_test_data())
+def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,X_exp,y_exp,missing_indicator):
+    replace_nan = ReplaceNoneWithValue(missing_marker = missing_indicator)
 
     X_res,y_res = replace_nan.prepare_data_for_fit(X_in,y_in)
     assert np.array_equal(X_exp,X_res)
     assert np.array_equal(y_exp,y_res)
 
-@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp", get_test_data())
-def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,X_exp,y_exp):
-    replace_nan = ReplaceNoneWithValue()
+@pytest.mark.parametrize("X_in,y_in,X_exp,y_exp,missing_indicator", get_test_data())
+def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,X_exp,y_exp,missing_indicator):
+    replace_nan = ReplaceNoneWithValue(missing_marker = missing_indicator)
 
     X_res,y_res = replace_nan.prepare_data_for_fit(pd.Series(X_in,name="someName_X"),pd.Series(y_in,name="someName_y"))
     assert np.array_equal(X_exp,X_res)
