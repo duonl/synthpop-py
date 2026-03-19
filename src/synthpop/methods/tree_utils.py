@@ -1,14 +1,15 @@
 import numpy as np
 import pandas as pd
-from numpy.random import RandomState
 from typing import Self, Dict, Mapping, TypeVar, Generic
 import numpy.typing as npt
 from sklearn.tree import BaseDecisionTree
+from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_is_fitted
+from sklearn.utils import check_random_state
 
 T = TypeVar("T")
 
-class LeafNodeSampler:
+class LeafNodeSampler(BaseEstimator):
     """
     Adds a leaf-based synthetic sampling functionality to any fitted
     decision tree estimator. The sampler generates synthetic target values based on 
@@ -67,9 +68,39 @@ class LeafNodeSampler:
         
         """
         check_is_fitted(tree)
-        self.tree_ = tree
         
-        pass
+        X = np.asarray(X)
+        y = np.asarray(y)
+
+        if X.shape[0] != y.shape[0]:
+            raise ValueError(
+                f"X and y must have the same number of samples. "
+                f"Got {X.shape[0]} and {y.shape[0]}"
+            )
+
+        leaf_ids = tree.apply(X)
+        self._leaf_map = {}
+
+        for leaf_id, target in zip(leaf_ids, y):
+            if leaf_id not in self._leaf_map:
+                self._leaf_map[leaf_id] = {}
+
+            leaf_hist = self._leaf_map[leaf_id]
+
+            if pd.isna(target):
+                key = np.nan
+                leaf_hist[key] = leaf_hist.get(key, 0) + 1
+            else:
+                leaf_hist[target] = leaf_hist.get(target, 0) + 1
+
+        self.tree_ = tree
+
+        if self.random_state is None:
+            self.random_state_ = check_random_state(seed=42)
+        else:
+            self.random_state_ = check_random_state(self.random_state)
+
+        return self
 
     def sample_from_leaves(self, X_syn: npt.ArrayLike) -> np.ndarray:
         """
@@ -87,4 +118,30 @@ class LeafNodeSampler:
         :param random_state: Seed used to reproduce randomness
         :return: Sampled synthetic target values
         """
-        pass
+        
+        check_is_fitted(self, ["tree_", "_leaf_map", "random_state_"])
+        X_syn = np.asarray(X_syn)
+
+        leaf_ids = self.tree_.apply(X_syn)
+        n_samples = len(leaf_ids)
+
+        y_syn = np.empty(n_samples, dtype=object)
+
+        for i, leaf_id in enumerate(leaf_ids):
+            if leaf_id not in self._leaf_map:
+                raise ValueError(
+                    f"Leaf id {leaf_id} not seen during fitting."
+                )
+            
+            leaf_hist = self._leaf_map[leaf_id]
+            values = np.array(list(leaf_hist.keys()), dtype=object)
+            counts = np.array(list(leaf_hist.values()), dtype=np.int32)
+
+            if counts.sum() == 0:
+                y_syn[i] = np.nan
+                continue
+
+            probs = counts / counts.sum()
+            y_syn[i] = self.random_state_.choice(values, p=probs)
+
+        return y_syn
