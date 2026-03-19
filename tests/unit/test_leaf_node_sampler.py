@@ -59,6 +59,8 @@ def test_fit_sampler_parametrized_inputs(X, y, leaf_ids, expected_map):
     sampler.fit_sampler(tree, X, y)
 
     assert hasattr(sampler, "_leaf_map")
+    assert hasattr(sampler, "random_state_")
+    assert hasattr(sampler, "tree_")
     assert sampler._leaf_map.keys() == expected_map.keys()
 
     for leaf_id in expected_map:
