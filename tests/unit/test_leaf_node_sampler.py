@@ -1,5 +1,5 @@
 from sklearn.utils.validation import NotFittedError
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, clone
 import numpy as np
 import pandas as pd
 import pytest 
@@ -309,4 +309,27 @@ def test_sample_unhashable_tree_output_raises():
 
     with pytest.raises(TypeError):
         sampler.sample_from_leaves(np.array([[1]]))
+
+# ----- clonability tests -----
+def test_clone_works_and_fitted_sampler_does_not_preserve_state():
+    tree = DummyTree([10, 10, 20])
+    tree.tree_ = True
+
+    X = np.array([[1], [2], [3]])
+    y = np.array([0, 1, 1])
+
+    sampler = LeafNodeSampler(random_state=42)
+    sampler.fit_sampler(tree, X, y)
+
+    cloned = clone(sampler)
+
+    # Fitted attributes should NOT be copied
+    assert not hasattr(cloned, "_leaf_map")
+    assert not hasattr(cloned, "tree_")
+    assert not hasattr(cloned, "random_state_")
+
+    # Original remains intact
+    assert hasattr(sampler, "_leaf_map")
+    assert hasattr(sampler, "tree_")
+    assert hasattr(sampler, "random_state_")
 
