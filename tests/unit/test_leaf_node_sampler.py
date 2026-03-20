@@ -1,12 +1,10 @@
-from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import NotFittedError
+from sklearn.base import BaseEstimator
 import numpy as np
 import pandas as pd
 import pytest 
 
 from synthpop.methods.tree_utils import LeafNodeSampler
-
-from sklearn.base import BaseEstimator
 
 class DummyTree(BaseEstimator):
     def __init__(self, leaf_ids):
@@ -93,3 +91,128 @@ def test_fit_sampler_throws_unfitted():
 
     with pytest.raises(NotFittedError):
         sampler.fit_sampler(tree, X, y)
+
+# ----- sample from leaves test cases -----
+def helper_make_sampler(leaf_map, leaf_ids, random_state=42):
+    """
+    Helper to construct a minimally fitted sampler
+    """
+    sampler = LeafNodeSampler(random_state=random_state)
+    sampler._leaf_map = leaf_map
+    sampler.tree_ = DummyTree(leaf_ids)
+    sampler.tree_.tree_ = True
+    sampler.random_state_ = np.random.RandomState(random_state)
+
+    return sampler
+
+@pytest.mark.parametrize(
+    "X_syn",
+    [
+        np.array([0, 1, 2]),                         # numpy numeric
+        [0, 1, 2],                                   # python list numeric
+        pd.Series([0, 1, 2]),                        # pandas Series numeric
+        np.array(["a", "b", "c"]),                   # numpy strings
+        ["a", "b", "c"],                             # python list strings
+        pd.Series(["a", "b", "c"]),                  # pandas Series strings
+        np.array([None, np.nan, pd.NA], dtype=object),  # mixed missing
+        [None, np.nan, pd.NA],                        # python list mixed missing
+        np.array(["1", 1, "2"], dtype=object)
+    ],
+)
+
+def test_sample_from_leaves_various_input_types(X_syn):
+    """
+    Ensure sample_from_leaves works with multiple input container types and dtypes.
+    """
+
+    leaf_map = {10: {0: 3, 1: 1}}
+    leaf_ids = [10] * 3
+
+    sampler = helper_make_sampler(leaf_map, leaf_ids, random_state=42)
+    
+    y_syn = sampler.sample_from_leaves(X_syn)
+
+    expected_values = set(leaf_map[10].keys())
+
+    for val in y_syn:
+        if any(pd.isna(k) for k in expected_values):
+            assert pd.isna(val) or val in expected_values
+        else:
+            assert val in expected_values
+
+    assert len(y_syn) == len(X_syn)
+
+def test_sample_from_leaves_respects_probabilities():
+    """
+    Sampling should follow empirical probabilities.
+    """
+    sampler = helper_make_sampler(
+        leaf_map={10: {0: 3, 1: 1}},
+        leaf_ids=[10] * 1000,
+        random_state=42
+    )
+
+    X_syn = np.arange(1000).reshape(-1, 1)
+    y_syn = sampler.sample_from_leaves(X_syn)
+
+    proportion_ones = np.mean(y_syn == 1)
+
+    assert 0.15 < proportion_ones < 0.35
+
+def test_sample_from_leaves_handles_nan():
+    """
+    NaN values should be sampled correctly.
+    """
+    sampler = helper_make_sampler(
+        leaf_map={10: {np.nan: 2, pd.NA: 1, None: 1, 1: 1}},
+        leaf_ids=[10, 10, 10, 10, 10]
+    )
+
+    X_syn = np.array([0, 1, 2, 3, 4])
+    y_syn = sampler.sample_from_leaves(X_syn)
+
+    assert len(y_syn) == 5
+    assert any(pd.isna(v) for v in y_syn)
+
+
+def test_sample_from_leaves_unseen_leaf_raises():
+    """
+    Unseen leaf id should raise ValueError.
+    """
+    sampler = helper_make_sampler(
+        leaf_map={10: {0: 1}},
+        leaf_ids=[999]  # not in leaf_map
+    )
+
+    with pytest.raises(ValueError, match="Leaf id .* not seen during fitting"):
+        sampler.sample_from_leaves(np.array([0]))
+
+
+def test_sample_from_leaves_empty_histogram_returns_nan():
+    """
+    Empty histogram should return NaN.
+    """
+    sampler = helper_make_sampler(
+        leaf_map={10: {}},
+        leaf_ids=[10]
+    )
+
+    y_syn = sampler.sample_from_leaves(np.array([0]))
+
+    assert len(y_syn) == 1
+    assert pd.isna(y_syn[0])
+
+def test_sample_from_leaves_not_fitted():
+    """
+    Missing required attributes should raise AttributeError.
+    """
+    sampler = LeafNodeSampler()
+    with pytest.raises(AttributeError):
+        sampler.sample_from_leaves(np.array([0]))
+    sampler.tree_ = True
+    with pytest.raises(AttributeError):
+        sampler.sample_from_leaves(np.array([0]))
+    sampler._leaf_map = {}
+    with pytest.raises(AttributeError):
+        sampler.sample_from_leaves(np.array([0]))
+

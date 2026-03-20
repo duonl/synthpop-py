@@ -119,7 +119,13 @@ class LeafNodeSampler(BaseEstimator):
         :return: Sampled synthetic target values
         """
         
-        check_is_fitted(self, ["tree_", "_leaf_map", "random_state_"])
+        required_attrs = ["tree_", "_leaf_map", "random_state_"]
+        missing = [attr for attr in required_attrs if not hasattr(self, attr)]
+        if missing:
+            raise AttributeError(
+            f"LeafNodeSampler is not fitted. Missing attributes: {missing}. "
+            "Call `fit_sampler` first.")
+        
         X_syn = np.asarray(X_syn)
 
         leaf_ids = self.tree_.apply(X_syn)
