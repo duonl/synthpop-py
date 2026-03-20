@@ -46,10 +46,22 @@ class DummyTree(BaseEstimator):
         # --- mixed: None, np.nan, pd.NA ---
         (np.array([0, 1, 2, 3]), np.array([None, np.nan, pd.NA, 1], dtype=object), np.array([10, 10, 20, 20]),
             {10: {np.nan: 2}, 20: {np.nan: 1, 1: 1,}}),
+        
+        # --- mixed string and integer ---
+        (np.array([1, "1", 1], dtype=object), np.array([1, "1", 1.0], dtype=object), [1, 2, 1],
+            {1: {1: 2}, 2: {"1": 1}}),
+
+        # Single input
+        (np.array([1]), np.array([5]), np.array([10]),
+            {10: {5: 1}}),
+
     ],
 )
 
 def test_fit_sampler_parametrized_inputs(X, y, leaf_ids, expected_map):
+    """
+    From various inputs the correct count mapping should be created.
+    """
     tree = DummyTree(leaf_ids)
     tree.tree_ = True
 
@@ -70,6 +82,17 @@ def test_fit_sampler_parametrized_inputs(X, y, leaf_ids, expected_map):
                 )
             else:
                 assert sampler._leaf_map[leaf_id][key] == count
+
+def test_fit_sampler_empty_input():
+    tree = DummyTree([])
+    tree.tree_ = True
+    sampler = LeafNodeSampler()
+    X = np.empty((0, 1))
+    y = np.array([])
+
+    sampler.fit_sampler(tree, X, y)
+    assert hasattr(sampler, "_leaf_map")
+    assert sampler._leaf_map == {}
 
 def test_fit_sampler_throws_shape_mismatch():
     X = np.array([0, 1, 2])
@@ -115,8 +138,10 @@ def helper_make_sampler(leaf_map, leaf_ids, random_state=42):
         ["a", "b", "c"],                             # python list strings
         pd.Series(["a", "b", "c"]),                  # pandas Series strings
         np.array([None, np.nan, pd.NA], dtype=object),  # mixed missing
-        [None, np.nan, pd.NA],                        # python list mixed missing
-        np.array(["1", 1, "2"], dtype=object)
+        [None, np.nan, pd.NA],                       # python list mixed missing
+        np.array(["1", 1, "2"], dtype=object),       # mixed dtypes
+        np.array([[0], [1], [2]]),                   # 2d input
+        np.array([[[0]], [[1]], [[2]]])              # 3d input
     ],
 )
 
@@ -159,6 +184,20 @@ def test_sample_from_leaves_respects_probabilities():
 
     assert 0.15 < proportion_ones < 0.35
 
+def test_sample_large_imbalanced_distribution():
+    sampler = helper_make_sampler(
+        leaf_map={10: {0: 10**6, 1: 1}},
+        leaf_ids=[10] * 100
+    )
+
+    X = np.arange(100).reshape(-1, 1)
+    y = sampler.sample_from_leaves(X)
+
+    # Should overwhelmingly favour 0 but still include 1 occasionally
+    proportion_ones = np.mean(y == 1)
+
+    assert proportion_ones < 0.01
+
 def test_sample_from_leaves_handles_nan():
     """
     NaN values should be sampled correctly.
@@ -174,8 +213,43 @@ def test_sample_from_leaves_handles_nan():
     assert len(y_syn) == 5
     assert any(pd.isna(v) for v in y_syn)
 
+def test_sample_determinism_with_same_seed():
+    leaf_map = {10: {0: 3, 1: 1}}
+    leaf_ids = [10] * 5
 
-def test_sample_from_leaves_unseen_leaf_raises():
+    sampler1 = helper_make_sampler(leaf_map, leaf_ids, random_state=42)
+    sampler2 = helper_make_sampler(leaf_map, leaf_ids, random_state=42)
+
+    X = np.arange(5).reshape(-1, 1)
+
+    y1 = sampler1.sample_from_leaves(X)
+    y2 = sampler2.sample_from_leaves(X)
+
+    assert np.array_equal(y1, y2)
+
+def test_sample_empty_histogram_allows_nan():
+    sampler = helper_make_sampler(
+        leaf_map={10: {0: 0, 1: 0}},
+        leaf_ids=[10]
+    )
+
+    y = sampler.sample_from_leaves(np.array([[1]]))
+
+    assert len(y) == 1
+    assert pd.isna(y[0])
+
+def test_sample_all_values_same_leaf():
+    sampler = helper_make_sampler(
+        leaf_map={10: {5: 3}},
+        leaf_ids=[10] * 5
+    )
+
+    X = np.arange(5).reshape(-1, 1)
+    y = sampler.sample_from_leaves(X)
+
+    assert np.all(y == 5)
+
+def test_sample_from_leaves_raises_unseen():
     """
     Unseen leaf id should raise ValueError.
     """
@@ -202,7 +276,7 @@ def test_sample_from_leaves_empty_histogram_returns_nan():
     assert len(y_syn) == 1
     assert pd.isna(y_syn[0])
 
-def test_sample_from_leaves_not_fitted():
+def test_sample_from_leaves_raises_unfitted():
     """
     Missing required attributes should raise AttributeError.
     """
@@ -215,4 +289,24 @@ def test_sample_from_leaves_not_fitted():
     sampler._leaf_map = {}
     with pytest.raises(AttributeError):
         sampler.sample_from_leaves(np.array([0]))
+
+def test_sample_unhashable_tree_output_raises():
+    class BadTree(BaseEstimator):
+        def fit(self, X, y):
+            self.tree_ = True
+            return self
+
+        def apply(self, X):
+            return [[1]] * len(X)  # unhashable leaf ids
+
+    tree = BadTree()
+    tree.fit(None, None)
+
+    sampler = LeafNodeSampler()
+    sampler._leaf_map = {1: {0: 1}}
+    sampler.tree_ = tree
+    sampler.random_state_ = np.random.RandomState(42)
+
+    with pytest.raises(TypeError):
+        sampler.sample_from_leaves(np.array([[1]]))
 
