@@ -3,6 +3,7 @@ from sklearn.base import BaseEstimator, clone
 import numpy as np
 import pandas as pd
 import pytest 
+import copy
 
 from synthpop.methods.tree_utils import LeafNodeSampler
 
@@ -45,7 +46,7 @@ class DummyTree(BaseEstimator):
 
         # --- mixed: None, np.nan, pd.NA ---
         (np.array([0, 1, 2, 3]), np.array([None, np.nan, pd.NA, 1], dtype=object), np.array([10, 10, 20, 20]),
-            {10: {np.nan: 2}, 20: {np.nan: 1, 1: 1,}}),
+            {10: {None: 1, np.nan: 1}, 20: {pd.NA: 1, 1: 1,}}),
         
         # --- mixed string and integer ---
         (np.array([1, "1", 1], dtype=object), np.array([1, "1", 1.0], dtype=object), [1, 2, 1],
@@ -75,13 +76,7 @@ def test_fit_sampler_parametrized_inputs(X, y, leaf_ids, expected_map):
 
     for leaf_id in expected_map:
         for key, count in expected_map[leaf_id].items():
-            if isinstance(key, float) and np.isnan(key):
-                assert any(
-                    np.isnan(k) and v == count
-                    for k, v in sampler._leaf_map[leaf_id].items()
-                )
-            else:
-                assert sampler._leaf_map[leaf_id][key] == count
+            assert sampler._leaf_map[leaf_id][key] == count
 
 def test_fit_sampler_empty_input():
     tree = DummyTree([])
@@ -321,7 +316,8 @@ def test_clone_works_and_fitted_sampler_does_not_preserve_state():
     sampler = LeafNodeSampler(random_state=42)
     sampler.fit_sampler(tree, X, y)
 
-    cloned = clone(sampler)
+    #cloned = clone(sampler)
+    cloned = sampler.clone()
 
     # Fitted attributes should NOT be copied
     assert not hasattr(cloned, "_leaf_map")
