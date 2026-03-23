@@ -73,8 +73,9 @@ class LeafNodeSampler():
         The resulting empirical distributions are stored internally and used
         for sampling.
 
-        This function can be used with missing values, but those are not expected at this point in the synthesis process 
-        using CartMethod. When missing values are seen in `y`, a warning will be raised.
+        This function passes any missing or non-missing values of `y` to `tree`. However, at this point
+        in the CartMethod synthesis, missing values are not expected. So when missing values are seen in 
+        `y`, a warning will be raised.
 
         :param tree: A fitted decision tree. It must implement `apply(X)` to return leaf node IDs and must
             have compatibility with sklearn's `check_is_fitted`.
