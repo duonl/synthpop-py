@@ -89,7 +89,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     array(['x', 'y', None, 'z'], dtype=object)
     """
 
-    def __init__(self,missing_marker= "N.a.N."):
+    def __init__(self,missing_marker:str = "N.a.N."):
         super().__init__()
         self.missing_replacement = missing_marker
     
@@ -104,10 +104,13 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         """
 
         missing_mask = pd.isna(y)
-        if self.missing_replacement in y[~missing_mask]:
+        if self.missing_replacement in y[~missing_mask] and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
-        result = copy.copy(y)
+        # The result of np.copy is always a numpy array. If y is a pandas series, the expected output is a pandas series.
+        # So if y is a pandas series (or not numpy array), it is better to use copy.copy.
+        # If y is a numpy array, it is faster to use np.copy.
+        result = np.copy(y) if isinstance(y,np.ndarray) else copy.copy(y)
         result[missing_mask] = self.missing_replacement
         return(X,result.astype(np.str_))
 
