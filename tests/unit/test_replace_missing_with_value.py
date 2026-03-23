@@ -6,15 +6,20 @@ from synthpop.data_processing.missing_value_handling import ReplaceNoneWithValue
 
 def get_test_data():
     missing_indicators = ["missing","N.a.N."]
-    return [
+
+    test_data_np_arrays = [
 #               X_in                y_in                          X_exp               y_exp
     (np.array(["a","b"]),      np.array(["x","y"]),np.array(["a","b"]),np.array(["x","y"]),"N.a.N."),
     *[(np.array(["a","b","a"]),np.array(["x","y",missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array(["x","y",missing_indicator],dtype=np.str_),missing_indicator) for missing_target in [None,pd.NA,np.nan] for missing_indicator in missing_indicators],
     *[(np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),np.array(["a","b",None],dtype=np.object_),np.array(["x","y","y"]),"N.a.N.") ],
     *[(np.array(["a","b","a"]),np.array(["x","y",missing_indicator],dtype=np.str_),np.array(["a","b","a"]),np.array(["x","y",missing_indicator],dtype=np.str_),missing_indicator) for missing_indicator in missing_indicators],
     *[(np.array(["a","b","a"]),np.array([missing_target,missing_target,missing_target],dtype=np.object_),np.array(["a","b","a"]),np.array([missing_indicator,missing_indicator,missing_indicator],dtype=np.str_),missing_indicator) for missing_target in [None,pd.NA,np.nan] for missing_indicator in missing_indicators]
+    ]
+
+    test_data_lists = [(X_in.tolist(),y_in.tolist(),X_exp.tolist(),y_exp,missing_indicator) for X_in,y_in,X_exp,y_exp,missing_indicator in test_data_np_arrays]
+    return test_data_np_arrays + test_data_lists
     
-]
+
 @pytest.mark.parametrize("X_in,y_in,X_exp,y_exp,missing_indicator", get_test_data())
 def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,X_exp,y_exp,missing_indicator):
     replace_nan = ReplaceNoneWithValue(missing_marker = missing_indicator)
@@ -63,11 +68,12 @@ def get_post_synth_test_data():
     x_values = [np.array([]),np.array([1,2,3]),pd.Series(["a","b"])]
     missing_markers = ["N.a.N.","missing marker"]
     #               y_in                            y_exp                              missing_marker
-    y_values = [(np.array(["a",missing,"b"]),np.array(["a",None,"b"],dtype=np.object_),missing) for missing in missing_markers] + \
+    y_values_np_array = [(np.array(["a",missing,"b"]),np.array(["a",None,"b"],dtype=np.object_),missing) for missing in missing_markers] + \
     [(np.array(["a","c","b",missing]),np.array(["a","c","b",None],dtype=np.object_),missing) for missing in missing_markers] + \
     [(np.array(["a","c","b",not_missing]),np.array(["a","c","b",not_missing],dtype=np.str_),None) for not_missing in ["not missing","missing","Nan","None"]]
 
-    return [(x_val,*y_val) for x_val in x_values for y_val in y_values]
+    y_values_list = [(y_in.tolist(),y_exp.tolist(),missmarker) for y_in,y_exp,missmarker in y_values_np_array]
+    return [(x_val,*y_val) for x_val in x_values for y_val in y_values_np_array +y_values_list ]
 
 @pytest.mark.parametrize("x,y_in,y_exp,missing_marker", get_post_synth_test_data())
 def test_post_synth_transform_correct_on_data(x,y_in,y_exp,missing_marker):
@@ -79,6 +85,8 @@ def test_post_synth_transform_correct_on_data(x,y_in,y_exp,missing_marker):
     y_res = transform.post_synth_transform(x,y_in)
     assert np.array_equal(y_res,y_exp)
     assert y_res.dtype == y_exp.dtype
+
+
 
 @pytest.mark.parametrize("x,y_in,y_exp,missing_marker", get_post_synth_test_data())
 def test_post_synth_transform_correct_on_data_pandas(x,y_in,y_exp,missing_marker):
