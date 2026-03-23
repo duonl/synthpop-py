@@ -1,9 +1,8 @@
 from sklearn.utils.validation import NotFittedError
-from sklearn.base import BaseEstimator, clone
+from sklearn.base import BaseEstimator
 import numpy as np
 import pandas as pd
 import pytest 
-import copy
 
 from synthpop.methods.tree_utils import LeafNodeSampler
 
@@ -119,7 +118,7 @@ def helper_make_sampler(leaf_map, leaf_ids, random_state=42):
     sampler._leaf_map = leaf_map
     sampler.tree_ = DummyTree(leaf_ids)
     sampler.tree_.tree_ = True
-    sampler.random_state_ = np.random.RandomState(random_state)
+    sampler.random_state_ = np.random.default_rng(random_state)
 
     return sampler
 

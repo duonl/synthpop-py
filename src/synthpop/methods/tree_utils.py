@@ -4,7 +4,6 @@ from typing import Self, TypeVar
 import numpy.typing as npt
 from sklearn.tree import BaseDecisionTree
 from sklearn.utils.validation import check_is_fitted
-from sklearn.utils import check_random_state
 import warnings
 
 T = TypeVar("T")
@@ -51,11 +50,14 @@ class LeafNodeSampler():
         def transform(self, X_syn):
             return self.tree_sampler_.sample_from_leaves(X_syn)
     """
-    def __init__(self, random_state: int | None = None):
+    def __init__(self, random_state: int | np.random.Generator | None = None):
         """
         Initialise the sampler.
-        :param random_state: Seed for the internal random number generator. Ensures reproducible sampling
-            when set to a fixed integer.
+        :param random_state: Controls the random number generation used for sampling.
+            - If `int`, it is used as a seed to initialise a new `numpy.random.Generator`
+                via `np.random.default_rng`.
+            - If `numpy.random.Generator`, it is used directly.
+            - If `None`, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
         pass
@@ -109,10 +111,11 @@ class LeafNodeSampler():
 
         self.tree_ = tree
 
-        if self.random_state is None:
-            self.random_state_ = check_random_state(seed=42)
+        if isinstance(self.random_state, np.random.Generator):
+            self.random_state_ = self.random_state
         else:
-            self.random_state_ = check_random_state(self.random_state)
+            seed = 42 if self.random_state is None else self.random_state
+            self.random_state_ = np.random.default_rng(seed)
 
         return self
 
@@ -164,7 +167,7 @@ class LeafNodeSampler():
                 continue
             
             cum_counts = np.cumsum(counts)
-            r = self.random_state_.randint(0, total)
+            r = self.random_state_.integers(0, total)
             idx = np.searchsorted(cum_counts, r, side="right")
             y_syn[i] = values[idx]
 
