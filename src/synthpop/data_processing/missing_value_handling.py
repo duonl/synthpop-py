@@ -102,7 +102,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return: a tuple ``(X,y)``. Leaves ``X`` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of ``y``. 
         """
-
+        y = np.asarray(y)
         missing_mask = pd.isna(y)
         if self.missing_replacement in y[~missing_mask] and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
