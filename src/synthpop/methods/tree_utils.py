@@ -74,26 +74,20 @@ class LeafNodeSampler():
             Array-like shape (n_samples,).
         :return: The fitted sampler instance.        
         """
+        
+        # input validation
         leaf_ids = np.asarray(leaf_ids)
         y = np.asarray(y)
 
         if leaf_ids.ndim != 1:
-            raise ValueError(
-                f"leaf_ids must be 1-dimensional with shape (n_samples,), "
-                f"got shape {leaf_ids.shape} instead."
-            )
-        
+            raise ValueError(f"leaf_ids must be 1-dimensional with shape (n_samples,), got shape {leaf_ids.shape} instead.")
         if y.ndim != 1:
-            raise ValueError(
-                f"y must be 1-dimensional with shape (n_samples,), "
-                f"got shape {y.shape} instead."
-            )
-
+            raise ValueError(f"y must be 1-dimensional with shape (n_samples,), got shape {y.shape} instead.")
+        if len(leaf_ids) == 0 or len(y) == 0:
+            raise ValueError("leaf_ids and y must be non-empty.")
         if leaf_ids.shape[0] != y.shape[0]:
             raise ValueError(
-                f"leaf_ids and y must have the same number of samples. "
-                f"Got {leaf_ids.shape[0]} and {y.shape[0]} instead."
-            )
+                f"leaf_ids and y must have the same number of samples. Got {leaf_ids.shape[0]} and {y.shape[0]} instead.")
 
         self._leaf_map = {}
 
@@ -141,6 +135,11 @@ class LeafNodeSampler():
         leaf_ids = np.asarray(leaf_ids)
         n_samples = len(leaf_ids)
 
+        if leaf_ids.ndim != 1:
+            raise ValueError(f"leaf_ids must be 1-dimensional with shape (n_samples,), got shape {leaf_ids.shape} instead.")
+        if n_samples == 0:
+            raise ValueError(f"leaf_ids must be non-empty.")
+
         y_syn = np.empty(n_samples, dtype=object)
 
         for i, leaf_id in enumerate(leaf_ids):
@@ -150,13 +149,15 @@ class LeafNodeSampler():
                 )
             
             leaf_hist = self._leaf_map[leaf_id]
-            values = np.array(list(leaf_hist.keys()), dtype=object)
-            counts = np.array(list(leaf_hist.values()), dtype=np.int64)
+            values = np.array(list(leaf_hist.keys()))
+            counts = np.array(list(leaf_hist.values()))
 
             total = counts.sum()
             if total == 0:
-                y_syn[i] = np.nan
-                continue
+                raise ValueError(
+                    f"Leaf {leaf_id} has an empty leaf map. "
+                    f"This indicates a corrupted or inconsistent LeafNodeSampler state."
+                )
             
             cum_counts = np.cumsum(counts)
             r = self.random_state_.integers(0, total)

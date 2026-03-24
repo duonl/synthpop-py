@@ -58,16 +58,7 @@ def test_fit_sampler_parametrized_inputs(leaf_ids, y, expected_map):
         for key, count in expected_map[leaf_id].items():
             assert sampler._leaf_map[leaf_id][key] == count
 
-def test_fit_sampler_empty_input():
-    sampler = LeafNodeSampler()
-    leaf_ids = np.array([])
-    y = np.array([])
-
-    sampler.fit_sampler(leaf_ids, y)
-    assert hasattr(sampler, "_leaf_map")
-    assert sampler._leaf_map == {}
-
-def test_fit_sampler_throws_shape_mismatch():
+def test_fit_sampler_raises_shape_mismatch():
     y = np.array([0, 1])
     leaf_ids = np.array([10, 10, 20])
     sampler = LeafNodeSampler()
@@ -75,7 +66,7 @@ def test_fit_sampler_throws_shape_mismatch():
     with pytest.raises(ValueError, match="must have the same number of samples"):
         sampler.fit_sampler(leaf_ids, y)
 
-def test_fit_sampler_throws_dimension_mismatch():
+def test_fit_sampler_raises_dimension_mismatch():
     sampler = LeafNodeSampler()
     leaf_ids = [[10], [10], [20]]
     y = [0, 1, 2] 
@@ -85,6 +76,18 @@ def test_fit_sampler_throws_dimension_mismatch():
     with pytest.raises(ValueError, match="leaf_ids must be 1-dimensional"):
         sampler.fit_sampler(leaf_ids, y)
     with pytest.raises(ValueError, match="y must be 1-dimensional"):
+        sampler.fit_sampler(leaf_ids2, y2)
+
+def test_fit_sampler_raises_non_empty():
+    sampler = LeafNodeSampler()
+    leaf_ids = []
+    y = [0, 1, 2]
+    leaf_ids2 = [1, 2, 3]
+    y2 = []
+
+    with pytest.raises(ValueError, match="must be non-empty"):
+        sampler.fit_sampler(leaf_ids, y)
+    with pytest.raises(ValueError, match="must be non-empty"):
         sampler.fit_sampler(leaf_ids2, y2)
 
 # ----- sample from leaves test cases -----
@@ -119,44 +122,32 @@ def test_sample_from_leaves_various_input_types(leaf_ids):
     expected_values = set(leaf_map[10].keys())
 
     for val in y_syn:
-        if any(pd.isna(k) for k in expected_values):
-            assert pd.isna(val) or val in expected_values
-        else:
             assert val in expected_values
 
     assert len(y_syn) == len(leaf_ids)
 
-def test_sample_from_leaves_respects_probabilities():
-    """
-    Sampling should follow empirical probabilities.
-    """
-    leaf_ids= [10] * 1000
-    sampler = helper_make_sampler(
-        leaf_map={10: {0: 3, 1: 1}},
-        leaf_ids=leaf_ids,
-        random_state=42
-    )
+class StubRNG:
+    def __init__(self, values):
+        self.values = iter(values)
 
-    y_syn = sampler.sample_from_leaves(leaf_ids)
+    def integers(self, low, high):
+        v = next(self.values)
+        # Map stub value into valid range
+        # This mimics modulo behaviour within range
+        return low + (v % (high - low))
+    
+def test_sampling_deterministic_with_stub_rng():
+    rng = StubRNG([0, 3, 1, 2])  # controlled indices
 
-    proportion_ones = np.mean(y_syn == 1)
+    sampler = LeafNodeSampler()
+    sampler._leaf_map = {10: {0: 3, 1: 1}}
+    sampler.random_state_ = rng
 
-    assert 0.24 < proportion_ones < 0.26
-
-def test_sample_large_imbalanced_distribution():
-    leaf_ids= [10] * 1000000
-    sampler = helper_make_sampler(
-        leaf_map={10: {0: 10**5, 1: 1}},
-        leaf_ids= leaf_ids
-    )
+    leaf_ids = [10, 10, 10, 10]
 
     y = sampler.sample_from_leaves(leaf_ids)
 
-    # Should overwhelmingly favour 0 but still include 1 occasionally
-    proportion_ones = np.mean(y == 1)
-
-    assert proportion_ones < 0.01
-    assert proportion_ones > 0
+    assert list(y) == [0, 1, 0, 0]
 
 def test_sample_from_leaves_handles_nan():
     """
@@ -185,16 +176,14 @@ def test_sample_determinism_with_same_seed():
 
     assert np.array_equal(y1, y2)
 
-def test_sample_empty_histogram_allows_nan():
+def test_sample_raises_empty_histogram():
     sampler = helper_make_sampler(
         leaf_map={10: {0: 0, 1: 0}},
         leaf_ids=[10]
     )
 
-    y = sampler.sample_from_leaves([10])
-
-    assert len(y) == 1
-    assert pd.isna(y[0])
+    with pytest.raises(ValueError, match="has an empty leaf map"):
+        y = sampler.sample_from_leaves([10])
 
 def test_sample_from_leaves_raises_unseen():
     """
@@ -208,21 +197,6 @@ def test_sample_from_leaves_raises_unseen():
     with pytest.raises(ValueError, match="Leaf id .* not seen during fitting"):
         sampler.sample_from_leaves(np.array([0]))
 
-
-def test_sample_from_leaves_empty_histogram_returns_nan():
-    """
-    Empty histogram should return NaN.
-    """
-    sampler = helper_make_sampler(
-        leaf_map={10: {}},
-        leaf_ids=[10]
-    )
-
-    y_syn = sampler.sample_from_leaves([10])
-
-    assert len(y_syn) == 1
-    assert pd.isna(y_syn[0])
-
 def test_sample_from_leaves_raises_unfitted():
     """
     Missing required attributes should raise AttributeError.
@@ -234,15 +208,15 @@ def test_sample_from_leaves_raises_unfitted():
     with pytest.raises(AttributeError):
         sampler.sample_from_leaves(np.array([0]))
 
-def test_sample_unhashable_tree_output_raises():
+def test_sample_from_leaves_raises_input_val():
     sampler = LeafNodeSampler()
     sampler._leaf_map = {1: {0: 1}}
-    sampler.random_state_ = np.random.RandomState(42)
+    sampler.random_state_ = np.random.default_rng(42)
 
-    bad_leafs_id = [[1]]
-
-    with pytest.raises(TypeError):
-        sampler.sample_from_leaves(bad_leafs_id)
+    with pytest.raises(ValueError, match="leaf_ids must be 1-dimensional"):
+        sampler.sample_from_leaves([[1]])
+    with pytest.raises(ValueError, match="leaf_ids must be non-empty"):
+        sampler.sample_from_leaves([])
 
 # ----- clonability tests -----
 def test_clone_works_and_fitted_sampler_does_not_preserve_state():
