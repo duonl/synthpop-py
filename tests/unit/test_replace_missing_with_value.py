@@ -72,7 +72,7 @@ def get_post_synth_test_data():
     [(np.array(["a","c","b",missing]),np.array(["a","c","b",None],dtype=np.object_),missing) for missing in missing_markers] + \
     [(np.array(["a","c","b",not_missing]),np.array(["a","c","b",not_missing],dtype=np.str_),None) for not_missing in ["not missing","missing","Nan","None"]]
 
-    y_values_list = [(y_in.tolist(),y_exp.tolist(),missmarker) for y_in,y_exp,missmarker in y_values_np_array]
+    y_values_list = [(y_in.tolist(),y_exp,missmarker) for y_in,y_exp,missmarker in y_values_np_array]
     return [(x_val,*y_val) for x_val in x_values for y_val in y_values_np_array +y_values_list ]
 
 @pytest.mark.parametrize("x,y_in,y_exp,missing_marker", get_post_synth_test_data())

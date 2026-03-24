@@ -92,7 +92,13 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     def __init__(self,missing_marker:str = "N.a.N."):
         super().__init__()
         self.missing_replacement = missing_marker
-    
+    def _copy_y(self,y):
+        if isinstance(y,pd.Series) or isinstance(y,np.ndarray):
+            y_arr = np.copy(y) if isinstance(y,np.ndarray) else copy.copy(y)
+        else:
+            y_arr = np.asarray(y,dtype=np.object_,copy=True)
+
+        return y_arr
     def prepare_data_for_fit(self,X:npt.ArrayLike, y:npt.ArrayLike)-> tuple[npt.ArrayLike,npt.ArrayLike]:
         """
         Replaces missing values in the target with "N.a.N."
@@ -102,17 +108,16 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return: a tuple ``(X,y)``. Leaves ``X`` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of ``y``. 
         """
-        y = np.asarray(y)
-        missing_mask = pd.isna(y)
-        if self.missing_replacement in y[~missing_mask] and missing_mask.any():
+        y_arr = self._copy_y(y)
+        missing_mask = pd.isna(y_arr)
+        if self.missing_replacement in y_arr[~missing_mask] and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
         # The result of np.copy is always a numpy array. If y is a pandas series, the expected output is a pandas series.
         # So if y is a pandas series (or not numpy array), it is better to use copy.copy.
         # If y is a numpy array, it is faster to use np.copy.
-        result = np.copy(y) if isinstance(y,np.ndarray) else copy.copy(y)
-        result[missing_mask] = self.missing_replacement
-        return(X,result.astype(np.str_))
+        y_arr[missing_mask] = self.missing_replacement
+        return(X,y_arr.astype(np.str_))
 
     def post_synth_transform(self,X:npt.ArrayLike,y:npt.ArrayLike) -> npt.ArrayLike:
         """
@@ -123,10 +128,11 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return:  The synthesised target with missing values.
         """ 
-        mask = y == self.missing_replacement
+        y_arr = self._copy_y(y)
+        mask = np.equal(y_arr ,self.missing_replacement)
         if not mask.any():
-            return y
+            return np.array(y) if not (isinstance(y,pd.Series) or isinstance(y,np.ndarray)) else y
         
-        result = y.astype(np.object_)
-        result[y == self.missing_replacement] = None
-        return result
+        y_arr = y_arr.astype(np.object_)
+        y_arr[mask] = None
+        return y_arr
