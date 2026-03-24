@@ -1,4 +1,3 @@
-from sklearn.utils.validation import NotFittedError
 import numpy as np
 import pandas as pd
 import pytest 

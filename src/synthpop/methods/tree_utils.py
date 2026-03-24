@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 from typing import Self, TypeVar
 import numpy.typing as npt
-from sklearn.tree import BaseDecisionTree
-from sklearn.utils.validation import check_is_fitted
 import warnings
 
 T = TypeVar("T")
