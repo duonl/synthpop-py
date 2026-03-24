@@ -130,11 +130,17 @@ class StubRNG:
     def __init__(self, values):
         self.values = iter(values)
 
-    def integers(self, low, high):
-        v = next(self.values)
-        # Map stub value into valid range
-        # This mimics modulo behaviour within range
-        return low + (v % (high - low))
+    def integers(self, low, high, size=None):
+        if size is None:
+            v = next(self.values)
+            return low + (v % (high - low))
+
+        # Return array of values
+        out = []
+        for _ in range(size):
+            v = next(self.values)
+            out.append(low + (v % (high - low)))
+        return np.array(out)
     
 def test_sampling_deterministic_with_stub_rng():
     rng = StubRNG([0, 3, 1, 2])  # controlled indices
