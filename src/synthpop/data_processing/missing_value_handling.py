@@ -92,13 +92,18 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     def __init__(self,missing_marker:str = "N.a.N."):
         super().__init__()
         self.missing_replacement = missing_marker
+
     def _copy_y(self,y):
-        if isinstance(y,pd.Series) or isinstance(y,np.ndarray):
-            y_arr = np.copy(y) if isinstance(y,np.ndarray) else copy.copy(y)
+        # The result of np.copy is always a numpy array. If y is a pandas series, the expected output is a pandas series.
+        # So if y is a pandas series (or not numpy array), it is better to use copy.copy.
+        # If y is a numpy array, it is faster to use np.copy.
+        if isinstance(y,pd.Series):
+            y_arr = y.copy(deep=True) 
         else:
             y_arr = np.asarray(y,dtype=np.object_,copy=True)
 
         return y_arr
+    
     def prepare_data_for_fit(self,X:npt.ArrayLike, y:npt.ArrayLike)-> tuple[npt.ArrayLike,npt.ArrayLike]:
         """
         Replaces missing values in the target with "N.a.N."
@@ -113,9 +118,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         if np.any(np.equal(y_arr[~missing_mask], self.missing_replacement)) and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
-        # The result of np.copy is always a numpy array. If y is a pandas series, the expected output is a pandas series.
-        # So if y is a pandas series (or not numpy array), it is better to use copy.copy.
-        # If y is a numpy array, it is faster to use np.copy.
+        
         y_arr[missing_mask] = self.missing_replacement
         return(X,y_arr.astype(np.str_))
 

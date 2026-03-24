@@ -45,7 +45,8 @@ def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,y_exp,missing
     replace_nan = ReplaceNoneWithValue(missing_marker = missing_indicator)
 
     x_pd = pd.Series(X_in,name="someName_X")
-    X_res,y_res = replace_nan.prepare_data_for_fit(x_pd,pd.Series(y_in,name="someName_y"))
+    y_pd = pd.Series(y_in,name="someName_y")
+    X_res,y_res = replace_nan.prepare_data_for_fit(x_pd,y_pd)
     assert X_res is x_pd
     assert np.array_equal(y_exp,y_res)
 
@@ -54,6 +55,8 @@ def test_prepare_data_for_fit_numeric_correctness_pandas(X_in,y_in,y_exp,missing
 
     assert y_res.name == "someName_y"
     assert X_res.name == "someName_X"
+
+    assert (y_res.index == y_pd.index).all()
 
 @pytest.mark.parametrize("missing",[None,pd.NA,np.nan])
 def test_prepare_data_for_fit_error_when_nan_is_a_value(missing):
@@ -70,6 +73,18 @@ def test_prepare_data_for_fit_error_when_nan_is_a_value(missing):
 
     with pytest.raises(ValueError):
         replace_nan.prepare_data_for_fit(X,y.tolist())
+
+@pytest.mark.parametrize("empty_data",
+                         [(np.array([])),
+                          (pd.Series([])),
+                          ([])
+                          ])
+def test_prepare_data_for_fit_empty(empty_data):
+    replace_nan = ReplaceNoneWithValue()
+    x_res,y_res = replace_nan.prepare_data_for_fit(np.array(["s"]),empty_data)
+    assert len(y_res) == 0
+
+
 
 def get_post_synth_test_data():
     x_values = [np.array([]),np.array([1,2,3]),pd.Series(["a","b"])]
@@ -126,3 +141,13 @@ def test_post_synth_transform_does_nothing_when_no_nan():
 
     result = replace_nan.post_synth_transform(X,y)
     assert (result == y).all()
+
+@pytest.mark.parametrize("empty_data",
+                         [(np.array([])),
+                          (pd.Series([])),
+                          ([])
+                          ])
+def test_post_synth_transform_empty(empty_data):
+    replace_nan = ReplaceNoneWithValue()
+    y_res = replace_nan.post_synth_transform(np.array(["s"]),empty_data)
+    assert len(y_res) == 0
