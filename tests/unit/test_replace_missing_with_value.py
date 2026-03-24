@@ -65,6 +65,12 @@ def test_prepare_data_for_fit_error_when_nan_is_a_value(missing):
     with pytest.raises(ValueError):
         replace_nan.prepare_data_for_fit(X,y)
 
+    with pytest.raises(ValueError):
+        replace_nan.prepare_data_for_fit(X,pd.Series(y))
+
+    with pytest.raises(ValueError):
+        replace_nan.prepare_data_for_fit(X,y.tolist())
+
 def get_post_synth_test_data():
     x_values = [np.array([]),np.array([1,2,3]),pd.Series(["a","b"])]
     missing_markers = ["N.a.N.","missing marker"]

@@ -110,7 +110,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         """
         y_arr = self._copy_y(y)
         missing_mask = pd.isna(y_arr)
-        if self.missing_replacement in y_arr[~missing_mask] and missing_mask.any():
+        if np.any(np.equal(y_arr[~missing_mask], self.missing_replacement)) and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
         # The result of np.copy is always a numpy array. If y is a pandas series, the expected output is a pandas series.
