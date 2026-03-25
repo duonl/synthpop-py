@@ -134,7 +134,6 @@ class StubRNG:
             v = next(self.values)
             return low + (v % (high - low))
 
-        # Return array of values
         out = []
         for _ in range(size):
             v = next(self.values)
@@ -154,20 +153,27 @@ def test_sampling_deterministic_with_stub_rng():
 
     assert list(y) == [0, 1, 0, 0]
 
-def test_sample_from_leaves_handles_nan():
-    """
-    NaN values should be sampled correctly.
-    """
-    leaf_ids=[10, 10, 10, 10, 10]
+import pytest
+import numpy as np
+import pandas as pd
+
+@pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
+def test_sample_from_leaves_each_missing_type(missing_value):
+    leaf_ids = [10] * 100
+
     sampler = helper_make_sampler(
-        leaf_map={10: {np.nan: 2, pd.NA: 1, None: 1, 1: 1}},
+        leaf_map={10: {missing_value: 10, 1: 1}},
         leaf_ids=leaf_ids
     )
 
     y_syn = sampler.sample_from_leaves(leaf_ids)
 
-    assert len(y_syn) == 5
-    assert any(pd.isna(v) for v in y_syn)
+    if missing_value is None:
+        assert any(v is None for v in y_syn)
+    elif missing_value is pd.NA:
+        assert any(v is pd.NA for v in y_syn)
+    else:  # np.nan
+        assert any(isinstance(v, float) and np.isnan(v) for v in y_syn)
 
 def test_sample_determinism_with_same_seed():
     leaf_map = {10: {0: 3, 1: 1}}
@@ -231,7 +237,6 @@ def test_clone_works_and_fitted_sampler_does_not_preserve_state():
     sampler = LeafNodeSampler(random_state=42)
     sampler.fit_sampler(leaf_ids, y)
 
-    #cloned = clone(sampler)
     cloned = sampler.clone()
 
     # Fitted attributes should NOT be copied
