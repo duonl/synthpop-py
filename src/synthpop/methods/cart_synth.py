@@ -56,11 +56,12 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         # self.encoder.fit(X)
         # data_encoded = self.encoder.transform(X)
         # super().fit(data_encoded, y)
+        # leaf_ids = self.apply(data_encoded)
         # if self.tree_sampler is None:
         #     self.tree_sampler_= LeafNodeSampler(random_state = self.random_state_)
         # else:
         #     self.tree_sampler_ = clone(self.tree_sampler)
-        # self.tree_sampler_.fit_sampler(self, data_encoded, y)
+        # self.tree_sampler_.fit_sampler(leaf_ids, y)
         return self
 
     def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
@@ -70,8 +71,10 @@ class TreeClassifierMethod(DecisionTreeClassifier):
         :param X: Input dataset
         :return: Input dataset with predicted column.
         """
-        # should call sklearn.utils.validation.check_is_fitted(self),
-        # return self.tree_sampler_.sample_from_leaves(X)
+        # should call sklearn.utils.validation.check_is_fitted(self)
+        # data_encoded = self.encoder.transform(X)
+        # leaf_ids = self.apply(data_encoded)
+        # return self.tree_sampler_.sample_from_leaves(leaf_ids)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
@@ -123,11 +126,14 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         self.encoder.fit(X)
         data_encoded = self.encoder.transform(X)
         super().fit(data_encoded, y)
+
+        leaf_ids = self.apply(data_encoded)
         if self.tree_sampler is None:
             self.tree_sampler_= LeafNodeSampler(random_state=self.random_state_)
         else:
             self.tree_sampler_ = clone(self.tree_sampler)
-        self.tree_sampler_.fit_sampler(self, data_encoded, y)
+
+        self.tree_sampler_.fit_sampler(leaf_ids, y)
         return self
 
     def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
@@ -137,8 +143,10 @@ class TreeRegressorMethod(DecisionTreeRegressor):
         :param X: Input dataset
         :return: Input dataset with predicted column.
         """
-        # should call sklearn.utils.validation.check_is_fitted(self),
-        # return self.tree_sampler_.sample_from_leaves(X)
+        # should call sklearn.utils.validation.check_is_fitted(self)
+        # data_encoded = self.encoder.transform(X)
+        # leaf_ids = self.apply(data_encoded)
+        # return self.tree_sampler_.sample_from_leaves(leaf_ids)
         return pd.DataFrame()
 
     def get_feature_names_out(self):
