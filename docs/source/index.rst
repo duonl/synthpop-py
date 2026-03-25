@@ -20,6 +20,7 @@ documentation for details.
    user guides/examples
    functional descriptions/fd_index
    developer/developer_index.md
+   documentation.md
 
 Indices and tables
 ==================
