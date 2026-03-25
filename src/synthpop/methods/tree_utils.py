@@ -141,11 +141,17 @@ class LeafNodeSampler():
         y_syn = np.empty(n_samples, dtype=object)
 
         unique_leaves, inverse_indices = np.unique(leaf_ids, return_inverse=True)
+        order = np.argsort(inverse_indices)
+        sorted_inv = inverse_indices[order]
+        split_points = np.flatnonzero(np.diff(sorted_inv)) + 1
+        groups = np.split(order, split_points)
 
-        for leaf in unique_leaves:
+        for leaf_idx, leaf in enumerate(unique_leaves):
             if leaf not in self._leaf_map:
                 raise ValueError(f"Leaf id {leaf} not seen during fitting.")
-        
+
+            indices = groups[leaf_idx]
+
             leaf_hist = self._leaf_map[leaf]
             values = np.array(list(leaf_hist.keys()))
             counts = np.array(list(leaf_hist.values()))
@@ -155,13 +161,11 @@ class LeafNodeSampler():
                 raise ValueError(
                     f"Leaf {leaf} has an empty leaf map. This indicates a corrupted or inconsistent LeafNodeSampler state."
                 )
-            
-            mask = np.equal(leaf_ids, leaf)
-            n_leaf_samples = mask.sum()
+
             cum_counts = np.cumsum(counts)
-            r = self.random_state_.integers(0, total, size=n_leaf_samples)
+            r = self.random_state_.integers(0, total, size=len(indices))
             idx = np.searchsorted(cum_counts, r, side="right")
-            y_syn[mask] = values[idx]
+            y_syn[indices] = values[idx]
 
         return y_syn
 
