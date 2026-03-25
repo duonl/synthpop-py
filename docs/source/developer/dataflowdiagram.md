@@ -1,3 +1,5 @@
+
+# Dataflow diagram
 ```{mermaid}
 flowchart TD
       U(["User"])-->|Step 1| S["Synthesiser()"]

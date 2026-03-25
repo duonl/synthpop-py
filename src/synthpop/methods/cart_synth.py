@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
-from synthpop.methods import base_synth, LeafNodeSampler
+from synthpop.methods import base_synth, tree_utils
 import numpy.typing as npt
 
 class TreeClassifierMethod(DecisionTreeClassifier):
@@ -22,7 +22,7 @@ class TreeClassifierMethod(DecisionTreeClassifier):
     def __init__(self, *,
                  encoder: TransformerMixin = PCAEncoder(),
                  missing_handling: BaseMissingValueHandler = ReplaceNoneWithValue(),
-                 tree_sampler: LeafNodeSampler | None = None,
+                 tree_sampler: tree_utils.LeafNodeSampler | None = None,
                  criterion: Literal['gini'] | Literal['entropy'] | Literal['log_loss'] = "gini",
                  splitter: Literal['best'] | Literal['random'] = "best",
                  max_depth: None | int = None,
@@ -90,7 +90,7 @@ class TreeRegressorMethod(DecisionTreeRegressor):
     def __init__(self, *,
                  encoder: TransformerMixin = MeanEncoder(),
                  missing_handling: BaseMissingValueHandler = MissingValuePredictor(),
-                 tree_sampler: LeafNodeSampler | None = None,
+                 tree_sampler: tree_utils.LeafNodeSampler | None = None,
                  criterion: Literal['squared_error'] | Literal['friedman_mse'] | Literal[
                      'absolute_error'] | Literal['poisson'] = "squared_error",
                  splitter: Literal['best'] | Literal['random'] = "best",
