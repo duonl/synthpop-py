@@ -153,10 +153,6 @@ def test_sampling_deterministic_with_stub_rng():
 
     assert list(y) == [0, 1, 0, 0]
 
-import pytest
-import numpy as np
-import pandas as pd
-
 @pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 def test_sample_from_leaves_each_missing_type(missing_value):
     leaf_ids = [10] * 100
