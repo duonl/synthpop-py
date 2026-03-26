@@ -12,7 +12,7 @@ Docstrings are required for all public classes, methods and functions. For inter
 Extra user guides and examples are not always needed, but should be provided if the user has to do "new" things to use this feature. 
 
 ## About writing documentation.
-We aim to write documentation in a way that is easy to produce and can be automaticalyl converted into a more readable format
+We aim to write documentation in a way that is easy to produce and can be automatically converted into a more readable format.
 For now, we use markdown to write most documentation. Only the docstrings in the code are in [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html). The flavor of markdown that we use is [MyST](https://myst-parser.readthedocs.io/en/latest/syntax/typography.html), which stands for Markedly StructuredText. MyST is a strict superset of [CommonMark](https://commonmark.org/).
 
 MyST has been configured with `dollarmath` and `amsmath` enabled. The `dollarmath` extension allows inline LaTeX expressions using dollar-sign syntax, like this: `$a^2 = b^2 + c^2$` to write $a^2 = b^2 + c^2$. The `amsmath` extension enables full LaTeX math environments to be used directly in MyST markdown, for example:
