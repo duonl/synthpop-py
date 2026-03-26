@@ -2,20 +2,20 @@
 
 We document for both users and developers. 
 The [api docs](./api%20reference/api%20docs%20index.rst) is for users quickly wanting to read the documentation of a specific method.
-Users new to this package should look at the [examples](./user%20guides/examples.md)
+Users new to this package should look at the [examples](./user%20guides/examples.md).
 The [developer documentation](./developer/developer_index.md) is for developers that want to understand this package or know more about how we develop.
-The [functional descriptions](./functional%20descriptions/fd_index.md) aim to describe what this package is designed to do, independent of programming language. These documents act as the blue print when developing features. The standards and norms described in the developer docs and the functional descriptions should be enough to implement a feature. 
+The [functional descriptions](./functional%20descriptions/fd_index.md) aim to describe what this package is designed to do, independent of programming language. These documents act as the blue print when developing features. The standards and norms described in the developer documentation and the functional descriptions should be enough to implement a feature. 
 
 ## The documentation required for new features
-The first documentation that should exists is a functional description. This should ideally be written before any code is written, since that ensures that the code is tailored to the requirements and not the other way around. 
-Any class, method, or function that you expect a user to use should have docstrings. Docstrings are optional for internal functions and classes.
+The first documentation that should exist is a functional description. Ideally, this should be written before any code, as that ensures that the code is tailored to the requirements and not the other way around
+Docstrings are required for all public classes, methods and functions. For internal-only components, docstrings are optional.
 Extra user guides and examples are not always needed, but should be provided if the user has to do "new" things to use this feature. 
 
 ## About writing documentation.
-We aim to write the documentation in a way that is efficient to write and then automatically translate it to a format that is easier to read.
+We aim to write documentation in a way that is easy to produce and can be automaticalyl converted into a more readable format
 For now, we use markdown to write most documentation. Only the docstrings in the code are in [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html). The flavor of markdown that we use is [MyST](https://myst-parser.readthedocs.io/en/latest/syntax/typography.html), which stands for Markedly StructuredText. MyST is a strict superset of [CommonMark](https://commonmark.org/).
 
-We have enabled `amsmath` and `dollarmath` within MySt. Using `dollarmath` means that it's possible to use dollar signs to use Latex, like this: `$a^2 = b^2 + c^2$` to write $a^2 = b^2 + c^2$. Using `amsmath` means that it's possible to use Latex directly in the markdown (MyST) syntax like this:
+MyST has been configured with `dollarmath` and `amsmath` enabled. The `dollarmath` extension allows inline LaTeX expressions using dollar-sign syntax, like this: `$a^2 = b^2 + c^2$` to write $a^2 = b^2 + c^2$. The `amsmath` extension enables full LaTeX math environments to be used directly in MyST markdown, for example:
 ```latex
  \begin{gather*}
   a_1=b_1+c_1\\a_2=b_2+c_2-d_2+e_2
@@ -26,7 +26,7 @@ This renders as
   a_1=b_1+c_1\\a_2=b_2+c_2-d_2+e_2.
 \end{gather*}
 
-Another extension we have enabled is [Mermaid](https://mermaid.ai/open-source/intro/). Mermaid enables you to write diagrams like this:
+Another enabled extension is [Mermaid](https://mermaid.ai/open-source/intro/), which allows you to write diagrams like this:
 ````
 ```{mermaid}
 graph TD
@@ -44,7 +44,7 @@ The languages to write documentation are MyST and reStructuredText, but the lang
 - [myst_parser](https://myst-parser.readthedocs.io/en/latest/index.html) to enable markdown.
 - [mermaid](https://github.com/mgaitan/sphinxcontrib-mermaid) to render diagrams.
 
-The documentation is hosted on [ReadTheDocs.io](https://about.readthedocs.com/), which is platform specifically for hosting documentation of code. 
+The documentation is hosted on [ReadTheDocs.io](https://about.readthedocs.com/), which is a platform specifically for hosting documentation of code. 
 Readthedocs.io is configured (via a github app) to build the documentation of the develop branch and of pull requests. It automatically builds the documentation when there is a new push to develop or a (commit to) a pull request. To build the documentation, readthedocs.io first clones the repository. The file `.readthedocs.yaml` specifies how readthedocs.io should build the documentation. 
 
-The first step to building the documentation is installing this package including the `docs` dependency group. The package needs to be installed so that autodoc can import every module to access the docstrings. Sphinx then parses everything to HTML. The HTML can then be served on [synthpop-py.readthedocs.io](synthpop-py.readthedocs.io)
+The first step to building the documentation is installing this package including the `docs` dependency group (`poetry install --with docs`). The package needs to be installed so that autodoc can import every module to access the docstrings. Sphinx then parses everything to HTML. The HTML can then be served on [synthpop-py.readthedocs.io](https://synthpop-py.readthedocs.io)
