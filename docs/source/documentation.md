@@ -7,7 +7,7 @@ The [developer documentation](./developer/developer_index.md) is for developers 
 The [functional descriptions](./functional%20descriptions/fd_index.md) aim to describe what this package is designed to do, independent of programming language. These documents act as the blue print when developing features. The standards and norms described in the developer documentation and the functional descriptions should be enough to implement a feature. 
 
 ## The documentation required for new features
-The first documentation that should exist is a functional description. Ideally, this should be written before any code, as that ensures that the code is tailored to the requirements and not the other way around
+The first documentation that should exist is a functional description. Ideally, this should be written before any code, as that ensures that the code is tailored to the requirements and not the other way around.
 Docstrings are required for all public classes, methods and functions. For internal-only components, docstrings are optional.
 Extra user guides and examples are not always needed, but should be provided if the user has to do "new" things to use this feature. 
 
