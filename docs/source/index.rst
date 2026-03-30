@@ -12,7 +12,7 @@ documentation for details.
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    intro
@@ -20,6 +20,7 @@ documentation for details.
    user guides/examples
    functional descriptions/fd_index
    developer/developer_index.md
+   documentation.md
 
 Indices and tables
 ==================
