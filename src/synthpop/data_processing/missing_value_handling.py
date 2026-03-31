@@ -37,6 +37,9 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         """ 
         pass
 
+    def __sklearn_clone__(self):
+        return copy.copy(self)
+
 
 class MissingValuePredictor(BaseMissingValueHandler):
     """

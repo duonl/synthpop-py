@@ -4,6 +4,7 @@ This module contains the CART method for synthesising data.
 from typing import Literal, Mapping, Self, Sequence
 from numpy.random import RandomState
 import pandas as pd
+from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
 from sklearn.base import TransformerMixin
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
@@ -28,7 +29,21 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         # Apply encoding en handling of missing values, pass on to super().fit
-        pass
+        self.encoders_ = {name: clone(self.encoder).fit(value,y) for (name,value) in X.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
+        self.missing_handler_ = clone(self.missing_handler)
+
+        prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X,y)
+
+        encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
+
+        all_features = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+
+        super().fit(all_features,prepared_y)
+
+        leaf_ids = super().apply(all_features)
+
+        self.tree_sampler_ = clone(self.tree_sampler).fit_sampler(leaf_ids,prepared_y)
+
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
         # Apply encoding, sample, apply (inverse) handling of missing values.
