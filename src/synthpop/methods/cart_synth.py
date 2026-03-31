@@ -13,6 +13,7 @@ from synthpop.methods import base_synth, tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler
 import numpy.typing as npt
 from abc import abstractmethod, ABCMeta
+import numpy as np
 
 
 class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
@@ -27,22 +28,33 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         self.missing_handler = missing_handling
         self.tree_sampler = tree_sampler
 
+
+    def _new_encoder(self):
+        return clone(self.encoder) if not(self.encoder is None) else self._get_encoder()
+    
+    def _new_missing_handling(self):
+        return clone(self.missing_handler) if not(self.missing_handler is None) else self._get_missing_handling()
+    
+    def _new_tree_sampler(self):
+        return clone(self.tree_sampler) if not(self.tree_sampler is None) else LeafNodeSampler()
+
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         # Apply encoding en handling of missing values, pass on to super().fit
-        self.encoders_ = {name: clone(self.encoder).fit(value,y) for (name,value) in X.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
-        self.missing_handler_ = clone(self.missing_handler)
+        self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
+        self.missing_handler_ = self._new_missing_handling()#clone(self.missing_handler)
 
         prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X,y)
 
         encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
 
-        all_features = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+        all_features_dict = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+        all_features = np.array([v for v in all_features_dict.values() ]).transpose()
 
-        super().fit(all_features,prepared_y)
+        super()._fit(all_features,prepared_y)
 
         leaf_ids = super().apply(all_features)
 
-        self.tree_sampler_ = clone(self.tree_sampler).fit_sampler(leaf_ids,prepared_y)
+        self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids,prepared_y)
 
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
