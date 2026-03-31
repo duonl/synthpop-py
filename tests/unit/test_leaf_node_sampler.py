@@ -227,19 +227,15 @@ def test_sample_from_leaves_raises_input_val():
 
 # ----- clonability tests -----
 def test_clone_works_and_fitted_sampler_does_not_preserve_state():
-    leaf_ids = [10, 20, 30]
-    y = np.array([0, 1, 1])
-
     sampler = LeafNodeSampler(random_state=42)
-    sampler.fit_sampler(leaf_ids, y)
+    sampler.fit_sampler([10, 20, 30], np.array([0, 1, 1]))
 
     cloned = sampler.clone()
 
-    # Fitted attributes should NOT be copied
-    assert not hasattr(cloned, "_leaf_map")
-    assert not hasattr(cloned, "random_state_")
-
-    # Original remains intact
-    assert hasattr(sampler, "_leaf_map")
-    assert hasattr(sampler, "random_state_")
+    # Fitted attributes should NOT be copied, original remains intact
+    for attr in ["_leaf_map", "random_state_"]:
+        assert not hasattr(cloned, attr)
+        assert hasattr(sampler, attr)
+    assert hasattr(cloned, "random_state")
+    assert hasattr(sampler, "random_state")
 

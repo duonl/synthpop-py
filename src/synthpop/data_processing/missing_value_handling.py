@@ -40,6 +40,20 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         """ 
         pass
 
+    @abstractmethod
+    def clone(self):
+        """
+        Create a new instance of the  with the same configuration.
+
+        The method only copies initialisation parameters (from __init__) and does not copy
+        any fitted state.
+        Similar to sklearn's `clone()`.
+
+        :return: A new, unfitted instance with the same __init__ parameters
+
+        """
+        pass
+
 class MissingValuePredictor(BaseMissingValueHandler):
     """
     Use a decision tree to predict which values are missing.
@@ -210,6 +224,22 @@ class MissingValuePredictor(BaseMissingValueHandler):
         y_out[z_sampled == 1] = np.nan
 
         return y_out
+    
+    def clone(self):
+        """
+        Create a new instance of the missing value predictor with the same configuration.
+
+        The method only copies initialisation parameters and does not copy
+        any fitted state. Similar to sklearn's `clone()`.
+
+        :return: A new, unfitted instance of `MissingValuePredictor()` with the 
+            same `encoding`, `tree` and `tree_sampler` setting.
+        
+        Examples:
+        -----
+        >>> MissingValuePredictor().clone()
+        """
+        return self.__class__(encoding=self.encoding, tree=self.tree, tree_sampler=self.tree_sampler)
    
 class ReplaceNoneWithValue(BaseMissingValueHandler):
     """
@@ -283,3 +313,21 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         y_arr = y_arr.astype(np.object_)
         y_arr[mask] = None
         return y_arr
+    
+    def clone(self):
+        """
+        Create a new instance of ReplaceNoneWithValue with the same configuration.
+
+        The method only copies initialisation parameters and does not copy
+        any fitted state. Similar to sklearn's `clone()`.
+
+        Note: `ReplaceNoneWithValue` does not have learned attributes.
+
+        :return: A new, unfitted instance of `ReplaceNoneWithValue()` with the 
+            same `missing_marker` setting.
+        
+        Examples:
+        -----
+        >>> ReplaceNoneWithValue().clone()
+        """
+        return self.__class__(missing_marker = self.missing_replacement)

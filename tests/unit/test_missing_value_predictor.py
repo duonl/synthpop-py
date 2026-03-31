@@ -247,3 +247,18 @@ def post_synth_transform_raises_unfitted():
     model = MissingValuePredictor()
     with pytest.raises(AttributeError):
         model.post_synth_transform({"a": [1]}, [1])
+
+# ----- clonability tests -----
+def test_clone_works_and_fitted_does_not_preserve_state():
+    mvp = MissingValuePredictor()
+    mvp.prepare_data_for_fit(X={"a": [1, 2, 3]}, y=[1, 2, 3])
+
+    cloned = mvp.clone()
+
+    # Fitted attributes should NOT be copied, original remains intact
+    for attr in ["encoders_", "tree_", "tree_sampler_"]:
+        assert not hasattr(cloned, attr)
+        assert hasattr(mvp, attr)
+    for attr in ["encoding", "tree", "tree_sampler"]:
+        assert hasattr(cloned, attr)
+        assert hasattr(mvp, attr)
