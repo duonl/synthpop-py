@@ -140,8 +140,12 @@ def get_pure_categorical_input():
 def get_encoder_transform_return_data():
     #The result of the transform of encoding is always a np.array of float32
     num_data = [1.1,2.2,3.3,4.4,5.5,6.6]
-    numpy_values = [np.array(num_data),np.array([*num_data[0:3],np.nan,*num_data[4:6]])]
-    return numpy_values #+ [pd.Series(data) for data in numpy_values]
+    numpy_values_1D = [np.array(num_data),np.array([*num_data[0:3],np.nan,*num_data[4:6]])]
+
+    num_data2=np.array([1.1,2.2,3.3,4.4,5.5,6.6])*1.4
+
+    numpy_data_2D = [ np.array([[v1,v2]]).transpose() for v1 in numpy_values_1D for v2 in [num_data,num_data2]]
+    return numpy_values_1D+numpy_data_2D #+ [pd.Series(data) for data in numpy_values]
 
 def get_missing_handling_prepare_for_fit_return_data():
     num_float_data = np.array([1.2,2.3,3.4,5.6,7.8,8.9])*3.2
