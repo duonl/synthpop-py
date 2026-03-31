@@ -19,13 +19,13 @@ import numpy as np
 class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
     def __init__(self, *, encoder: TransformerMixin | None = None,
-                 missing_handling: BaseMissingValueHandler | None = None,
+                 missing_handler: BaseMissingValueHandler | None = None,
                  tree_sampler: LeafNodeSampler | None = None,
                  criterion, splitter, max_depth, min_samples_split, min_samples_leaf, min_weight_fraction_leaf, max_features, max_leaf_nodes, random_state, min_impurity_decrease, class_weight=None, ccp_alpha=0):
         super().__init__(criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf,
                          max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha)
         self.encoder = encoder
-        self.missing_handler = missing_handling
+        self.missing_handler = missing_handler
         self.tree_sampler = tree_sampler
 
 
@@ -94,7 +94,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param rest: Parameters inherent to DecisionTreeClassifier
     """
 
-    def __init__(self, *, encoder=None, missing_handling=None, tree_sampler=None,
+    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,
         criterion="gini",
         splitter="best",
         max_depth=None,
@@ -108,7 +108,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         class_weight=None,
         ccp_alpha=0.0,
         monotonic_cst=None,):
-        super().__init__(encoder=encoder, missing_handling=missing_handling, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
+        super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                          min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha)
 
     def _get_encoder(self):
@@ -145,7 +145,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         min_impurity_decrease=0.0,
         ccp_alpha=0.0,
         monotonic_cst=None):
-        super().__init__(encoder=encoder, missing_handling=missing_handling, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
+        super().__init__(encoder=encoder, missing_handler=missing_handling, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                          min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=None, ccp_alpha=ccp_alpha)
     
     def _get_encoder(self):

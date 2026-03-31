@@ -7,7 +7,9 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.tree import BaseDecisionTree
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
-from synthpop.methods.cart_synth import _AbstractTreeMethod
+from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod
+from sklearn.utils.estimator_checks import parametrize_with_checks
+
 import copy
 
 # stubs ---------------------------
@@ -83,7 +85,7 @@ class TestTreeMethod(_AbstractTreeMethod):
                 min_impurity_decrease=None,
                 class_weight=None,
                 ccp_alpha=0):
-        super().__init__(encoder=encoder, missing_handling=missing_handling, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha)
+        super().__init__(encoder=encoder, missing_handler=missing_handling, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha)
         BaseDecisionTree._fit = self.fit_local
         BaseDecisionTree.apply = self.apply_local
         self.apply_result =apply_result
@@ -322,3 +324,16 @@ def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnod
     assert np.array_equal(leafnode_sampler.sample_from_leaves_return_value,tree_method.missing_handler_.post_synth_transform_y)
     assert np.array_equal(result,missing_handling.post_synth_transform_result)
 
+#general tests ------------------------------------------------------------------------------------
+
+def test_TreeClassifierMethod_get_params():
+    method = TreeClassifierMethod()
+    method.get_params()
+
+@parametrize_with_checks([TreeClassifierMethod()], legacy=False, expected_failed_checks=lambda x: {
+    "check_dont_overwrite_parameters": "tests with multiple features",
+    "check_n_features_in_after_fitting": "tests with multiple features",
+    "check_fit_score_takes_y":"tests with a score component"
+})
+def test_TreeClassifierMethod_encoder_is_sklearn_compatible(estimator, check):
+    check(estimator)
