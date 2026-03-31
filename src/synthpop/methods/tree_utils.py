@@ -51,8 +51,10 @@ class LeafNodeSampler():
         Initialise the sampler.
         :param random_state: Controls the random number generation used for sampling.
             - If `int`, it is used as a seed to initialise a new `numpy.random.Generator`
-                via `np.random.default_rng`.
-            - If `numpy.random.Generator`, it is used directly.
+                via `np.random.default_rng`. This generator is reset with each call so output
+                is consistent between calls.
+            - If `numpy.random.Generator`, it is used directly. This generator is not reset with each
+                call, so the state advances with each call.
             - If `None`, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
@@ -103,10 +105,12 @@ class LeafNodeSampler():
                               "sampled. Review your input data if this is unintended.")
 
         if isinstance(self.random_state, np.random.Generator):
+        # Extract seed is not possible → treat as non-resettable (repeated calls do not give the same output)
+            self._seed = None
             self.random_state_ = self.random_state
         else:
-            seed = 42 if self.random_state is None else self.random_state
-            self.random_state_ = np.random.default_rng(seed)
+            self._seed = 42 if self.random_state is None else self.random_state
+            self.random_state_ = np.random.default_rng(self._seed)
         
         self._y_dtype = np.asarray(y).dtype
 
@@ -132,6 +136,13 @@ class LeafNodeSampler():
 
         if not hasattr(self, "_leaf_map") or not hasattr(self, "random_state_"):
             raise AttributeError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
+        
+        seed = getattr(self, "_seed", None)
+
+        if seed is not None:
+            rng = np.random.default_rng(seed)
+        else:
+            rng = self.random_state_ # fallback, not-resettable
         
         leaf_ids = np.asarray(leaf_ids)
         n_samples = len(leaf_ids)
@@ -166,7 +177,7 @@ class LeafNodeSampler():
                 )
 
             cum_counts = np.cumsum(counts)
-            r = self.random_state_.integers(0, total, size=len(indices))
+            r = rng.integers(0, total, size=len(indices))
             idx = np.searchsorted(cum_counts, r, side="right")
             for i, v in zip(indices, np.take(values, idx)):
                 y_syn[i] = v
