@@ -144,7 +144,11 @@ def get_encoder_transform_return_data():
     num_data2=np.array([1.1,2.2,3.3,4.4,5.5,6.6])*1.4
 
     numpy_data_2D = [ np.vstack([v1,v2]).transpose() for v1 in numpy_values_1D for v2 in [num_data,num_data2]]
-    return numpy_values_1D+numpy_data_2D #+ [pd.Series(data) for data in numpy_values]
+
+    numpy_output = numpy_values_1D+numpy_data_2D
+    pandas_output_1D = [pd.DataFrame(data,columns=["single_encoded_column"]) for data in numpy_values_1D]
+    pandas_output_2D = [pd.DataFrame(data,columns=["first_encoded_column","second_encoded_column"]) for data in numpy_data_2D]
+    return numpy_output + pandas_output_1D + pandas_output_2D #+ [pd.Series(data) for data in numpy_values]
 
 def get_missing_handling_prepare_for_fit_return_data():
     num_float_data = np.array([1.2,2.3,3.4,5.6,7.8,8.9])*3.2

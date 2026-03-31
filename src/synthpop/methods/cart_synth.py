@@ -41,7 +41,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         # Apply encoding en handling of missing values, pass on to super().fit
         self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
-        self.missing_handler_ = self._new_missing_handling()#clone(self.missing_handler)
+        self.missing_handler_ = self._new_missing_handling()
 
         prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X,y)
 
