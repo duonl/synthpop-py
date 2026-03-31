@@ -87,7 +87,6 @@ class MissingValuePredictor(BaseMissingValueHandler):
         """
         Minimal validation for dict-based tabular data.
         """
-
         if not isinstance(X, dict):
             raise TypeError(f"X must be a dict[str, array-like], got {type(X)}.")
         if len(X) == 0:
@@ -119,6 +118,25 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         return X_out, y_out
     
+    def _build_X_matrix(self, X, fit=False):
+        feature_order = getattr(self, "feature_order_", None)
+        if feature_order is None:
+            feature_order = list(X.keys())
+            self.feature_order_ = feature_order
+
+        X_encoded = []
+        for col in feature_order:
+            values = np.asarray(X[col])
+            encoder = self.encoders_.get(col, None)
+            if encoder is None:
+                encoded = values.astype(np.float32)
+            else:
+                encoded = encoder.transform(values).astype(np.float32)
+            
+            X_encoded.append(encoded.reshape(-1, 1))
+
+        return np.hstack(X_encoded)
+    
     def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Trains a decision tree to predict when y is missing. Removes rows from both `X` and `y` when `y` is missing.
@@ -133,33 +151,30 @@ class MissingValuePredictor(BaseMissingValueHandler):
         # input validation
         X_val, y_val = self._validate_X_y_dict(X, y)
 
+        self.feature_order_ = list(X_val.keys())
+
         self.tree_ = clone(self.tree) if self.tree else DecisionTreeClassifier(min_samples_leaf= 5)
         self.tree_sampler_ = self.tree_sampler.clone() if self.tree_sampler else LeafNodeSampler()
         
         # implementation
-        z = pd.isna(y_val).astype(int)
+        z = pd.isna(y_val)
 
-        self._all_missing = np.all(z == 1)
-        self._no_missing = np.all(z == 0)
+        self._all_missing = np.all(z)
+        self._no_missing = not np.any(z)
 
         self.encoders_ = {}
-        X_encoded = []
 
-        for col, values in X_val.items():
-            values = np.asarray(values)
+        for col in self.feature_order_:
+            values = np.asarray(X_val[col])
 
             if values.dtype.kind in ("O", "U", "S"):
                 encoder = clone(self.encoding) if self.encoding else MeanEncoder()
                 encoder.fit(values, z)
-                encoded = encoder.transform(values).astype(np.float32)
                 self.encoders_[col] = encoder
             else:
-                encoded = values.astype(np.float32)
                 self.encoders_[col] = None
-            
-            X_encoded.append(encoded.reshape(-1, 1))
         
-        X_matrix = np.hstack(X_encoded)
+        X_matrix = self._build_X_matrix(X_val)    
 
         if not self._all_missing and not self._no_missing:
             self.tree_.fit(X_matrix, z)
@@ -172,10 +187,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         # remove the missing value rows for return
         mask = ~pd.isna(y_val)
 
-        X_filtered = {
-            col: values[mask]
-            for col, values in X_val.items()
-        }
+        X_filtered = {col: X_val[col][mask] for col in X_val}
         y_filtered = y_val[mask]
 
         return X_filtered, y_filtered
@@ -191,7 +203,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         """ 
 
         # input validation
-        if not hasattr(self, "tree_") or not hasattr(self, "tree_sampler_") or not hasattr(self, "encoders_"):
+        if not hasattr(self, "tree_") or not hasattr(self, "tree_sampler_") or not hasattr(self, "encoders_") or not hasattr(self, "feature_order_"):
             raise AttributeError("MissingValuePredictor is not fitted. Call `prepare_data_for_fit` first.")
 
         X, y = self._validate_X_y_dict(X, y)
@@ -203,25 +215,14 @@ class MissingValuePredictor(BaseMissingValueHandler):
         if self._no_missing:
             return y
         
-        X_encoded = []
-        for col, values in X.items():
-            values = np.asarray(values)
-            encoder = self.encoders_[col]
-            
-            if encoder is None:
-                encoded = values.astype(np.float32)
-            else:
-                encoded = encoder.transform(values).astype(np.float32)
-            
-            X_encoded.append(encoded.reshape(-1, 1))
-
-        X_matrix = np.hstack(encoded.reshape(-1, 1))
+        X_matrix = self._build_X_matrix(X)
 
         leaf_ids = self.tree_.apply(X_matrix)
-        z_sampled = self.tree_sampler_.sample_from_leaves(leaf_ids).astype(int)
+        missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
+        missing_mask = np.asarray(missing_mask).astype(bool)
 
-        y_out = y.astype(object).copy()
-        y_out[z_sampled == 1] = np.nan
+        y_out = y.astype(float).copy()
+        y_out[missing_mask] = np.nan
 
         return y_out
     
