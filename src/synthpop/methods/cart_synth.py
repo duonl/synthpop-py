@@ -48,7 +48,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
 
         all_features_dict = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
-        all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])#np.hstack([v if v.ndim!=1 else [v] for v in all_features_dict.values() ]).transpose()#np.array([*v for v in all_features_dict.values() ]).transpose()
+        all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])
 
         super()._fit(all_features,prepared_y)
 
@@ -59,7 +59,15 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
         # Apply encoding, sample, apply (inverse) handling of missing values.
-        pass
+        encoded_features = {name:self.encoders_[name].transform(X[name]) for name in self.encoders_.keys()}
+
+        all_features_dict = encoded_features | {name: value for (name,value) in X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+        all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])
+        leaf_ids = super().apply(all_features)
+
+        sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
+        result = self.missing_handler_.post_synth_transform(X,sample)
+        return result
 
     def get_feature_names_out(self):
         pass

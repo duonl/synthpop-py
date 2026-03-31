@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import numpy.typing as npt
 import pytest
+from sklearn import clone
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.tree import BaseDecisionTree
 
@@ -97,8 +98,6 @@ class TestTreeMethod(_AbstractTreeMethod):
         return self
     
     def apply_local(self,X):
-        if not hasattr(self,"fit_X_"):
-            raise Exception("apply called before fit")
         self.apply_X_ = X
         return self.apply_result
     
@@ -107,7 +106,7 @@ class TestTreeMethod(_AbstractTreeMethod):
 #---------------------------------------------------
 
 
-# Test data
+# Test data ---------------------------------------------------------------------------------------
 def get_input_test_data():
     num_int_data = [1,2,5,2,5,3]
     num_float_data = [1.2,2.3,3.4,5.6,7.8,8.9]
@@ -155,7 +154,7 @@ def get_missing_handling_prepare_for_fit_return_data():
     base_cases = [ ({"cat_1":string_data1,"num_1":num_float_data,"cat_2":string_data2},target_data) for target_data in [num_float_data,string_data1]]
     return base_cases
 
-    
+# Fixtures ----------------------------------------------------------------------------------------
 @pytest.fixture(params=get_encoder_transform_return_data())
 def param_transform_result_encoder(request):
     return TransformStub(transform_return_value= request.param)
@@ -166,7 +165,7 @@ def encoder():
 
 @pytest.fixture(params=get_missing_handling_prepare_for_fit_return_data())
 def param_fit_result_missing_handling(request):
-    return StubMissingHandler(prepared_for_fit_result=request.param,post_synth_transform_result=None)
+    return StubMissingHandler(prepared_for_fit_result=request.param,post_synth_transform_result=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
 
 @pytest.fixture
 def missing_handling():
@@ -188,9 +187,9 @@ def apply_result(missing_handling):
 
 @pytest.fixture
 def tree_method(encoder,missing_handling,leafnode_sampler,apply_result):
-    
     return TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,apply_result=apply_result)
 
+# test fit ----------------------------------------------------------------------------------------
 @pytest.mark.parametrize("X,y",get_input_test_data())
 def test_fit_trains_encoder(X,y,tree_method,encoder,missing_handling,leafnode_sampler,apply_result):
 
@@ -227,16 +226,16 @@ def test_fit_data_is_encoded(X,y,tree_method,encoder,param_fit_result_missing_ha
     assert np.array_equal(tree_method.encoders_["cat_1"].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0]["cat_1"])
     assert np.array_equal(tree_method.encoders_["cat_2"].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0]["cat_2"])
 
-def get_expected_input_for_tree(encoders,missing_handler):
+def get_expected_input_for_tree(encoders,data_1D):
 
     v1 = encoders["cat_1"].transform_return_value
     v2 = encoders["cat_2"].transform_return_value
     if v1.ndim !=1:
         return np.hstack([ v1,v2,
-              np.array([missing_handler.prepared_for_fit_result[0]["num_1"]]).transpose()
+              np.array([data_1D]).transpose()
               ])
 
-    return np.array([v1,v2,missing_handler.prepared_for_fit_result[0]["num_1"] ]).transpose()
+    return np.array([v1,v2,data_1D]).transpose()
 
 @pytest.mark.parametrize("X,y",get_input_test_data())
 def test_fit_tree_is_fit(X,y,tree_method,param_transform_result_encoder,param_fit_result_missing_handling,leafnode_sampler,apply_result):
@@ -245,7 +244,7 @@ def test_fit_tree_is_fit(X,y,tree_method,param_transform_result_encoder,param_fi
 
     tree_method.fit(X,y)
 
-    expected_input_for_tree = get_expected_input_for_tree(tree_method.encoders_,tree_method.missing_handler_)
+    expected_input_for_tree = get_expected_input_for_tree(tree_method.encoders_,tree_method.missing_handler_.prepared_for_fit_result[0]["num_1"])
 
     # expected_input_for_tree = np.array([tree_method.encoders_["cat_1"].transform_return_value,
     #                            tree_method.encoders_["cat_2"].transform_return_value,
@@ -256,17 +255,14 @@ def test_fit_tree_is_fit(X,y,tree_method,param_transform_result_encoder,param_fi
 
     assert np.array_equal(tree_method.missing_handler_.prepared_for_fit_result[1],tree_method.fit_y_)
 
-
 @pytest.mark.parametrize("X,y",get_input_test_data())
 def test_fit_tree_is_applied(X,y,tree_method,param_transform_result_encoder,param_fit_result_missing_handling,leafnode_sampler,apply_result):
 
     tree_method = TestTreeMethod(encoder=param_transform_result_encoder,missing_handling=param_fit_result_missing_handling,tree_sampler=leafnode_sampler,apply_result=apply_result)
     tree_method.fit(X,y)
 
-    expected_input_for_tree = get_expected_input_for_tree(tree_method.encoders_,tree_method.missing_handler_)
+    expected_input_for_tree = get_expected_input_for_tree(tree_method.encoders_,tree_method.missing_handler_.prepared_for_fit_result[0]["num_1"])
     assert np.array_equal(expected_input_for_tree,tree_method.apply_X_,equal_nan=True)
-
-
 @pytest.mark.parametrize("X,y",get_input_test_data())
 def test_fit_sampler_fit(X,y,tree_method):
     tree_method.fit(X,y)
@@ -274,3 +270,51 @@ def test_fit_sampler_fit(X,y,tree_method):
     assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,tree_method.apply_result)
     assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler.prepared_for_fit_result[1])
     assert not (tree_method.tree_sampler is tree_method.tree_sampler_)
+
+# test transform ----------------------------------------------------------------------------------
+
+def make_fitted_tree_method(encoder,missing_handling,leafnode_sampler,apply_result):
+    tree_method = TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,apply_result=apply_result)
+    tree_method.encoders_ = {"cat_1": clone(encoder),"cat_2":clone(encoder)}
+    tree_method.missing_handler_ = clone(missing_handling)
+    tree_method.tree_sampler_ = clone(leafnode_sampler)
+
+    return tree_method
+@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
+def test_transform_encodes_data(X,encoder,missing_handling,leafnode_sampler,apply_result):
+    tree_method = make_fitted_tree_method(encoder,missing_handling=missing_handling,leafnode_sampler=leafnode_sampler,apply_result=apply_result)
+
+    tree_method.transform(X)
+
+    assert np.array_equal(X["cat_1"],tree_method.encoders_["cat_1"].transform_X_)
+    assert np.array_equal(X["cat_2"],tree_method.encoders_["cat_2"].transform_X_)
+
+@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
+def test_transform_applies(X,param_transform_result_encoder,missing_handling,leafnode_sampler,apply_result):
+    tree_method = make_fitted_tree_method(param_transform_result_encoder,missing_handling=missing_handling,leafnode_sampler=leafnode_sampler,apply_result=apply_result)
+
+    tree_method.transform(X)
+
+    expected_input_for_tree = get_expected_input_for_tree(tree_method.encoders_,X["num_1"])
+
+    assert np.array_equal(expected_input_for_tree,tree_method.apply_X_,equal_nan=True)
+
+@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
+def test_transform_samples(X,encoder,missing_handling,leafnode_sampler,apply_result):
+
+    tree_method = make_fitted_tree_method(encoder,missing_handling=missing_handling,leafnode_sampler=leafnode_sampler,apply_result=apply_result)
+
+    tree_method.transform(X)
+
+    assert np.array_equal(apply_result,tree_method.tree_sampler_.sample_from_leaves_leaf_ids)
+
+@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
+def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnode_sampler,apply_result):
+    tree_method = make_fitted_tree_method(encoder,missing_handling=missing_handling,leafnode_sampler=leafnode_sampler,apply_result=apply_result)
+
+    result = tree_method.transform(X)
+
+    assert X == tree_method.missing_handler_.post_synth_transform_X
+    assert np.array_equal(leafnode_sampler.sample_from_leaves_return_value,tree_method.missing_handler_.post_synth_transform_y)
+    assert np.array_equal(result,missing_handling.post_synth_transform_result)
+
