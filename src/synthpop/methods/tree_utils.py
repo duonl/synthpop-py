@@ -56,6 +56,7 @@ class LeafNodeSampler():
             - If `None`, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
+        self._y_dtype = None
         pass
 
     def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike) -> Self:
@@ -106,6 +107,8 @@ class LeafNodeSampler():
         else:
             seed = 42 if self.random_state is None else self.random_state
             self.random_state_ = np.random.default_rng(seed)
+        
+        self._y_dtype = np.asarray(y).dtype
 
         return self
 
@@ -124,7 +127,7 @@ class LeafNodeSampler():
             should be generated. Array-like of shape (n_samples,)
         :return: Synthetic target values sampled from the leaf-wise empirical
             distributions. A np.ndarray of shape (n_samples,). The dtype is
-            `object`.
+            the same as the input dtype.
         """
 
         if not hasattr(self, "_leaf_map") or not hasattr(self, "random_state_"):
@@ -138,7 +141,7 @@ class LeafNodeSampler():
         if n_samples == 0:
             raise ValueError(f"leaf_ids must be non-empty.")
 
-        y_syn = np.empty(n_samples, dtype=object)
+        y_syn = np.empty(n_samples, dtype=self._y_dtype)
 
         unique_leaves, inverse_indices = np.unique(leaf_ids, return_inverse=True)
         order = np.argsort(inverse_indices)
@@ -153,7 +156,7 @@ class LeafNodeSampler():
             indices = groups[leaf_idx]
 
             leaf_hist = self._leaf_map[leaf]
-            values = np.array(list(leaf_hist.keys()))
+            values = list(leaf_hist.keys())
             counts = np.array(list(leaf_hist.values()))
 
             total = counts.sum()
@@ -165,7 +168,8 @@ class LeafNodeSampler():
             cum_counts = np.cumsum(counts)
             r = self.random_state_.integers(0, total, size=len(indices))
             idx = np.searchsorted(cum_counts, r, side="right")
-            y_syn[indices] = values[idx]
+            for i, v in zip(indices, np.take(values, idx)):
+                y_syn[i] = v
 
         return y_syn
 

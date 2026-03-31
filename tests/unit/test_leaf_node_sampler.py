@@ -90,13 +90,14 @@ def test_fit_sampler_raises_non_empty():
         sampler.fit_sampler(leaf_ids2, y2)
 
 # ----- sample from leaves test cases -----
-def helper_make_sampler(leaf_map, leaf_ids, random_state=42):
+def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32):
     """
     Helper to construct a minimally fitted sampler
     """
     sampler = LeafNodeSampler(random_state=random_state)
     sampler._leaf_map = leaf_map
     sampler.random_state_ = np.random.default_rng(random_state)
+    sampler._y_dtype = np.dtype(y_dtype)
     return sampler
 
 @pytest.mark.parametrize(
@@ -124,6 +125,7 @@ def test_sample_from_leaves_various_input_types(leaf_ids):
             assert val in expected_values
 
     assert len(y_syn) == len(leaf_ids)
+    assert y_syn.dtype == sampler._y_dtype
 
 class StubRNG:
     def __init__(self, values):
@@ -151,15 +153,17 @@ def test_sampling_deterministic_with_stub_rng():
 
     y = sampler.sample_from_leaves(leaf_ids)
 
-    assert list(y) == [0, 1, 0, 0]
+    assert np.array_equal(y, np.array([0, 1, 0, 0]))
 
 @pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 def test_sample_from_leaves_each_missing_type(missing_value):
     leaf_ids = [10] * 100
+    y_dtype = float if (missing_value is not None and missing_value is not pd.NA and np.isnan(missing_value)) else object
 
     sampler = helper_make_sampler(
         leaf_map={10: {missing_value: 10, 1: 1}},
-        leaf_ids=leaf_ids
+        leaf_ids=leaf_ids,
+        y_dtype=y_dtype
     )
 
     y_syn = sampler.sample_from_leaves(leaf_ids)
