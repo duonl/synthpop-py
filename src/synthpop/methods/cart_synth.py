@@ -50,9 +50,9 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         all_features_dict = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
         all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])
 
-        super()._fit(all_features,prepared_y)
+        self._fit(all_features,prepared_y)
 
-        leaf_ids = super().apply(all_features)
+        leaf_ids = self.apply(all_features)
 
         self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids,prepared_y)
 
@@ -63,7 +63,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
         all_features_dict = encoded_features | {name: value for (name,value) in X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
         all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])
-        leaf_ids = super().apply(all_features)
+        leaf_ids = self.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
         result = self.missing_handler_.post_synth_transform(X,sample)
