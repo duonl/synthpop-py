@@ -15,3 +15,4 @@ def test_treemethod_classifier_fit():
     y = np.array(["x","y"])
 
     tree_method.fit(X,y)
+    assert tree_method.n_features_in_ >= 3

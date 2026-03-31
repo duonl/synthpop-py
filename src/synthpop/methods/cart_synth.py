@@ -48,7 +48,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
 
         all_features_dict = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
-        all_features = np.array([v for v in all_features_dict.values() ]).transpose()
+        all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])#np.hstack([v if v.ndim!=1 else [v] for v in all_features_dict.values() ]).transpose()#np.array([*v for v in all_features_dict.values() ]).transpose()
 
         super()._fit(all_features,prepared_y)
 
