@@ -135,7 +135,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
             
             X_encoded.append(encoded.reshape(-1, 1))
 
-        return np.hstack(X_encoded)
+        return np.column_stack(X_encoded)
     
     def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
