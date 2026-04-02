@@ -27,6 +27,10 @@ exclude_patterns = []
 #html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_js_files = [
+    "mermaid-zoom.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/svg-pan-zoom/3.6.1/svg-pan-zoom.min.js",
+]
 
 extensions = [
     'sphinx.ext.autodoc',
