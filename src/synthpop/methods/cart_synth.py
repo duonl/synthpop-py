@@ -37,13 +37,22 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
     
     def _new_tree_sampler(self):
         return clone(self.tree_sampler) if not(self.tree_sampler is None) else LeafNodeSampler()
+    
+
+    def _validate_X(self,X):
+        if isinstance(X,np.ndarray):
+            return {i:X[:,i] for i in range(X.shape[1])}
+        else:
+            return X
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         # Apply encoding en handling of missing values, pass on to super().fit
-        self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
+        X_val = self._validate_X(X)
+
+        self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
 
-        prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X,y)
+        prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X_val,y)
 
         encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
 
@@ -55,6 +64,8 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         leaf_ids = self.apply(all_features)
 
         self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids,prepared_y)
+
+        return self
 
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
@@ -93,6 +104,12 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param encoder: an transformer object. Default is PCA encoder.
     :param rest: Parameters inherent to DecisionTreeClassifier
     """
+
+    # _parameter_constraints: dict = {
+    #     **BaseDecisionTree._parameter_constraints,
+    #     "criterion": [StrOptions({"gini", "entropy", "log_loss"})],#, Hidden(Criterion)],
+    #     "class_weight": [dict, list, StrOptions({"balanced"}), None],
+    # }
 
     def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,
         criterion="gini",
