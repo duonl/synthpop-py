@@ -143,7 +143,7 @@ The exact workflow to fix bugs depends on where the bug is found.
 zoom:
 caption: flowchart of when and how to fix bugs.
 ---
-flowchart TD
+flowchart LR
     A0[Reporter claims a bug] -->A1{Is the clear what the expected and observed outcomes are?}
     A1 -->|no| A2[Clear this up with the reporter]
     A1 -->|yes| A3{Is it clear what triggers these outcomes?}
@@ -169,7 +169,7 @@ flowchart TD
     G -->|No| D
 
     C2 --> |release branch| I[Fix in release branch → merge back to develop]
-    C -->|develop| D
+    C2 -->|develop| D
 ```
 
 ## Versioning
