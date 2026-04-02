@@ -116,9 +116,7 @@ The first step is to read the functional documentation. Is it clear what needs t
 10. Upload the new version to PyPi. 
 
 ## Bug Handling
-A is considered a bug when:
-1. It contradicts documentation, or
-2. It violates reasonable user expectations
+A behaviour is considered a bug when it contradicts documentation or it violates reasonable user expectations.
 
 A valid bug report must include:
 - Observed behaviour
