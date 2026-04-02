@@ -129,9 +129,9 @@ class MissingValuePredictor(BaseMissingValueHandler):
             values = np.asarray(X[col])
             encoder = self.encoders_.get(col, None)
             if encoder is None:
-                encoded = values.astype(np.float32)
+                encoded = values
             else:
-                encoded = encoder.transform(values).astype(np.float32)
+                encoded = encoder.transform(values)
             
             X_encoded.append(encoded.reshape(-1, 1))
 

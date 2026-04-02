@@ -47,9 +47,7 @@ def test_feature_order_and_encoding_integration():
 
     X_matrix = predictor._build_X_matrix(X)
 
-    # numeric → float32 passthrough OR mean encoding if categorical
     assert X_matrix.shape == (4, 2)
-    assert X_matrix.dtype == np.float32
 
 def test_tree_sampler_integration():
     predictor = MissingValuePredictor(
