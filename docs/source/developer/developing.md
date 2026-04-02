@@ -71,7 +71,7 @@ In the event of a critical issue in the main branch, a **hotfix branch** is crea
 |branch type| example name| created from| When created | When closed | merge targets| activities|
 |-----------|-----------|-----------|-----------|-----------|-----------|-----------|
 | main | main | nothing | codebase created| never|None| making code available for general users, no direct commits|
-| develop| dev| nothing| codebase created| never| None, unless to prevent merge conflicts| collecting new features, no direct commits|
+| develop| develop| nothing| codebase created| never| None, unless to prevent merge conflicts| collecting new features, no direct commits|
 |feature branches|  12-implement-xgboost|develop| starting to develop a new feature| feature tested by developer and code reviewed| develop| developing new features, writing automatic tests, writing documentation, incorporating feedback|
 | release branches| release-1.2.0| develop | all the features for a new version have been merged in develop| code is stable and approved by (a representative group of) users| main, develop | testing by users, finishing touches, bugfixes|
 |hotfix| hotfix-3| main | a critical bug has been found in main| the bug has been fixed and merged| main, develop| fixing the critical bug|
@@ -143,26 +143,32 @@ The exact workflow to fix bugs depends on where the bug is found.
 zoom:
 caption: flowchart of when and how to fix bugs.
 ---
-flowchart LR
-    A0[The reporter claims there is a bug] -->A1{Is the clear what the expected and observed outcomes are?}
+flowchart TD
+    A0[Reporter claims a bug] -->A1{Is the clear what the expected and observed outcomes are?}
     A1 -->|no| A2[Clear this up with the reporter]
     A1 -->|yes| A3{Is it clear what triggers these outcomes?}
     A3 -->|no| A2
     A3 --> |yes| A
     A[Actual behaviour is not expected behaviour] --> B{Does the actual behaviour contradict the documentation?}
     
-    B --> |no, but the expectations of the reporter are common sense.| C
-    B --> |no, but the expectations of the reporter sound reasonable.| D[Treat it like a feature request.]
-    B --> |no, the reporter has a misunderstanding of the package| D1{Review the documentation and communications about the package. Is there any room for improvement?}
+    B --> |no, but expectations are common sense| C[Proceed as bug]
+    B --> |no, but the expectations are reasonable| D[Treat it like a feature request]
+    B --> |no, misunderstanding| D1{Can documentation be improved?}
+
     D1 --> |yes| D
     D1 --> |no| Z[There is nothing to be done]
-    B --> |yes| C{On what type of branch has the bug been found? }
-    C --> |main| E{Does it have a significant impact on the users?}
-    E --> |yes| F[This is a critical bug, use the hotfix method]
-    C -->|On a feature branch| G{Is it in the code being developed on that branch}
-    G -->|yes| H[Fix it in that branch]
+
+    B --> |yes| C2{On what type of branch has the bug been found?}
+
+    C2 --> |main| E{Significant user impact?}
+    E --> |yes| F[Critical bug → use hotfix process]
+    E --> |no| Z[Fill in a bug report in the issues on Github]
+
+    C2 -->|feature branch| G{Is it in code of this branch?}
+    G -->|yes| H[Fix in the feature branch]
     G -->|No| D
-    C --> |On a release branch| I[Fix it in that branch, squash merge to develop, but do not close the release branch.]
+
+    C2 --> |release branch| I[Fix in release branch → merge back to develop]
     C -->|develop| D
 ```
 
