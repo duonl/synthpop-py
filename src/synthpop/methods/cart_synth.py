@@ -70,14 +70,15 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
         # Apply encoding, sample, apply (inverse) handling of missing values.
-        encoded_features = {name:self.encoders_[name].transform(X[name]) for name in self.encoders_.keys()}
+        X_val = self._validate_X(X)
+        encoded_features = {name:self.encoders_[name].transform(X_val[name]) for name in self.encoders_.keys()}
 
-        all_features_dict = encoded_features | {name: value for (name,value) in X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+        all_features_dict = encoded_features | {name: value for (name,value) in X_val.items() if pd.api.types.is_numeric_dtype(value.dtype)}
         all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])
         leaf_ids = self.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
-        result = self.missing_handler_.post_synth_transform(X,sample)
+        result = self.missing_handler_.post_synth_transform(X_val,sample)
         return result
 
     def get_feature_names_out(self):
@@ -137,8 +138,14 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     # The distinction between regression and classification is made in BaseDecisionTree based on tags.
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
+        allow_nan = self.splitter in ("best", "random") and self.criterion in {
+            "gini",
+            "log_loss",
+            "entropy",
+        }
         tags.estimator_type = "classifier"
         tags.target_tags.required = True
+        tags.input_tags.allow_nan = allow_nan
         return tags
 
 
