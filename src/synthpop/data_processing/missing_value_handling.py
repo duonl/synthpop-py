@@ -127,11 +127,10 @@ class MissingValuePredictor(BaseMissingValueHandler):
         X_encoded = []
         for col in feature_order:
             values = np.asarray(X[col])
-            encoder = self.encoders_.get(col, None)
-            if encoder is None:
-                encoded = values
+            if col in self.encoders_:
+                encoded = self.encoders_[col].transform(values)
             else:
-                encoded = encoder.transform(values)
+                encoded  = values
             
             X_encoded.append(encoded.reshape(-1, 1))
 
@@ -172,7 +171,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
                 encoder.fit(values, z)
                 self.encoders_[col] = encoder
             else:
-                self.encoders_[col] = None
+                continue
         
         X_matrix = self._build_X_matrix(X_val)    
 
@@ -180,9 +179,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
             self.tree_.fit(X_matrix, z)
             leaf_ids = self.tree_.apply(X_matrix)
             self.tree_sampler_.fit_sampler(leaf_ids, z)
-        else:
-            self.tree_ = None
-            self.tree_sampler_ = None
+        else: #leave tree_ and tree_sampler_ unfitted
+            pass
         
         # remove the missing value rows for return
         mask = ~pd.isna(y_val)
@@ -202,18 +200,20 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """ 
 
+        # implementation
+        if self._all_missing:
+            return np.full(len(y), np.nan)
+        if self._no_missing:
+            return y
+        
         # input validation
-        if not hasattr(self, "tree_") or not hasattr(self, "tree_sampler_") or not hasattr(self, "encoders_") or not hasattr(self, "feature_order_"):
+        if (not hasattr(self, "tree_")
+            or not hasattr(self, "tree_sampler_")
+            or not hasattr(self, "encoders_")
+            or not hasattr(self, "feature_order_")):
             raise AttributeError("MissingValuePredictor is not fitted. Call `prepare_data_for_fit` first.")
 
         X, y = self._validate_X_y_dict(X, y)
-        n = len(y)
-
-        # implementation
-        if self._all_missing:
-            return np.full(n, np.nan)
-        if self._no_missing:
-            return y
         
         X_matrix = self._build_X_matrix(X)
 

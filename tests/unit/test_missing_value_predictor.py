@@ -21,6 +21,8 @@ def stub_encoder():
     
         def transform(self, X):
             self.transform_inputs = X
+            if self.transform_return is None:
+                self.transform_return = np.ones(len(X))
             return self.transform_return
     
     return EncoderStub()
@@ -85,7 +87,6 @@ def predictor(stub_encoder, stub_tree, stub_sampler):
     ]
 )
 def test_validate_fit_accepts_valid_X_y(predictor, X, y):
-    predictor.encoding.transform_return = np.array([1, 2])
     out_X, out_y = predictor.prepare_data_for_fit(X, y)
     assert isinstance(out_X, dict)
     assert isinstance(out_y, np.ndarray)
@@ -118,7 +119,6 @@ def test_validate_fit_raises_bad_shapes(predictor, X):
 
 # ----- prepare data for fit tests -----
 def test_prepare_data_respects_feature_order_through_flow(predictor):
-    predictor.encoding.transform_return = np.array([1, 1, 1])
     X = {
         "a": [1, 2, 3],
         "b": ["x", None, "y"]
@@ -131,7 +131,7 @@ def test_prepare_data_respects_feature_order_through_flow(predictor):
     assert np.array_equal(predictor.feature_order_, list(X_out.keys())), "output feature order should be the same as input"
 
 def test_prepare_data_missing_data_flow_correct(predictor):
-    predictor.encoding.transform_return = np.array([1, 1, 1, 1])
+    predictor.encoding.transform_return = np.array([2, 2, 2, 2])
     predictor.tree.apply_return = np.array([0, 1, 2, 3])
 
     X = {"cat": ["a", "b", "a", "b"]}
@@ -148,28 +148,27 @@ def test_prepare_data_missing_data_flow_correct(predictor):
     assert np.array_equal(tree_X, predictor.encoding.transform_return.reshape(-1, 1)), "X input of the tree should be the output of the encoding but reshaped to 2D"
 
     sampler = predictor.tree_sampler_
-    leaf_ids, z_sampler = sampler.fit_inputs
+    given_sampler_input_leaf_ids, given_sampler_input_y_values = sampler.fit_inputs
 
-    assert np.array_equal(leaf_ids, predictor.tree.apply_return), "Sampler must receive tree.apply output as leaf IDs"
+    assert np.array_equal(given_sampler_input_leaf_ids, predictor.tree.apply_return), "Sampler must receive tree.apply output as leaf IDs"
 
     expected_z = np.array([False, True, False, False]) #from y
-    assert np.array_equal(z_sampler, expected_z), "missingness mask is not retrieved correctly"
+    assert np.array_equal(given_sampler_input_y_values, expected_z), "missingness mask is not retrieved correctly"
 
     assert np.array_equal(X_out["cat"], ["a", "a", "b"])
     assert np.array_equal(y_out, [0, 0, 1])
 
 def test_prepare_data_no_missing_data_flow(predictor):
-    predictor.encoding.transform_return = np.array([1, 1, 1, 1])
     X = {"cat": ["a", "b", "c", "d"], "num": [1, 2, 3, 4]}
     y = [10, 20, 30, 40] 
 
     X_out, y_out = predictor.prepare_data_for_fit(X, y)
 
-    assert predictor.tree_ is None, "no tree should be build when there are no missing values"
-    assert predictor.tree_sampler_ is None, "no sampler should be used when there are no missing values"
+    assert predictor.tree_ .fit_inputs is None, "no tree should be build when there are no missing values"
+    assert predictor.tree_sampler_.fit_inputs is None, "no sampler should be used when there are no missing values"
 
-    enc_num = predictor.encoders_["num"]
-    assert enc_num is None
+    assert "num" not in predictor.encoders_
+    assert len(predictor.encoders_) == 1
 
     enc_cat = predictor.encoders_["cat"]
     fit_X, fit_y = enc_cat.fit_inputs
@@ -183,7 +182,6 @@ def test_prepare_data_no_missing_data_flow(predictor):
     assert np.array_equal(list(X_out.keys()), predictor.feature_order_)
 
 def test_prepare_data_for_fit_mixed_types(predictor):
-    predictor.encoding.transform_return = pd.array([1, 1, 1, 1, 1, 1]) #without the code fails
     X = {"cat": ["a", "b", "c", "d", "e", "f"], "num": [1, 2, 3, 4, 5, 6]}
     y = [0, np.nan, 1, None, 2, pd.NA]
 
@@ -196,8 +194,8 @@ def test_prepare_data_all_missing(predictor):
     X = {"a": [1, 2, 3]}
     y = [np.nan, None, pd.NA]
     X_out, y_out = predictor.prepare_data_for_fit(X, y)
-    assert predictor.tree_ is None
-    assert predictor.tree_sampler_ is None
+    assert predictor.tree_.fit_inputs is None
+    assert predictor.tree_sampler_.fit_inputs is None
     assert len(X_out["a"]) == 0
     assert len(y_out) == 0
 
@@ -205,13 +203,12 @@ def test_prepare_data_no_missing(predictor):
     X = {"a": [1, 2, 3], "b": [1, 2, 3]}
     y = [0, 1, 0]
     X_out, y_out = predictor.prepare_data_for_fit(X, y)
-    assert predictor.tree_ is None
+    assert predictor.tree_.fit_inputs is None
     for k in X:
         assert np.array_equal(X_out[k], X[k])
     assert np.array_equal(y_out, y)
 
 def test_prepare_data_does_not_mutate_inputs(predictor):
-    predictor.encoding.transform_return = np.array([1, 1, 1])
     X = {"a": [1, 2, 3]}
     y = [0, None, 1]
     X_copy = {k: v.copy() for k, v in X.items()}
@@ -228,7 +225,7 @@ def test_post_synth_transform_basic(predictor, stub_tree, stub_sampler):
     predictor.tree_.apply_return = np.array([0, 1, 2, 3])
     predictor.tree_sampler_ = stub_sampler
     predictor.tree_sampler_.sample_return = np.array([False, True, False, True])
-    predictor.encoders_ = {"a": None, "b": None}
+    predictor.encoders_ = {}
     predictor._all_missing = False
     predictor._no_missing = False
 
@@ -238,7 +235,7 @@ def test_post_synth_transform_basic(predictor, stub_tree, stub_sampler):
 
     out = predictor.post_synth_transform(X, y)
 
-    assert predictor.tree_sampler_.sample_inputs is not None, "Sampler should be called"
+    assert np.array_equal(predictor.tree_sampler_.sample_inputs, predictor.tree_.apply_return), "Sampler should be called"
     assert out.shape == y.shape
     assert np.array_equal(np.isnan(out), predictor.tree_sampler_.sample_return)
 
@@ -246,14 +243,8 @@ def test_post_synth_transform_basic(predictor, stub_tree, stub_sampler):
 def test_post_synth_all_missing(predictor, stub_tree, stub_sampler):
     predictor._all_missing = True
     predictor._no_missing = False
-
-    predictor.tree_ = stub_tree
-    predictor.tree_sampler_ = stub_sampler
-    predictor.encoders_ = {}
-
     X = {"a": [1, 2, 3]}
     y = np.array([1, 2, 3])
-    predictor.feature_order_ = list(X.keys())
     out = predictor.post_synth_transform(X, y)
 
     assert np.all(np.isnan(out))
@@ -261,31 +252,25 @@ def test_post_synth_all_missing(predictor, stub_tree, stub_sampler):
 def test_post_synth_no_missing(predictor, stub_tree, stub_sampler):
     predictor._all_missing = False
     predictor._no_missing = True
-
-    predictor.tree_ = stub_tree
-    predictor.tree_sampler_ = stub_sampler
-    predictor.encoders_ = {}
-
     X = {"a": [1, 2, 3]}
     y = np.array([1, 2, 3])
-    predictor.feature_order_ = list(X.keys())
+
     out = predictor.post_synth_transform(X, y)
 
     assert np.array_equal(out, y)
 
-def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler):
+def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_encoder):
     predictor.tree_ = stub_tree
     predictor.tree_.apply_return = np.array([0, 1, 2, 3])
     predictor.tree_sampler_ = stub_sampler
     predictor.tree_sampler_.sample_return = np.array([False, True, False, False])
     predictor._all_missing = False
     predictor._no_missing = False
-    predictor.encoders_ = {
-        "a": type("E", (), {"transform_return": np.array([1, 2, 3, 4]),
-                           "transform": lambda self, x: self.transform_return})(),
-        "b": type("E", (), {"transform_return": np.array([10, 20, 30, 40]),
-                           "transform": lambda self, x: self.transform_return})()
-    }
+    encoder_a = stub_encoder
+    encoder_a.transform_return = np.array([1, 2, 3, 4])
+    encoder_b = type(stub_encoder)()  # new instance
+    encoder_b.transform_return = np.array([10, 20, 30, 40])
+    predictor.encoders_ = {"a": encoder_a, "b": encoder_b}
     predictor.feature_order_ = ["a", "b"]
 
     X = {"a": [1, 2, 3, 4], "b": [10, 20, 30, 40]}
@@ -300,9 +285,9 @@ def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler):
     assert np.array_equal(tree_X, expected_X), "tree input must be encoded X matrix"
 
     sampler = predictor.tree_sampler_
-    leaf_ids = sampler.sample_inputs
+    given_sampler_input_leaf_ids = sampler.sample_inputs
     
-    assert np.array_equal(leaf_ids, predictor.tree_.apply_return), "Sampler must receive tree.apply output as leaf IDs."
+    assert np.array_equal(given_sampler_input_leaf_ids, predictor.tree_.apply_return), "Sampler must receive tree.apply output as leaf IDs."
     assert np.array_equal(np.isnan(out), predictor.tree_sampler_.sample_return)
     
 
@@ -318,7 +303,7 @@ def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler):
     predictor.tree_sampler_.sample_return = np.array([False, True, False, False])
     predictor._all_missing = False
     predictor._no_missing = False
-    predictor.encoders_ = {"a": None, "b": None}
+    predictor.encoders_ = {}
     predictor.feature_order_ = ["a", "b"]
 
     X = {
