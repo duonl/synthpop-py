@@ -89,6 +89,22 @@ def test_fit_sampler_raises_non_empty():
     with pytest.raises(ValueError, match="must be non-empty"):
         sampler.fit_sampler(leaf_ids2, y2)
 
+@pytest.mark.parametrize(
+        "y_input, expected_dtype_check",
+        [(np.array([1, 2, 3], dtype = int), np.integer),
+        (np.array([1.0, 2.0, 3.0], dtype=float), float),
+        (np.array([True, False, True]), np.bool_),
+        (np.array(["a", "b", "c"]), np.str_),
+        (np.array([1, "a", 3], dtype=object), object),
+        ],
+)
+def test_fit_sampler_sets_y_dtype_correctly(y_input, expected_dtype_check):
+    sampler = LeafNodeSampler()
+    leaf_ids = np.array([10] * len(y_input))
+    sampler.fit_sampler(leaf_ids, y_input)
+
+    assert np.issubdtype(sampler._y_dtype, expected_dtype_check)
+
 # ----- sample from leaves test cases -----
 def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32):
     """
