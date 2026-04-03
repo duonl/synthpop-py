@@ -172,7 +172,6 @@ def test_prepare_data_no_missing_data_flow(predictor):
     assert enc_num is None
 
     enc_cat = predictor.encoders_["cat"]
-    assert enc_cat is not None
     fit_X, fit_y = enc_cat.fit_inputs
     assert np.array_equal(fit_X, X["cat"]), "encoding input should be original X"
     assert np.array_equal(fit_y, pd.isna(y)), "encoding input should be original missingness mask"
