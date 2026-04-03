@@ -139,7 +139,7 @@ def test_prepare_data_missing_data_flow_correct(predictor):
 
     X_out, y_out = predictor.prepare_data_for_fit(X, y)
 
-    assert np.array_equal(predictor.encoders_["cat"].fit_inputs, (X["cat"], pd.isna(y))), "encoding input should be original X and and missingness mask"
+    assert np.array_equal(predictor.encoders_["cat"].fit_inputs, (X["cat"], np.array([False,True,False,False]))), "encoding input should be original X and and missingness mask"
 
     tree = predictor.tree_
     tree_X, z = tree.fit_inputs
