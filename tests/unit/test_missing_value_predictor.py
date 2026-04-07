@@ -167,7 +167,6 @@ def test_prepare_data_no_missing_data_flow(predictor):
     assert predictor.tree_ .fit_inputs is None, "no tree should be build when there are no missing values"
     assert predictor.tree_sampler_.fit_inputs is None, "no sampler should be used when there are no missing values"
 
-    assert "num" not in predictor.encoders_
     assert len(predictor.encoders_) == 1
 
     enc_cat = predictor.encoders_["cat"]
