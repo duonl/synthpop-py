@@ -6,7 +6,7 @@ from numpy.random import RandomState
 import pandas as pd
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
-from sklearn.base import TransformerMixin
+from sklearn.base import TransformerMixin, check_is_fitted
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth, tree_utils
@@ -14,6 +14,7 @@ from synthpop.methods.tree_utils import LeafNodeSampler
 import numpy.typing as npt
 from abc import abstractmethod, ABCMeta
 import numpy as np
+from sklearn.utils.validation import validate_data
 
 
 class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
@@ -40,13 +41,23 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
     
 
     def _validate_X(self,X):
+
         if isinstance(X,np.ndarray):
-            return {i:X[:,i] for i in range(X.shape[1])}
+            X_d = {i:X[:,i] for i in range(X.shape[1])}
         else:
-            return X
+            X_d = X
+
+        n_features_given = len(X_d.keys())
+        if not hasattr(self,"n_features_in_"):
+            self.n_features_in_ = n_features_given
+        else:
+            
+            if n_features_given != self.n_features_in_:
+                raise ValueError(f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
+        return X_d
         
     def _build_X_matrix(self,encoded_features,X_prep):
-        all_features_dict = encoded_features | {name: value for (name,value) in X_prep.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+        all_features_dict = encoded_features | {name: X_prep[name] for name in self.feature_order_ if pd.api.types.is_numeric_dtype(X_prep[name].dtype)}
         all_features = np.column_stack(list(all_features_dict.values()))
         return all_features
 
@@ -59,6 +70,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         self.missing_handler_ = self._new_missing_handling()
 
         self.feature_order_ = list(X_val.keys())
+        
 
         prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X_val,y)
 
@@ -77,6 +89,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
         # Apply encoding, sample, apply (inverse) handling of missing values.
+        check_is_fitted(self)
         X_val = self._validate_X(X)
         encoded_features = {name:self.encoders_[name].transform(X_val[name]) for name in self.encoders_.keys()}
 

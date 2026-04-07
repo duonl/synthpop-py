@@ -5,6 +5,7 @@ import numpy.typing as npt
 import pytest
 from sklearn import clone
 from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.exceptions import NotFittedError
 from sklearn.tree import BaseDecisionTree
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
@@ -421,6 +422,11 @@ def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnod
     assert np.array_equal(leafnode_sampler.sample_from_leaves_return_value,tree_method.missing_handler_.post_synth_transform_y)
     assert np.array_equal(result,missing_handling.post_synth_transform_result)
 
+@pytest.mark.parametrize("X",[v[0] for v in get_standard_input_test_data()])
+def test_transform_raises_error_when_not_fitted(X,tree_method):
+    
+    with pytest.raises(NotFittedError):
+        tree_method.transform(X)
 #general tests ------------------------------------------------------------------------------------
 
 def test_TreeClassifierMethod_get_params():
