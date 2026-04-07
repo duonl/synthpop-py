@@ -170,13 +170,12 @@ def test_prepare_data_no_missing_data_flow(predictor):
     assert predictor.tree_ .fit_inputs is None, "no tree should be build when there are no missing values"
     assert predictor.tree_sampler_.fit_inputs is None, "no sampler should be used when there are no missing values"
 
-    assert "num" not in predictor.encoders_
     assert len(predictor.encoders_) == 1
 
     enc_cat = predictor.encoders_["cat"]
     fit_X, fit_y = enc_cat.fit_inputs
     assert np.array_equal(fit_X, X["cat"]), "encoding input should be original X"
-    assert np.array_equal(fit_y, pd.isna(y)), "encoding input should be original missingness mask"
+    assert np.array_equal(fit_y, [False]*len(y))
 
     for col in X:
         assert np.array_equal(X_out[col], np.array(X[col]))
