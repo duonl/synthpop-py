@@ -44,6 +44,12 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
             return {i:X[:,i] for i in range(X.shape[1])}
         else:
             return X
+        
+    def _build_X_matrix(self,encoded_features,X_prep):
+        all_features_dict = encoded_features | {name: value for (name,value) in X_prep.items() if pd.api.types.is_numeric_dtype(value.dtype)}
+        all_features = np.column_stack(list(all_features_dict.values()))
+        return all_features
+
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         # Apply encoding en handling of missing values, pass on to super().fit
@@ -52,12 +58,13 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
 
+        self.feature_order_ = list(X_val.keys())
+
         prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X_val,y)
 
         encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
 
-        all_features_dict = encoded_features | {name: value for (name,value) in prepared_for_fit_X.items() if pd.api.types.is_numeric_dtype(value.dtype)}
-        all_features = np.column_stack(list(all_features_dict.values()))
+        all_features = self._build_X_matrix(encoded_features,prepared_for_fit_X)
 
         self._fit(all_features,prepared_y)
 
@@ -73,8 +80,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         X_val = self._validate_X(X)
         encoded_features = {name:self.encoders_[name].transform(X_val[name]) for name in self.encoders_.keys()}
 
-        all_features_dict = encoded_features | {name: value for (name,value) in X_val.items() if pd.api.types.is_numeric_dtype(value.dtype)}
-        all_features = np.hstack([v if v.ndim!=1 else np.array([v]).transpose() for v in all_features_dict.values() ])
+        all_features = self._build_X_matrix(encoded_features,X_val)
         leaf_ids = self.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
