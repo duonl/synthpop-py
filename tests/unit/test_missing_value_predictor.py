@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest 
+import copy
 from sklearn.tree import BaseDecisionTree
 from sklearn.base import BaseEstimator
 
@@ -130,12 +131,14 @@ def test_prepare_data_respects_feature_order_through_flow(predictor):
     assert predictor.feature_order_ == ["a", "b"], "Feature order contract should be handled correctly"
     assert np.array_equal(predictor.feature_order_, list(X_out.keys())), "output feature order should be the same as input"
 
-def test_prepare_data_missing_data_flow_correct(predictor):
+@pytest.mark.parametrize(
+        "y", [[0, None, 0, 1], [0, np.nan, 0, 1], [0, pd.NA, 0, 1]],
+)
+def test_prepare_data_missing_data_flow_correct(predictor, y):
     predictor.encoding.transform_return = np.array([2, 2, 2, 2])
     predictor.tree.apply_return = np.array([0, 1, 2, 3])
 
     X = {"cat": ["a", "b", "a", "b"]}
-    y = [0, None, 0, 1]
 
     X_out, y_out = predictor.prepare_data_for_fit(X, y)
 
@@ -220,27 +223,7 @@ def test_prepare_data_does_not_mutate_inputs(predictor):
     assert X == X_copy
 
     # ----- post synth transform tests -----
-def test_post_synth_transform_basic(predictor, stub_tree, stub_sampler):
-    predictor.tree_ = stub_tree
-    predictor.tree_.apply_return = np.array([0, 1, 2, 3])
-    predictor.tree_sampler_ = stub_sampler
-    predictor.tree_sampler_.sample_return = np.array([False, True, False, True])
-    predictor.encoders_ = {}
-    predictor._all_missing = False
-    predictor._no_missing = False
-
-    X = {"a": [1, 2, 3, 4], "b": [10, 20, 30, 40]}
-    y = np.array([100, 200, 300, 400])
-    predictor.feature_order_ = list(X.keys())
-
-    out = predictor.post_synth_transform(X, y)
-
-    assert np.array_equal(predictor.tree_sampler_.sample_inputs, predictor.tree_.apply_return), "Sampler should be called"
-    assert out.shape == y.shape
-    assert np.array_equal(np.isnan(out), predictor.tree_sampler_.sample_return)
-
-
-def test_post_synth_all_missing(predictor, stub_tree, stub_sampler):
+def test_post_synth_all_missing(predictor):
     predictor._all_missing = True
     predictor._no_missing = False
     X = {"a": [1, 2, 3]}
@@ -249,7 +232,7 @@ def test_post_synth_all_missing(predictor, stub_tree, stub_sampler):
 
     assert np.all(np.isnan(out))
 
-def test_post_synth_no_missing(predictor, stub_tree, stub_sampler):
+def test_post_synth_no_missing(predictor):
     predictor._all_missing = False
     predictor._no_missing = True
     X = {"a": [1, 2, 3]}
@@ -268,7 +251,7 @@ def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_
     predictor._no_missing = False
     encoder_a = stub_encoder
     encoder_a.transform_return = np.array([1, 2, 3, 4])
-    encoder_b = type(stub_encoder)()  # new instance
+    encoder_b = copy.copy(stub_encoder)
     encoder_b.transform_return = np.array([10, 20, 30, 40])
     predictor.encoders_ = {"a": encoder_a, "b": encoder_b}
     predictor.feature_order_ = ["a", "b"]

@@ -70,7 +70,7 @@ def test_fit_sampler_raises_dimension_mismatch():
     leaf_ids = [[10], [10], [20]]
     y = [0, 1, 2] 
     leaf_ids2 = [10, 10, 20]
-    y2 = pd.DataFrame([0, 1, 2]).values
+    y2 = np.array([[0], [1], [2]])
 
     with pytest.raises(ValueError, match="leaf_ids must be 1-dimensional"):
         sampler.fit_sampler(leaf_ids, y)
@@ -164,6 +164,7 @@ def test_sampling_deterministic_with_stub_rng():
     sampler = LeafNodeSampler()
     sampler._leaf_map = {10: {0: 3, 1: 1}}
     sampler.random_state_ = rng
+    sampler._y_dtype = None #for test purpose only
 
     leaf_ids = [10, 10, 10, 10]
 
@@ -197,7 +198,7 @@ def test_sample_determinism_with_same_seed():
 
     sampler1 = helper_make_sampler(leaf_map, leaf_ids, random_state=41)
     sampler2 = helper_make_sampler(leaf_map, leaf_ids, random_state=41)
-    sampler1._seed = 41 #set during fitting
+    sampler1._seed = 41 #set during fitting, sampler2 seed is not set to test y4
 
     y1 = sampler1.sample_from_leaves(leaf_ids)
     y2 = sampler2.sample_from_leaves(leaf_ids)

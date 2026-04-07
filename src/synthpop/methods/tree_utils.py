@@ -5,6 +5,7 @@ import numpy.typing as npt
 import warnings
 
 T = TypeVar("T")
+_UNSET = object()
 
 class LeafNodeSampler():
     """
@@ -58,7 +59,7 @@ class LeafNodeSampler():
             - If `None`, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
-        self._y_dtype = None
+        self._y_dtype = _UNSET
         pass
 
     def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike) -> Self:
