@@ -239,7 +239,7 @@ def test_post_synth_transform_basic(predictor, stub_tree, stub_sampler):
     assert np.array_equal(np.isnan(out), predictor.tree_sampler_.sample_return)
 
 
-def test_post_synth_all_missing(predictor, stub_tree, stub_sampler):
+def test_post_synth_all_missing(predictor)
     predictor._all_missing = True
     predictor._no_missing = False
     X = {"a": [1, 2, 3]}
