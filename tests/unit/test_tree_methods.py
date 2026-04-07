@@ -1,3 +1,4 @@
+import collections
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
@@ -133,7 +134,7 @@ def get_standard_input_test_data():
 
 def get_extended_input_test_data():
     num_float_data = [1.2,2.3,-1.9,5.6,7.8,8.9]
-    num_array_input = (np.array([
+    num_array = np.array([
         [1,2,3],
         [0.1,2.4,5],
         [1.4,2,.63],
@@ -141,7 +142,8 @@ def get_extended_input_test_data():
         [12,2.8,73],
         [0.61,2.44,52]
 
-    ]),np.array(num_float_data),[0,1,2],[])
+    ])
+    num_array_input = (num_array,np.array(num_float_data),[0,1,2],[])
 
     string_arrray_input = (np.array([
         ["a","b"],
@@ -153,7 +155,9 @@ def get_extended_input_test_data():
     ]),np.array(num_float_data),[],[0,1])
 
     standard_inputs = [(X,y,["num_1"],["cat_1","cat_2"]) for (X,y) in get_standard_input_test_data() ]
-    result = [*standard_inputs,num_array_input,string_arrray_input]
+
+    numeric_only_dict = ({"num_1":num_array[:,0],"num_2":num_array[:,1]},np.array(num_float_data),["num_1","num_2"],[])
+    result = [*standard_inputs,num_array_input,string_arrray_input,numeric_only_dict]
     return result
 
 
@@ -387,6 +391,12 @@ def test_transform_applies(X,index_num,index_cat,encoder,missing_handling,leafno
     expected_input_for_tree = get_expected_input_for_tree(tree_method.encoders_,X,index_num,index_cat = index_cat)
 
     assert np.array_equal(expected_input_for_tree,tree_method.apply_X_,equal_nan=True)
+
+    if not isinstance(X,np.ndarray):
+        X_reorderd = collections.OrderedDict(reversed(list(X.items())))
+        tree_method.transform(X_reorderd)
+        assert np.array_equal(expected_input_for_tree,tree_method.apply_X_,equal_nan=True)
+
 
 @pytest.mark.parametrize("X",[v[0] for v in get_standard_input_test_data()])
 def test_transform_samples(X,encoder,missing_handling,leafnode_sampler,apply_result):
