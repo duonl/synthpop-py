@@ -132,7 +132,7 @@ class LeafNodeSampler():
             the same as the input dtype.
         """
 
-        if not hasattr(self, "_leaf_map") or not hasattr(self, "random_state_"):
+        if not hasattr(self, "_leaf_map") or not hasattr(self, "random_state_") or not hasattr(self, "_y_dtype"):
             raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
         
         seed = getattr(self, "_seed", None)

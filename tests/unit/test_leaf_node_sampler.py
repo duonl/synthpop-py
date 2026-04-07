@@ -251,6 +251,7 @@ def test_sample_from_leaves_raises_input_val():
     sampler = LeafNodeSampler()
     sampler._leaf_map = {1: {0: 1}}
     sampler.random_state_ = np.random.default_rng(42)
+    sampler._y_dtype = np.int64
 
     with pytest.raises(ValueError, match="leaf_ids must be 1-dimensional"):
         sampler.sample_from_leaves([[1]])
