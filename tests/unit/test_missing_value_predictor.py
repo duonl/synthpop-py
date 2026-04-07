@@ -4,6 +4,7 @@ import pytest
 import copy
 from sklearn.tree import BaseDecisionTree
 from sklearn.base import BaseEstimator
+from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
 # ----- fixtures -----    
@@ -275,7 +276,7 @@ def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_
 
 def post_synth_transform_raises_unfitted():
     model = MissingValuePredictor()
-    with pytest.raises(AttributeError):
+    with pytest.raises(NotFittedError):
         model.post_synth_transform({"a": [1]}, [1])
     
 def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler):

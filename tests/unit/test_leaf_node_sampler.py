@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest 
+from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.tree_utils import LeafNodeSampler
 
@@ -164,7 +165,7 @@ def test_sampling_deterministic_with_stub_rng():
     sampler = LeafNodeSampler()
     sampler._leaf_map = {10: {0: 3, 1: 1}}
     sampler.random_state_ = rng
-    sampler._y_dtype = None #for test purpose only
+    sampler._y_dtype = np.int64
 
     leaf_ids = [10, 10, 10, 10]
 
@@ -240,10 +241,10 @@ def test_sample_from_leaves_raises_unfitted():
     Missing required attributes should raise AttributeError.
     """
     sampler = LeafNodeSampler()
-    with pytest.raises(AttributeError):
+    with pytest.raises(NotFittedError):
         sampler.sample_from_leaves(np.array([0]))
     sampler._leaf_map = {}
-    with pytest.raises(AttributeError):
+    with pytest.raises(NotFittedError):
         sampler.sample_from_leaves(np.array([0]))
 
 def test_sample_from_leaves_raises_input_val():

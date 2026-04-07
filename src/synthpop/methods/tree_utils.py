@@ -1,11 +1,9 @@
 import numpy as np
 import pandas as pd
-from typing import Self, TypeVar
+from typing import Self
 import numpy.typing as npt
 import warnings
-
-T = TypeVar("T")
-_UNSET = object()
+from sklearn.exceptions import NotFittedError
 
 class LeafNodeSampler():
     """
@@ -59,7 +57,6 @@ class LeafNodeSampler():
             - If `None`, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
-        self._y_dtype = _UNSET
         pass
 
     def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike) -> Self:
@@ -136,7 +133,7 @@ class LeafNodeSampler():
         """
 
         if not hasattr(self, "_leaf_map") or not hasattr(self, "random_state_"):
-            raise AttributeError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
+            raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
         
         seed = getattr(self, "_seed", None)
 

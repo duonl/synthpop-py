@@ -4,13 +4,13 @@ This module contains classes for different strategies for handling missing (None
 from abc import abstractmethod,ABCMeta
 from sklearn.base import TransformerMixin, clone
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.exceptions import NotFittedError
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler
 import numpy.typing as npt
 import numpy as np
 import pandas as pd
 from typing import Dict
-import copy
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -211,7 +211,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
             or not hasattr(self, "tree_sampler_")
             or not hasattr(self, "encoders_")
             or not hasattr(self, "feature_order_")):
-            raise AttributeError("MissingValuePredictor is not fitted. Call `prepare_data_for_fit` first.")
+            raise NotFittedError("MissingValuePredictor is not fitted. Call `prepare_data_for_fit` first.")
 
         X, y = self._validate_X_y_dict(X, y)
         
