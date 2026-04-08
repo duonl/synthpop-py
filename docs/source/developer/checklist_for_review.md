@@ -4,54 +4,117 @@ This checklist is intended to guide reviewers in performing consistent, thorough
 For first-time reviewers, it is recommended to briefly consult the [Developing Synthpop](developing.md) and [Code Standards, Norms and Conventions](code_standards_and_norms.md) documents. These provide the necessary context on workflows and quality expectations, which the checklist operationalises.
 
 ## Before you review
-- [ ] Understand the feature request
-- [ ] Understand which user is going to use this.
-- [ ] Understand how the user is going to use it.
-- [ ] Understand the scope of the pull request. 
-- [ ] Understand the issues related to this pull request. 
-- [ ] Clarify the scope of the review.
+- [ ] Understand the purpose of the change (linked issue or feature request)
+- [ ] Understand intended user interaction and usage context
+- [ ] Understand expected inputs, outputs and behaviour
+- [ ] Understand the scope of the pull request.
+- [ ] Identify related issues, dependencies or constraints
+- [ ] Confirm which parts of the codebase are in scope for your review
 
-The following sub list should be checked in order. If one sub list is not complete, request changes before reviewing any further. 
+The following sub-list should be checked in order. If one sub list is not complete, request changes before reviewing any further. 
 After changes have been submitted, start with the first sublist again. 
 
-## 1. Global scan
-- [ ] Only relevant files have been included in the pull request (so no automatically generated files or files that should not be public)
-- [ ] You know what files you need to review. This means that you know what files have been reviewed already or are for someone else to review. 
-- [ ] The pull request only includes the requested feature. 
+## 1. Scope and global scan
+- [ ] Only relevant files are included in the pull request (automatically generated files or files that should not be public)
+- [ ] The pull request only includes the requested feature (no unrelated changes)
 - [ ] All merge conflicts have been resolved.
-- [ ] If you pull the feature branch and run all the test, they all pass without warnings. 
-- [ ] If you pretend to be an user and use this feature, it works as expected. Use the user examples in the issue.
-- [ ] The documentations builds without errors. 
+- [ ] No debug code, prints or commented-out blocks are present
+- [ ] Documentation builds successfully without errors
+- [ ] You understand which files you are responsible for reviewing
+- [ ] The implementation matches the intended feature scope
+- [ ] All tests pass without warnings
+- [ ] Example code from the issue or docstrings runs and behaves as expected
 
+## 2. Behaviour and requirements validation
+- [ ] The implementation matches the feature specification (functional description)
+- [ ] All required functionality described in the issue is present
+- [ ] Behaviour is correct in normal usage scenarios
+- [ ] Behaviour is correct in expected real-world usage
+- [ ] Assumptins made by the implementation are valid and documented
+- [ ] Violations of assumptions result in predictable and informative errors
 
-## 2. Reviewing the tests
+## 3. Reviewing the tests
+### Coverage and completeness
+- [ ] All new logic paths are covered by tests
+- [ ] Both success and failure cases are tested
+- [ ] Edge cases from the specification are explicitly tested
+- [ ] Regression tests are added where relevant (previous bugs stay fixed)
+### Standard test dimensions
+- [ ] Correct output type, shape, and schema are tested
+- [ ] Behaviour in trivial cases is tested (e.g. empty inputs, single values)
+- [ ] Behaviour in realistic use cases is tested
+- [ ] Edge cases are covered (boundary values, extreme inputs, degenerate cases)
+Find more standard topics in testing in the [Code Standards, Norms and Conventions](code_standards_and_norms.md)
+### Obvious / sanity cases
+- [ ] Where relevant, sanity cases are tested, such as:
+    - operations on single-element inputs
+    - identity operations (e.g. sorting already sorted data)
+    - comparison of identical datasets
+    - no-op transformations
+### Test quality
+- [ ] Each test has a clear behavioural assertion
+- [ ] Tests are easy to read and logically structured
+- [ ] Tests validate behaviour, not implementation details
+- [ ] Tests are determinisitc and reproducible
+- [ ] Randomness is controlled via seeds or mocks where needed
+- [ ] Tests are isolated and independent (no shared state or order dependence)
+- [ ] Tests clean up all side effects, even when the test fails (files, globals, environment changes)
+- [ ] Unit tests are  lightweight (run quickly and do not use a lot of computer resources) and fully automatic. This is to enable automatic checks.
 
-- [ ] Every aspect of the new feature is being taken up in the unit tests. Standard aspects include:
-    - correct shape and datatype of return value (correct dataframe/series, number of columns, datatype of columns, number of rows, column names). Typehints are non-binding. And a type hint might specify and abstract type, where the specification for a feature specify a concrete type.
-    - behaviour in "trivial" cases (input is empty dataframe, zero, None, etc...)
-    - behaviour in realistic use case. 
-    - edge cases. (values equal to border values, None, etc...)
-- [ ] unit tests are still lightweight (run quickly and do not use a lot of computer resources) and fully automatic. This is to enable automatic checks. Besides, unittests are supposed to run very often. Slow unit tests become annoying when developing, hindering testing more often.
-For each unit test:
-- [ ] The flow of the test is easy to understand. For each line of code of the test, you know what it does and it makes sense to have that line of code.
-- [ ] The test leaves the computer the way it found it. The test should leave no proof that it has run. This implies that a cleanup should happen, even if the test fails. Check this by examining the code of the test. Are there files on disk being made? Are there any static or global variables. 
-- [ ] It is clear what the test is supposed to test. A test has a certain claim,assertion or hypothesis over the code. It is clear what that hypothesis is. 
-- [ ] The only reason the test could fail is an error in the code being tested (and not in dependencies)
-- [ ] The tests effectively proves the claim.
-- [ ] The test is not testing too much. A failed test should imply that the hypothesis should be rejected. So a bug in a dependency can not cause this test to fail. 
+## 4. Reviewing the code
+### Correctness and design
+- [ ] Implementation correctly satisfies the specification
+- [ ] Code is not more complex than necessary
+- [ ] No duplicate code is unnecessarily introduced
+- [ ] Each component has a clear and single responsibility
+- [ ] SOLID principles are respected where applicable
+- [ ] Any edge case you see is covered by unit tests
+### Data and numerical integrity
+- [ ] Input data is not unintentionally mutated
+- [ ] No data leakage occurs between stages (fit/transform/generate)
+- [ ] Numerical computations are stable (no unexpected NaNs or Infs)
+- [ ] Floating point comparisons are handled safely
+### API consistency
+- [ ] Naming conventions are consistent with the codebase
+- [ ] Function signatures follow established patterns
+- [ ] Parameters are intuitive and consistent across similar functions
 
-## 3. Reviewing the code
+## 5. Edge cases, robustness and error handling
+- [ ] Empty inputs are handled correctly
+- [ ] Single-element inputs behave correctly
+- [ ] Extreme numeric values are handled safely
+- [ ] Division by zero is handled or prevened
+- [ ] Invalid inputs fail in a predictable and informative way
+- [ ] Boundary conditions behave as expected
+- [ ] Behaviour is stable across repeated executions
 
-- [ ] The code is the most efficient way to pass the tests.
-- [ ] There is no duplicate code.
-- [ ] Each component (module, class, function) is easy to understand. 
-- [ ] The [SOLID principles](https://www.geeksforgeeks.org/system-design/solid-principle-in-programming-understand-with-real-life-examples/) have been applied. 
-- [ ] Any edge cases you see in the code have been covered by unit tests. 
-- [ ] Type hints where appropriate. 
+## 6. Scikit-learn estimator compliance (if applicable)
+- [ ] Estimator passes `check_estimator` or `parametrize_with_checks`
+- [ ] `fit`, `transform`, etc. behave correctly and consistenly
+- [ ] `get_params` and `set_params` work correctly
+- [ ] Estimator is stateless where required (e.g. `transform`)
+- [ ] There are no mutable default arguments
+- [ ] Implementation follows scikit-learn developer guidelines
 
-## 4. Reviewing the form, style, and documentation
+## 7. Performance and scalability (when relevant)
+- [ ] Implementation scales reasonably with dataset size
+    - [ ] There are no `for`-loops that could be vectorised
+- [ ] No avoidable copies of large datasets are made
+- [ ] Complexity is acceptable for intended use cases
 
-- [ ] PEP8 code standard.
-- [ ] British English.
-- [ ] The docstrings tell how to use the code. 
-- [ ] There are examples of how to use the code, and those examples run. 
+## 8. Documentation and usability
+- [ ] Docstrings are accurate and reflect actual behaviour
+- [ ] Examples are included for non-trivial functionality
+- [ ] Examples are correct and executable
+- [ ] Terminology is consistent with project standards
+
+## 9. Form and style
+- [ ] Code follows PEP8 standards
+- [ ] British English is used
+- [ ] Type hints are used where appropriate
+- [ ] No unnecessary or unclear comments are present
+
+## 10. Final check
+- [ ] You can clearly explain what the change does and why it is correct
+- [ ] You would be comfortable maintaining this code in the future
+- [ ] The change improves or maintains overall codebase quality
