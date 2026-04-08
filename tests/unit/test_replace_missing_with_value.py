@@ -151,3 +151,14 @@ def test_post_synth_transform_empty(empty_data):
     replace_nan = ReplaceNoneWithValue()
     y_res = replace_nan.post_synth_transform(np.array(["s"]),empty_data)
     assert len(y_res) == 0
+
+# ----- clonability tests -----
+def test_clone_works_and_fitted_does_not_preserve_state():
+    rpnwv = ReplaceNoneWithValue(missing_marker="N.a.N.")
+    rpnwv.prepare_data_for_fit(X=np.array(["a","b","c","c"]), y=np.array(["x","y",None,"z"]))
+
+    cloned = rpnwv.clone()
+
+    # Does not have learned attributes
+    assert hasattr(cloned, "missing_replacement")
+    assert hasattr(rpnwv, "missing_replacement")

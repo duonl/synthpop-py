@@ -28,17 +28,17 @@ The algorithm consists of two phases:
 
 How the synthesiser is fit depends on whether the target column contains a numeric or categorical variable. Below we will explain the different approaches.
 
-#### 3.1.0 The first column
+#### 3.1.1 The first column
 The first column is a special case for CART. If there are no predictors, a sample with replacement should be taken from the distribution of the observed data. 
 
-#### 3.1.1 Fitting with a categorical target 
+#### 3.1.2 Fitting with a categorical target 
 Decision trees from scikit-learn cannot run with categorical features, therefore those variables must first be transformed into numeric variables. The default encoder in the synthpop synthesiser for categorical targets is a [PCA encoder](PCA-encoding.md). A custom encoder can be specified when defining a specific classifier.
 
 Once the categorical features are encoded, we check for missing values in the target. If the target contains missing values, then the missing values are replaced by the value "N.a.N.". If that value already occurs, an error should be raised and the process should stop. This happens when a variable contains both an existing "N.a.N." value and 'regular' missing values. We then assume a problem in data quality.
 
 When these steps are completed, a classification tree can be fit. For details about the fitting, see the [scikit-learn documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
-#### 3.1.2 Fitting with a numeric target
+#### 3.1.3 Fitting with a numeric target
 As mentioned, the categorical features must first be encoded. The default encoder for numeric targets is a [Mean encoder](Mean-encoding.md). Again, a custom encoder can be specified when defining a specific classifier.
 
 Here, if the target contains missing values, the [Missing Value Predictor](MissingValuePredictor.md) is fitted with the original unencoded features and target. After, any rows where the target is missing are filtered out. Then a regression tree can be fit using the filtered features and target. For details about the fitting, we refer you again to the [scikit-learn documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html).
@@ -63,10 +63,9 @@ For the generation of a numeric column, we apply the following steps:
 
 Only numeric and categorical variables are supported. Other data types must be converted or removed before synthesis.
 
-## 5. Edge cases and special situations
 
-## 6. Limitations and considerations
+## 5. Limitations and considerations
 
-### 6.1 No prediction matrix
+### 5.1 No prediction matrix
 
 In synthpop-R, users can configure a prediction matrix which specifies, for each variable, which previously synthesised variables should be included or excluded as predictors in the synthesis method. In the current version of synthpop-python, this level of control is not available; all variables synthesised earlier are automatically used as features in the model.
