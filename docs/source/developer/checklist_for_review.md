@@ -83,9 +83,8 @@ Find more standard topics in testing in the [Code Standards, Norms and Conventio
 - [ ] Empty inputs are handled correctly
 - [ ] Single-element inputs behave correctly
 - [ ] Extreme numeric values are handled safely
-- [ ] Division by zero is handled or prevened
+- [ ] Division by zero is handled or prevented
 - [ ] Invalid inputs fail in a predictable and informative way
-- [ ] Boundary conditions behave as expected
 - [ ] Behaviour is stable across repeated executions
 
 ## 6. Scikit-learn estimator compliance (if applicable)
