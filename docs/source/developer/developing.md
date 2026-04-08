@@ -1,6 +1,8 @@
 # Developing Synthpop
 
-This document provides guidelines for developing Synthpop. It outlines the principles, workflows and conventions to follow when working on the project.
+This document describes how development within the Synthpop project is structured and executed. It provides the foundational context needed to understand how work is planned, implemented, reviewed and released. It covers the process that guides development.
+
+For first-time contributors, this page should be read first. It provides the mental model of how the project operates and how individual tasks fit into the broader system. The other documentation, such as the developer checklist, review checklist and code standards, builds on the processes defined here.
 
 ## Assumed context
 The development team is currently small. These guidelines assume that only a few developers will be working in parallel at any given time. Bug fixes and new features are expected to be developed concurrently, while the pace of introducing new features remains modest.
@@ -190,6 +192,8 @@ Use suffix `-alpha.x`. Increment `x` after each testing cycle.
 - Document all user-facing functionality.
 - Avoid breaking changes unless justified.
 - Continuously evaluate test coverage.
+
+A complete list can be found in [Code Standards, Norms and Conventions](code_standards_and_norms.md).
 
 ## Final Notes
 This document is intended to evolve alongside the project. Developers are encouraged to propose improvements where processes become unclear or inefficient.
