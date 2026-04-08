@@ -139,17 +139,37 @@ def test_prepare_data_missing_data_flow_correct(predictor, y):
     predictor.encoding.transform_return = np.array([2, 2, 2, 2])
     predictor.tree.apply_return = np.array([0, 1, 2, 3])
 
-    X = {"cat": ["a", "b", "a", "b"]}
+    X = {"cat1": ["a", "b", "a", "b"],
+         "cat2": ["x", "y", "x", "y"],
+         "num1": [1, 2, 3, 4],
+         "num2": [10.0, 20.0, 30.0, 40.0]}
 
     X_out, y_out = predictor.prepare_data_for_fit(X, y)
 
-    assert np.array_equal(predictor.encoders_["cat"].fit_inputs, (X["cat"], np.array([False,True,False,False]))), "encoding input should be original X and and missingness mask"
+    expected_mask = np.array([False, True, False, False])
+
+    for col in ["cat1", "cat2"]:
+        enc = predictor.encoders_[col]
+        fit_X, fit_y = enc.fit_inputs
+
+        assert np.array_equal(fit_X, X[col])
+        assert np.array_equal(fit_y, expected_mask)
 
     tree = predictor.tree_
     tree_X, z = tree.fit_inputs
-    
-    assert tree_X.shape == (4, 1) #Tree expects matrix
-    assert np.array_equal(tree_X, predictor.encoding.transform_return.reshape(-1, 1)), "X input of the tree should be the output of the encoding but reshaped to 2D"
+
+    # --- check full matrix composition ---
+    encoded_cat1 = predictor.encoders_["cat1"].transform_return.reshape(-1, 1)
+    encoded_cat2 = predictor.encoders_["cat2"].transform_return.reshape(-1, 1)
+
+    expected_matrix = np.column_stack([
+        encoded_cat1,
+        encoded_cat2,
+        np.array(X["num1"]).reshape(-1, 1),
+        np.array(X["num2"]).reshape(-1, 1),
+    ])
+
+    assert np.array_equal(tree_X, expected_matrix), "Tree input must combine encoded categorical and raw numeric features in correct order"
 
     sampler = predictor.tree_sampler_
     given_sampler_input_leaf_ids, given_sampler_input_y_values = sampler.fit_inputs
@@ -159,7 +179,10 @@ def test_prepare_data_missing_data_flow_correct(predictor, y):
     expected_z = np.array([False, True, False, False]) #from y
     assert np.array_equal(given_sampler_input_y_values, expected_z), "missingness mask is not retrieved correctly"
 
-    assert np.array_equal(X_out["cat"], ["a", "a", "b"])
+    keep_idx = ~expected_mask
+
+    for col in X:
+        assert np.array_equal(X_out[col], np.array(X[col])[keep_idx]), f"{col} not correctly filtered"
     assert np.array_equal(y_out, [0, 0, 1])
 
 def test_prepare_data_no_missing_data_flow(predictor):
@@ -287,11 +310,13 @@ def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler):
     predictor._all_missing = False
     predictor._no_missing = False
     predictor.encoders_ = {}
-    predictor.feature_order_ = ["a", "b"]
+    predictor.feature_order_ = ["a", "b", "c", "d"]
 
     X = {
-        "b": [10, 20, 30, 40],
-        "a": [1, 2, 3, 4]
+        "b": ["x", "y", "x", "y"],
+        "a": [1, 2, 3, 4],
+        "c": ["u", "v", "u", "v"],
+        "d": [10, 20, 30, 40]
     }
     y = np.array([100, 200, 300, 400])
 
@@ -299,7 +324,7 @@ def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler):
 
     tree = predictor.tree_
     tree_X = tree.apply_inputs
-    expected_X = np.column_stack((X["a"], X["b"]))
+    expected_X = np.column_stack((X["a"], X["b"], X["c"], X["d"]))
 
     assert np.array_equal(tree_X, expected_X), "feature_order_ must override input dict ordering"
 

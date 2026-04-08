@@ -70,8 +70,25 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     :param encoding: Default is a :doc: `MeanEncoder` <synthpop.data_processing.encoders.MeanEncoder>.
     :param tree: Decision tree classifier. Default is [DecisionTreeClassifier(min_samples_leaf=5)](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)
-    :param tree_sampler: Leaf node sampler. Default is :py:meth:LeafNodeSampler
-        .
+    :param tree_sampler: Leaf node sampler. Default is :py:meth:LeafNodeSampler.
+
+    Examples
+    --------
+    >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+    >>> import numpy as np
+    >>>
+    >>> X = {"num": [25, 30, 35, 40], "cat": ["A", "B", "A", "B"]}
+    >>> y = [1.0, np.nan, 3.0, None]
+    >>>
+    >>> mvp = MissingValuePredictor()
+    >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
+    >>>
+    >>> #simulate synthetic generation step
+    >>> y_synth = np.array([10, 20, 30, 40])
+    >>> y_final = mvp.post_synth_transform(X, y_synth)
+    >>> y_final
+    array([10., nan, nan, 40.])
+
     """
 
     def __init__(self, encoding: TransformerMixin | None = None, 
@@ -146,6 +163,22 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :param y: the target column.
 
         :return: a tuple (X, y) of the original data excluding the rows where `y` is missing.
+
+        Examples
+        --------
+        >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+        >>> import numpy as np
+        >>>
+        >>> X = {"num": [25, 30, 35, 40], "cat": ["A", "B", "A", "B"]}
+        >>> y = [1.0, np.nan, 3.0, None]
+        >>>
+        >>> mvp = MissingValuePredictor()
+        >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
+        >>> X_clean
+        {'num': array([25, 35]), 'cat': array(['A', 'A'], dtype='<U1')}
+        >>> y_clean
+        array([1.0, 3.0], dtype=object)
+
         """
         # input validation
         X_val, y_val = self._validate_X_y_dict(X, y)
@@ -198,6 +231,24 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :param y: the target column.
 
         :return:  The synthesised target with missing values.
+
+        Examples
+        --------
+        >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+        >>> import numpy as np
+        >>>
+        >>> X = {"num": [25, 30, 35, 40], "cat": ["A", "B", "A", "B"]}
+        >>> y = [1.0, np.nan, 3.0, None]
+        >>>
+        >>> mvp = MissingValuePredictor()
+        >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
+        >>>
+        >>> #simulate synthetic generation step
+        >>> y_synth = np.array([10, 20, 30, 40])
+        >>> y_final = mvp.post_synth_transform(X, y_synth)
+        >>> y_final
+        array([10., nan, nan, 40.])
+
         """ 
 
         # implementation
