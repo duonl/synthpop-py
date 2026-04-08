@@ -1,7 +1,12 @@
 # Checklist for developers
 
-This document specifies the tasks of the developer. 
-This checklist is meant to ensure code quality and optimal code workflow. 
+This checklist defines the standard set of actions required when contributing code to the Synthpop project. It is designed to help developers maintain a consistent workflow and ensure that every change meets the project's expectations for quality, completeness and review readiness.
+
+The checklist follows the full development lifecycle: from preparing your work before starting, through implementation, to preparing a pull request and responding to review feedback. Each section reflects a different stage of development and helps prevent common issues such as incomplete implementations, missing tests or unclear pull requests.
+
+For first-time contributors, it is recommended to read [Developing Synthpop](developing.md) first, as it explains the overall workflow and principles that this checklist operationalises in practice. The [Code Standards, Norms and Conventions](code_standards_and_norms.md) document is also relevant when making decisions about implementation details.
+
+Use this checklist as a practical working guide during development. It is not meant to slow you down, but to ensure that the work is structured, reviewable and aligned with the project's expectations before submission.
 
 ## Before you begin
 - [ ] Fully understand the feature request. 
