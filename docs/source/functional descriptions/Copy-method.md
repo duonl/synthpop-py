@@ -35,4 +35,4 @@ To generate a synthetic column, the method produces values based solely on the s
 Any missing values in the original target are copied into the synthetic target.
 
 ## 5. Limitations and considerations
-The Copy method does not capture any relationships between the target and feature variables The method is intended as a structural or baseline component within a larger synthesis framework and is not designed to function as a standalone generative model.
+The Copy method does not capture any relationships between the target and feature variables. The method is intended as a structural or baseline component within a larger synthesis framework and is not designed to function as a standalone generative model.
