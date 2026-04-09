@@ -4,7 +4,7 @@ Synthesis methods
 .. py:module:: synthpop.methods
 
 
-base\_synth module
+Base synth module
 ---------------------------------------
 
 .. automodule:: synthpop.methods.base_synth
@@ -13,7 +13,7 @@ base\_synth module
    :undoc-members:
 
 
-cart\_synth module
+CART synth module
 ---------------------------------------
 
 .. automodule:: synthpop.methods.cart_synth
@@ -22,7 +22,7 @@ cart\_synth module
    :undoc-members:
 
 
-XGBoost\_synth module
+XGBoost synth module
 ------------------------------------------
 
 .. automodule:: synthpop.methods.XGBoost_synth
