@@ -71,7 +71,7 @@ Find more standard topics in testing in the [Code Standards, Norms and Conventio
 - [ ] Any edge case you see is covered by unit tests
 ### Data and numerical integrity
 - [ ] Input data is not unintentionally mutated
-- [ ] No data leakage occurs between stages (fit/transform/generate)
+- [ ] No data leakage occurs between stages (fit/transform/generate) (e.g. refitting in transform)
 - [ ] Floating point comparisons are handled safely
 ### API consistency
 - [ ] Function and method names are consistent with existing naming conventions in the codebase
