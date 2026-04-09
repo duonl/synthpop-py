@@ -68,8 +68,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
-    :param encoding: Default is a :doc: `MeanEncoder` <synthpop.data_processing.encoders.MeanEncoder>.
-    :param tree: Decision tree classifier. Default is [DecisionTreeClassifier(min_samples_leaf=5)](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)
+    :param encoding: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`.
+    :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5)<https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)>`.
     :param tree_sampler: Leaf node sampler. Default is :py:meth:LeafNodeSampler.
 
     Examples
