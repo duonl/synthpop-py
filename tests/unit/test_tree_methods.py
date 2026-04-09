@@ -54,6 +54,12 @@ class StubMissingHandler(BaseMissingValueHandler):
         self.post_synth_transform_y = y
         return self.post_synth_transform_result
     
+    def clone(self):
+        return copy.copy(self)
+    
+    def __sklearn_clone__(self):
+        return copy.copy(self)
+    
 class StubLeafNodeSampler():
     def __init__(self,sample_from_leaves_return_value):
         self.sample_from_leaves_return_value = sample_from_leaves_return_value
