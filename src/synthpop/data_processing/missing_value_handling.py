@@ -287,8 +287,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :return: A new, unfitted instance of `MissingValuePredictor()` with the 
             same `encoding`, `tree` and `tree_sampler` setting.
         
-        Examples:
-        -----
+        Examples
+        --------
         >>> MissingValuePredictor().clone()
         """
         return self.__class__(encoding=self.encoding, tree=self.tree, tree_sampler=self.tree_sampler)
@@ -378,8 +378,8 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         :return: A new, unfitted instance of `ReplaceNoneWithValue()` with the 
             same `missing_marker` setting.
         
-        Examples:
-        -----
+        Examples
+        --------
         >>> ReplaceNoneWithValue().clone()
         """
         return self.__class__(missing_marker = self.missing_replacement)
