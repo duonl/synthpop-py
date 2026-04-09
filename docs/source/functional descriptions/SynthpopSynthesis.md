@@ -24,13 +24,24 @@ The algorithm consists of two phases:
 
 ### 3.1 Fitting the synthesiser
 For each column, a model is fitted in the order specified above. All previous columns are the features, the current column is the target.
-The default model is a sample for the first generated variable, and [CART](CART.md) for all other variables.
+The default model is a [sample](Sample-method.md) for the first generated variable, and [CART](CART.md) for all other variables.
 
 ### 3.2 Generating a synthetic dataset
-
 The synthetic dataset is generated incrementally, column by column:
-1. The first column is synthesised by taking a sample with replacement of the user specified number of rows. 
-2. For subsequent models, the fitted model is used to generate synthetic data using the data that has already be synthesised. 
+
+### 3.2.1 Initialisation of the synthetic dataset
+To support generating a synthetic dataset with an arbitrary number of rows, an initial synthetic feature is constructed that defines the desired output size. This is achieved by introducing a placeholder feature with the specified number of rows. This feature does not carry meaningful information but serves as a structural anchor to ensure that all subsequent synthesis steps operate on a dataset with the correct number of rows.
+
+This initial feature acts as the feature set for generating the first column.
+
+### 3.2.2 Generating the first column
+By default, the first column is synthesised using the Sample method, drawing values with replacement from the original data. The number of generated values is determined by the number of rows in the current synthetic dataset, which is defined by the placeholder feature introduced in the previous step. After this step, the current synthetic dataset is only the synthesised version of the first column.
+
+### 3.2.3 Generating subsequent columns
+For each subsequent column:
+1. The already synthesised columns are used as features.
+2. The fitted model for the current column is applied to these features.
+3. A synthetic version of the target column is generated.
 
 ## 4. Mathematical properties and constraints
 
