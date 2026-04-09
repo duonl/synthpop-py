@@ -69,6 +69,9 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         # Apply encoding en handling of missing values, pass on to super().fit
         X_val = self._validate_X(X)
 
+        if hasattr(y,"name"):
+            self.target_name_ = y.name
+
         self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
 
@@ -105,8 +108,8 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         result = self.missing_handler_.post_synth_transform(X_val,sample)
         return result
 
-    def get_feature_names_out(self):
-        pass
+    def get_feature_names_out(self,input_features=None):
+        return [self.target_name_]
 
     @abstractmethod
     def _get_encoder(self):
@@ -155,7 +158,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         return ReplaceNoneWithValue()
     
     def _get_tree(self):
-        return DecisionTreeClassifier()#TODO: set default params
+        return DecisionTreeClassifier(min_samples_leaf=5)#TODO: set default params
     
 
 
@@ -177,7 +180,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         return MissingValuePredictor()
     
     def _get_tree(self):
-        return DecisionTreeRegressor()#TODO: set default params
+        return DecisionTreeRegressor(min_samples_leaf=5)#TODO: set default params
     
 
 class CartMethod(base_synth.BaseSynthMethod):

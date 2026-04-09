@@ -333,6 +333,16 @@ def test_fit_sampler_fit(X,y,tree_method):
     assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler.prepared_for_fit_result[1])
     assert not (tree_method.tree_sampler is tree_method.tree_sampler_)
 
+@pytest.mark.parametrize("X,y",get_standard_input_test_data())
+def test_fit_set_feature_names_out(X,y,tree_method):
+
+    y = pd.Series(y,name="target_name")
+
+    tree_method.fit(X,y)
+
+    assert tree_method.target_name_ == "target_name"
+    pass
+
 # test transform ----------------------------------------------------------------------------------
 
 def make_fitted_tree_method(encoder,missing_handling,leafnode_sampler,tree,X,cat_index = None,num_index=[]):
@@ -434,6 +444,14 @@ def test_transform_raises_error_when_not_fitted(X,tree_method):
     with pytest.raises(NotFittedError):
         tree_method.transform(X)
 #general tests ------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("X",[v[0] for v in get_standard_input_test_data()])
+def test_get_feature_names_out(X,tree_method):
+    tree_method.target_name_ = "name_of_target"
+
+    result = tree_method.get_feature_names_out()
+    assert result == ["name_of_target"]
+
 
 def test_TreeClassifierMethod_get_params():
     method = TreeClassifierMethod()
