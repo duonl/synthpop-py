@@ -72,12 +72,16 @@ Find more standard topics in testing in the [Code Standards, Norms and Conventio
 ### Data and numerical integrity
 - [ ] Input data is not unintentionally mutated
 - [ ] No data leakage occurs between stages (fit/transform/generate)
-- [ ] Numerical computations are stable (no unexpected NaNs or Infs)
 - [ ] Floating point comparisons are handled safely
 ### API consistency
-- [ ] Naming conventions are consistent with the codebase
-- [ ] Function signatures follow established patterns
-- [ ] Parameters are intuitive and consistent across similar functions
+- [ ] Function and method names are consistent with existing naming conventions in the codebase
+- [ ] Parameter names are intuitive and consistent with similar functions and modules (same concept → same name)
+- [ ] Parameter ordering follows existing conventions:
+    - [ ] required parameters come before optional parameters
+    - [ ] commonly used parameters appear first
+    - [ ] ordering is consistent with similar functions
+- [ ] Optional parameters have sensible and safe defaults
+- [ ] Default values are consistent with similar functions and reflect typical use cases
 
 ## 5. Edge cases, robustness and error handling
 - [ ] Empty inputs are handled correctly
