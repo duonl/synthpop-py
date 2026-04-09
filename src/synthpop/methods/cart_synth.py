@@ -6,7 +6,7 @@ from numpy.random import RandomState
 import pandas as pd
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
-from sklearn.base import TransformerMixin, check_is_fitted
+from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth, tree_utils
@@ -17,17 +17,17 @@ import numpy as np
 from sklearn.utils.validation import validate_data
 
 
-class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
+class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
     def __init__(self, *, encoder: TransformerMixin | None = None,
                  missing_handler: BaseMissingValueHandler | None = None,
                  tree_sampler: LeafNodeSampler | None = None,
-                 criterion, splitter, max_depth, min_samples_split, min_samples_leaf, min_weight_fraction_leaf, max_features, max_leaf_nodes, random_state, min_impurity_decrease, class_weight=None, ccp_alpha=0):
-        super().__init__(criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf,
-                         max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha)
+                 tree: BaseDecisionTree | None = None):
+        super().__init__()
         self.encoder = encoder
         self.missing_handler = missing_handler
         self.tree_sampler = tree_sampler
+        self.tree = tree
 
 
     def _new_encoder(self):
@@ -38,6 +38,9 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
     
     def _new_tree_sampler(self):
         return clone(self.tree_sampler) if not(self.tree_sampler is None) else LeafNodeSampler()
+    
+    def _new_tree(self):
+        return clone(self.tree) if not (self.tree is None) else self._get_tree()
     
 
     def _validate_X(self,X):
@@ -78,9 +81,11 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
 
         all_features = self._build_X_matrix(encoded_features,prepared_for_fit_X)
 
-        self._fit(all_features,prepared_y)
+        self.tree_ = self._new_tree().fit(all_features,prepared_y)
 
-        leaf_ids = self.apply(all_features)
+        #self._fit(all_features,prepared_y)
+
+        leaf_ids = self.tree_.apply(all_features)
 
         self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids,prepared_y)
 
@@ -94,7 +99,7 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
         encoded_features = {name:self.encoders_[name].transform(X_val[name]) for name in self.encoders_.keys()}
 
         all_features = self._build_X_matrix(encoded_features,X_val)
-        leaf_ids = self.apply(all_features)
+        leaf_ids = self.tree_.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
         result = self.missing_handler_.post_synth_transform(X_val,sample)
@@ -111,6 +116,21 @@ class _AbstractTreeMethod(BaseDecisionTree, metaclass=ABCMeta):
     def _get_missing_handling(self):
         pass
 
+    @abstractmethod
+    def _get_tree(self):
+        pass
+
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.estimator_type = "transformer"
+        tags.target_tags.required=True
+        tags.target_tags.two_d_labels=True
+        tags.input_tags.two_d_array=True
+        tags.input_tags.categorical=True
+        tags.input_tags.string=True
+        tags.input_tags.dict=True
+        tags.input_tags.allow_nan =True
+        return tags
     # The leafnode sampler does not vary between regression and classification.
     # @abstractmethod
     # def _get_leafnode_sampler(self):
@@ -125,28 +145,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param rest: Parameters inherent to DecisionTreeClassifier
     """
 
-    # _parameter_constraints: dict = {
-    #     **BaseDecisionTree._parameter_constraints,
-    #     "criterion": [StrOptions({"gini", "entropy", "log_loss"})],#, Hidden(Criterion)],
-    #     "class_weight": [dict, list, StrOptions({"balanced"}), None],
-    # }
-
-    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,
-        criterion="gini",
-        splitter="best",
-        max_depth=None,
-        min_samples_split=2,
-        min_samples_leaf=1,
-        min_weight_fraction_leaf=0.0,
-        max_features=None,
-        random_state=None,
-        max_leaf_nodes=None,
-        min_impurity_decrease=0.0,
-        class_weight=None,
-        ccp_alpha=0.0,
-        monotonic_cst=None,):
-        super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
-                         min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha)
+    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler,tree=tree)
 
     def _get_encoder(self):
         return PCAEncoder()
@@ -154,18 +154,9 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     def _get_missing_handling(self):
         return ReplaceNoneWithValue()
     
-    # The distinction between regression and classification is made in BaseDecisionTree based on tags.
-    def __sklearn_tags__(self):
-        tags = super().__sklearn_tags__()
-        allow_nan = self.splitter in ("best", "random") and self.criterion in {
-            "gini",
-            "log_loss",
-            "entropy",
-        }
-        tags.estimator_type = "classifier"
-        tags.target_tags.required = True
-        tags.input_tags.allow_nan = allow_nan
-        return tags
+    def _get_tree(self):
+        return DecisionTreeClassifier()#TODO: set default params
+    
 
 
 class TreeRegressorMethod(_AbstractTreeMethod):
@@ -176,20 +167,8 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param rest: Parameters inherent to DecisionTreeRegressor
     """
 
-    def __init__(self, *, encoder=None, missing_handling=None, tree_sampler=None, criterion="squared_error",
-        splitter="best",
-        max_depth=None,
-        min_samples_split=2,
-        min_samples_leaf=1,
-        min_weight_fraction_leaf=0.0,
-        max_features=None,
-        random_state=None,
-        max_leaf_nodes=None,
-        min_impurity_decrease=0.0,
-        ccp_alpha=0.0,
-        monotonic_cst=None):
-        super().__init__(encoder=encoder, missing_handler=missing_handling, tree_sampler=tree_sampler, criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
-                         min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, random_state=random_state, min_impurity_decrease=min_impurity_decrease, class_weight=None, ccp_alpha=ccp_alpha)
+    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree = None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler, tree=tree)
     
     def _get_encoder(self):
         return MeanEncoder()
@@ -197,14 +176,9 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def _get_missing_handling(self):
         return MissingValuePredictor()
     
-
-    # The distinction between regression and classification is made in BaseDecisionTree based on tags.
-    def __sklearn_tags__(self):
-        tags = super().__sklearn_tags__()
-        tags.estimator_type = "regressor"
-        tags.target_tags.required = True
-        return tags
-
+    def _get_tree(self):
+        return DecisionTreeRegressor()#TODO: set default params
+    
 
 class CartMethod(base_synth.BaseSynthMethod):
     """
