@@ -1,5 +1,5 @@
 """
-This module contains classes for different strategies for handling missing (None) values in the target during synthesis. 
+This module contains classes for different strategies for handling missing values (None) in the target during synthesis. 
 """
 from abc import abstractmethod,ABCMeta
 from sklearn.base import TransformerMixin, clone
