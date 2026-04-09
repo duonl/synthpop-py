@@ -5,6 +5,8 @@ This documentation is used by developers to implement this package. It can be ve
 
 SynthpopSynthesis.md
 CART.md
+Copy-method.md
+Sample-method.md
 Mean-encoding.md
 PCA-encoding.md
 MissingValuePredictor.md
