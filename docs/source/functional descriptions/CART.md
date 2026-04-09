@@ -13,7 +13,7 @@ The inputs for fitting a CART model are:
 - A target as a one column table of original data
 
 The input for generating synthetic data with a CART model is:
-- A synthetic version of the features used for fitting.
+- A synthetic version of the features used for fitting. The number of rows determines the required output size.
 
 The output is one column of synthetic data that is similar to the target.
 
