@@ -11,7 +11,7 @@ The inputs for fitting a Copy synthesis method are:
 - A target as a one column table of original data
 
 The input for generating synthetic data with a Copy model is:
-- A synthetic version of the features used for fitting with the same number of rows
+- A synthetic version of the features used for fitting
 
 The output is one column of synthetic data that is identical to the target variable.
 
