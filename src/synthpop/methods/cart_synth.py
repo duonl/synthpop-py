@@ -17,7 +17,7 @@ import numpy as np
 from sklearn.utils.validation import validate_data
 
 
-class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
+class AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     """
     :param encoder: an transformer object. Default is PCA encoder.
     :param missing_handler: handler for missing values in the target variable.
@@ -70,6 +70,9 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
+        """
+        Fit to predict `y` using `X`
+        """
         # Apply encoding en handling of missing values, pass on to super().fit
         X_val = self._validate_X(X)
 
@@ -100,6 +103,7 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
+        
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(self)
         X_val = self._validate_X(X)
@@ -144,7 +148,7 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     #     pass
 
 
-class TreeClassifierMethod(_AbstractTreeMethod):
+class TreeClassifierMethod(AbstractTreeMethod):
 
     def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree=None):
         super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler,tree=tree)
@@ -160,7 +164,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     
 
 
-class TreeRegressorMethod(_AbstractTreeMethod):
+class TreeRegressorMethod(AbstractTreeMethod):
     """
     A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
 
