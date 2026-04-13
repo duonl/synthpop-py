@@ -43,8 +43,9 @@ def test_transform_various_dtypes(y, target_name, n_samples):
     model.target_name_ = target_name
     model.n_samples_ = n_samples
 
-    result = model.transform()
-    pd.testing.assert_series_equal(result, y)
+    result = model.transform(None)
+    expected = pd.DataFrame({target_name: y.values})
+    pd.testing.assert_frame_equal(result, expected)
 
 def test_transform_accepts_X():
     model = CopyMethod()
@@ -89,5 +90,5 @@ def test_get_feature_names_out_manual_state(target_name, input_features, expecte
 
     result = model.get_feature_names_out(input_features)
 
-    assert result == expected
+    assert result == [expected]
 

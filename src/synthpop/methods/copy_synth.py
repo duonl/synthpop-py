@@ -55,6 +55,6 @@ class CopyMethod(base_synth.BaseSynthMethod):
             input_features = getattr(self, "feature_names_in_", [])
 
         if self.target_name_ is None:
-            return input_features
+            return [input_features]
 
         return [self.target_name_]
