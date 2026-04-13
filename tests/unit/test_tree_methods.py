@@ -131,7 +131,7 @@ def get_standard_input_test_data():
                               "cat_1":np.array(string_data1),
                               "cat_2":np.array(string_data2),
                               },target_data) for target_data in [num_float_data,string_data1]]
-    return base_cases_numpy + [(pd.DataFrame(d[0]),pd.Series(d[1])) for d in base_cases_numpy]
+    return base_cases_numpy + [(pd.DataFrame.from_dict(d[0]),pd.Series(d[1])) for d in base_cases_numpy]
 
 
 def get_extended_input_test_data():
@@ -253,6 +253,12 @@ def test_validate_fit_raises_bad_shapes(tree_method, X):
     y = [0,1]
     with pytest.raises(ValueError):
         tree_method.fit(X, y)
+
+@pytest.mark.parametrize(
+        "y", [{"a": [1, 2]}, [[1], [2]], None, "invalid", 123, []])
+def test_validate_fit_raises_invalid_y(tree_method, y):
+    with pytest.raises(ValueError):
+        tree_method.fit({1: [1, 2]}, y)
 
 @pytest.mark.parametrize("X,y,index_num,index_cat",get_extended_input_test_data())
 def test_fit_trains_encoder(X,y,index_num,index_cat,tree_method,encoder,missing_handling,leafnode_sampler,tree):
@@ -435,7 +441,7 @@ def test_transform_samples(X,encoder,missing_handling,leafnode_sampler,tree):
     tree_method.transform(X)
 
     assert np.array_equal(tree.apply_result,tree_method.tree_sampler_.sample_from_leaves_leaf_ids)
-
+#TODO:assert that only dicts are passed to the dependencies
 @pytest.mark.parametrize("X",[v[0] for v in get_standard_input_test_data()])
 def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnode_sampler,tree):
     
@@ -444,7 +450,8 @@ def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnod
     result = tree_method.transform(X)
 
     if isinstance(X,pd.DataFrame):
-        assert X.equals(tree_method.missing_handler_.post_synth_transform_X)
+        X_exp = {k:np.array(v) for (k,v) in X.to_dict(orient="list").items()}
+        assert X_exp == tree_method.missing_handler_.post_synth_transform_X
     else:
         assert X == tree_method.missing_handler_.post_synth_transform_X
     assert np.array_equal(leafnode_sampler.sample_from_leaves_return_value,tree_method.missing_handler_.post_synth_transform_y)
