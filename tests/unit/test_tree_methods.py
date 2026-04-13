@@ -159,7 +159,7 @@ def get_extended_input_test_data():
     standard_inputs = [(X,y,["num_1"],["cat_1","cat_2"]) for (X,y) in get_standard_input_test_data() ]
 
     numeric_only_dict = ({"num_1":num_array[:,0],"num_2":num_array[:,1]},np.array(num_float_data),["num_1","num_2"],[])
-    result = [*standard_inputs,num_array_input,string_arrray_input,numeric_only_dict]
+    result = [*standard_inputs,num_array_input,string_array_input,numeric_only_dict]
     return result
 
 

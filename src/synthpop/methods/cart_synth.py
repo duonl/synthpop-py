@@ -31,16 +31,16 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
 
     def _new_encoder(self):
-        return clone(self.encoder) if not(self.encoder is None) else self._get_encoder()
+        return clone(self.encoder) if self.encoder is not None else self._get_encoder()
     
     def _new_missing_handling(self):
-        return clone(self.missing_handler) if not(self.missing_handler is None) else self._get_missing_handling()
+        return clone(self.missing_handler) if self.missing_handler is not None else self._get_missing_handling()
     
     def _new_tree_sampler(self):
-        return clone(self.tree_sampler) if not(self.tree_sampler is None) else LeafNodeSampler()
+        return clone(self.tree_sampler) if self.tree_sampler is not None else LeafNodeSampler()
     
     def _new_tree(self):
-        return clone(self.tree) if not (self.tree is None) else self._get_tree()
+        return clone(self.tree) if self.tree is not None else self._get_tree()
     
 
     def _validate_X(self,X):
