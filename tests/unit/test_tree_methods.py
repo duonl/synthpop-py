@@ -147,7 +147,7 @@ def get_extended_input_test_data():
     ])
     num_array_input = (num_array,np.array(num_float_data),[0,1,2],[])
 
-    string_arrray_input = (np.array([
+    string_array_input = (np.array([
         ["a","b"],
         ["a","c"],
         ["x","t"],
