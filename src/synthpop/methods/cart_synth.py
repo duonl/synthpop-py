@@ -1,7 +1,7 @@
 """
 This module contains the CART method for synthesising data. 
 """
-from typing import Literal, Mapping, Self, Sequence
+from typing import Dict, Literal, Mapping, Self, Sequence
 from numpy.random import RandomState
 import pandas as pd
 from sklearn import clone
@@ -46,6 +46,43 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
     
+    @classmethod
+    def _validate_X_y_dict(cls, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, np.ndarray], np.ndarray]:
+        """
+        Minimal validation for dict-based tabular data.
+        """
+        #TODO: this function is copied from MissingValuePredictor. Refactoring should happen to avoid duplication of code. 
+        # if not isinstance(X, dict):
+        #     raise TypeError(f"X must be a dict[str, array-like], got {type(X)}.")
+        if len(X) == 0:
+            raise ValueError("X must contain at least one feature.")
+
+        X_out = {}
+        lengths = set()
+
+        for key, col in X.items():
+            arr = np.asarray(col)
+            if arr.ndim != 1:
+                raise ValueError(f"Column '{key}' must be 1-dimensional, got shape {arr.shape}.")
+            if len(arr) == 0:
+                raise ValueError(f"Column '{key}' is empty.")
+            X_out[key] = arr
+            lengths.add(len(arr))
+
+        if len(lengths) != 1:
+            raise ValueError(f"All columns in X must have the same length, got lengths {lengths}.")
+
+        n_samples = lengths.pop()
+
+        y_out = np.asarray(y)
+
+        if y_out.ndim != 1:
+            raise ValueError(f"y must be 1-dimensional, got shape {y_out.shape}.")
+        if len(y_out) != n_samples:
+            raise ValueError(f"X and y must have the same number of samples. Got {n_samples} and {len(y_out)}.")
+
+        return X_out, y_out
+    
 
     def _validate_X(self,X):
 
@@ -78,10 +115,10 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         Fit to predict `y` using `X`
         """
         # Apply encoding en handling of missing values, pass on to super().fit
-        X_val = self._validate_X(X)
-
         if hasattr(y,"name"):
             self.target_name_ = y.name
+        X_d = self._validate_X(X)
+        X_val,y = self._validate_X_y_dict(X_d,y)
 
         self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()

@@ -240,6 +240,20 @@ def tree_method(encoder,missing_handling,leafnode_sampler,tree):
     return TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=tree)
 
 # test fit ----------------------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    "X",
+    [
+        {"a": [[1, 2]], "b": [1, 2]},   # 2-dimensional
+        {"a": [], "b": [1, 2]},         # empty column
+        {"a": [1, 2], "b": [1]},        # length mismatch
+        {"a": []}                       # empty key
+    ],
+)
+def test_validate_fit_raises_bad_shapes(tree_method, X):
+    y = [0,1]
+    with pytest.raises(ValueError):
+        tree_method.fit(X, y)
+
 @pytest.mark.parametrize("X,y,index_num,index_cat",get_extended_input_test_data())
 def test_fit_trains_encoder(X,y,index_num,index_cat,tree_method,encoder,missing_handling,leafnode_sampler,tree):
 
@@ -258,9 +272,6 @@ def test_fit_trains_encoder(X,y,index_num,index_cat,tree_method,encoder,missing_
 
         for i2 in index_cat:
             assert (not ( tree_method.encoders_[i] is tree_method.encoders_[i2])) or i2==i
-
-
-
 
 @pytest.mark.parametrize("X,y,index_num,index_cat",get_extended_input_test_data())
 def test_fit_prepare_data_for_fit_is_called(X,y,index_num,index_cat,tree_method):#,encoder,missing_handling,leafnode_sampler,apply_result):
@@ -343,7 +354,6 @@ def test_fit_set_feature_names_out(X,y,tree_method):
     tree_method.fit(X,y)
 
     assert tree_method.target_name_ == "target_name"
-    pass
 
 # test transform ----------------------------------------------------------------------------------
 
