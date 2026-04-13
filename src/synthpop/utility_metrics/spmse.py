@@ -1,5 +1,5 @@
 """
-This module contains utilities to evaluate the utility of synthetic data.
+This module contains metrics to evaluate the utility of synthetic data.
 """
 import pandas as pd
 

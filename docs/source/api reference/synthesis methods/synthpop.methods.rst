@@ -1,18 +1,10 @@
-synthesise methods
+Synthesis methods
 ==============================
 
 .. py:module:: synthpop.methods
 
 
-XGBoost\_synth module
-------------------------------------------
-
-.. automodule:: synthpop.methods.XGBoost_synth
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-base\_synth module
+Base synth module
 ---------------------------------------
 
 .. automodule:: synthpop.methods.base_synth
@@ -21,10 +13,19 @@ base\_synth module
    :undoc-members:
 
 
-cart\_synth module
+CART synth module
 ---------------------------------------
 
 .. automodule:: synthpop.methods.cart_synth
    :members:
    :show-inheritance:
    :inherited-members:
+   :undoc-members:
+
+XGBoost synth module
+------------------------------------------
+
+.. automodule:: synthpop.methods.XGBoost_synth
+   :members:
+   :show-inheritance:
+   :undoc-members:

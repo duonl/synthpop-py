@@ -18,7 +18,7 @@ class Synthesiser:
     """
     def __init__(self, 
                  column_order: list[str] | list[int] | None = None,
-                 default_syn_method: BaseSynthMethod = CartMethod(),
+                 default_syn_method: BaseSynthMethod | None = None,
                  special_syn_method: dict[str, BaseSynthMethod] | None = None) -> None:
         pass
 

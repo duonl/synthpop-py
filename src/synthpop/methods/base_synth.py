@@ -26,19 +26,6 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         #If an estimator is given as a parameter, it should be cloned using the clone() method.
     
     @abstractmethod
-    def get_feature_names_out(self,input_features = None):
-        """
-        Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.
-        
-        See https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output 
-        and SLEP018 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html) and SLEP007 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html)
-        
-        :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during `fit` are used.
-        """
-        
-        pass
-
-    @abstractmethod
     def fit(self,X:pd.DataFrame | None, y: pd.Series) -> Self:
         '''
         The `fit` method must learn all parameters required to synthesise the target variable from the provided features.
@@ -82,3 +69,16 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     # def set_params(self, **params) -> Self:
     #     return super().set_params(**params)
     
+    
+    @abstractmethod
+    def get_feature_names_out(self,input_features = None):
+        """
+        Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.
+        
+        See https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output 
+        and SLEP018 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html) and SLEP007 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html)
+        
+        :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during `fit` are used.
+        """
+        
+        pass

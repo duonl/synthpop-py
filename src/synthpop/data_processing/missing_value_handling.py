@@ -1,5 +1,5 @@
 """
-This module contains classes for different strategies for handling missing (None) values in the target during synthesis. 
+This module contains classes for different strategies for handling missing values (None) in the target during synthesis. 
 """
 from abc import abstractmethod,ABCMeta
 from sklearn.base import TransformerMixin, clone
@@ -68,8 +68,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
-    :param encoding: Default is a :doc: `MeanEncoder` <synthpop.data_processing.encoders.MeanEncoder>.
-    :param tree: Decision tree classifier. Default is [DecisionTreeClassifier(min_samples_leaf=5)](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)
+    :param encoding: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`.
+    :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_.
     :param tree_sampler: Leaf node sampler. Default is :py:meth:LeafNodeSampler.
 
     Examples
@@ -287,8 +287,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :return: A new, unfitted instance of `MissingValuePredictor()` with the 
             same `encoding`, `tree` and `tree_sampler` setting.
         
-        Examples:
-        -----
+        Examples
+        --------
         >>> MissingValuePredictor().clone()
         """
         return self.__class__(encoding=self.encoding, tree=self.tree, tree_sampler=self.tree_sampler)
@@ -378,8 +378,8 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         :return: A new, unfitted instance of `ReplaceNoneWithValue()` with the 
             same `missing_marker` setting.
         
-        Examples:
-        -----
+        Examples
+        --------
         >>> ReplaceNoneWithValue().clone()
         """
         return self.__class__(missing_marker = self.missing_replacement)

@@ -35,6 +35,7 @@ extensions = [
 ]
 myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
 autodoc_typehints = "both"
+autodoc_member_order = "bysource"
 
 autodoc_mock_imports = ['matplotlib', 'typing_extensions',]
 source_suffix = {

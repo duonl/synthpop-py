@@ -193,8 +193,8 @@ class LeafNodeSampler():
         :return: A new, unfitted instance of `LeafNodeSampler()` with the 
             same `random_state` setting.
         
-        Examples:
-        -----
+        Examples
+        --------
         >>> sampler = LeafNodeSampler().clone()
         """
         return self.__class__(random_state=self.random_state)

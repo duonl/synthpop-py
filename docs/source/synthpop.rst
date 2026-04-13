@@ -1,4 +1,4 @@
-synthpop package
+Synthpop package
 ================
 
 Subpackages
@@ -8,7 +8,7 @@ Subpackages
    :maxdepth: 4
 
    api reference/data processing/synthpop.data_processing
-   api reference/synthesise methods/synthpop.methods
+   api reference/synthesis methods/synthpop.methods
    api reference/utility metrics/utility_metrics
    api reference/plotting/synthpop.plotting
 

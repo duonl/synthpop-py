@@ -1,4 +1,4 @@
-data\_processing
+Data processing
 =======================================
 
 .. py:module:: synthpop.data_processing
@@ -13,7 +13,7 @@ Encoder module
    :undoc-members:
 
 
-missing_value_handling module
+Missing Value Handling module
 --------------------------------------------------
 
 .. automodule:: synthpop.data_processing.missing_value_handling
