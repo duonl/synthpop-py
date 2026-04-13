@@ -19,10 +19,11 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
     Transforms categorical data to one or more numeric columns.
     The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
 
-    :param pca_transform: The pca transform used. The default value is `sklearn.decomposition.PCA()`. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html/>`_ for the possible parameters.With the default parameters, all principle components are computed and used.
+    :param pca_transform: The pca transform used. The default value is :py:class:`sklearn.decomposition.PCA`. 
+         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principle components are computed and used.
 
     Examples
-    ========
+    --------
 
         >>> from synthpop.data_processing.encoders import PCAEncoder
         >>> import numpy as np
@@ -219,9 +220,10 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
     Transforms categorical data to numeric using mean encoding. The feature column `X` is encoded based on a numeric target column `y`.
 
     Examples
+    --------
         >>> X = np.array(["a", "a", "b", "b", "c"])
         >>> y = np.array([1, 0, 2, 0, 3])
-
+        >>>
         >>> encoder = MeanEncoder()
         >>> encoder.fit(X, y)
         >>> X_transformed = encoder.transform(X)
@@ -253,9 +255,10 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         :param y: Target column.
 
         Examples
+        --------
             >>> X = np.array(["a", "a", "b", "b", "c"])
             >>> y = np.array([1, 0, 2, 0, 3])
-
+            >>>
             >>> encoder = MeanEncoder()
             >>> encoder.fit(X, y)
         """
@@ -303,7 +306,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         Examples
             >>> X = np.array(["a", "a", "b", "b", "c"])
             >>> y = np.array([1, 0, 2, 0, 3])
-
+            >>>
             >>> encoder = MeanEncoder()
             >>> encoder.fit(X, y)
             >>> X_transformed = encoder.transform(X)

@@ -164,7 +164,7 @@ class CartMethod(base_synth.BaseSynthMethod):
 
     """
 
-    def __init__(self, regressor: TreeRegressorMethod = TreeRegressorMethod(), classifier: TreeClassifierMethod = TreeClassifierMethod()) -> None:
+    def __init__(self, regressor: TreeRegressorMethod | None = None, classifier: TreeClassifierMethod | None = None) -> None:
         super().__init__()
         # see https://scikit-learn.org/stable/developers/develop.html#instantiation
         self.reg = regressor

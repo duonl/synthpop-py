@@ -1,5 +1,5 @@
 """
-This module contains utilities to visually inspect synthetic data and evaluate its quality. 
+This module contains functions to visually inspect synthetic data and evaluate its quality. 
 """
 import pandas as pd
 
