@@ -27,5 +27,4 @@ cart\_synth module
 .. automodule:: synthpop.methods.cart_synth
    :members:
    :show-inheritance:
-   :undoc-members:
-
+   :inherited-members:
