@@ -11,7 +11,7 @@ For developers, this documentation should be used during implementation and when
 - British English
 - [PEP8](https://peps.python.org/pep-0008/)
 - Use the term "original data" to refer to the data that is not synthetic. 
-- Use typehints where appropriate.
+- Use type hints where appropriate.
 - Code and documentation must use clear, unambiguous naming.
 - Avoid abbreviations unless they are widely established in the domain (e.g. "df" for DataFrame in local scope only)
 - Function and variable names should describe intent, not implementation.
@@ -23,14 +23,14 @@ For developers, this documentation should be used during implementation and when
 - [SOLID](https://en.wikipedia.org/wiki/SOLID) principles.
 - It should always be possible to generate synthetic data within 5 lines of code. 
 - All classes that inherit from BaseEstimator should follow [the developer guides of scikit-learn](https://scikit-learn.org/stable/developers/develop.html)
-- Use numpy arrays where possible. 
+- Use NumPy arrays where possible. 
 - The user of this package should be able to use pandas.
 - Prefer explicit over implicit behaviour.
 - Avoid premature abstraction: prefer simple solutions until complexity justifies generalisation.
 
 A synthesis method should accept pandas dataframes/series and heterogeneous data.
 Making the data homogeneous should happen within the synthesis method.
-It is best to use numpy within a synthesis method. See [#45](https://github.com/Synthpop-data/synthpop-py/issues/45).
+It is best to use NumPy within a synthesis method. See [#45](https://github.com/Synthpop-data/synthpop-py/issues/45).
 
 ### Informative issues and pull requests
 | issue/pull request number | topic |
@@ -51,7 +51,7 @@ Tests should primarily validate behaviour, not implementation details. The goal 
 What should be tested is dependent on what is implemented and follow from the requirements. However, there are standard tests that apply to most situations. The following list should be treated as inspiration, not as an exhaustive or prescriptive set of rules:
 
 #### 1. Output correctness (type, shape, structure)
-Verify that otput conform to expected data contracts.
+Verify that output is conform to expected data contracts.
 - Correct return type (e.g. `list`, `numpy.ndarray`, `pandas.DataFrame`, `pandas.Series`)
 - Correct shape and dimensionality
 - Correct schema:
@@ -82,7 +82,7 @@ Ensure robustness under extreme or unusual inputs.
 - Degenerate cases (constant columns, identical rows, etc.)
 - For every occurrence of `==`, `<`, `<=`, `>`, `>=` there are edge cases
 - For every numeric division there is a possibility to have a zero division
-- Whenever there is a `==` between numeric values, there could be floating point precision issues ((e.g. `0.1 + 0.2 ≠ 0.3`)
+- Whenever there is a `==` between numeric values, there could be floating point precision issues (e.g. `0.1 + 0.2 ≠ 0.3`)
 
 #### 4. Input validation and consistency
 Ensure the function behaves correctly when inputs are invalid or inconsistent.
@@ -112,7 +112,7 @@ Not always required, but important for data-heavy operations:
 - Avoidance of unnecessary copies
 - Stability under repeated execution
 
- #### 7. Reproducability
+ #### 7. Reproducibility
  - Same seed gives the same output
  - Controlled randomness
  - No hidden global state affecting results

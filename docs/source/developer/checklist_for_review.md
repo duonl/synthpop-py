@@ -30,7 +30,7 @@ After changes have been submitted, start with the first sublist again.
 - [ ] All required functionality described in the issue is present
 - [ ] Behaviour is correct in normal usage scenarios
 - [ ] Behaviour is correct in expected real-world usage
-- [ ] Assumptins made by the implementation are valid and documented
+- [ ] Assumptions made by the implementation are valid and documented
 - [ ] Violations of assumptions result in predictable and informative errors
 
 ## 3. Reviewing the tests
@@ -55,7 +55,7 @@ Find more standard topics in testing in the [Code Standards, Norms and Conventio
 - [ ] Each test has a clear behavioural assertion
 - [ ] Tests are easy to read and logically structured
 - [ ] Tests validate behaviour, not implementation details
-- [ ] Tests are determinisitc and reproducible
+- [ ] Tests are deterministic and reproducible
 - [ ] Randomness is controlled via seeds or mocks where needed
 - [ ] Tests are isolated and independent (no shared state or order dependence)
 - [ ] Tests clean up all side effects, even when the test fails (files, globals, environment changes)
@@ -93,7 +93,7 @@ Find more standard topics in testing in the [Code Standards, Norms and Conventio
 
 ## 6. Scikit-learn estimator compliance (if applicable)
 - [ ] Estimator passes `check_estimator` or `parametrize_with_checks`
-- [ ] `fit`, `transform`, etc. behave correctly and consistenly
+- [ ] `fit`, `transform`, etc. behave correctly and consistently
 - [ ] `get_params` and `set_params` work correctly
 - [ ] Estimator is stateless where required (e.g. `transform`)
 - [ ] There are no mutable default arguments
