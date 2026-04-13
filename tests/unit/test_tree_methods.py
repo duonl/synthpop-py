@@ -9,7 +9,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.tree import BaseDecisionTree
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
-from synthpop.methods.cart_synth import AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod
+from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
 import copy
@@ -92,7 +92,7 @@ class StubTree():
     def __sklearn_clone__(self):
         return copy.copy(self)
 
-class TestTreeMethod(AbstractTreeMethod):
+class TestTreeMethod(_AbstractTreeMethod):
     def __init__(self, *,
                  encoder = None,
                 missing_handling = None,
