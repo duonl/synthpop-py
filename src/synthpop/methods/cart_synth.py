@@ -63,9 +63,6 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
             if n_features_given != self.n_features_in_:
                 raise ValueError(f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
-        # if not isinstance(X,pd.DataFrame):
-        #     if not np.array([isinstance(v,np.ndarray) for v in X_d.values()]).all():
-        #         return {k:np.array(v) for (k,v) in X_d.items()}
         return X_d
         
     def _build_X_matrix(self,encoded_features,X_prep):
