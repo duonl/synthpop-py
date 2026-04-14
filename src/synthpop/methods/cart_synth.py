@@ -22,6 +22,9 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     """
     :param encoder: an transformer object. Default is PCA encoder.
     :param missing_handler: handler for missing values in the target variable.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree: a Decision Tree to construct the conditional probability distributions.
+
     """
 
     def __init__(self, *, encoder: TransformerMixin | None = None,
@@ -76,14 +79,16 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
         Fit to predict `y` using `X`
+
+        :param X: features to predict `y`.
+        :param y: target to synthesise.
+
         """
-        # Apply encoding en handling of missing values, pass on to super().fit
         if hasattr(y,"name"):
             self.target_name_ = y.name
         X_d = self._validate_X(X)
         X_val,n_samples = validate_dict_x(X_d)
         y = validate_y(y,n_samples)
-        #X_val,y = self._validate_X_y_dict(X_d,y)
 
         self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
@@ -99,8 +104,6 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
         self.tree_ = self._new_tree().fit(all_features,prepared_y)
 
-        #self._fit(all_features,prepared_y)
-
         leaf_ids = self.tree_.apply(all_features)
 
         self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids,prepared_y)
@@ -109,6 +112,14 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
+        """
+        Synthesise new column
+
+        :param X: features used to predict the target variable.
+
+        :return: synthesised column.
+
+        """
         
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(self)
@@ -150,13 +161,17 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         tags.input_tags.dict=True
         tags.input_tags.allow_nan =True
         return tags
-    # The leafnode sampler does not vary between regression and classification.
-    # @abstractmethod
-    # def _get_leafnode_sampler(self):
-    #     pass
 
 
 class TreeClassifierMethod(_AbstractTreeMethod):
+    """
+    :param encoder: an transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
+    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
+
+    """
+    
 
     def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree=None):
         super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler,tree=tree)
@@ -174,9 +189,11 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
 class TreeRegressorMethod(_AbstractTreeMethod):
     """
-    A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
+    :param encoder: an transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
 
-    
     """
 
     def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree = None):
