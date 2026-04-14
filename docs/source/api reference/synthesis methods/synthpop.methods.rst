@@ -22,6 +22,14 @@ CART synth module
    :undoc-members:
 
 
+Copy synth module
+---------------------------------------
+
+.. automodule:: synthpop.methods.copy_synth
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 XGBoost synth module
 ------------------------------------------
 
