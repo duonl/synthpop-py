@@ -442,6 +442,7 @@ def test_transform_samples(X,encoder,missing_handling,leafnode_sampler,tree):
 
     assert np.array_equal(tree.apply_result,tree_method.tree_sampler_.sample_from_leaves_leaf_ids)
 #TODO:assert that only dicts are passed to the dependencies
+#TODO: assert datatypes
 @pytest.mark.parametrize("X",[v[0] for v in get_standard_input_test_data()])
 def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnode_sampler,tree):
     
@@ -451,7 +452,9 @@ def test_transform_calls_post_synth_transform(X,encoder,missing_handling,leafnod
 
     if isinstance(X,pd.DataFrame):
         X_exp = {k:np.array(v) for (k,v) in X.to_dict(orient="list").items()}
-        assert X_exp == tree_method.missing_handler_.post_synth_transform_X
+
+        for (k,v) in X_exp.items():
+            assert np.array_equal(v,tree_method.missing_handler_.post_synth_transform_X[k])
     else:
         assert X == tree_method.missing_handler_.post_synth_transform_X
     assert np.array_equal(leafnode_sampler.sample_from_leaves_return_value,tree_method.missing_handler_.post_synth_transform_y)

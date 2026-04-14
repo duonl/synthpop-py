@@ -52,6 +52,8 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
         if isinstance(X,np.ndarray):
             X_d = {i:X[:,i] for i in range(X.shape[1])}
+        elif isinstance(X,pd.DataFrame):
+            X_d = X.to_dict(orient="list")
         else:
             X_d = X
 
