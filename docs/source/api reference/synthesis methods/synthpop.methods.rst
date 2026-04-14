@@ -29,6 +29,7 @@ Copy synth module
    :members:
    :show-inheritance:
    :undoc-members:
+   
 
 XGBoost synth module
 ------------------------------------------
