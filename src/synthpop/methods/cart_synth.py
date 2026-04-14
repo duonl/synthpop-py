@@ -1,24 +1,24 @@
 """
 This module contains the CART method for synthesising data. 
 """
-from typing import Dict, Literal, Mapping, Self, Sequence
-from numpy.random import RandomState
+from abc import abstractmethod, ABCMeta
+from typing import Self
 import pandas as pd
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
-from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
-from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
-from synthpop.methods import base_synth, tree_utils
-from synthpop.methods.tree_utils import LeafNodeSampler
-import numpy.typing as npt
-from abc import abstractmethod, ABCMeta
 import numpy as np
-from sklearn.utils.validation import validate_data
-from synthpop._validation import validate_dict_x,validate_y
+import numpy.typing as npt
+
+from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
+from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
+    MissingValuePredictor, ReplaceNoneWithValue
+from synthpop.methods import base_synth
+from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop._validation import validate_dict_x, validate_y
 
 
-class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
+class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
     :param encoder: an transformer object. Default is PCA encoder.
     :param missing_handler: handler for missing values in the target variable.
@@ -37,44 +37,43 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         self.tree_sampler = tree_sampler
         self.tree = tree
 
-
     def _new_encoder(self):
         return clone(self.encoder) if self.encoder is not None else self._get_encoder()
-    
+
     def _new_missing_handling(self):
         return clone(self.missing_handler) if self.missing_handler is not None else self._get_missing_handling()
-    
+
     def _new_tree_sampler(self):
         return clone(self.tree_sampler) if self.tree_sampler is not None else LeafNodeSampler()
-    
+
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
-    
 
-    def _validate_X(self,X):
+    def _validate_X(self, X) -> dict[str, npt.ArrayLike]:
 
-        if isinstance(X,np.ndarray):
-            X_d = {i:X[:,i] for i in range(X.shape[1])}
-        elif isinstance(X,pd.DataFrame):
+        if isinstance(X, np.ndarray):
+            X_d = {i: X[:, i] for i in range(X.shape[1])}
+        elif isinstance(X, pd.DataFrame):
             X_d = X.to_dict(orient="list")
         else:
             X_d = X
 
         n_features_given = len(X_d.keys())
-        if not hasattr(self,"n_features_in_"):
+        if not hasattr(self, "n_features_in_"):
             self.n_features_in_ = n_features_given
         else:
-            
+
             if n_features_given != self.n_features_in_:
-                raise ValueError(f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
+                raise ValueError(
+                    f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
         return X_d
-        
-    def _build_X_matrix(self,encoded_features,X_prep):
-        all_features_dict = encoded_features | {name: X_prep[name] for name in self.feature_order_ if pd.api.types.is_numeric_dtype(X_prep[name].dtype)}
+
+    def _build_X_matrix(self, encoded_features, X_prep) -> np.ndarray:
+        all_features_dict = encoded_features | {
+            name: X_prep[name] for name in self.feature_order_ if pd.api.types.is_numeric_dtype(X_prep[name].dtype)}
         all_features = np.column_stack(list(all_features_dict.values()))
         return all_features
-
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
@@ -84,32 +83,34 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         :param y: target to synthesise.
 
         """
-        if hasattr(y,"name"):
+        if hasattr(y, "name"):
             self.target_name_ = y.name
         X_d = self._validate_X(X)
-        X_val,n_samples = validate_dict_x(X_d)
-        y = validate_y(y,n_samples)
+        X_val, n_samples = validate_dict_x(X_d)
+        y = validate_y(y, n_samples)
 
-        self.encoders_ = {name: self._new_encoder().fit(value,y) for (name,value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
+        self.encoders_ = {name: self._new_encoder().fit(value, y) for (
+            name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
 
         self.feature_order_ = list(X_val.keys())
-        
 
-        prepared_for_fit_X,prepared_y = self.missing_handler_.prepare_data_for_fit(X_val,y)
+        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(
+            X_val, y)
 
-        encoded_features = {name:self.encoders_[name].transform(prepared_for_fit_X[name]) for name in self.encoders_.keys()}
+        encoded_features = {name: self.encoders_[name].transform(
+            prepared_for_fit_X[name]) for name in self.encoders_.keys()}
 
-        all_features = self._build_X_matrix(encoded_features,prepared_for_fit_X)
+        all_features = self._build_X_matrix(
+            encoded_features, prepared_for_fit_X)
 
-        self.tree_ = self._new_tree().fit(all_features,prepared_y)
+        self.tree_ = self._new_tree().fit(all_features, prepared_y)
 
         leaf_ids = self.tree_.apply(all_features)
 
-        self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids,prepared_y)
+        self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids, prepared_y)
 
         return self
-
 
     def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
         """
@@ -120,22 +121,23 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         :return: synthesised column.
 
         """
-        
+
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(self)
         X_d = self._validate_X(X)
-        X_val,n_samples = validate_dict_x(X_d)
-        #X_val = self._validate_X(X)
-        encoded_features = {name:self.encoders_[name].transform(X_val[name]) for name in self.encoders_.keys()}
+        X_val, _ = validate_dict_x(X_d)
 
-        all_features = self._build_X_matrix(encoded_features,X_val)
+        encoded_features = {name: self.encoders_[name].transform(
+            X_val[name]) for name in self.encoders_.keys()}
+
+        all_features = self._build_X_matrix(encoded_features, X_val)
         leaf_ids = self.tree_.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
-        result = self.missing_handler_.post_synth_transform(X_val,sample)
+        result = self.missing_handler_.post_synth_transform(X_val, sample)
         return result
 
-    def get_feature_names_out(self,input_features=None):
+    def get_feature_names_out(self, input_features=None):
         return [self.target_name_]
 
     @abstractmethod
@@ -153,13 +155,13 @@ class _AbstractTreeMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
         tags.estimator_type = "transformer"
-        tags.target_tags.required=True
-        tags.target_tags.two_d_labels=True
-        tags.input_tags.two_d_array=True
-        tags.input_tags.categorical=True
-        tags.input_tags.string=True
-        tags.input_tags.dict=True
-        tags.input_tags.allow_nan =True
+        tags.target_tags.required = True
+        tags.target_tags.two_d_labels = True
+        tags.input_tags.two_d_array = True
+        tags.input_tags.categorical = True
+        tags.input_tags.string = True
+        tags.input_tags.dict = True
+        tags.input_tags.allow_nan = True
         return tags
 
 
@@ -171,20 +173,20 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
 
     """
-    
 
-    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree=None):
-        super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler,tree=tree)
+    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None, tree=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler,
+                         tree_sampler=tree_sampler, tree=tree)
 
     def _get_encoder(self):
         return PCAEncoder()
 
     def _get_missing_handling(self):
         return ReplaceNoneWithValue()
-    
+
     def _get_tree(self):
-        return DecisionTreeClassifier(min_samples_leaf=5)#TODO: set default params
-    
+        # TODO: set default params
+        return DecisionTreeClassifier(min_samples_leaf=5)
 
 
 class TreeRegressorMethod(_AbstractTreeMethod):
@@ -196,18 +198,20 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     """
 
-    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None,tree = None):
-        super().__init__(encoder=encoder, missing_handler=missing_handler, tree_sampler=tree_sampler, tree=tree)
-    
+    def __init__(self, *, encoder=None, missing_handler=None, tree_sampler=None, tree=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler,
+                         tree_sampler=tree_sampler, tree=tree)
+
     def _get_encoder(self):
         return MeanEncoder()
 
     def _get_missing_handling(self):
         return MissingValuePredictor()
-    
+
     def _get_tree(self):
-        return DecisionTreeRegressor(min_samples_leaf=5)#TODO: set default params
-    
+        # TODO: set default params
+        return DecisionTreeRegressor(min_samples_leaf=5)
+
 
 class CartMethod(base_synth.BaseSynthMethod):
     """
