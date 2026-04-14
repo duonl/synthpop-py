@@ -12,35 +12,35 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
     Examples
     --------
-    >>> from synthpop.methods.copy_synth import CopyMethod
-    >>> import pandas as pd
-    >>> 
-    >>> X = pd.DataFrame({"X": [1, 2, 3]})
-    >>> y = pd.Series(["a", "b", "c"], name="target_column")
-    >>>
-    >>> model = CopyMethod()
-    >>> model.fit(X, y)
-    CopyMethod()
-    >>> model.transform(X)
-    target_column
-    0             a
-    1             b
-    2             c
+        >>> from synthpop.methods.copy_synth import CopyMethod
+        >>> import pandas as pd
+        >>> 
+        >>> X = pd.DataFrame({"X": [1, 2, 3]})
+        >>> y = pd.Series(["a", "b", "c"], name="target_column")
+        >>>
+        >>> model = CopyMethod()
+        >>> model.fit(X, y)
+        CopyMethod()
+        >>> model.transform(X)
+        target_column
+        0             a
+        1             b
+        2             c
 
-    Without X:
-    >>> from synthpop.methods.copy_synth import CopyMethod
-    >>> import pandas as pd
-    >>> 
-    >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
-    >>>
-    >>> model = CopyMethod()
-    >>> model.fit(None, y)
-    CopyMethod()
-    >>> model.transform(None)
-    new_target_column
-    0             1
-    1             2
-    2             <NA>
+        Without X:
+        >>> from synthpop.methods.copy_synth import CopyMethod
+        >>> import pandas as pd
+        >>> 
+        >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
+        >>>
+        >>> model = CopyMethod()
+        >>> model.fit(None, y)
+        CopyMethod()
+        >>> model.transform(None)
+        new_target_column
+        0             1
+        1             2
+        2             <NA>
     """
 
     def __init__(self):
