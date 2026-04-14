@@ -18,7 +18,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
         """
         Stores the entire column in this object
 
-        :param X: Optional: Features dataset. Not used for learning.
+        :param X: Features dataset. Can be `None`. Not used for learning.
         :param y: The column to be copied.
         """
         self.y_ = y.copy()
@@ -31,11 +31,11 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
         return self
     
-    def transform(self, X: pd.DataFrame | None = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
         """
         Returns an exact copy of the fitted target column.
 
-        :param X: Optional: DataFrame of already synthesised columns. Is used only to validate the number of rows.
+        :param X: DataFrame of already synthesised columns. Can also be `None`. Is used only to validate the number of rows.
         :return: One column of synthetic data that is identical to the target variable (Original `y`).
         """
 
