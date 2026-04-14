@@ -323,7 +323,13 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         if np.any(np.equal(y_arr[~missing_mask], self.missing_replacement)) and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
-        
+        if missing_mask.all():
+            value = [self.missing_replacement]*len(missing_mask)
+            if isinstance(y,pd.Series):
+                y_out = pd.Series(value,name = y.name)
+            else:
+                y_out = np.array(value)
+            return (X,y_out)
         y_arr[missing_mask] = self.missing_replacement
         return(X,y_arr.astype(np.str_))
 
