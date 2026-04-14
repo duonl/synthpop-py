@@ -107,7 +107,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_in_ = 1
 
-        X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
+        X_val,y_val = validate_data(self,X=np.asarray(X),y=y, validate_separately = (
             dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
             ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
             ))
