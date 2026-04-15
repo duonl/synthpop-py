@@ -137,7 +137,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return result
 
     def get_feature_names_out(self, input_features=None):
-         if input_features is None:
+        if input_features is None:
             input_features = getattr(self, "feature_names_in_", [])
 
         if self.target_name_ is None:
