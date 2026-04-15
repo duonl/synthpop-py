@@ -86,3 +86,60 @@ def test_general_usage(method,X,y):
     result2 = method.fit_transform(X,y_pd)
     assert isinstance(result2,pd.DataFrame)
     assert "target_variable" in result2
+
+
+def test_input_to_tree_is_array_of_float32():
+    assert False,"test not made yet"
+
+def test_no_information_lost():
+    """
+    test bijection of X and tree input.
+    """
+    assert False,"test not made yet"
+
+def test_TreeRegressorMethod_shape():
+    """
+    test if the input to the decision trees has the right shape
+    """
+    assert False,"test not made yet"
+
+def test_TreeClassifierMethod_shape():
+    """
+    test if the input to the decision trees has the right shape
+    """
+    assert False,"test not made yet"
+
+def test_synthetic_nowhere_missing_when_observed_nowhere_missing():
+    """
+    Test if the synthetic column is nowhere missing when the original is nowhere missing.
+    """
+    assert False,"test not made yet"
+
+def test_something_no_missing():
+    #test should contain:
+    # int features
+    # float64 features
+    # float32 features
+    # string features
+
+    #aspects of tests:
+    # data (correlations, shape,count )
+    # types (numpy, pd.categorical, float32/64, int, string, object, pd.DataFrame)
+    # missing
+    # consistency (order of dict/columns, reproducible)
+    # sklearn compatibility
+
+    # invariants:
+    # the y of the decision tree can never be missing.
+    # the input to the decision tree when transforming should be invariant under the order of the features.
+    # equivalent datatypes: {string,pd.Categorical}, {int, float32,float64}
+    # for any valid X and y, the input to decision tree should be a np.array of dtype float32. (fit and transform)
+    # for any valid X with 1-column encoding and y nowhere missing, the shape of X and the input of the decision tree should be the same.
+
+    # co variants:
+    # for nowhere missing numeric targets: the shape of the features should be the shape of the array given to decision tree.
+    # non-degenerate encoding: bijection X <-> input decision tree
+
+    # for all tests: the outcome should be invariant under equivalent datatypes
+
+    pass
