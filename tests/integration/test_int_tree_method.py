@@ -88,6 +88,7 @@ def test_general_usage(method,X,y):
     assert "target_variable" in result2
 
 
+
 def test_input_to_tree_is_array_of_float32():
     assert False,"test not made yet"
 
