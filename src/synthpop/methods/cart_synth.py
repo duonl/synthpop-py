@@ -62,7 +62,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         if not hasattr(self, "n_features_in_"):
             self.n_features_in_ = n_features_given
         else:
-
             if n_features_given != self.n_features_in_:
                 raise ValueError(
                     f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
