@@ -62,7 +62,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         if not hasattr(self, "n_features_in_"):
             self.n_features_in_ = n_features_given
         else:
-
             if n_features_given != self.n_features_in_:
                 raise ValueError(
                     f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
@@ -138,6 +137,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return result
 
     def get_feature_names_out(self, input_features=None):
+         if input_features is None:
+            input_features = getattr(self, "feature_names_in_", [])
+
+        if self.target_name_ is None:
+            return [input_features]
+
         return [self.target_name_]
 
     @abstractmethod
@@ -156,7 +161,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         tags = super().__sklearn_tags__()
         tags.estimator_type = "transformer"
         tags.target_tags.required = True
-        tags.target_tags.two_d_labels = True
         tags.input_tags.two_d_array = True
         tags.input_tags.categorical = True
         tags.input_tags.string = True

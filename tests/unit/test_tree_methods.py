@@ -246,7 +246,8 @@ def tree_method(encoder,missing_handling,leafnode_sampler,tree):
         {"a": [[1, 2]], "b": [1, 2]},   # 2-dimensional
         {"a": [], "b": [1, 2]},         # empty column
         {"a": [1, 2], "b": [1]},        # length mismatch
-        {"a": []}                       # empty key
+        {"a": []},                       # empty key
+        {}
     ],
 )
 def test_validate_fit_raises_bad_shapes(tree_method, X):
@@ -349,7 +350,7 @@ def test_fit_sampler_fit(X,y,tree_method):
     tree_method.fit(X,y)
 
     assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,tree_method.tree_.apply_result)
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler.prepared_for_fit_result[1])
+    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler_.prepared_for_fit_result[1])
     assert not (tree_method.tree_sampler is tree_method.tree_sampler_)
 
 @pytest.mark.parametrize("X,y",get_standard_input_test_data())
