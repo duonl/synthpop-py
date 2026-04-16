@@ -14,7 +14,8 @@ from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
     MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
+import synthpop.methods.tree_utils as tree_utils
 from synthpop._validation import validate_dict_x, validate_y
 
 
@@ -50,22 +51,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
 
-    def _validate_X(self, X) -> dict[str, npt.ArrayLike]:
-
-        if isinstance(X, np.ndarray):
-            X_d = {i: X[:, i] for i in range(X.shape[1])}
-        elif isinstance(X, pd.DataFrame):
-            X_d = X.to_dict(orient="list")
-        else:
-            X_d = X
-
-        return X_d
-
-    def _build_X_matrix(self, encoded_features, X_prep) -> np.ndarray:
-        all_features_dict = encoded_features | {
-            name: X_prep[name] for name in self.feature_order_ if pd.api.types.is_numeric_dtype(X_prep[name].dtype)}
-        all_features = np.column_stack(list(all_features_dict.values()))
-        return all_features
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
@@ -77,26 +62,20 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         if hasattr(y, "name"):
             self.target_name_ = y.name
-        X_d = self._validate_X(X)
-        X_val, n_samples = validate_dict_x(X_d)
+        X_val, n_samples = validate_dict_x(X)
         y = validate_y(y, n_samples)
 
-        self.n_features_in_ = len(X_d.keys())
+        self.n_features_in_ = len(X.keys())
+        self.feature_order_ = list(X.keys())
 
         self.encoders_ = {name: self._new_encoder().fit(value, y) for (
             name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
 
-        self.feature_order_ = list(X_val.keys())
-
-        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(
-            X_val, y)
-
-        encoded_features = {name: self.encoders_[name].transform(
-            prepared_for_fit_X[name]) for name in self.encoders_.keys()}
-
-        all_features = self._build_X_matrix(
-            encoded_features, prepared_for_fit_X)
+        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(X_val, y)
+        
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in prepared_for_fit_X.items()}
+        all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
 
         self.tree_ = self._new_tree().fit(all_features, prepared_y)
 
@@ -118,18 +97,17 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(self)
-        X_d = self._validate_X(X)
-        X_val, _ = validate_dict_x(X_d)
+        X_val, _ = validate_dict_x(X)
 
-        n_features_given = len(X_d.keys())
+        n_features_given = len(X.keys())
         if n_features_given != self.n_features_in_:
             raise ValueError(
                 f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
-        encoded_features = {name: self.encoders_[name].transform(
-            X_val[name]) for name in self.encoders_.keys()}
+        
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in X.items()}
 
-        all_features = self._build_X_matrix(encoded_features, X_val)
+        all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
         leaf_ids = self.tree_.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
