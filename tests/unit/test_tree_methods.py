@@ -15,6 +15,34 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 import copy
 import numbers
 
+#tree:
+#  apply
+#  fit 
+
+# encoder:
+#  fit
+#  transform
+#    returns numpy array (1D or 2D)
+
+# tree_sampler
+#  fit_sampler
+#  sample_from_leaves
+
+# missing_handler
+#   prepare_data_for_fit:
+#       returns dict of numpy arrays with the same number of keys
+#   post_synth_transform
+
+
+# assumptions:
+# The input is always a dictionary.
+# prepare_data_for_fit: the number of output features equals the number of input features.
+# the output of encoders are always 1D or 2D
+
+# data:
+# The actual data only matters when asserting calls to the tree. 
+
+
 # stubs ---------------------------
 class TransformStub(TransformerMixin, BaseEstimator):
 
@@ -348,23 +376,22 @@ def test_fit_set_feature_names_out(X,y,tree_method):
 
 # test transform ----------------------------------------------------------------------------------
 
-def make_fitted_tree_method(encoder,missing_handling,leafnode_sampler,tree,X,cat_index = None,num_index=[]):
+def make_fitted_tree_method(encoder,missing_handling,leafnode_sampler,tree,X,cat_index):
     tree_method = TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=tree)
-    tree_method.encoders_ = {"cat_1": clone(encoder),"cat_2":clone(encoder)} if cat_index is None else {k:clone(encoder) for k in cat_index}
+    tree_method.encoders_ =  {k:clone(encoder) for k in cat_index}
     tree_method.missing_handler_ = clone(missing_handling)
     tree_method.tree_sampler_ = clone(leafnode_sampler)
     tree_method.tree_ = clone(tree)
-    tree_method.n_features_in_ = X.shape[1] if isinstance(X,np.ndarray) else len(X.keys())
+    tree_method.n_features_in_ = len(X.keys())
 
-    c_index = cat_index if not (cat_index is None) else [] 
-    tree_method.feature_order_ = num_index+c_index if isinstance(X,np.ndarray) else list(X.keys())
+    tree_method.feature_order_ = list(X.keys())
 
     return tree_method
 @pytest.mark.parametrize("X,index_num,index_cat",[(v[0],v[2],v[3]) for v in get_extended_input_test_data()])
 def test_transform_encodes_data(X,index_num,index_cat,encoder,missing_handling,leafnode_sampler,tree):
     tree_method = make_fitted_tree_method(encoder,X=X,
                                           missing_handling=missing_handling,leafnode_sampler=leafnode_sampler,
-                                          tree=tree,cat_index =index_cat,num_index = index_num)
+                                          tree=tree,cat_index =index_cat)
 
     tree_method.transform(X)
 
@@ -373,31 +400,24 @@ def test_transform_encodes_data(X,index_num,index_cat,encoder,missing_handling,l
 
 
 
-def get_expected_input_for_tree(encoders,X,index_num,index_cat=None):
+# def get_expected_input_for_tree(encoders,X:dict):
 
-    if index_cat is None:
-        index_cat = ["cat_1","cat_2"]
-
-    return_values = [encoders[i].transform_return_value  for i in index_cat]
-    cat_data_array = [np.array([v]).transpose() if v.ndim==1 else v for v in return_values]
+#     return_values = {i: encoders[i].transform_return_value  for i in X.keys()}
+#     cat_data_array = {k:np.array([v]).transpose() if v.ndim==1 else v for (k,v) in return_values.items()}
 
 
-    #num_data_array = [np.array([data_1D]).transpose() for data_1D in num_data]
-    # else:
-    if not isinstance(X,np.ndarray):
-        num_data_array = np.array([X[k] for k in index_num]).transpose()
-    elif len(index_num)!=0 :
-        num_data_array = np.array([X[:,k] for k in index_num]).transpose()
-    else:
-        return np.hstack([*cat_data_array])
-    # else:
-    #     num_data_array = np.array([[]])
+#     num_data_array = np.array([X[k] for k in index_num]).transpose()
 
+#     exp_result = np.array()
 
-    #if v1.ndim !=1:
-    return np.hstack([ *cat_data_array,
-            num_data_array
-            ])
+#     for key in X.keys():
+#         if key in encoders:
+#             exp_result = np.hstack([])
+
+#     #if v1.ndim !=1:
+#     return np.hstack([ *cat_data_array,
+#             num_data_array
+#             ])
 
 
 @pytest.mark.parametrize("X,index_num,index_cat",[(v[0],v[2],v[3]) for v in get_extended_input_test_data()])
