@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Self
 import numpy.typing as npt
 import warnings
+from synthpop.reproducability import get_rng,get_seed
 from sklearn.exceptions import NotFittedError
 
 class LeafNodeSampler():
@@ -107,7 +108,7 @@ class LeafNodeSampler():
             self._seed = None
             self.random_state_ = self.random_state
         else:
-            self._seed = 42 if self.random_state is None else self.random_state
+            self._seed = get_seed() if self.random_state is None else self.random_state
             self.random_state_ = np.random.default_rng(self._seed)
         
         self._y_dtype = np.asarray(y).dtype
