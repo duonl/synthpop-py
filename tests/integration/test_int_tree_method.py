@@ -2,6 +2,7 @@ import copy
 import pytest
 import pandas as pd
 import numpy as np
+import string
 
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
 
@@ -88,7 +89,16 @@ def test_general_usage(method,X,y):
     assert "target_variable" in result2
 
 
+def get_int_feature_dict(n_features,n_rows):
 
+    result = {}
+
+    for i,c in enumerate(string.ascii_lowercase[0:n_features]):
+        result[c] = np.arange(0,n_rows,1) *(i+1)
+
+def get_int_target(features):
+    n_rows = features.values()[0].shape[0]
+    return np.arange(0,n_rows,1)
 def test_input_to_tree_is_array_of_float32():
     assert False,"test not made yet"
 
