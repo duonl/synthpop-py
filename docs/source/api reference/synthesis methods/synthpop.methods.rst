@@ -31,6 +31,15 @@ Copy synth module
    :undoc-members:
    
 
+Sample synth module
+---------------------------------------
+
+.. automodule:: synthpop.methods.sample_synth
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+
 XGBoost synth module
 ------------------------------------------
 
