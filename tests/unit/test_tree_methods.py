@@ -16,32 +16,6 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 import copy
 import numbers
 
-#tree:
-#  apply
-#  fit 
-
-# encoder:
-#  fit
-#  transform
-#    returns numpy array (1D or 2D)
-
-# tree_sampler
-#  fit_sampler
-#  sample_from_leaves
-
-# missing_handler
-#   prepare_data_for_fit:
-#       returns dict of numpy arrays with the same number of keys
-#   post_synth_transform
-
-
-# assumptions:
-# The input is always a dictionary.
-# prepare_data_for_fit: the number of output features equals the number of input features.
-# the output of encoders are always 1D or 2D
-
-# data:
-# The actual data only matters when asserting calls to the tree. 
 
 
 # stubs ---------------------------
@@ -457,8 +431,7 @@ def test_transform_samples(X,index_num,index_cat,encoder,missing_handling,leafno
     tree_method.transform(X)
 
     assert np.array_equal(tree.apply_result,tree_method.tree_sampler_.sample_from_leaves_leaf_ids)
-#TODO:assert that only dicts are passed to the dependencies
-#TODO: assert datatypes
+
 @pytest.mark.parametrize("X,index_num,index_cat",[(v[0],v[2],v[3]) for v in get_extended_input_test_data()])
 def test_transform_calls_post_synth_transform(X,index_num,index_cat,encoder,missing_handling,leafnode_sampler,tree):
     
@@ -490,6 +463,10 @@ def test_TreeClassifierMethod_get_params():
     method.get_params()
 
 
+def ndarray_to_dict(a):
+    if isinstance(a,np.ndarray):
+        return {i: a[:,i] for i in range(a.shape[1])}
+    return a
 @parametrize_with_checks([TreeClassifierMethod(),TreeRegressorMethod()], legacy=False, expected_failed_checks=lambda x: {
     #"check_dont_overwrite_parameters": "tests with multiple features",
     #"check_n_features_in_after_fitting": "tests with multiple features",
@@ -497,4 +474,15 @@ def test_TreeClassifierMethod_get_params():
 })
 @pytest.mark.noautofixt
 def test_TreeMethod_is_sklearn_compatible(estimator, check):
+
+    class EstimatorWrap(estimator.__class__):
+        def fit(self,X,y):
+            return super().fit(ndarray_to_dict(X),y)
+        
+        def transform(self,X):
+            return super().transform(ndarray_to_dict(X))
+        
+
+    estimator.__class__ = EstimatorWrap
+
     check(estimator)
