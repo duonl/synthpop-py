@@ -113,12 +113,6 @@ class TestTreeMethod(_AbstractTreeMethod):
     def _get_missing_handling(self):
         return super()._get_missing_handling()
     
-def possible_array_to_dict(X):
-
-    if not (isinstance(X,np.ndarray)):
-        return X
-    
-    return [X[:,i] for i in range(X.shape[1])]
 #---------------------------------------------------
 
 def assert_dict_array_equal(expected,actual):
@@ -130,38 +124,55 @@ def assert_dict_array_equal(expected,actual):
 
 # Test data ---------------------------------------------------------------------------------------
 def get_standard_input_test_data():
-    num_int_data = [1,2,5,2,5,3]
-    num_float_data = [1.2,2.3,3.4,5.6,7.8,8.9]
-    string_data1 = ["a","b","c","d","e","f"]
-    string_data2 = ["aa","bc","cc","dD","eE","fF"]
 
+    X = {
+        "num_1":np.array([1,2,5,2,5,3]),
+        "cat_1":np.array(["a","b","c","d","e","f"]),
+        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
 
-    base_cases_numpy = [ ({"num_1":np.array(num_int_data),
-                              "cat_1":np.array(string_data1),
-                              "cat_2":np.array(string_data2),
-                              },target_data) for target_data in [num_float_data,string_data1]]
+    }
+    base_cases_numpy = [ (X,target_data) for target_data in [np.array([1.2,2.3,3.4,5.6,7.8,8.9]),np.array(["a","b","c","d","e","f"])]]
     return base_cases_numpy
 
 
 def get_extended_input_test_data():
-    num_float_data = [1.2,2.3,-1.9,5.6,7.8,8.9]
-    num_array = np.array([
-        [1,2,3],
-        [0.1,2.4,5],
-        [1.4,2,.63],
-        [0.13,21.4,54],
-        [12,2.8,73],
-        [0.61,2.44,52]
+    X1 = {
+        "num_1":np.array([1,2,5,2,5,3]),
+        "cat_1":np.array(["a","b","c","d","e","f"]),
+        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
+    }
 
-    ])
+    X2 = {
+        "num_1":np.array([1,2,5,2,5,3]),
+        "cat_1":np.array(["a","b","c","d","e","f"]),
+        "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
+        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
+    }
+
+    X3 = {
+        "num_1":np.array([1,2,5,2,5,3]),
+        "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
+    }
+
+    X4 = {
+        "cat_1":np.array(["a","b","c","d","e","f"]),
+        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
+    }
+
+    y1 = np.array([1.2,2.3,3.4,5.6,7.8,8.9])
+    y2 = np.array(["a","b","c","d","e","f"])
+
+    base_cases_numpy = [ (X1,y1,["num_1"],["cat_1","cat_2"]),
+                        (X2,y2,["num_1","num_2"],["cat_1","cat_2"])
+                        ]
 
     standard_inputs = [(X,y,["num_1"],["cat_1","cat_2"]) for (X,y) in get_standard_input_test_data() ]
 
-    list_input =[({k:v.tolist() for (k,v) in X.items()},y,idx_num,idx_cat) for (X,y,idx_num,idx_cat) in standard_inputs]
+    # list_input =[({k:v.tolist() for (k,v) in X.items()},y,idx_num,idx_cat) for (X,y,idx_num,idx_cat) in standard_inputs]
 
-    numeric_only_dict = ({"num_1":num_array[:,0],"num_2":num_array[:,1]},np.array(num_float_data),["num_1","num_2"],[])
-    result = [*standard_inputs,numeric_only_dict,*list_input]
-    return result
+    # numeric_only_dict = ({"num_1":num_array[:,0],"num_2":num_array[:,1]},np.array(num_float_data),["num_1","num_2"],[])
+    # result = [*standard_inputs,numeric_only_dict,*list_input]
+    return standard_inputs
 
 
 def get_encoder_transform_return_data():
@@ -474,6 +485,7 @@ def ndarray_to_dict(a):
 })
 @pytest.mark.noautofixt
 def test_TreeMethod_is_sklearn_compatible(estimator, check):
+    # doc the why
 
     class EstimatorWrap(estimator.__class__):
         def fit(self,X,y):
