@@ -4,7 +4,10 @@ import pandas as pd
 import numpy as np
 import string
 
+from sklearn.tree import DecisionTreeClassifier
+
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
+from sklearn.datasets import make_classification
 
 def test_treemethod_classifier_fit_and_transform():
     tree_method = TreeClassifierMethod()
@@ -89,18 +92,42 @@ def test_general_usage(method,X,y):
     assert "target_variable" in result2
 
 
-def get_int_feature_dict(n_features,n_rows):
+def get_test_data_classifier():
+    X,y = make_classification(n_classes=10,n_informative=11)
+    y = np.array([string.ascii_lowercase[i] for i in y])
+    X = {i:X[:,i] for i in range(X.shape[1])}
+    return (X,y)
+    
+def spy_fit_transfrom(obj):
+    class spy_fit_wrapper(obj.__class__):
+        def fit(self,X,y):
+            self.fit_X = X
+            self.fit_y = y
+            return super().fit(X,y)
+        
+        def transform(self,X):
+            self.transform_X = X
+            return super().transform(X)
+        
+    obj.__class__ = spy_fit_wrapper
 
-    result = {}
+    return obj
+        
+def spy_decisionTreeClassifier():
+    tree = DecisionTreeClassifier()
+    return spy_fit_transfrom(tree)
 
-    for i,c in enumerate(string.ascii_lowercase[0:n_features]):
-        result[c] = np.arange(0,n_rows,1) *(i+1)
+def rigged_tree_classifier_method():
+    tree = spy_fit_transfrom(DecisionTreeClassifier())
+    return TreeClassifierMethod(tree=tree)
 
-def get_int_target(features):
-    n_rows = features.values()[0].shape[0]
-    return np.arange(0,n_rows,1)
-def test_input_to_tree_is_array_of_float32():
-    assert False,"test not made yet"
+    
+@pytest.mark.parametrize("method,X,y",[(rigged_tree_classifier_method(),*get_test_data_classifier())])
+def test_input_to_tree_is_array_of_float32(method,X,y):
+
+    method.fit(X,y)
+    assert isinstance(method.tree_.fit_X,np.ndarray)
+    assert method.tree_.fit_X.dtype == np.dtype(np.float32)
 
 def test_no_information_lost():
     """
