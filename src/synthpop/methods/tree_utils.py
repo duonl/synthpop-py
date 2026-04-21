@@ -204,4 +204,4 @@ def build_feature_matrix(X: dict[str, np.ndarray],feature_order:list[str]) -> np
     if len(X.keys()) == 0:
         return np.empty(shape=(0,0))
     
-    return np.hstack([X[k].reshape(-1,1) if X[k].ndim==1 else X[k] for k in feature_order])
+    return np.hstack([X[k].reshape(-1,1) if X[k].ndim==1 else X[k] for k in feature_order],dtype=np.float32)
