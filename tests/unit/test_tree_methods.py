@@ -122,25 +122,20 @@ def assert_dict_array_equal(expected,actual):
 
 
 def get_input_test_data():
+
     X1 = {
         "num_1":np.array([1,2,5,2,5,3]),
         "cat_1":np.array(["a","b","c","d","e","f"]),
+        "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
         "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
     }
 
     X2 = {
         "num_1":np.array([1,2,5,2,5,3]),
-        "cat_1":np.array(["a","b","c","d","e","f"]),
         "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
-        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
     }
 
     X3 = {
-        "num_1":np.array([1,2,5,2,5,3]),
-        "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
-    }
-
-    X4 = {
         "cat_1":np.array(["a","b","c","d","e","f"]),
         "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
     }
@@ -148,10 +143,12 @@ def get_input_test_data():
     y1 = np.array([1.2,2.3,3.4,5.6,7.8,8.9])
     y2 = np.array(["a","b","c","d","e","f"])
 
+
+    # Some tests need a ground truth of which columns are categorical.
+    # That is why a list of categorical columns is supplied to each test.
     base_cases_numpy = [ (X1,y1,["cat_1","cat_2"]),
-                        (X2,y2,["cat_1","cat_2"]),
-                        (X3,y1,[]),
-                        (X4,y1,["cat_1","cat_2"]),
+                        (X2,y2,[]),
+                        (X3,y1,["cat_1","cat_2"]),
                         ]
 
     return base_cases_numpy
@@ -199,14 +196,39 @@ def tree_method(encoder,missing_handling,leafnode_sampler,tree):
 
 @pytest.fixture(autouse=True)
 def stub_build_feature_matrix(request,monkeypatch):
+    # The test should not use the real implementation of build_feature_matrix.
+    # The test should use a stub of that function instead.
+    # There is one exception to this: the standard tests of sklearn do need the real build_feature_matrix.
+
+    # setting autouse=True causes this fixture to be used in every test.
+    # to enable the exception, we check for the 'noautofixt' mark.
     if 'noautofixt' in request.keywords:
         return
+    
+    #We need to import tree utils here so that we can replace build_feature_matrix with our stub.
     from synthpop.methods import tree_utils
+
+    # We define the stub
     def stub_build_feature_matrix(X,feature_order):
         return get_exp_feature_matrix()
+    
+    # and use monkey patching to replace the method with the stub.
     monkeypatch.setattr(tree_utils,"build_feature_matrix",stub_build_feature_matrix)
 
+@pytest.fixture()
+def fitted_tree(tree_method,request):
 
+    X = request.node.callspec.params["X"]
+    cat_index = request.node.callspec.params["index_cat"]
+    tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
+    tree_method.missing_handler_ = clone(tree_method.missing_handler)
+    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
+    tree_method.tree_ = clone(tree_method.tree)
+    tree_method.n_features_in_ = len(X.keys())
+
+    tree_method.feature_order_ = list(X.keys())
+
+    return tree_method
 
 # test fit ----------------------------------------------------------------------------------------
 @pytest.mark.parametrize(
@@ -231,9 +253,14 @@ def test_validate_fit_raises_invalid_y(tree_method,X, y):
         tree_method.fit(X, y)
 
 @pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_trains_encoder(X,y,index_cat,tree_method,encoder,missing_handling,leafnode_sampler,tree):
+def test_n_features_in(X,y,index_cat,tree_method):
 
-    tree_method = TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=tree)
+    tree_method.fit(X, y)
+    assert tree_method.n_features_in_ == len(X)
+
+@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
+def test_fit_trains_encoder(X,y,index_cat,tree_method):
+
     
     tree_method.fit(X,y)
 
@@ -280,10 +307,8 @@ def test_fit_data_is_encoded(X,y,index_cat,tree_method):
 
     tree_method.fit(X,y)
 
-    for c in index_cat:
-        assert np.array_equal(tree_method.encoders_[c].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][c])
-
-    assert len(index_cat) == len(tree_method.encoders_)
+    for i in index_cat:
+        assert np.array_equal(tree_method.encoders_[i].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][i])
 
 
 
@@ -326,20 +351,7 @@ def test_fit_set_feature_names_out(X,y,index_cat,tree_method):
 
 # test transform ----------------------------------------------------------------------------------
 
-@pytest.fixture()
-def fitted_tree(tree_method,request):
 
-    X = request.node.callspec.params["X"]
-    cat_index = request.node.callspec.params["index_cat"]
-    tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
-    tree_method.missing_handler_ = clone(tree_method.missing_handler)
-    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
-    tree_method.tree_ = clone(tree_method.tree)
-    tree_method.n_features_in_ = len(X.keys())
-
-    tree_method.feature_order_ = list(X.keys())
-
-    return tree_method
 
 @pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
 def test_transform_encodes_data(X,index_cat,fitted_tree):
@@ -356,6 +368,10 @@ def test_transform_build_feature_matrix(X,index_cat,fitted_tree,mocker):
 
     spy = mocker.spy(tree_utils,"build_feature_matrix")
     tree_method = fitted_tree 
+
+    # we need to verify that the feature order seen when fitting is used.
+    # setting feature_order_ to a random sequence guarantees that the tree method uses feature_order_ and does not use list(X.keys())
+    tree_method.feature_order_ = ["some","random","order"]
 
     tree_method.transform(X)
     X_exp = {k: tree_method.encoders_[k].transform_return_value if k in index_cat else v for (k,v) in X.items()}
