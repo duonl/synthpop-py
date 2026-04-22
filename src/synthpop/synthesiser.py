@@ -11,15 +11,17 @@ class Synthesiser:
     """
     Delegates synthesis tasks to the appropriate synthesis method classes. 
 
+    :param random_seed: seed for randomness.
     :param column_order: list of variable names or list of indexes to define the order in which the columns will be synthesised. Default is the column order of the original dataset.
     :param default_syn_method: BaseSynth object. Synthesis method to apply to each column, except the first one and the ones defined in special_syn_method. Default synthesis method is CartSynth. 
     :param special_syn_method: Dictionary of special synthesis method per variable. If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynth objects. By default, there is no special synthesis method.
     :param first_column_method: The method for synthesising the first column. This is a special case, since there are no predictors available.
     """
-    def __init__(self, 
+    def __init__(self, random_seed: int,
                  column_order: list[str] | list[int] | None = None,
                  default_syn_method: BaseSynthMethod | None = None,
-                 special_syn_method: dict[str, BaseSynthMethod] | None = None) -> None:
+                 special_syn_method: dict[str, BaseSynthMethod] | None = None,
+                 ) -> None:
         pass
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:
