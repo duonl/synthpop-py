@@ -311,7 +311,7 @@ def test_fit_tree_is_applied(X,y,index_cat,tree_method):
 def test_fit_sampler_fit(X,y,index_cat,tree_method):
     tree_method.fit(X,y)
 
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,tree_method.tree_.apply_result)
+    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,tree_method.tree_.apply_result), "input of the sampler must be the output of the tree"
     assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler_.prepared_for_fit_result[1])
     assert not (tree_method.tree_sampler is tree_method.tree_sampler_)
 
@@ -362,7 +362,7 @@ def test_transform_build_feature_matrix(X,index_cat,fitted_tree,mocker):
     spy.assert_called_once_with(X_exp,tree_method.feature_order_ )
 
 @pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_applies(X,index_cat,fitted_tree):
+def test_transform_applies_fitted_tree(X,index_cat,fitted_tree):
     tree_method =fitted_tree
 
     tree_method.transform(X)
@@ -374,7 +374,7 @@ def test_transform_applies(X,index_cat,fitted_tree):
 
 
 @pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_samples(X,index_cat,fitted_tree):
+def test_transform_uses_sampler(X,index_cat,fitted_tree):
 
     tree_method =fitted_tree
 
