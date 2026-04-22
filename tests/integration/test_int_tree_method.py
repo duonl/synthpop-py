@@ -4,10 +4,12 @@ import pandas as pd
 import numpy as np
 import string
 
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.decomposition import PCA
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+from synthpop.data_processing.encoders import PCAEncoder
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
-from sklearn.datasets import make_classification
+from sklearn.datasets import make_classification, make_regression
 
 def test_treemethod_classifier_fit_and_transform():
     tree_method = TreeClassifierMethod()
@@ -92,92 +94,138 @@ def test_general_usage(method,X,y):
     assert "target_variable" in result2
 
 
-def get_test_data_classifier():
+def make_data_missing(X):
+
+    for ik, k in enumerate(X.keys()):
+
+
+        X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=np.dtypes.StringDType(na_object=np.nan))
+
+    return X
+
+
+def get_test_data_classifier(with_cats = False,with_missing_features=False):
     X,y = make_classification(n_classes=10,n_informative=11)
-    y = np.array([string.ascii_lowercase[i] for i in y])
-    X = {i:X[:,i] for i in range(X.shape[1])}
-    return (X,y)
     
-def spy_fit_transfrom(obj):
-    class spy_fit_wrapper(obj.__class__):
+    X = {i:X[:,i] for i in range(X.shape[1])}
+
+
+    idx_cats = [3,4,6]
+    if with_cats:
+        for idx in idx_cats:
+            x = (X[idx]*10).astype(int)
+            x_i = [f %5 for f in x]
+            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i])
+
+    if with_missing_features:
+        X = make_data_missing(X)
+
+
+    y = np.array([string.ascii_lowercase[i] for i in y])
+    return (X,y)
+
+
+def get_test_data_regressor(with_cats=False,with_missing_features=False):
+    X,y = make_regression()
+    X = {i:X[:,i] for i in range(X.shape[1])}
+
+    idx_cats = [3,4,6]
+    if with_cats:
+        for idx in idx_cats:
+            x = (X[idx]*10).astype(int)
+            x_i = [f %26 for f in x]
+            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype = np.dtypes.StringDType(na_object=np.nan))
+
+    if with_missing_features:
+        X = make_data_missing(X)
+
+    return (X,y)
+
+    
+    
+def spy_tree_wrapper(obj):
+    class spy_wrapper(obj.__class__):
         def fit(self,X,y):
             self.fit_X = X
             self.fit_y = y
             return super().fit(X,y)
         
-        def transform(self,X):
-            self.transform_X = X
-            return super().transform(X)
+        def apply(self,X):
+            self.apply_X = X
+            return super().apply(X)
         
-    obj.__class__ = spy_fit_wrapper
+    obj.__class__ = spy_wrapper
 
     return obj
         
-def spy_decisionTreeClassifier():
-    tree = DecisionTreeClassifier()
-    return spy_fit_transfrom(tree)
 
-def rigged_tree_classifier_method():
-    tree = spy_fit_transfrom(DecisionTreeClassifier())
-    return TreeClassifierMethod(tree=tree)
+def rigged_tree_classifier_method(pca_components = 1):
+    tree = spy_tree_wrapper(DecisionTreeClassifier())
+    return TreeClassifierMethod(tree=tree,encoder=PCAEncoder(pca_transform= PCA(n_components=pca_components)))
+
+def rigged_tree_regressor_method():
+    tree = spy_tree_wrapper(DecisionTreeRegressor())
+    return TreeRegressorMethod(tree=tree)
 
     
-@pytest.mark.parametrize("method,X,y",[(rigged_tree_classifier_method(),*get_test_data_classifier())])
+@pytest.mark.parametrize("method,X,y",[
+    (rigged_tree_classifier_method(),*get_test_data_classifier()),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor()),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_missing_features= True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
+                                       ])
 def test_input_to_tree_is_array_of_float32(method,X,y):
 
     method.fit(X,y)
     assert isinstance(method.tree_.fit_X,np.ndarray)
     assert method.tree_.fit_X.dtype == np.dtype(np.float32)
 
-def test_no_information_lost():
+    assert isinstance(method.tree_.apply_X,np.ndarray)
+    assert method.tree_.apply_X.dtype == np.dtype(np.float32)
+
+def histogram_matches(a,b):
+    hist_a =np.sort(np.unique(a,return_counts=True)[1])
+    hist_b =np.sort(np.unique(b,return_counts=True)[1])
+
+    return np.array_equal(hist_a,hist_b)
+@pytest.mark.parametrize("method,X,y",[
+    (rigged_tree_classifier_method(),*get_test_data_classifier()),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor()),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
+                                       ])
+def test_no_information_lost_when_fitting_tree(method,X,y):
     """
     test bijection of X and tree input.
     """
-    assert False,"test not made yet"
+    method.fit(X,y)
 
-def test_TreeRegressorMethod_shape():
+    for (i,k) in enumerate(X.keys()):
+        assert histogram_matches(X[k],method.tree_.fit_X[:,i])
+
+    assert method.tree_.fit_X.shape[0] == list(X.values())[0].shape[0]
+    assert method.tree_.fit_X.shape[1] == len(X.values())
+
+
+@pytest.mark.parametrize("method,X,y",[
+    (rigged_tree_classifier_method(),*get_test_data_classifier()),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor()),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
+                                       ])
+def test_no_information_lost_when_apply_tree(method,X,y):
     """
-    test if the input to the decision trees has the right shape
+    test bijection of X and tree input.
     """
-    assert False,"test not made yet"
 
-def test_TreeClassifierMethod_shape():
-    """
-    test if the input to the decision trees has the right shape
-    """
-    assert False,"test not made yet"
+    method.fit(X,y)
 
-def test_synthetic_nowhere_missing_when_observed_nowhere_missing():
-    """
-    Test if the synthetic column is nowhere missing when the original is nowhere missing.
-    """
-    assert False,"test not made yet"
+    for (i,k) in enumerate(X.keys()):
+        assert histogram_matches(X[k],method.tree_.apply_X[:,i])
 
-def test_something_no_missing():
-    #test should contain:
-    # int features
-    # float64 features
-    # float32 features
-    # string features
-
-    #aspects of tests:
-    # data (correlations, shape,count )
-    # types (numpy, pd.categorical, float32/64, int, string, object, pd.DataFrame)
-    # missing
-    # consistency (order of dict/columns, reproducible)
-    # sklearn compatibility
-
-    # invariants:
-    # the y of the decision tree can never be missing.
-    # the input to the decision tree when transforming should be invariant under the order of the features.
-    # equivalent datatypes: {string,pd.Categorical}, {int, float32,float64}
-    # for any valid X and y, the input to decision tree should be a np.array of dtype float32. (fit and transform)
-    # for any valid X with 1-column encoding and y nowhere missing, the shape of X and the input of the decision tree should be the same.
-
-    # co variants:
-    # for nowhere missing numeric targets: the shape of the features should be the shape of the array given to decision tree.
-    # non-degenerate encoding: bijection X <-> input decision tree
-
-    # for all tests: the outcome should be invariant under equivalent datatypes
-
-    pass
+    assert method.tree_.apply_X.shape[0] == list(X.values())[0].shape[0]
+    assert method.tree_.apply_X.shape[1] == len(X.values())
