@@ -2,7 +2,7 @@
 
 Synthetic data generation requires both determinism and high-quality randomness. These goals are not contradictory but must be explicitly engineered. Reproducibility ensures that results are deterministic and auditable. Randomness quality ensures that generated data does not exhibit artificial structure or leak information about the source of the data.
 
-Poor handling of either undermines trust. Non-determinism breaks pipelines and debugging, while also makes it impossible to recreate the synthetic data. Weak randomness can introduce bias, or in extreme cases, enable reconstruction of the original data.
+Poor handling of either undermines trust. Non-determinism breaks pipelines and debugging, while also makes it impossible to recreate the synthetic data. Weak randomness can introduce bias, or in some cases, enable reconstruction of the original data.
 
 We assume users generate datasets via Python scripts.
 
