@@ -1,32 +1,34 @@
 # Reproducibility and Randomness
 
-For the trustworthiness of synthetic data, it is important to be able to reproduce a synthetic dataset. 
-It might even be a formal requirement for some users. 
-Furthermore, a predictable package helps the user to build a reliable process to make a synthetic dataset.
-Random behaviour can frustrate debugging efforts. 
+Synthetic data generation requires both determinism and high-quality randomness. These goals are not contradictory but must be explicitly engineered. Reproducibility ensures that results are deterministic and auditable. Randomness quality ensures that generated data does not exhibit artificial structure or leak information about the source of the data.
 
-The methods to make a synthetic datasets fundamentally need randomness. 
-If the randomness is not random enough it might reduce the quality of the generated synthetic datasets by introducing patterns that are not in the observed data.
-It is not excluded that a lack of randomness can make it possible to reconstruct the observed data. 
+Poor handling of either undermines trust. Non-determinism breaks pipelines and debugging, while also makes it impossible to recreate the synthetic data. Weak randomness can introduce bias, or in extreme cases, enable reconstruction of the original data.
 
-We expect that the user is running a Python script to produce a synthetic dataset.
+We assume users generate datasets via Python scripts.
 
 ## Reproducibility
-
-- consecutive runs of the Python script should yield the same synthetic dataset.
-- Calling methods and functions of this package multiple times should yield the same result. 
-- The user should be able to generate multiple synthetic datasets from the same observed dataset in the same script.
-- The seed for the randomness must be supplied by the user.
-
+This package enforces strong reproducibility guarantees:
+- **Deterministic execution**: running the same script with the same inputs and seed must yield identical synthetic datasets.
+- **Function-level determinism**: repeated calls to the same method with identical arguments and seeds must produce identical outputs.
+- **Multiple datasets per run**: Users must be able to generate multiple independent datasets from the same observed data within a single script in a controlled and reproducible way.
+- **Explicit seeding**: a root seed must be provided by the user. No implicit or hidden seeding is allowed.
 
 ## Randomness
+While deterministic, the system must still produce statistically sound randomness:
+- **Independence of random streams**: all random number generators (RNGs) used across components must be independent unless explicitly coupled.
+- **Robust seeding**: user-provided seeds are normaised via a `SeedSequence` to avoid poor statistical properties. See [here](https://numpy.org/doc/stable/reference/random/parallel.html) for considerations.
+- **No hidden correlations**: derived RNGs must not introduce unintended correlations between components.
 
-- all random numbers used in this package should be independent.
-- Care should be taken to properly seed the randomness. See [here](https://numpy.org/doc/stable/reference/random/parallel.html) for some indication of what to consider. Not every user-provided seed is a good seed.
+## Constraints
+- **No default seed**: if no seed is provided, the package must raise an explicit error.
+- **Dependency handling**: any dependency that requires randomness must be driven by the same controlled seeding mechanism.
 
+## Design
+The package uses a hierarchical seeding strategy:
+- A **root seed** is supplied by the user when creating a `Synthesiser`.
+- Each component that requires randomness derives its own **instance seed**.
+- RNGs are constructed from the combination of a rood seed and an instance seed.
+This ensures that identical seeds give identical RNG streams. Different instance seeds give independent streams and different root seeds give entirely different experiments.
 
-## other constraints
-
-- There should be no default seed. If the user does not provide a seed, an error should be raised. 
-- Some dependencies of this package might require randomness as well. 
+Using these seeds an RNG is created. We leverage NumPy's internal `SeedSequence` logic to safely combine entropy sources. Seeding management is handled in a class that provides a global root seed registry, a context manager for temporary reseeding and utilities for generating derived seeds.
 
