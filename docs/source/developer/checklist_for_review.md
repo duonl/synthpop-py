@@ -4,7 +4,7 @@ This checklist is intended to guide reviewers in performing consistent, thorough
 For first-time reviewers, it is recommended to briefly consult the [Developing Synthpop](developing.md) and [Code Standards, Norms and Conventions](code_standards_and_norms.md) documents. These provide the necessary context on workflows and quality expectations, which the checklist operationalises.
 
 A review is expected to be complete. However, if during early stages of review (e.g. scope, behaviour or method design) it becomes clear that the implementation requires major changes (such as fundamental design issues, incorrect architecture or invalid core assumptions) then:
-- You may stap the review early
+- You may stop the review early
 - You must explicitly communicate this in the review
 - You should describe what blocks further review, why continued review is not useful at this stage and what must be addressed before continuation.
 
