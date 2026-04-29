@@ -68,6 +68,7 @@ This checks whether tests ocover the full behavioural space of the system from a
     - identity operations (e.g. sorting already sorted data)
     - comparison of identical datasets
     - no-op transformations
+
 Find more standard topics in testing in the [Code Standards, Norms and Conventions](code_standards_and_norms.md)
 ### Test quality
 This checks whether tests are well-structured, deterministic and suitable for long-term maintenance and automation.
