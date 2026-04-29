@@ -21,7 +21,6 @@ This checks whether the pull request is self-contained, relevant and structurall
 - [ ] Only relevant files are included in the pull request (automatically generated files or files that should not be public)
 - [ ] The pull request only includes the requested feature (no unrelated changes)
 - [ ] All merge conflicts have been resolved.
-- [ ] No debug code, prints or commented-out blocks are present
 - [ ] You understand which files you are responsible for reviewing
 - [ ] The implementation matches the intended feature scope
 
@@ -38,7 +37,6 @@ This checks whether all required functionality from the specification is fully i
 - [ ] The implementation matches the feature specification (functional description)
 - [ ] All required functionality described in the issue is implemented
 - [ ] The implementation correctly reflects the intended behaviour in real-world usage
-- [ ] Assumptions made by the implementation are valid and documented
 - [ ] Invalid assumptions fail safely with informative errors
 - [ ] The code produces expected outputs for intended inputs
 
@@ -120,6 +118,7 @@ This checks whether the code is readable, consistent and aligned with project-wi
 - [ ] British English is used
 - [ ] Type hints are used where appropriate
 - [ ] No unnecessary or unclear comments are present
+- [ ] No debug code, prints or commented-out blocks are present
 ### API consistency
 This checks whether the code and language is predictable, consistent and behaves similarly to comparable parts of the codebase.
 - [ ] Function and method names are consistent with existing naming conventions in the codebase
@@ -133,6 +132,7 @@ This checks whether the code and language is predictable, consistent and behaves
 ## 10. Documentation and usability
 This checks whether the code is understandable and usable without reading implementation details.
 - [ ] Docstrings are accurate and reflect actual behaviour
+- [ ] Assumptions made by the implementation are valid and documented
 - [ ] Examples are included for non-trivial functionality
 - [ ] Examples are correct and executable
 - [ ] Terminology is consistent with project standards
