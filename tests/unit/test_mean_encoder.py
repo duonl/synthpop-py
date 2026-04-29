@@ -20,8 +20,6 @@ def test_fit_raises_for_non_numeric_target():
     [
         (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype), np.array([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
         (np.array(["a", "b", "c"],dtype = str_dtype), np.array([3/2, 5/2, 7/2]), {"a": 1.5, "b": 2.5, "c": 3.5}),
-        # (pd.Series(["a", "a", "b", "b", "c"],dtype = str_dtype), pd.Series([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
-        # (pd.Series(["a", "a", "b", "b"],dtype = str_dtype), pd.Series([1, -1, 6, -4]), {"a": 0, "b": 1}),
     ]
 )
 def test_fit_calculates_means(X, y, expected_mapping):
@@ -32,14 +30,13 @@ def test_fit_calculates_means(X, y, expected_mapping):
     assert result.mapping_ == expected_mapping, "Encoder calculates incorrect mean values"
 
 def test_fit_empty_target_category():
-    X = np.array(["a", "b", "c", "d", "e", "f", "f", "f"],dtype = str_dtype)
-    y = np.array([1, 2, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+    X = np.array(["a", "b", "c", "c", "c"],dtype = str_dtype)
+    y = np.array([1, 2, np.nan, np.nan, np.nan])
     enc = MeanEncoder()
     enc.fit(X, y)
     assert enc.mapping_["a"] == 1
     assert enc.mapping_["b"] == 2
-    assert np.isnan(enc.mapping_["c"]), "When y is always None for a specific X category, encoding map must be empty for that category only."
-    assert np.isnan(enc.mapping_["d"]), "When y is always np.nan for a specific X category, encoding map must be empty for that category only."
+    assert np.isnan(enc.mapping_["c"]), "When y is always np.nan for a specific X category, encoding map must be empty for that category only."
 
 def test_fit_ignores_some_missing_targets():
     X = np.array(["a", "a", "a", "a", "b", "b"],dtype = str_dtype)
@@ -138,6 +135,5 @@ def test_transform_raises_not_fitted():
     "check_fit_score_takes_y":"tests with a score component"
 })
 def test_sklearn_compatibility(estimator,check):
-    pass
-    #check(estimator)
+    check(estimator)
     

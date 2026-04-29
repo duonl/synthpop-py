@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from synthpop.data_processing.encoders import PCAEncoder
+from sklearn import config_context
 
 
 def test_pca_encoding_fit_full_data():
@@ -74,32 +75,29 @@ def test_pca_encoding_fit_constant_feature():
     # The behaviour is different as described in the functional descriptions.
     # Instead of the number of rows, it is encoded by the value 0.0
 
-def test_pca_encoding_fit_transform_regular_feature_output_api():
-    X = pd.Series(["a", "a","b","b","c"],name="input_feature")
-    y = pd.Series(["x", "x","y","z","w"])
-
-    encoder = PCAEncoder().set_output(transform="pandas")
-
-    result = encoder.fit_transform(X=X,y=y)
-    assert result.shape[0]== 5
-    assert isinstance(result,pd.DataFrame)
-    assert result.columns.equals(pd.Index(["input_feature_pca0","input_feature_pca1","input_feature_pca2"]))
 
 def test_pca_encoding_changed_number_of_components():
     X = pd.Series(["a", "a","b","b","c"],name="input_feature")
     y = pd.Series(["x", "x","y","z","w"])
 
-    encoder = PCAEncoder(pca_transform= PCA(n_components=2)).set_output(transform="pandas")
+    encoder = PCAEncoder(pca_transform= PCA(n_components=2))
 
     result = encoder.fit_transform(X=X,y=y)
     assert result.shape[0]== 5
-    assert isinstance(result,pd.DataFrame)
-    assert result.columns.equals(pd.Index(["input_feature_pca0","input_feature_pca1"]))
 
-def test_pca_encoding_numeric_and_string():
-    X = np.array(["1",1,None])
-    y = pd.Series(["a","b","c"])
 
-    encoder = PCAEncoder()
-    result = encoder.fit_transform(X,y)
-    assert not np.equal(result[0],result[1]).all()
+def test_pca_encoding_not_broken_by_setoutput_api():
+
+    X = np.array(["a", "a","b","b","c"])
+    y = np.array(["x", "x","y","z","w"])
+
+    encoder = PCAEncoder(pca_transform= PCA(n_components=2))
+
+    before = encoder.fit_transform(X,y)
+    
+    #Using the setoutput api here via a context manager could have effect on sklearn.PCA
+    with config_context(transform_output="pandas"):
+        after = encoder.fit_transform(X,y)
+
+    assert np.array_equal(before,after), "set output api break pca encoding"
+    

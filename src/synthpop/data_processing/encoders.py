@@ -108,13 +108,10 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_in_ = 1
 
-        X_val,y_val = validate_data(self,X=X,y=y, validate_separately = (
-            dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
-            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
-            ))
+        X_val = to_missing_str_array(X)
+        y_val = to_missing_str_array(y)
 
-        if isinstance(X,pd.Series):
-            self.feature_names_in_ = [X.name]
+
         if X_val.ndim != 1:
             raise ValueError("X should be 1D")
         if y_val.ndim != 1:
@@ -182,7 +179,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         check_is_fitted(self)
         # if pd.isna(X).all():
         #     return np.zeros(X.shape[0])
-        missing_mapping =  {None:[np.nan]*self.n_features_out_, pd.NA:[np.nan]*self.n_features_out_, np.nan:[np.nan]*self.n_features_out_}
+        missing_mapping =  { np.nan:[np.nan]*self.n_features_out_}
         mapping_including_missing = self.mapping_|missing_mapping if hasattr(self,"mapping_") else missing_mapping
 
         # if X contains Nones, then the dtype of X is object.
@@ -194,27 +191,8 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             if not unique_values_in_x.issubset(self.mapping_.keys()):
                 raise ValueError("new values not seen during fitting when encoding.")
 
-        x_na = pd.isna(X)
+        return np.array([mapping_to_np_array[v] if v==v else [np.nan]* self.n_features_out_ for v in X])
 
-        keys = np.where(x_na,None,X)
-        mapping_to_np_array = {k: np.array(v,dtype=np.float32) for (k,v) in mapping_including_missing.items()}
-        f = np.frompyfunc(mapping_to_np_array.get,nin=1,nout=1)
-        return np.array(np.asanyarray(f(keys)).tolist())
-
-
-    def get_feature_names_out(self,input_features=None):
-        if not hasattr(self,"feature_names_in_"):
-            if input_features is  None:
-                return [f"x{i}" for i in range(self.n_features_out_)]
-            else:
-                return [f"{input_features[0]}_pca{i}" for i in range(self.n_features_out_)]
-
-        if input_features is None:
-            return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
-        if input_features != self.feature_names_in_:
-            raise ValueError(f"input_features is not feature_names_in_. Expected: {self.feature_names_in_}, actual: {input_features}")
-        return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
-    
    
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
     """
