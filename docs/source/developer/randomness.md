@@ -1,7 +1,7 @@
 # Using randomness in this package
 
-This package enforces strict requirements on randomness to ensure both reproducibility (deterministic outputs given a seed) and statistical validaty (independent, high-quality random streams). These requirements are defined in the [functional descriptions](../functional%20descriptions/reproducibility.md) and are consistent with guidance from the
-[scikit-learn's](https://scikit-learn.org/stable/developers/develop.html#random-numbers) standards for random numbers and [NumPy's](https://numpy.org/doc/stable/reference/random/generator.html) guidelines that has [additional recommendations](https://numpy.org/doc/stable/reference/random/bit_generators/index.html#seeding-and-entropy).
+This package enforces strict requirements on randomness to ensure both reproducibility (deterministic outputs given a seed) and statistical validaty (high-quality, reproducible random streams). These requirements are defined in the [functional descriptions](../functional%20descriptions/reproducibility.md) and are consistent with guidance from the
+[scikit-learn's](https://scikit-learn.org/stable/developers/develop.html#random-numbers) standards for random numbers and aligned with [NumPy's](https://numpy.org/doc/stable/reference/random/generator.html) Generator API and [seeding recommendations](https://numpy.org/doc/stable/reference/random/bit_generators/index.html#seeding-and-entropy), with a focus on deterministic reproducibility.
 
 ## Background: NumPy vs. scikitlearn
 There is a mismatch between ecosystem conventions:
@@ -17,7 +17,7 @@ Most of the recommendations of NumPy and the requirements from the functional de
 If you are developing an estimator in this package, the guidelines by scikit-learn apply mostly. The points where we deviate are:
 
 - use **`numpy.random.Generator`** instead of `numpy.random.RandomState`.
-- if no seed is provided in the initialiser, use `Reseed.get_new_seed()` to obtain a random state. 
+- if no seed is provided in the initialiser, use `Reseed.get_new_seed()` to obtain a deterministic instance seed.
 - use **`Reseed.get_rng(self.random_state_ )`** instead of `check_random_state` to obtain an RNG.
 - do **not** store the RNG in the object. 
 Using one RNG for the entire object breaks the requirement that methods in this package should yield the same output when called multiple times.
@@ -34,7 +34,7 @@ When implementing estimators or components:
 **1. Accept a user-facing seed**
 ```python
 def __init(self, random_state: int | None = None):
-    self.random_state = random.state
+    self.random_state = random_state
 ```
 **2. Create an instance seed from the root seed if no seed is given**:
 ```python
