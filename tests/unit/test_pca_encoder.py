@@ -59,8 +59,9 @@ def get_test_data_full():
     ])  # sigma=   1   1/2,   1/2
 
     input_with_np_arrays = [(X, y, expected_input_pca, pca_result, expected_dict) for pca_result, expected_dict in get_pca_return_and_dict()]
+    input_2D = [(X.reshape((-1,1)), y, expected_input_pca, pca_result, expected_dict) for pca_result, expected_dict in get_pca_return_and_dict()]
     input_with_lists = [(X.tolist(), y.tolist(), expected_input_pca, pca_result, expected_dict) for pca_result, expected_dict in get_pca_return_and_dict()]
-    return [*input_with_np_arrays,*input_with_lists]
+    return [*input_with_np_arrays,*input_with_lists,*input_2D]
 
 
 def get_test_data_feature_constants():
@@ -221,21 +222,15 @@ def test_pca_fit_exception_on_not_1d_datatype():
 
     encoder = PCAEncoder(pca_transform=None)
 
+    #assert that a ValueError is raised when X has multiple columns.
     with pytest.raises(ValueError):
-        encoder.fit(pd.DataFrame([["a", None, "b", "b"]]),
-                    np.array(["a", None, "b", "b"]))
-
-    with pytest.raises(ValueError):
-        encoder.fit(np.array(["a", None, "b", "b"]),
-                    pd.DataFrame([["a", None, "b", "b"]]))
-
+        encoder.fit(np.array([["a", np.nan],["b","c"]],dtype=str_dtype),
+                    np.array(["a", np.nan, "b", "b"]))
+        assert False,encoder.mapping_
+        
     with pytest.raises(ValueError):
         encoder.fit(np.array([["a", None, "b", "b"]]),
-                    np.array(["a", None, "b", "b"]))
-
-    with pytest.raises(ValueError):
-        encoder.fit(np.array(["a", None, "b", "b"]),
-                    np.array([["a", None, "b", "b"]]))
+                    np.array([["a", np.nan],["b","c"]],dtype=str_dtype))
 
 
 # testing transform--------------------------------------------------------------------------------

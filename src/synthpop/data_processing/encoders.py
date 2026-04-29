@@ -15,6 +15,17 @@ import numpy.typing as npt
 from synthpop.utils import str_dtype, to_missing_str_array
 
 
+def validate_string_array(x):
+    arr = to_missing_str_array(x)
+
+    if arr.ndim >1:
+        if arr.shape[1] !=1:
+            raise ValueError("input should be 1D")
+        else:
+            return arr.reshape(-1)
+            
+    return arr
+
 class PCAEncoder(TransformerMixin, BaseEstimator):
     """
     Transforms categorical data to one or more numeric columns.
@@ -108,14 +119,14 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_in_ = 1
 
-        X_val = to_missing_str_array(X)
-        y_val = to_missing_str_array(y)
+        X_val = validate_string_array(X)#to_missing_str_array(X).reshape(X.shape[0])
+        y_val = validate_string_array(y)#to_missing_str_array(y).reshape(y.shape[0])
 
 
-        if X_val.ndim != 1:
-            raise ValueError("X should be 1D")
-        if y_val.ndim != 1:
-            raise ValueError("Y should be 1D")
+        # if X_val.ndim != 1:
+        #     raise ValueError("X should be 1D")
+        # if y_val.ndim != 1:
+        #     raise ValueError("Y should be 1D")
         
         if X_val.shape[0] == 0 and y_val.shape[0]==0:
             self.mapping_ = {}
@@ -191,7 +202,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
             if not unique_values_in_x.issubset(self.mapping_.keys()):
                 raise ValueError("new values not seen during fitting when encoding.")
 
-        return np.array([mapping_to_np_array[v] if v==v else [np.nan]* self.n_features_out_ for v in X])
+        return np.array([self.mapping_[v] if v==v else [np.nan]* self.n_features_out_ for v in X],dtype=np.float32)
 
    
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
