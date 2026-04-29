@@ -49,6 +49,10 @@ Use this checklist as a practical working guide during development. It is not me
 - [ ] The pull request merges into develop.
 - [ ] The pull request title is descriptive and includes relevant issue references
 - [ ] The pull request description clearly explains what changed, why it changed, the scope of the change and any known limitations or areas requiring attention
+- [ ] By default, a pull request is ready for a full review. If requesting a partial review, the scope is explicitly defined in the pull request description. It is clearly stated:
+  - [ ] which parts should be reviewed
+  - [ ] which parts are not ready for review
+  - [ ] what kind of feedback is expected (e.g. design, approach, API)
 - [ ] Any merge conflicts have been resolved
 - [ ] All tests are re-run after resolving conflicts
 - [ ] Commit history is clean and ready for squash merge
