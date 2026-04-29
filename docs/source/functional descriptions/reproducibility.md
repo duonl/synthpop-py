@@ -13,19 +13,23 @@ This package enforces strong reproducibility guarantees:
 - **Multiple datasets per run**: Users must be able to generate multiple independent datasets from the same observed data within a single script in a controlled and reproducible way.
 - **Explicit seeding**: a root seed must be provided by the user. No implicit or hidden seeding is allowed.
 
+Deteminism assumes identical call order and identical seeds passed to all random number generator (RNG) creating functions.
+
 ## Randomness
 While deterministic, the system must still produce statistically sound randomness:
-- **Independence of random streams**: all random number generators (RNGs) used across components must be independent unless explicitly coupled.
-- **Robust seeding**: user-provided seeds are normaised via a `SeedSequence` to avoid poor statistical properties. See [here](https://numpy.org/doc/stable/reference/random/parallel.html) for considerations.
+- **Deterministic variability**: different instance seeds produce different random streams under te same root seed.
+- **Root-seed isolation**: changing the root seed results in entirely different random streams across the system.
+- **Robust seeding**: root seeds are processed through `SeedSequence` to avoid poor statistical properties from low-entropy or structured seeds. See [here](https://numpy.org/doc/stable/reference/random/parallel.html) for considerations.
 - **No hidden correlations**: derived RNGs must not introduce unintended correlations between components.
 
 ## Constraints
-- **No default seed**: if no seed is provided, the package must raise an explicit error.
-- **Dependency handling**: any dependency that requires randomness must be driven by the same controlled seeding mechanism.
+- **No default seed**: the root seed must be explicitly set before any RNG is created, otherwise an error should be raised.
+- **Centralised randomness**: all randomness must be created via the package's RNG utilities.
+- **Dependency handling**: any dependency that requires randomness must accept externally provided seeds or RNGs derived from this system.
 
 ## Design
-The package uses a hierarchical seeding strategy:
-- A **root seed** is supplied by the user when creating a `Synthesiser`.
+The package uses a deterministic seed composition strategy:
+- A **root seed** is supplied by the user when creating a `Synthesiser`. This seed is stored globally.
 - Each component that requires randomness derives its own **instance seed**.
 - RNGs are constructed from the combination of a rood seed and an instance seed.
 This ensures that identical seeds give identical RNG streams. Different instance seeds give independent streams and different root seeds give entirely different experiments.
