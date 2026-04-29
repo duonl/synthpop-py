@@ -15,21 +15,55 @@ import numpy.typing as npt
 from synthpop.utils import str_dtype, to_missing_str_array
 
 
-def to_1D(arr):
-    if arr.ndim >1:
-        if arr.shape[1] !=1:
-            raise ValueError("input should be 1D")
-        else:
-            return arr.reshape(-1)
-            
-    return arr
-    
-def validate_string_array(x):
-    arr = to_missing_str_array(x)
-            
-    return to_1D(arr)
 
-class PCAEncoder(TransformerMixin, BaseEstimator):
+
+class _BaseEncoder(TransformerMixin, BaseEstimator):
+    def to_1D(self,arr):
+        if arr.ndim >1:
+            if arr.shape[1] !=1:
+                raise ValueError("input should be 1D")
+            else:
+                return arr.reshape(-1)
+            
+        return arr
+
+    def validate_string_array(self,x):
+       arr = to_missing_str_array(x)
+       return self.to_1D(arr)
+
+    def _check_unseen_values(self,X_val):
+       X_missing = np.isnan(X_val)
+        
+       # Detect unseen categories
+       unseen_categories = set(X_val[~X_missing]) - set(self.mapping_.keys())
+       if unseen_categories:
+           raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
+
+    def _apply_mapping(self,X_val):
+
+        
+        result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32)
+
+        if not hasattr(self,"mapping_"):
+            return np.full((len(X_val),1), np.nan, dtype=np.float32)
+
+
+        if len(self.mapping_) == 0:
+            return result #2D output with only nans
+        
+
+        X_missing = np.isnan(X_val)
+        
+        # Apply mapping
+        for i, val in enumerate(X_val):
+            if not X_missing[i]:
+                result[i] = self.mapping_[val]
+
+        return result
+        
+
+
+class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
     The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
@@ -122,8 +156,8 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_in_ = 1
 
-        X_val = validate_string_array(X)#to_missing_str_array(X).reshape(X.shape[0])
-        y_val = validate_string_array(y)#to_missing_str_array(y).reshape(y.shape[0])
+        X_val = self.validate_string_array(X)
+        y_val = self.validate_string_array(y)
 
         
         if X_val.shape[0] == 0 and y_val.shape[0]==0:
@@ -185,26 +219,13 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         :param X: the feature to be encoded.
         """
 
-        check_is_fitted(self)
-        # if pd.isna(X).all():
-        #     return np.zeros(X.shape[0])
-        missing_mapping =  { np.nan:[np.nan]*self.n_features_out_}
-        mapping_including_missing = self.mapping_|missing_mapping if hasattr(self,"mapping_") else missing_mapping
-        X_val = validate_string_array(X)
-
-        # if X contains Nones, then the dtype of X is object.
-        # In that case, X cannot be sorted.
-        # many routines of numpy for finding differences between lists depend on the items being sortable.
-        
-        if hasattr(self,"mapping_"):
-            unique_values_in_x =set(X_val[~pd.isna(X_val)])#np.unique([v for v in X if not pd.isna(v)])
-            if not unique_values_in_x.issubset(self.mapping_.keys()):
-                raise ValueError("new values not seen during fitting when encoding.")
-
-        return np.array([self.mapping_[v] if v==v else [np.nan]* self.n_features_out_ for v in X_val],dtype=np.float32)
+        check_is_fitted(self, 'mapping_')
+        X_val = self.validate_string_array(X)
+        self._check_unseen_values(X_val)
+        return self._apply_mapping(X_val)
 
    
-class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
+class MeanEncoder(_BaseEncoder):
     """
     Transforms categorical data to numeric using mean encoding. The feature column `X` is encoded based on a numeric target column `y`.
 
@@ -257,10 +278,11 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("mean encoding not possible for empty arrays")
-        X_val =  validate_string_array(X)
-        y_val = to_1D(y)
+        X_val =  self.validate_string_array(X)
+        y_val = self.to_1D(y)
 
         self.n_features_in_ = 1
+        self.n_features_out_ = 1
 
 
         # Identify missing
@@ -278,7 +300,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
             else:
                 mean_val = valid_targets.mean()
             
-            self.mapping_[cat] = np.float32(mean_val)
+            self.mapping_[cat] = [np.float32(mean_val)]
 
         return self
 
@@ -301,26 +323,6 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self, 'mapping_')
-        X_val = validate_string_array(X)
-
-        result = np.full((len(X_val),1), np.nan, dtype=np.float32)
-
-
-        if len(self.mapping_) == 0:
-            return result #2D output with only nans
-        
-        # Start transform
-
-        X_missing = np.isnan(X_val)
-        
-        # Detect unseen categories
-        unseen_categories = set(X_val[~X_missing]) - set(self.mapping_.keys())
-        if unseen_categories:
-            raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
-        
-        # Apply mapping
-        for i, val in enumerate(X_val):
-            if not X_missing[i]:
-                result[i] = self.mapping_[val]
-
-        return result
+        X_val = self.validate_string_array(X)
+        self._check_unseen_values(X_val)
+        return self._apply_mapping(X_val)

@@ -306,11 +306,12 @@ def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
 @pytest.mark.parametrize("missing", [np.nan])
 def test_pca_transform_when_mapping_is_empty_transform_missing_to_nan(missing):
     """
-    transforming an empty X should always result in an empty array, even if the mapping is empty.
+    transforming an always missing X should always result in an always nan array, even if the mapping is empty.
     """
     encoder = PCAEncoder(pca_transform=None)
 
     encoder.n_features_out_ = 2
+    encoder.mapping_ = {}
 
     result = encoder.transform(X=np.array([missing,missing]))
     assert len(result) == 2
@@ -325,7 +326,7 @@ def test_pca_transform_exception_on_new_value():
     encoder.mapping_ = {"a": [1.1, 2.2], "c":[3.3,4.4]}
     encoder.n_features_out_ = 2
 
-    with pytest.raises(ValueError, match="values not seen during fitting"):
+    with pytest.raises(ValueError, match="Column to be encoded X has unseen categories"):
         result = encoder.transform(np.array(["b","c"]))
 
 

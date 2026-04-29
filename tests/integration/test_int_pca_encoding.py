@@ -77,8 +77,8 @@ def test_pca_encoding_fit_constant_feature():
 
 
 def test_pca_encoding_changed_number_of_components():
-    X = pd.Series(["a", "a","b","b","c"],name="input_feature")
-    y = pd.Series(["x", "x","y","z","w"])
+    X = np.array(["a", "a","b","b","c"])
+    y = np.array(["x", "x","y","z","w"])
 
     encoder = PCAEncoder(pca_transform= PCA(n_components=2))
 
