@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import numpy.typing as npt
 
+from synthpop.utils import str_dtype, to_missing_str_array
 
 
 class PCAEncoder(TransformerMixin, BaseEstimator):
@@ -263,29 +264,26 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
             >>> encoder.fit(X, y)
         """
 
-        # Required sklearn attributes
-        y = np.array([np.nan if (v is pd.NA ) else v for v in y], dtype=float) #for pd.NA compatibility
+        if not np.issubdtype(y.dtype,np.number):
+            raise ValueError("target must be numeric dtype for mean encoding")
 
-        X_val, y_val = validate_data(self, X=X, y=y, validate_separately = (
-             dict(ensure_2d=False, ensure_min_samples=1, dtype=["str", "object"], ensure_all_finite="allow-nan"),
-             dict(ensure_2d=False, ensure_min_samples=1, dtype='numeric', ensure_all_finite="allow-nan")
-        ))
+        if X.shape[0] == 0 or y.shape[0] == 0:
+            raise ValueError("mean encoding not possible for empty arrays")
+        X_val =  to_missing_str_array(X)
+        y_val = y
 
-        if isinstance(X,pd.Series) and X.name is not None:
-            self.feature_names_in_ = [X.name]
         self.n_features_in_ = 1
 
 
         # Identify missing
-        X_missing = np.zeros(len(X_val), dtype=bool)
-        X_missing |= pd.isna(X_val)
-        y_missing = pd.isna(y_val)
+        X_missing = np.isnan(X_val)
+        y_missing = np.isnan(y_val)
         
         # Fit encoder
         self.mapping_ = {}
-        unique_categories = np.unique(X_val[~X_missing].astype(str))
+        unique_categories = np.unique(X_val[~X_missing])
         for cat in unique_categories:
-            mask = (~X_missing) & (X_val.astype(str) == cat)
+            mask = (~X_missing) & (X_val == cat)
             valid_targets = y_val[mask & ~y_missing]
             if valid_targets.size == 0:
                 mean_val = np.nan
@@ -317,7 +315,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         check_is_fitted(self, 'mapping_')
 
         # Input validation
-        X = np.asarray(X)
+        #X = np.asarray(X)
 
         if X.ndim != 1:
             raise ValueError(f"X must be a 1D array, got shape {X.shape}.")
@@ -327,11 +325,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         # Start transform
         result = np.full(len(X), np.nan, dtype=np.float32)
 
-        # Detect missing
-        X_missing = np.zeros(len(X), dtype=bool)
-        if X.dtype.kind in ("f", "i"):
-            X_missing |= np.isnan(X)
-        X_missing |= np.equal(X, None)
+        X_missing = np.isnan(X)
         
         # Detect unseen categories
         unseen_categories = set(X[~X_missing]) - set(self.mapping_.keys())
@@ -344,18 +338,3 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
                 result[i] = self.mapping_[val]
 
         return result
-    
-    def get_feature_names_out(self, input_features=None):
-        check_is_fitted(self, "mapping_")
-
-        if input_features is None:
-            if hasattr(self, "feature_names_in_"):
-                input_features = self.feature_names_in_
-            else:
-                input_features = [f"mean_x{i}" for i in range(self.n_features_in_)]
-
-        if hasattr(self, "feature_names_in_"):
-            if not np.array_equal(input_features, self.feature_names_in_):
-                raise ValueError(f"input_features must match feature_names_in_. Expected {self.feature_names_in_}, got {input_features}")
-        base = input_features[0]
-        return np.asarray([f"{base}_mean"], dtype=object)
