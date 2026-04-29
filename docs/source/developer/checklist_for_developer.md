@@ -49,7 +49,7 @@ Use this checklist as a practical working guide during development. It is not me
 - [ ] The pull request merges into develop.
 - [ ] The pull request title is descriptive and includes relevant issue references
 - [ ] The pull request description clearly explains what changed, why it changed, the scope of the change and any known limitations or areas requiring attention
-- [ ] By default, a pull request is ready for a full review. If requesting a partial review, the scope is explicitly defined in the pull request description. It is clearly stated:
+- [ ] If no scope is specified, the reviewer assumes a full review is requested. If requesting a partial review, the scope is explicitly defined in the pull request description. It is clearly stated:
   - [ ] which parts should be reviewed
   - [ ] which parts are not ready for review
   - [ ] what kind of feedback is expected (e.g. design, approach, API)
@@ -61,7 +61,7 @@ Use this checklist as a practical working guide during development. It is not me
 - [ ] All review comments have been addressed or responded to
 - [ ] All "Before making a pull request" checks still pass after changes
 - [ ] Any merge conflicts have been resolved and tests re-run
-- [ ] No additional unrelated changes were introduces during fixes
+- [ ] No additional unrelated changes were introduced during fixes
 
 ## Done condition
 A feature is considered complete when:
