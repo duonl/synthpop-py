@@ -237,10 +237,12 @@ def test_pca_fit_exception_on_not_1d_datatype():
 
 
 def get_test_data_transform():
+
+    shapes = [-1,(-1,1)]
     data = [
 
         (
-            np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype), #X
+            np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype).reshape(s), #X
             {  # mapping_
                 "a": [1.2, 3.4],
                 "b": [np.nan,np.nan],
@@ -259,7 +261,7 @@ def get_test_data_transform():
                 ],
                 dtype=np.float32
             )
-        )]
+        ) for s in shapes]
 
     return data
 

@@ -15,9 +15,7 @@ import numpy.typing as npt
 from synthpop.utils import str_dtype, to_missing_str_array
 
 
-def validate_string_array(x):
-    arr = to_missing_str_array(x)
-
+def to_1D(arr):
     if arr.ndim >1:
         if arr.shape[1] !=1:
             raise ValueError("input should be 1D")
@@ -25,6 +23,11 @@ def validate_string_array(x):
             return arr.reshape(-1)
             
     return arr
+    
+def validate_string_array(x):
+    arr = to_missing_str_array(x)
+            
+    return to_1D(arr)
 
 class PCAEncoder(TransformerMixin, BaseEstimator):
     """
@@ -122,11 +125,6 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         X_val = validate_string_array(X)#to_missing_str_array(X).reshape(X.shape[0])
         y_val = validate_string_array(y)#to_missing_str_array(y).reshape(y.shape[0])
 
-
-        # if X_val.ndim != 1:
-        #     raise ValueError("X should be 1D")
-        # if y_val.ndim != 1:
-        #     raise ValueError("Y should be 1D")
         
         if X_val.shape[0] == 0 and y_val.shape[0]==0:
             self.mapping_ = {}
@@ -192,17 +190,18 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         #     return np.zeros(X.shape[0])
         missing_mapping =  { np.nan:[np.nan]*self.n_features_out_}
         mapping_including_missing = self.mapping_|missing_mapping if hasattr(self,"mapping_") else missing_mapping
+        X_val = validate_string_array(X)
 
         # if X contains Nones, then the dtype of X is object.
         # In that case, X cannot be sorted.
         # many routines of numpy for finding differences between lists depend on the items being sortable.
         
         if hasattr(self,"mapping_"):
-            unique_values_in_x =set(X[~pd.isna(X)])#np.unique([v for v in X if not pd.isna(v)])
+            unique_values_in_x =set(X_val[~pd.isna(X_val)])#np.unique([v for v in X if not pd.isna(v)])
             if not unique_values_in_x.issubset(self.mapping_.keys()):
                 raise ValueError("new values not seen during fitting when encoding.")
 
-        return np.array([self.mapping_[v] if v==v else [np.nan]* self.n_features_out_ for v in X],dtype=np.float32)
+        return np.array([self.mapping_[v] if v==v else [np.nan]* self.n_features_out_ for v in X_val],dtype=np.float32)
 
    
 class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
@@ -258,8 +257,8 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
 
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("mean encoding not possible for empty arrays")
-        X_val =  to_missing_str_array(X)
-        y_val = y
+        X_val =  validate_string_array(X)
+        y_val = to_1D(y)
 
         self.n_features_in_ = 1
 
@@ -302,27 +301,25 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self, 'mapping_')
+        X_val = validate_string_array(X)
 
-        # Input validation
-        #X = np.asarray(X)
+        result = np.full((len(X_val),1), np.nan, dtype=np.float32)
 
-        if X.ndim != 1:
-            raise ValueError(f"X must be a 1D array, got shape {X.shape}.")
+
         if len(self.mapping_) == 0:
-            return np.full(len(X), np.nan, dtype=np.float32).reshape(-1, 1) #2D output with only nans
+            return result #2D output with only nans
         
         # Start transform
-        result = np.full(len(X), np.nan, dtype=np.float32)
 
-        X_missing = np.isnan(X)
+        X_missing = np.isnan(X_val)
         
         # Detect unseen categories
-        unseen_categories = set(X[~X_missing]) - set(self.mapping_.keys())
+        unseen_categories = set(X_val[~X_missing]) - set(self.mapping_.keys())
         if unseen_categories:
             raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
         
         # Apply mapping
-        for i, val in enumerate(X):
+        for i, val in enumerate(X_val):
             if not X_missing[i]:
                 result[i] = self.mapping_[val]
 

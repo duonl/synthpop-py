@@ -19,6 +19,8 @@ def test_fit_raises_for_non_numeric_target():
     "X, y, expected_mapping",
     [
         (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype), np.array([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
+        (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype).reshape((-1,1)), np.array([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
+        (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype), np.array([1, 0, 2, 0, 3]).reshape((-1,1)), {"a": 0.5, "b": 1, "c": 3}),
         (np.array(["a", "b", "c"],dtype = str_dtype), np.array([3/2, 5/2, 7/2]), {"a": 1.5, "b": 2.5, "c": 3.5}),
     ]
 )
@@ -79,13 +81,14 @@ def test_fit_with_empty_arrays():
 
 
 # ----- transform test cases -----
-def test_transforms_uses_mapping():
+@pytest.mark.parametrize("X",[np.array(["a", "b", "a", "c"],dtype = str_dtype),
+                              np.array(["a", "b", "a", "c"],dtype = str_dtype).reshape((-1,1))])
+def test_transforms_uses_mapping(X):
     #Given a fitted estimator
     encoder = MeanEncoder()
     encoder.mapping_ = {"a": 1, "b": 2, "c": None}
-    X = np.array(["a", "b", "a", "c"],dtype = str_dtype)
     result = encoder.transform(X)
-    expected_result = np.array([1, 2, 1, np.nan], dtype=np.float32)
+    expected_result = np.array([1, 2, 1, np.nan], dtype=np.float32).reshape((-1,1))# The output should always be 2D. 
     assert np.allclose(expected_result, result, equal_nan=True), "Transform does not apply mapping correctly"
 
 def test_transform_with_empty_mapping_returns_nans():
