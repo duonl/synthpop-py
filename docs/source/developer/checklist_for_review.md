@@ -47,8 +47,6 @@ This checks whether the implementation is fully and meaningfully validated acros
 - [ ] Edge cases from the functional description are explicitly tested
 - [ ] Correct stubs, mocks and spies are used where applicable in the tests
 - [ ] Real-world usage scenarios are represented in tests
-- [ ] Regression tests are added where relevant
-- [ ] Critical paths are explicitly tested, not only indirectly covered
 - [ ] Data flow through the implementation is tested end-to-end
     - [ ] Output of one component matches input expectations of the next
     - [ ] No implicit mismatches exist between stages (e.g. shape, schema, dtype, structure)
@@ -98,11 +96,11 @@ This checks whether the implementation is correctly manages data flow and avoids
 - [ ] Behaviour is stable across repeated executions
 
 ## 7. Scikit-learn estimator compliance (if applicable)
-This checks whether the implementation conforms to scikit-learn's API and behavioural contract, if applicable.
+This checks whether the implementation conforms to scikit-learn's API and behavioural contract, if applicable. See [scikit-learn's developer guides](https://scikit-learn.org/stable/developers/develop.html)
 - [ ] Estimator passes `check_estimator` or `parametrize_with_checks`
 - [ ] `fit`, `transform`, etc. behave correctly and consistenly
 - [ ] `get_params` and `set_params` work correctly
-- [ ] Estimator is stateless where required (e.g. `transform`)
+- [ ] Inference methods (e.g. `transform` and `predict`) are deterministic and do not alter estimator state
 - [ ] There are no mutable default arguments
 - [ ] Implementation follows scikit-learn developer guidelines
 
