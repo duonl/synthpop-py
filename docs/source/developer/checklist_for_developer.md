@@ -49,6 +49,10 @@ Use this checklist as a practical working guide during development. It is not me
 - [ ] The pull request merges into develop.
 - [ ] The pull request title is descriptive and includes relevant issue references
 - [ ] The pull request description clearly explains what changed, why it changed, the scope of the change and any known limitations or areas requiring attention
+- [ ] If no scope is specified, the reviewer assumes a full review is requested. If requesting a partial review, the scope is explicitly defined in the pull request description. It is clearly stated:
+  - [ ] which parts should be reviewed
+  - [ ] which parts are not ready for review
+  - [ ] what kind of feedback is expected (e.g. design, approach, adherence to conventions, usability)
 - [ ] Any merge conflicts have been resolved
 - [ ] All tests are re-run after resolving conflicts
 - [ ] Commit history is clean and ready for squash merge
@@ -57,7 +61,7 @@ Use this checklist as a practical working guide during development. It is not me
 - [ ] All review comments have been addressed or responded to
 - [ ] All "Before making a pull request" checks still pass after changes
 - [ ] Any merge conflicts have been resolved and tests re-run
-- [ ] No additional unrelated changes were introduces during fixes
+- [ ] No additional unrelated changes were introduced during fixes
 
 ## Done condition
 A feature is considered complete when:
@@ -67,7 +71,7 @@ A feature is considered complete when:
 - All checks pass
 
 The pull request must be merged using **squash and merge** to maintain a clean commit history. This can be done by clicking on *Squash and merge* on Github at the bottom of the pull request. Make sure to click on the dropdown menu if you only see a button with *Merge pull request*. To squash merge in the command line you first run:
-```{bash}
+```bash
 git checkout target_branch
 git merge --squash feature_branch
 git commit -m "Commit message"
