@@ -112,7 +112,7 @@ This checks whether the implementation is computationally efficient and suitable
 - [ ] Complexity is acceptable for intended use cases
 
 ## 9. Form and style
-This checks whether the code is readable, consistent and aligned with project-wide conventoins.
+This checks whether the code is readable, consistent and aligned with project-wide conventions.
 - [ ] Code follows PEP8 standards
 - [ ] British English is used
 - [ ] Type hints are used where appropriate
