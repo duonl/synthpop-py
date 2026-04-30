@@ -71,7 +71,7 @@ A feature is considered complete when:
 - All checks pass
 
 The pull request must be merged using **squash and merge** to maintain a clean commit history. This can be done by clicking on *Squash and merge* on Github at the bottom of the pull request. Make sure to click on the dropdown menu if you only see a button with *Merge pull request*. To squash merge in the command line you first run:
-```{bash}
+```bash
 git checkout target_branch
 git merge --squash feature_branch
 git commit -m "Commit message"
