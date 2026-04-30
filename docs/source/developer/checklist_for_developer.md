@@ -52,7 +52,7 @@ Use this checklist as a practical working guide during development. It is not me
 - [ ] If no scope is specified, the reviewer assumes a full review is requested. If requesting a partial review, the scope is explicitly defined in the pull request description. It is clearly stated:
   - [ ] which parts should be reviewed
   - [ ] which parts are not ready for review
-  - [ ] what kind of feedback is expected (e.g. design, approach, API)
+  - [ ] what kind of feedback is expected (e.g. design, approach, adherence to conventions, usability)
 - [ ] Any merge conflicts have been resolved
 - [ ] All tests are re-run after resolving conflicts
 - [ ] Commit history is clean and ready for squash merge
