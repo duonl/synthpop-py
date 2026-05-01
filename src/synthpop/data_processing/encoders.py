@@ -33,8 +33,14 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         return arr
 
     def validate_string_array(self,x):
-       arr = to_stringdtype_array(x)
-       return self.to_1D(arr)
+        
+        """
+        Transform all missing values in a string array to np.nan.
+        :param x: an array of strings
+        :return: the 1-dimensional array of strings with one value for missing
+        """
+        arr = to_stringdtype_array(x)
+        return self.to_1D(arr)
 
     def _check_unseen_values(self,X_val):
        X_missing = np.isnan(X_val)
