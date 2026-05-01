@@ -19,9 +19,14 @@ from synthpop.utils import str_dtype,to_stringdtype_array
 
 class _BaseEncoder(TransformerMixin, BaseEstimator):
     def to_1D(self,arr):
+        """
+        The expected input of the encoders is 2D.
+        Conceptually, the encoders work on a per-column basis.
+        That is why we need to convert to 1D arrays.
+        """
         if arr.ndim >1:
             if arr.shape[1] !=1:
-                raise ValueError("input should be 1D")
+                raise ValueError("input should be 1D or be 2D with one column")
             else:
                 return arr.reshape(-1)
             
@@ -89,18 +94,6 @@ class PCAEncoder(_BaseEncoder):
         [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
         [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
 
-        >>> from synthpop.data_processing.encoders import PCAEncoder
-        >>> import pandas as pd
-        >>> X = pd.Series(["a", "a","b","b","c"],name="input_feature")
-        >>> y = pd.Series(["x", "x","y","z","w"])
-        >>> encoder = PCAEncoder().set_output(transform="pandas")
-        >>> encoder.fit_transform(X=X,y=y)
-        input_feature_pca0  input_feature_pca1  input_feature_pca2
-        0           -1.118034       -1.500000e+00       -1.201987e-16
-        1           -1.118034       -1.500000e+00       -1.201987e-16
-        2            2.236068       -1.295326e-15       -1.201987e-16
-        3            2.236068       -1.295326e-15       -1.201987e-16
-        4           -1.118034        1.500000e+00       -1.201987e-16
     
         with a different number of principle components (only the first):
         
@@ -169,7 +162,8 @@ class PCAEncoder(_BaseEncoder):
 
         #The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val,pd.isna(y_val))
-        if not False in missing_contingency_table:
+
+        if not False in missing_contingency_table:# If there are only missing values for y:
             self.mapping_ = {k: [np.nan] for k in missing_contingency_table.index}
             self.n_features_out_ = 1
             return self  
@@ -200,7 +194,7 @@ class PCAEncoder(_BaseEncoder):
         if isinstance(pca_result,pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
-        self.n_features_out_ = pca_result.shape[1] #needed for get_feature_names_out
+        self.n_features_out_ = pca_result.shape[1] #needed for transform
     
         mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing
 
