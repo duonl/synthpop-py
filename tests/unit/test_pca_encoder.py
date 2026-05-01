@@ -205,14 +205,13 @@ def test_pca_fit_constant_feature():
 
 def test_pca_fit_empty_input():
     """
-    fitting on empty data should result in an empty mapping.
+    For now, we don't have a clear usage scenario in which it would make sense to define what happens when the input is an empty array.
+    Altough empty array => empty mapping_ would make sense, it is more likely to hide a serious bug than to help the user for now. 
     """
     encoder = PCAEncoder(pca_transform=None)
-
-    encoder.fit(X=np.array([]), y=np.array([]))
-
-    assert encoder.mapping_ == {}
-    validate_set_inout_count(encoder, expected_n_feat=0)
+    
+    with pytest.raises(ValueError):
+        encoder.fit(X=np.array([]), y=np.array([]))
 
 
 def test_pca_fit_exception_on_not_1d_datatype():
@@ -226,7 +225,6 @@ def test_pca_fit_exception_on_not_1d_datatype():
     with pytest.raises(ValueError):
         encoder.fit(np.array([["a", np.nan],["b","c"]],dtype=str_dtype),
                     np.array(["a", np.nan, "b", "b"]))
-        assert False,encoder.mapping_
         
     with pytest.raises(ValueError):
         encoder.fit(np.array([["a", None, "b", "b"]]),
@@ -290,18 +288,9 @@ def test_pca_transform_empty_input():
     result = encoder.transform(np.array([]))
 
     assert len(result) == 0
+    assert result.dtype == np.float32
+    assert result.ndim == 2
 
-
-def test_pca_transform_when_mapping_is_empty_transform_empty_to_empty():
-    """
-    transforming an empty X should always result in an empty array, even if the mapping is empty.
-    """
-    encoder = PCAEncoder(pca_transform=None)
-    encoder.mapping_ = {}
-    encoder.n_features_out_ = 0
-
-    result = encoder.transform(X=np.array([]))
-    assert len(result) == 0
 
 @pytest.mark.parametrize("missing", [np.nan])
 def test_pca_transform_when_mapping_is_empty_transform_missing_to_nan(missing):

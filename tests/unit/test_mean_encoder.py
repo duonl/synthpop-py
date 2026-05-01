@@ -76,6 +76,10 @@ def test_fit_multiple_times():
     assert enc.mapping_["b"] == [20], "Refitting does not work properly"
 
 def test_fit_with_empty_arrays():
+    """
+    For now, we don't have a clear usage scenario in which it would make sense to define what happens when the input is an empty array.
+    Altough empty array => empty mapping_ would make sense, it is more likely to hide a serious bug than to help the user for now. 
+    """
     enc = MeanEncoder()
     with pytest.raises(ValueError):
         enc.fit(np.array([],dtype = str_dtype), np.array([]))
@@ -131,6 +135,17 @@ def test_transform_wrong_shape():
     with pytest.raises(ValueError):
         enc.transform(np.array([["a","c"], ["b","d"]]))  # 2 columns instead of one.
 
+def test_transform_empty_input():
+    encoder = MeanEncoder()
+    encoder.mapping_ = {"a":[1.2]}
+    encoder.n_features_out_ = 1
+
+    result = encoder.transform(np.array([]))
+
+    assert len(result) == 0
+    assert result.dtype == np.float32
+    assert result.ndim == 2
+    
 def test_transform_raises_not_fitted():
     enc = MeanEncoder()
     with pytest.raises(NotFittedError):

@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 import numpy.typing as npt
 
-from synthpop.utils import str_dtype, to_missing_str_array
+from synthpop.utils import str_dtype,to_stringdtype_array
 
 
 
@@ -28,40 +28,41 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         return arr
 
     def validate_string_array(self,x):
-       arr = to_missing_str_array(x)
+       arr = to_stringdtype_array(x)
        return self.to_1D(arr)
 
     def _check_unseen_values(self,X_val):
        X_missing = np.isnan(X_val)
         
        # Detect unseen categories
-       unseen_categories = set(X_val[~X_missing]) - set(self.mapping_.keys())
-       if unseen_categories:
+       unseen_categories = np.setdiff1d(X_val[~X_missing], list(self.mapping_.keys()))
+       if unseen_categories.size >0:
            raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
 
     def _apply_mapping(self,X_val):
-
         
-        result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32)
-
-        if not hasattr(self,"mapping_"):
-            return np.full((len(X_val),1), np.nan, dtype=np.float32)
-
-
-        if len(self.mapping_) == 0:
-            return result #2D output with only nans
-        
+        result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32)#preallocation
 
         X_missing = np.isnan(X_val)
+
+        unique_vals = np.unique(X_val,return_inverse=False)#The reverse_index does not work well with nan. 
+        rev_index = np.searchsorted(unique_vals, X_val)
+
         
-        # Apply mapping
-        for i, val in enumerate(X_val):
-            if not X_missing[i]:
-                result[i] = self.mapping_[val]
+        #checking for np.nan in a list comprehension is complicated
+        # np.isnan does not work well for stringDType.
+        # v==np.nan will always be false, even if v is np.nan.
+        # Since v==v is only false if v = nan, this seems like the simplest and most reliable way to solve this.
+        # using nan as a key in the dictionary does not work either, probably for the same reasons.
+        mapped_vals = np.array([self.mapping_[v] if v==v else [np.nan]*self.n_features_out_ for v in unique_vals],dtype=np.float32)
+
+        result = mapped_vals[rev_index]
+
+        if result.ndim == 1:
+            return result.reshape((-1,1))
 
         return result
         
-
 
 class PCAEncoder(_BaseEncoder):
     """
@@ -160,11 +161,8 @@ class PCAEncoder(_BaseEncoder):
         y_val = self.validate_string_array(y)
 
         
-        if X_val.shape[0] == 0 and y_val.shape[0]==0:
-            self.mapping_ = {}
-            self.n_features_out_ = 0
-
-            return self
+        if X_val.shape[0] == 0 or y_val.shape[0]==0:
+            raise ValueError("pca encoding not possible for empty arrays")
 
         # the core of this implementation
 
