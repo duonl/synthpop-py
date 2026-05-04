@@ -26,6 +26,9 @@ def make_fitted_model(values: list, counts: list, target_name="target", n_sample
         pd.Series(["a", "b", "c"], name="my_target", dtype="category"),
         pd.Series([None, False, True], name="my_target"),
         pd.Series([0], name="my_target"),
+        pd.Series([1, 1, 1, -2, 3], name="my_target"),
+        pd.Series(["a", "a", "a", "a", "a", "a", "b"], name="my_target"),
+        pd.Series([np.nan, np.nan, np.nan, np.nan, 0], name="my_target"),
     ],
 )
 def test_fit_stores_distribution_and_metadata(y):
@@ -129,11 +132,18 @@ def test_transform_different_seeds_produce_different_results():
     assert not result1.equals(result2)
 
 
-def test_transform_approximate_distribution():
-    values = [1, 2, 3]
-    counts = [5, 3, 2]
-
-    model = make_fitted_model(values, counts, n_samples=10)
+@pytest.mark.parametrize(
+    "values, counts",
+    [
+        ([1, 2, 3], [1, 1, 1]),     # Uniform distribution
+        ([1, 2, 3], [5, 3, 2]),     # Moderate skew
+        ([1, 2, 3], [98, 1, 1]),    # Extreme skew
+        ([1], [10]),                # Degenerate (single outcome)
+        (["a", "b"], [999, 1]),     # Binary extreme
+    ],
+)
+def test_transform_approximate_distribution(values, counts):
+    model = make_fitted_model(values, counts, n_samples=sum(counts))
     X = pd.DataFrame(index=range(10000))
 
     result = model.transform(X)["target"].value_counts(normalize=True)
@@ -142,7 +152,11 @@ def test_transform_approximate_distribution():
     expected = {v: c / total for v, c in zip(values, counts)}
 
     for v in values:
-        assert np.isclose(result[v], expected[v], atol=0.02)
+        # Degenerate case: expect near-perfect match
+        if len(values) == 1:
+            assert np.isclose(result[v], 1.0)
+        else:
+            assert np.isclose(result[v], expected[v], atol=0.02)
 
 
 def test_transform_raises_unfitted():
