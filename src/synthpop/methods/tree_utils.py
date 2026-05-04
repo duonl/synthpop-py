@@ -5,7 +5,7 @@ import numpy.typing as npt
 import warnings
 from sklearn.exceptions import NotFittedError
 
-def sample_array(rng: np.random.default_rng, counts: np.ndarray, values: np.ndarray, n_samples: int):
+def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarray, n_samples: int):
     """
     Helper function that draws samples with replacement from the empirical distribution of an array.
 
