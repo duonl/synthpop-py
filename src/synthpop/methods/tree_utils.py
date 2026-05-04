@@ -9,7 +9,7 @@ def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarra
     """
     Helper function that draws samples with replacement from the empirical distribution of an array.
 
-    :param rng: a random number generator. Often `np.random.default_rng`.
+    :param rng: a random number generator. Often `np.random.Generator`.
     :param counts: array of the counts of values.
     :param values: array of the distinct values.
     :n_samples: number of samples to be drawn.
