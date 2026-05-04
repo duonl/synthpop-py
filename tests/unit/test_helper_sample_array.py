@@ -6,21 +6,19 @@ from synthpop.methods.tree_utils import sample_array
 
 # ----- stubs -----
 class StubRNG:
-    def __init__(self, values):
-        self.values = iter(values)
+    def __init__(self, output_array):
+        self.output_array = np.array(output_array)
+        self.called_with = []
 
     def integers(self, low, high, size=None):
+        self.called_with.append((low, high, size))
+
         if size is None:
-            v = next(self.values)
-            return low + (v % (high - low))
+            return self.output_array[0]
+        
+        return self.output_array[:size]
 
-        out = []
-        for _ in range(size):
-            v = next(self.values)
-            out.append(low + (v % (high - low)))
-        return np.array(out)
-
-def test_sample_array_deterministic_with_stub_rng():
+def test_sample_array_maps_rng_output_to_sampled_values():
     rng = StubRNG([0, 3, 1, 2])
 
     counts = np.array([3, 1])   # total = 4
@@ -36,6 +34,8 @@ def test_sample_array_deterministic_with_stub_rng():
     expected = np.array([0, 1, 0, 0])
 
     assert np.array_equal(out, expected)
+
+    assert rng.called_with == [(0, 4, 4)] #low is 0, high is 4, n_samples is 4
 
 @pytest.mark.parametrize(
     "counts, values",
