@@ -14,7 +14,7 @@ More features does not always make for a better package. Adding a new feature ha
 
 ## Step 1: a feature request
 The first step is to let us know that you have an idea for an improvement.This can be done by submitting a feature request via GitHub. You don't need to provide code or a detailed plan yet.
-The purpose of this is to establish if (and when) we want this functionality in this package. 
+The purpose of this is to establish if (and roughly when) we want this functionality in this package. 
 Some important things to mention in the initial feature request are:
 - What problem does this solve?
 - Who is going to use this?
@@ -32,9 +32,23 @@ The aim of this step is to reach consensus on how the feature should be implemen
 While it might be tempting to skip this step and immediatly develop it, there is a risk that it needs to be completely rewritten to fit in with this package.
 Some things to establish in this step are:
 - expected usage (example code of how to use this feature)
-- suggested code layout/ mockup of the code (empty classes, empty methods and functions), function signatures. Adding documentation to the mockup can help a lot to undstand the plan.
+- suggested code layout/ mockup of the code (empty classes, empty methods and functions), function signatures. Adding documentation to the mockup can help a lot to understand the plan.
 - extra dependencies
 - accepted user inputs
-- (if applicable) notable edge cases.
+- (if applicable) notable edge cases
+- which parts of the codebase need to change
+- related development
 There are multiple effective ways to comunicate this. Describing it in natural language in the feature request might be a good point to start.
-As the plans become less abstract, it might help to write the mockup code in a branch. This might give development a head start.
+As the plans become less abstract, it might help to write the mockup code in a branch. This could give development a head start.
+At the end of this stage, a developer would have all the information they need to develop this feature.
+
+## Step 3: planning
+The next step is to decide when to develop this feature. The product owner is responsible for this planning.
+The following points are taken into account when planning the development of a new feature:
+- A release that has breaking changes (changes that force users to alter their code) places a burden on users. It might be best to bundle breaking changes into one major version release.
+- A feature might have synergy with other features.
+- capacity of developers
+- urgency of the feature
+- priorities
+
+
