@@ -18,15 +18,17 @@ The purpose of this is to establish if (and roughly when) we want this functiona
 Some important things to mention in the initial feature request are:
 - What problem does this solve?
 - Who is going to use this?
+- To what extend is this a proven concept? This is the point where a proof of concept might help. Is there other info
+
+In the discussion that follow, there can be discussion about:
 - How many people are going to use this? Does this generalize to other groups of users?
 - What is the impact on users that profit from this feature?
 - What is the impact on the other users?
-- To what extend is this a proven concept? This is the point where a proof of concept might help.
 - Who do you hope/expect will develop this?
 Based on this and the follow-up discussion, the product owner decides if this is a feature that will be adopted in this package.
 If the feature gets accepted, it moves on to the next step
 
-## Step 2: From concept to solution
+## Step 2: Design consensus
 What exactly happens in this step depends mostly on the feature. 
 The aim of this step is to reach consensus on how the feature should be implemented. 
 While it might be tempting to skip this step and immediatly develop it, there is a risk that it needs to be completely rewritten to fit in with this package.
