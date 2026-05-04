@@ -19,51 +19,29 @@ def make_fitted_model(values: list, counts: list, target_name="target", n_sample
 
 # ----- fit tests -----
 @pytest.mark.parametrize(
-    "y",
+    "y, expected_values, expected_counts",
     [
-        pd.Series([1, pd.NA, 3], name="my_target"),
-        pd.Series([1.1, 2.2, np.nan], name="my_target"),
-        pd.Series(["a", "b", "c"], name="my_target", dtype="category"),
-        pd.Series([None, False, True], name="my_target"),
-        pd.Series([0], name="my_target"),
-        pd.Series([1, 1, 1, -2, 3], name="my_target"),
-        pd.Series(["a", "a", "a", "a", "a", "a", "b"], name="my_target"),
-        pd.Series([np.nan, np.nan, np.nan, np.nan, 0], name="my_target"),
+        (pd.Series([1, pd.NA, 3], name="my_target"), [1, pd.NA, 3], [1, 1, 1],),
+        (pd.Series([1.1, 2.2, np.nan], name="my_target"), [1.1, 2.2, np.nan], [1, 1, 1],),
+        (pd.Series(["a", "b", "c"], name="my_target", dtype="category"), ["a", "b", "c"], [1, 1, 1],),
+        (pd.Series([None, False, True], name="my_target"), [None, False, True], [1, 1, 1],),
+        (pd.Series([0], name="my_target"), [0], [1],),
+        (pd.Series([1, 1, 1, -2, 3], name="my_target"), [1, -2, 3], [3, 1, 1],),
+        (pd.Series(["a", "a", "a", "a", "a", "a", "b"], name="my_target"), ["a", "b"], [6, 1],),
+        (pd.Series([np.nan, np.nan, np.nan, np.nan, 0], name="my_target"), [np.nan, 0], [4, 1],),
     ],
 )
-def test_fit_stores_distribution_and_metadata(y):
+def test_fit_stores_distribution_and_metadata(y, expected_values, expected_counts):
     model = SampleMethod().fit(None, y)
 
     assert model.target_name_ == "my_target"
     assert model.n_samples_ == len(y)
-
     assert model.counts_.sum() == len(y), "Counts must sum to total number of samples"
 
-    unique_vals = []
-    counts = []
+    assert list(model.counts_) == expected_counts
 
-    #not using value_counts to not follow the same implementation
-    for v in y:
-        matched = False
-        for i, uv in enumerate(unique_vals):
-            if (pd.isna(v) and pd.isna(uv)) or (not pd.isna(v) and not pd.isna(uv) and v == uv):
-                counts[i] += 1
-                matched = True
-                break
-
-        if not matched:
-            unique_vals.append(v)
-            counts.append(1)
-
-    assert len(model.values_) == len(unique_vals), "Mismatch in number of distinct values"
-
-    for model_value, expected_value in zip(model.values_, unique_vals):
-        if pd.isna(expected_value):
-            assert pd.isna(model_value), "Expected NA in values_ but missing"
-        else:
-            assert model_value == expected_value, f"Value mismatch: {model_value} != {expected_value}"
-    
-    assert np.array_equal(model.counts_, np.array(counts)), "Frequency counts mismatch"
+    for model_value, expected_value in zip(model.values_, expected_values):
+        assert (pd.isna(model_value) and pd.isna(expected_value)) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
 
 
 def test_fit_sets_default_name_when_none():
