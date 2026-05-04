@@ -47,7 +47,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         pass
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame| None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
         """
         The `transform` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
 

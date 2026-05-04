@@ -22,6 +22,15 @@ CART synth module
    :inherited-members: BaseEstimator,_MetadataRequester,_SetOutputMixin
 
 
+Copy synth module
+---------------------------------------
+
+.. automodule:: synthpop.methods.copy_synth
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   
+
 XGBoost synth module
 ------------------------------------------
 
