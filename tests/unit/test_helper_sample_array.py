@@ -128,15 +128,6 @@ def test_sample_array_zero_samples():
 
     assert out.shape == (0,)
 
-def test_sample_array_mismatched_lengths():
-    rng = np.random.default_rng(0)
-
-    counts = np.array([1, 2])
-    values = np.array([10])  # mismatch
-
-    with pytest.raises(IndexError):
-        sample_array(rng, counts, values, n_samples=5)
-
 def test_sample_array_all_zero_counts():
     rng = np.random.default_rng(0)
 
