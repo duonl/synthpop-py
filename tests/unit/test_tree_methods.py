@@ -12,8 +12,6 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 
 import copy
 
-
-
 # stubs ---------------------------
 class TransformStub(TransformerMixin, BaseEstimator):
 
@@ -37,6 +35,13 @@ class TransformStub(TransformerMixin, BaseEstimator):
 
         return self.transform_return_value
     
+
+@pytest.fixture
+def encoder():
+    #The result of the transform of encoding is always a 2D np.array of float32, with one or more columns
+    return TransformStub(transform_return_value=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
+
+
 class StubMissingHandler(BaseMissingValueHandler):
     
     def __init__(self, prepared_for_fit_result,post_synth_transform_result):
@@ -58,7 +63,19 @@ class StubMissingHandler(BaseMissingValueHandler):
     
     def __sklearn_clone__(self):
         return copy.copy(self)
-    
+
+@pytest.fixture
+def missing_handling(request):
+
+    # The result X of prepare_data_for_fit must contain the same columns as X
+    X = request.node.callspec.params["X"]
+    X_prepare_res = {k:np.array([k]*3) for k in X.keys()}
+    y_prepare_res = np.arange(0,3)
+
+    y_post_synthesis_result = np.arange(3,6)
+    return StubMissingHandler(prepared_for_fit_result=(X_prepare_res,y_prepare_res),post_synth_transform_result=y_post_synthesis_result)
+
+
 class StubLeafNodeSampler():
     def __init__(self,sample_from_leaves_return_value):
         self.sample_from_leaves_return_value = sample_from_leaves_return_value
@@ -75,6 +92,10 @@ class StubLeafNodeSampler():
     def __sklearn_clone__(self):
         return copy.copy(self)
 
+@pytest.fixture
+def leafnode_sampler():
+    return StubLeafNodeSampler(sample_from_leaves_return_value=np.array([1,2,3,4]))
+
 class StubTree():
     def __init__(self,apply_result=None):
         self.apply_result=apply_result
@@ -90,6 +111,10 @@ class StubTree():
         return self.apply_result
     def __sklearn_clone__(self):
         return copy.copy(self)
+
+@pytest.fixture
+def tree(apply_result):
+    return StubTree(apply_result=apply_result)
 
 class TestTreeMethod(_AbstractTreeMethod):
     def __init__(self, *,
@@ -109,6 +134,26 @@ class TestTreeMethod(_AbstractTreeMethod):
     def _get_missing_handling(self):
         return super()._get_missing_handling()
     
+@pytest.fixture
+def tree_method(encoder,missing_handling,leafnode_sampler,tree):
+    return TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=tree)
+
+@pytest.fixture()
+def fitted_tree(tree_method,request):
+
+    X = request.node.callspec.params["X"]
+    cat_index = request.node.callspec.params["index_cat"]
+    tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
+    tree_method.missing_handler_ = clone(tree_method.missing_handler)
+    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
+    tree_method.tree_ = clone(tree_method.tree)
+    tree_method.n_features_in_ = len(X.keys())
+
+    tree_method.feature_order_ = list(X.keys())
+
+    return tree_method
+
+
 #---------------------------------------------------
 
 def assert_dict_array_equal(expected,actual):
@@ -157,41 +202,12 @@ def get_exp_feature_matrix():
     return np.array([[1,2],[3,4]])
 # Fixtures ----------------------------------------------------------------------------------------
 
-@pytest.fixture
-def encoder():
-    #The result of the transform of encoding is always a 2D np.array of float32, with one or more columns
-    return TransformStub(transform_return_value=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
-
-
-@pytest.fixture
-def missing_handling(request):
-
-    # The result X of prepare_data_for_fit must contain the same columns as X
-    X = request.node.callspec.params["X"]
-    X_prepare_res = {k:np.array([k]*3) for k in X.keys()}
-    y_prepare_res = np.arange(0,3)
-
-    y_post_synthesis_result = np.arange(3,6)
-    return StubMissingHandler(prepared_for_fit_result=(X_prepare_res,y_prepare_res),post_synth_transform_result=y_post_synthesis_result)
-
-
-@pytest.fixture
-def leafnode_sampler():
-    return StubLeafNodeSampler(sample_from_leaves_return_value=np.array([1,2,3,4]))
 
 @pytest.fixture
 def apply_result(missing_handling):
     n = len(missing_handling.prepared_for_fit_result[0])
     apply_result = np.array([i%3 for i in range(n)])
     return apply_result
-
-@pytest.fixture
-def tree(apply_result):
-    return StubTree(apply_result=apply_result)
-    
-@pytest.fixture
-def tree_method(encoder,missing_handling,leafnode_sampler,tree):
-    return TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=tree)
 
 
 @pytest.fixture(autouse=True)
@@ -215,20 +231,6 @@ def stub_build_feature_matrix(request,monkeypatch):
     # and use monkey patching to replace the method with the stub.
     monkeypatch.setattr(tree_utils,"build_feature_matrix",stub_build_feature_matrix)
 
-@pytest.fixture()
-def fitted_tree(tree_method,request):
-
-    X = request.node.callspec.params["X"]
-    cat_index = request.node.callspec.params["index_cat"]
-    tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
-    tree_method.missing_handler_ = clone(tree_method.missing_handler)
-    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
-    tree_method.tree_ = clone(tree_method.tree)
-    tree_method.n_features_in_ = len(X.keys())
-
-    tree_method.feature_order_ = list(X.keys())
-
-    return tree_method
 
 # test fit ----------------------------------------------------------------------------------------
 @pytest.mark.parametrize(
@@ -273,6 +275,17 @@ def test_fit_trains_encoder(X,y,index_cat,tree_method):
             assert (not ( tree_method.encoders_[i] is tree_method.encoders_[i2])) or i2==i
 
 @pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
+def test_fit_transforms_with_encoder(X,y,index_cat,tree_method):
+
+
+    tree_method.fit(X,y)
+
+    for i in index_cat:
+        assert np.array_equal(tree_method.encoders_[i].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][i])
+
+
+
+@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
 def test_fit_prepare_data_for_fit_is_called(X,y,index_cat,tree_method):
 
     tree_method.fit(X,y)
@@ -300,15 +313,6 @@ def test_fit_build_feature_matrix(X,y,index_cat,tree_method,mocker):
     spy.assert_called_once_with(X_exp,list(X.keys()))
     
 
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_data_is_encoded(X,y,index_cat,tree_method):
-
-
-    tree_method.fit(X,y)
-
-    for i in index_cat:
-        assert np.array_equal(tree_method.encoders_[i].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][i])
 
 
 
