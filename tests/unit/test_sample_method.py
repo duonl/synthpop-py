@@ -37,19 +37,33 @@ def test_fit_stores_distribution_and_metadata(y):
     assert model.target_name_ == "my_target"
     assert model.n_samples_ == len(y)
 
-    assert model.counts_.sum() == model.n_samples_
+    assert model.counts_.sum() == len(y), "Counts must sum to total number of samples"
 
-    expected = pd.value_counts(y, dropna=False)
+    unique_vals = []
+    counts = []
 
-    expected_index = expected.index
-    model_index = pd.Index(model.values_)
+    #not using value_counts to not follow the same implementation
+    for v in y:
+        matched = False
+        for i, uv in enumerate(unique_vals):
+            if (pd.isna(v) and pd.isna(uv)) or (not pd.isna(v) and not pd.isna(uv) and v == uv):
+                counts[i] += 1
+                matched = True
+                break
 
-    expected_non_nan = set(v for v in expected_index if not pd.isna(v))
-    model_non_nan = set(v for v in model_index if not pd.isna(v))
+        if not matched:
+            unique_vals.append(v)
+            counts.append(1)
 
-    assert model_non_nan == expected_non_nan
+    assert len(model.values_) == len(unique_vals), "Mismatch in number of distinct values"
 
-    assert any(pd.isna(v) for v in model.values_) == any(pd.isna(v) for v in expected_index)
+    for model_value, expected_value in zip(model.values_, unique_vals):
+        if pd.isna(expected_value):
+            assert pd.isna(model_value), "Expected NA in values_ but missing"
+        else:
+            assert model_value == expected_value, f"Value mismatch: {model_value} != {expected_value}"
+    
+    assert np.array_equal(model.counts_, np.array(counts)), "Frequency counts mismatch"
 
 
 def test_fit_sets_default_name_when_none():
