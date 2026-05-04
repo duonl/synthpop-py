@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from sklearn.exceptions import NotFittedError
 from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.methods.tree_utils import sample_array
 
 class SampleMethod(BaseSynthMethod):
     """
@@ -85,10 +86,7 @@ class SampleMethod(BaseSynthMethod):
         
         n = len(X) if X is not None else self.n_samples_
         
-        cum_counts = np.cumsum(self.counts_)
-        r = self.random_state_.integers(0, self.counts_.sum(), size=n)
-        idx = np.searchsorted(cum_counts, r, side="right")
-        sampled = self.values_[idx]
+        sampled = sample_array(self.random_state_, self.counts_, self.values_, n) 
 
         return pd.DataFrame({self.target_name_: sampled})
     
