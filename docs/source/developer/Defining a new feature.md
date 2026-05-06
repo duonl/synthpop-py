@@ -3,8 +3,8 @@
 This guide describes the process of defining a feature: from initial idea to the start of development.
 
 ## What kind of new features are we looking for
-The aim of this package is to facilitate the creation of synthetic data. The first intended audience are goverment institutions.
-Being reliable and trusthworthiness are more important than preformance. See also CONTRIBUTING.md. We cannot accept untested and/or unproven technology. 
+The aim of this package is to facilitate the creation of synthetic data. The first intended audience are government institutions.
+Being reliable and trustworthiness are more important than performance. See also CONTRIBUTING.md. We cannot accept untested and/or unproven technology. 
 On the other hand, new features that improve user friendliness are very welcome. 
 
 More features does not always make for a better package. Adding a new feature has as a consequence that:
@@ -34,14 +34,14 @@ The aim of this step is to reach consensus on how the feature should be implemen
 While it might be tempting to skip this step and immediatly develop it, there is a risk that it needs to be completely rewritten to fit in with this package.
 Some things to establish in this step are:
 - expected usage (example code of how to use this feature)
-- suggested code layout/ mockup of the code (empty classes, empty methods and functions), function signatures. Adding documentation to the mockup can help a lot to understand the plan.
+- suggested code layout/ mock-up of the code (empty classes, empty methods and functions), function signatures. Adding documentation to the mock-up can help a lot to understand the plan.
 - extra dependencies
 - accepted user inputs
 - (if applicable) notable edge cases
 - which parts of the codebase need to change
 - related development
-There are multiple effective ways to comunicate this. Describing it in natural language in the feature request might be a good point to start.
-As the plans become less abstract, it might help to write the mockup code in a branch. This could give development a head start.
+There are multiple effective ways to communicate this. Describing it in natural language in the feature request might be a good point to start.
+As the plans become less abstract, it might help to write the mock-up code in a branch. This could give development a head start.
 At the end of this stage, a developer would have all the information they need to develop this feature.
 
 ## Step 3: planning
