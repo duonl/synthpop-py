@@ -315,7 +315,7 @@ def test_pca_transform_exception_on_new_value():
     encoder.mapping_ = {"a": [1.1, 2.2], "c":[3.3,4.4]}
     encoder.n_features_out_ = 2
 
-    with pytest.raises(ValueError, match="Column to be encoded X has unseen categories"):
+    with pytest.raises(ValueError, match="transform received unseen categories. Unseen values:"):
         result = encoder.transform(np.array(["b","c"]))
 
 

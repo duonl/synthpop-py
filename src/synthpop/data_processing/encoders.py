@@ -48,7 +48,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
        # Detect unseen categories
        unseen_categories = np.setdiff1d(X_val[~X_missing], list(self.mapping_.keys()))
        if unseen_categories.size >0:
-           raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
+           raise ValueError(f"transform received unseen categories. Unseen values: {unseen_categories}. Ensure input was fitted")
 
     def _apply_mapping(self,X_val):
 
@@ -63,15 +63,13 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         if X_missing.all():
             return result
 
-        unique_vals,rev_index = np.unique(X_val,return_inverse=True)#The reverse_index does not work well with nan. 
+        unique_vals,rev_index = np.unique(X_val,return_inverse=True)#The reverse_index does not work well with nan.
+        #Note that rev_index does not reconstruct X_val when X_val is a stringDType array with np.nan:
+        # x_val = np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype)
+        # unique_vals,rev_index = np.unique(x_val,return_inverse=True)
+        # unique_vals[rev_index]
+        # array(['a', 'a', 'b', 'b', 'c', 'c', 'c'],dtype=StringDType(na_object=nan))
         
-
-        
-        #checking for np.nan in a list comprehension is complicated
-        # np.isnan does not work well for stringDType.
-        # v==np.nan will always be false, even if v is np.nan.
-        # Since v==v is only false if v = nan, this seems like the simplest and most reliable way to solve this.
-        # using nan as a key in the dictionary does not work either, probably for the same reasons.
         mapped_vals = np.array([self.mapping_[v] for v in unique_vals],dtype=np.float32)
 
         result = mapped_vals[rev_index]
@@ -170,7 +168,7 @@ class PCAEncoder(_BaseEncoder):
 
         
         if X_val.shape[0] == 0 or y_val.shape[0]==0:
-            raise ValueError("pca encoding not possible for empty arrays")
+            raise ValueError("Cannot fit encoder: X and y must be non-empty.")
 
         # the core of this implementation
 
@@ -178,7 +176,7 @@ class PCAEncoder(_BaseEncoder):
         #The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val,pd.isna(y_val))
 
-        if not False in missing_contingency_table:# If there are only missing values for y:
+        if (missing_contingency_table.columns).all():# If there are only missing values for y:
             self.mapping_ = {k: [np.nan] for k in missing_contingency_table.index}
             self.n_features_out_ = 1
             return self  
@@ -281,11 +279,11 @@ class MeanEncoder(_BaseEncoder):
         """
 
         if not np.issubdtype(y.dtype,np.number):
-            raise ValueError("target must be numeric dtype for mean encoding")
+            raise ValueError(f"MeanEncoder requires numeric target array y. Received dtype={y.dtype}")
 
         if X.shape[0] == 0 or y.shape[0] == 0:
-            raise ValueError("mean encoding not possible for empty arrays")
-        X_val =  self.validate_string_array(X)
+            raise ValueError("Cannot fit encoder: X and y must be non-empty.")
+        X_val = self.validate_string_array(X)
         y_val = self.to_1D(y)
 
         self.n_features_in_ = 1
@@ -302,12 +300,8 @@ class MeanEncoder(_BaseEncoder):
         for cat in unique_categories:
             mask = (~X_missing) & (X_val == cat)
             valid_targets = y_val[mask & ~y_missing]
-            if valid_targets.size == 0:
-                mean_val = np.nan
-            else:
-                mean_val = valid_targets.mean()
             
-            self.mapping_[cat] = [np.float32(mean_val)]
+            self.mapping_[cat] = np.mean(valid_targets, dtype=np.float32)#[np.float32(mean_val)]
 
         return self
 
