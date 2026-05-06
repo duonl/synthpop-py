@@ -5,6 +5,21 @@ import numpy.typing as npt
 import warnings
 from sklearn.exceptions import NotFittedError
 
+def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarray, n_samples: int):
+    """
+    Helper function that draws samples with replacement from the empirical distribution of an array.
+
+    :param rng: a random number generator. Often `np.random.Generator`.
+    :param counts: array of the counts of values.
+    :param values: array of the distinct values.
+    :n_samples: number of samples to be drawn.
+    """
+    cum_counts = np.cumsum(counts)
+    r = rng.integers(0, counts.sum(), size=n_samples)
+    idx = np.searchsorted(cum_counts, r, side="right")
+    sampled = values[idx]
+    return sampled
+
 class LeafNodeSampler():
     """
     Leaf-based synthetic target sampler driven by explicit leaf IDs.
