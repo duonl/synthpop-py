@@ -51,13 +51,20 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
            raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
 
     def _apply_mapping(self,X_val):
+
+        if X_val.shape[0] == 0:
+            return np.empty(shape= (0,self.n_features_out_),dtype=np.float32)
+
         
         result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32)#preallocation
 
         X_missing = np.isnan(X_val)
 
-        unique_vals = np.unique(X_val,return_inverse=False)#The reverse_index does not work well with nan. 
-        rev_index = np.searchsorted(unique_vals, X_val)
+        if X_missing.all():
+            return result
+
+        unique_vals,rev_index = np.unique(X_val,return_inverse=True)#The reverse_index does not work well with nan. 
+        
 
         
         #checking for np.nan in a list comprehension is complicated
@@ -65,9 +72,11 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         # v==np.nan will always be false, even if v is np.nan.
         # Since v==v is only false if v = nan, this seems like the simplest and most reliable way to solve this.
         # using nan as a key in the dictionary does not work either, probably for the same reasons.
-        mapped_vals = np.array([self.mapping_[v] if v==v else [np.nan]*self.n_features_out_ for v in unique_vals],dtype=np.float32)
+        mapped_vals = np.array([self.mapping_[v] for v in unique_vals],dtype=np.float32)
 
         result = mapped_vals[rev_index]
+
+        result[X_missing] = [np.nan]*self.n_features_out_
 
         if result.ndim == 1:
             return result.reshape((-1,1))
