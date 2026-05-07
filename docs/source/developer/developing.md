@@ -84,7 +84,7 @@ In the event of a critical issue in the main branch, a **hotfix branch** is crea
 This section describes several common scenarios for tasks that a developer may need to perform
 
 ### Developing a feature
-Before a feature can be developed, the process described in [Defining a new feature.md](./Defining a new feature.md) needs to be completed.
+Before a feature can be developed, the process described in (Defining a new feature)[./Defining a new feature.md] needs to be completed.
 The first step is to read the functional documentation. Is it clear what needs to be built? Can you locate the feature request ticket(s)? Do you know which users will use this feature? Can you identify any edge cases or exceptions?
 
 1. Sync your fork with the upstream **develop** branch.
