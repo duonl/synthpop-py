@@ -18,13 +18,19 @@ The purpose of this step is to establish whether (and roughly when) we want this
 Some important things to mention in the initial feature request are:
 - What problem does this solve?
 - Who will use it?
-- To what extent is this a proven concept? A proof of concept may be helpful at this stage.
+- To what extent is this a proven concept? A proof of concept or additional information may be helpful at this stage.
 
 In the discussion that follows, the following points may be addressed:
 - How many people will use this feature? Does it generalise to other user groups?
 - What is the impact on users who benefit from this feature?
 - What is the impact on other users?
 - Who do you expect will develop this feature?
+
+During this discussion, choices will be made regarding the required functionality.
+These choices are consolidated in a document called the functional description.
+This document describes the functional requirements for this feature. It should be independent of programming language.
+This document sets the goal for the next phase.
+
 Based on this and the follow-up discussion, the product owner decides whether the feature will be adopted into the package.
 If the feature is accepted, it moves on to the next step.
 
@@ -35,11 +41,11 @@ While it may be tempting to skip this step and immediately begin development, th
 Some things to establish in this step are:
 - expected usage (for example, sample coding showing how to use the feature)
 - suggested code structure or mock-up (empty classes, methods and functions), including function signatures. Adding documentation to the mock-up can be very helpful in clarifying the plan
-- additional dependencies
+- additional dependencies. We need to be carefull with external packages, since it may cause compatibility or versioning conflicts.
 - accepted user inputs
 - (if applicable) notable edge cases
 - which parts of the codebase need to change
-- related development work
+- related development work. There might be other features being developed that needs to work together with the feature of might have some overlap.
 There are multiple effective ways to communicate this. Describing it in natural language in the feature request may be a good starting point.
 As the plan becomes more concrete, it may be helpful to implement a code mock-up in a branch. This can provide a head start for development.
 By the end of this stage, a developer should have all the information needed to implement the feature.
