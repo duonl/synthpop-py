@@ -310,7 +310,9 @@ def test_fit_build_feature_matrix(X,y,index_cat,tree_method,mocker):
 
     tree_method.fit(X,y)
     X_exp = {k: tree_method.encoders_[k].transform_return_value if k in index_cat else v for (k,v) in tree_method.missing_handler_.prepared_for_fit_result[0].items()}
-    spy.assert_called_once_with(X_exp,list(X.keys()))
+
+    expected_order = tree_method.feature_order_
+    spy.assert_called_once_with(X_exp,expected_order)
     
 
 
@@ -463,6 +465,7 @@ def test_TreeMethod_is_sklearn_compatible(estimator, check):
             return super().transform(ndarray_to_dict(X))
         
     #This is needed to change the datatype of the estimator to the child class.
-    estimator.__class__ = EstimatorWrap
+    #estimator.__class__ = EstimatorWrap
+    wrapped = EstimatorWrap(**estimator.get_params())
 
-    check(estimator)
+    check(wrapped)
