@@ -7,9 +7,8 @@ import pandas as pd
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
-import numpy as np
 import numpy.typing as npt
-
+import numpy as np
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
     MissingValuePredictor, ReplaceNoneWithValue
@@ -62,6 +61,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         if hasattr(y, "name"):
             self.target_name_ = y.name
+        else:
+            self.target_name_ = None
         X_val, n_samples = validate_dict_x(X)
         y = validate_y(y, n_samples)
 
@@ -85,7 +86,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         return self
 
-    def transform(self, X: dict[str, npt.ArrayLike]) -> npt.ArrayLike:
+    def transform(self, X: dict[str, npt.ArrayLike]) -> np.ndarray:
         """
         Synthesise new column
 
@@ -105,7 +106,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
                 f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
         
-        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in X.items()}
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in X_val.items()}
 
         all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
         leaf_ids = self.tree_.apply(all_features)

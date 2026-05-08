@@ -170,7 +170,7 @@ def get_input_test_data():
 
     X1 = {
         "num_1":np.array([1,2,5,2,5,3]),
-        "cat_1":np.array(["a","b","c","d","e","f"]),
+        "cat_1":["a","b","c","d","e","f"],
         "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
         "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
     }
@@ -353,6 +353,14 @@ def test_fit_set_feature_names_out(X,y,index_cat,tree_method):
 
     assert tree_method.target_name_ == "target_name"
 
+@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
+def test_fit_set_feature_names_out_no_target_name(X,y,index_cat,tree_method):
+
+
+    tree_method.fit(X,y)
+
+    assert tree_method.target_name_ is None
+
 # test transform ----------------------------------------------------------------------------------
 
 
@@ -363,6 +371,7 @@ def test_transform_encodes_data(X,index_cat,fitted_tree):
     fitted_tree.transform(X)
 
     for i in index_cat:
+        assert isinstance(fitted_tree.encoders_[i].transform_X_,np.ndarray)
         assert np.array_equal(X[i],fitted_tree.encoders_[i].transform_X_)
 
 

@@ -51,3 +51,15 @@ def test_build_feature_matrix_respects_order():
                                            [6,2,4]]))
     assert result.dtype == np.dtype(np.float32)
 
+def test_build_feature_matrix_raise_on_columns_mismatch():
+    X = {
+        "a":np.array([1,np.nan]),
+        "b":np.array([3,4]),
+         }
+    with pytest.raises(ValueError,match="cannot build feature matrix: received more columns than expected"):
+        result = build_feature_matrix(X,["a"])
+
+    with pytest.raises(ValueError,match="cannot build feature matrix: received less columns than expected"):
+        result = build_feature_matrix(X,["a","b","c"])
+
+
