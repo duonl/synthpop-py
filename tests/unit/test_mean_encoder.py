@@ -84,7 +84,12 @@ def test_fit_with_empty_arrays():
     enc = MeanEncoder()
     with pytest.raises(ValueError):
         enc.fit(np.array([],dtype = str_dtype), np.array([]))
-
+        
+def test_fit_exception_on_row_mismatch():
+    encoder = MeanEncoder()
+    with pytest.raises(ValueError,match="Number of observations in X and y do not match"):
+        encoder.fit(np.array(["a","b"],dtype=str_dtype),
+                    np.array([1,2,3]))
 
 # ----- transform test cases -----
 @pytest.mark.parametrize("X",[np.array(["a", "b", "a", "c"],dtype = str_dtype),
@@ -151,6 +156,8 @@ def test_transform_raises_not_fitted():
     enc = MeanEncoder()
     with pytest.raises(NotFittedError):
         enc.transform(np.array([1, 2, 3]))
+
+
 
 # ----- sklearn test suite -----
 

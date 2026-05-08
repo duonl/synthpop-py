@@ -231,7 +231,12 @@ def test_pca_fit_exception_on_not_1d_datatype():
         encoder.fit(np.array([["a", None, "b", "b"]]),
                     np.array([["a", np.nan],["b","c"]],dtype=str_dtype))
 
-
+def test_pca_fit_exception_on_row_mismatch():
+    encoder = PCAEncoder(pca_transform=None)
+    with pytest.raises(ValueError,match="Number of observations in X and y do not match"):
+        encoder.fit(np.array(["a","b"],dtype=str_dtype),
+                    np.array(["a","b","c"],dtype=str_dtype))
+    
 # testing transform--------------------------------------------------------------------------------
 
 

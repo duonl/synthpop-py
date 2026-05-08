@@ -92,7 +92,7 @@ class PCAEncoder(_BaseEncoder):
     The user can adjust the amount of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
 
     :param pca_transform: The pca transform used. The default value is :py:class:`sklearn.decomposition.PCA`. 
-         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principle components are computed and used.
+         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principal components are computed and used.
 
     Examples
     --------
@@ -112,7 +112,7 @@ class PCAEncoder(_BaseEncoder):
         [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
 
     
-        with a different number of principle components (only the first):
+        with a different number of principal components (only the first):
         
         >>> import numpy as np
         >>> from synthpop.data_processing.encoders import PCAEncoder
@@ -173,6 +173,8 @@ class PCAEncoder(_BaseEncoder):
         
         if X_val.shape[0] == 0 or y_val.shape[0]==0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
+        if X_val.shape[0] != y_val.shape[0]:
+            raise ValueError("Number of observations in X and y do not match")
 
         # the core of this implementation
 
@@ -287,8 +289,14 @@ class MeanEncoder(_BaseEncoder):
 
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
+
+        
+        
         X_val = self.validate_string_array(X)
         y_val = self.to_1D(y)
+
+        if X_val.shape[0] != y_val.shape[0]:
+            raise ValueError("Number of observations in X and y do not match")
 
         self.n_features_in_ = 1
         self.n_features_out_ = 1
@@ -304,8 +312,10 @@ class MeanEncoder(_BaseEncoder):
         for cat in unique_categories:
             mask = (~X_missing) & (X_val == cat)
             valid_targets = y_val[mask & ~y_missing]
-            
-            self.mapping_[cat] = np.mean(valid_targets, dtype=np.float32,keepdims=True)#[np.float32(mean_val)]
+            if valid_targets.size == 0:
+                self.mapping_[cat] = np.array([np.nan],dtype=np.float32)
+            else:
+                self.mapping_[cat] = np.mean(valid_targets, dtype=np.float32,keepdims=True)
 
         return self
 
