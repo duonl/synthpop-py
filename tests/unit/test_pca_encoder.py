@@ -64,17 +64,6 @@ def get_test_data_full():
     return [*input_with_np_arrays,*input_with_lists,*input_2D]
 
 
-# def get_test_data_feature_constants():
-#     #   constant feature
-#     X = np.array(["a", "a", "a", "a"],dtype = str_dtype)
-#     y = np.array(["x", "x", "y", "z"],dtype = str_dtype)
-
-#     expected_input_pca = np.array([  # centred table       contingency table
-#         # x y z                             x  y  z              x  y  z
-#         [0, 0, 0],  # a                      a [0, 0, 0]            [2, 1, 1]
-#     ])
-#     return [(X, y, None, None, {"a": [0, 0, 0]})]
-
 
 def get_test_data_target_constants():
     #   constant feature
