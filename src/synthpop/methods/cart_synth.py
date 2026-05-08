@@ -14,7 +14,7 @@ from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
     MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth
-from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
+from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
 from synthpop._validation import validate_dict_x, validate_y
 
