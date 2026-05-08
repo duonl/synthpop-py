@@ -205,8 +205,9 @@ def test_pca_fit_constant_feature():
 
 def test_pca_fit_empty_input():
     """
-    For now, we don't have a clear usage scenario in which it would make sense to define what happens when the input is an empty array.
-    Altough empty array => empty mapping_ would make sense, it is more likely to hide a serious bug than to help the user for now. 
+    For now, we do not have a clear usage scenario in which empty inputs should be supported.
+    Although outputting an empty `mapping_` for an empty array makes sense, it is more likely to hide a serious bug than to help the user for now.
+    This test ensures that poviding empty arrays raises a ValueError, since the expected behaviour for empty datasets is currently undefined in the functional description.
     """
     encoder = PCAEncoder(pca_transform=None)
     
@@ -295,7 +296,7 @@ def test_pca_transform_empty_input():
 @pytest.mark.parametrize("missing", [np.nan])
 def test_pca_transform_when_mapping_is_empty_transform_missing_to_nan(missing):
     """
-    transforming an always missing X should always result in an always nan array, even if the mapping is empty.
+    transforming an always missing X should result in an always nan array, even if the mapping is empty.
     """
     encoder = PCAEncoder(pca_transform=None)
 
@@ -316,7 +317,7 @@ def test_pca_transform_exception_on_new_value():
     encoder.n_features_out_ = 2
 
     with pytest.raises(ValueError, match="transform received unseen categories. Unseen values:"):
-        result = encoder.transform(np.array(["b","c"]))
+         encoder.transform(np.array(["b","c"]))
 
 
 def test_pca_transform_given_fitted_estimator_when_transforming_missing_values():

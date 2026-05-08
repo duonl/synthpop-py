@@ -58,9 +58,6 @@ def test_pca_encoding_fit_constant_target():
     assert encoder.mapping_["c"] == pytest.approx([-1*sqrt2])
 
 
-    # The behaviour is different as described in the functional descriptions.
-    # Instead of a pure count encoding, it is count encoding + scaling + centring.
-
 def test_pca_encoding_fit_constant_feature():
     X = pd.Series(["a", "a","a","a","a"],name="input_feature")
     y = pd.Series(["x", "y","y","w","q"])
@@ -100,5 +97,5 @@ def test_pca_encoding_not_broken_by_setoutput_api():
     with config_context(transform_output="pandas"):
         after = encoder.fit_transform(X,y)
 
-    assert np.array_equal(before,after), "set output api break pca encoding"
+    assert np.array_equal(before,after), "Scikit-learn's set_output API breaks PCA encoding"
     

@@ -77,8 +77,9 @@ def test_fit_multiple_times():
 
 def test_fit_with_empty_arrays():
     """
-    For now, we don't have a clear usage scenario in which it would make sense to define what happens when the input is an empty array.
-    Altough empty array => empty mapping_ would make sense, it is more likely to hide a serious bug than to help the user for now. 
+    For now, we do not have a clear usage scenario in which empty inputs should be supported.
+    Although outputting an empty `mapping_` for an empty array makes sense, it is more likely to hide a serious bug than to help the user for now.
+    This test ensures that poviding empty arrays raises a ValueError, since the expected behaviour for empty datasets is currently undefined in the functional description.
     """
     enc = MeanEncoder()
     with pytest.raises(ValueError):

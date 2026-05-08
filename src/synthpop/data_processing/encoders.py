@@ -4,15 +4,15 @@ This module contains classes to encode categorical data to numeric data.
 """
 from typing import Self
 from sklearn import clone
-from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
-from sklearn.utils.validation import check_is_fitted, validate_data
+from sklearn.base import  TransformerMixin, BaseEstimator
+from sklearn.utils.validation import check_is_fitted
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
 
-from synthpop.utils import str_dtype,to_stringdtype_array
+from synthpop.utils import to_stringdtype_array
 
 
 
@@ -21,8 +21,13 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
     def to_1D(self,arr):
         """
         The expected input of the encoders is 2D.
-        Conceptually, the encoders work on a per-column basis.
-        That is why we need to convert to 1D arrays.
+        Conceptually, the encoders operate on a single feature column at a time.
+        This helper converts input to a 1-dimensional array while allowing both:
+          - 1D arrays of shape (n_samples,)
+          - 2D single-column arrays of shape (n_samples, 1)
+
+
+        Arrays with more than one column are rejected.
         """
         if arr.ndim >1:
             if arr.shape[1] !=1:
@@ -54,8 +59,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
 
         if X_val.shape[0] == 0:
             return np.empty(shape= (0,self.n_features_out_),dtype=np.float32)
-
-        
+ 
         result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32)#preallocation
 
         X_missing = np.isnan(X_val)
@@ -63,7 +67,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         if X_missing.all():
             return result
 
-        unique_vals,rev_index = np.unique(X_val,return_inverse=True)#The reverse_index does not work well with nan.
+        unique_vals,rev_index = np.unique(X_val,return_inverse=True)
         #Note that rev_index does not reconstruct X_val when X_val is a stringDType array with np.nan:
         # x_val = np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype)
         # unique_vals,rev_index = np.unique(x_val,return_inverse=True)
@@ -85,7 +89,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
 class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
+    The user can adjust the amount of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
 
     :param pca_transform: The pca transform used. The default value is :py:class:`sklearn.decomposition.PCA`. 
          See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principle components are computed and used.
@@ -301,7 +305,7 @@ class MeanEncoder(_BaseEncoder):
             mask = (~X_missing) & (X_val == cat)
             valid_targets = y_val[mask & ~y_missing]
             
-            self.mapping_[cat] = np.mean(valid_targets, dtype=np.float32)#[np.float32(mean_val)]
+            self.mapping_[cat] = np.mean(valid_targets, dtype=np.float32,keepdims=True)#[np.float32(mean_val)]
 
         return self
 

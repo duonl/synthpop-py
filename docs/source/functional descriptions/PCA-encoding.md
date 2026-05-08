@@ -51,7 +51,7 @@ Only the first $k$ principal components are kept as part of the encoding.
 |missing | missing | missing|
 |any specific non-missing value| always missing for that specific feature value | missing|
 |any specific non-missing value| sometimes but not always missing for that specific feature value|the encoding treats the missing target value as a normal value and the default PCA is applied
-|many different non-missing values| the same constant over all values of the feature (any non-missing value)| The rotation matrix of PCA becomes an identity matrix. The contingency table becomes a 1D vector of the number of occurrences of the feature level. |
+|many different non-missing values| the same constant over all values of the feature (any non-missing value)| The rotation matrix of PCA becomes an identity matrix. The contingency table becomes a 1D vector of the number of occurrences of the feature level. The encoding is an scaled and centered version of count encoding |
 |constant (one non-missing value for all rows)| many different non-missing values or constant (any non-missing value) for that specific feature value| The contingency table becomes a constant vector. After centring, this vector is the zero vector. The feature should be encoded with 0.|
 
 ### 6.1 Missing values
