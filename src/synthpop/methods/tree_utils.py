@@ -9,10 +9,11 @@ def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarra
     """
     Helper function that draws samples with replacement from the empirical distribution of an array.
 
-    :param rng: a random number generator. Often `np.random.Generator`.
-    :param counts: array of the counts of values.
-    :param values: array of the distinct values.
-    :n_samples: number of samples to be drawn.
+    :param rng: A random number generator.
+    :param counts: Array of the counts for each values.
+    :param values: Array of the distinct values corresponding to `counts`.
+    :n_samples: Number of samples to be drawn.
+    :return: Sampled values.
     """
     cum_counts = np.cumsum(counts)
     r = rng.integers(0, counts.sum(), size=n_samples)
@@ -185,15 +186,16 @@ class LeafNodeSampler():
 
             total = counts.sum()
             if total == 0:
-                raise ValueError(
-                    f"Leaf {leaf} has an empty leaf map. This indicates a corrupted or inconsistent LeafNodeSampler state."
-                )
+                raise ValueError(f"Leaf {leaf} has an empty leaf map. This indicates a corrupted or inconsistent LeafNodeSampler state.")
 
-            cum_counts = np.cumsum(counts)
-            r = rng.integers(0, total, size=len(indices))
-            idx = np.searchsorted(cum_counts, r, side="right")
-            for i, v in zip(indices, np.take(values, idx)):
-                y_syn[i] = v
+            sampled = sample_array(
+                rng=rng,
+                counts=counts,
+                values=np.asarray(values, dtype=self._y_dtype),
+                n_samples=len(indices),
+            )
+
+            y_syn[indices] = sampled
 
         return y_syn
 
