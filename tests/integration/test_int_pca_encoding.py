@@ -59,8 +59,8 @@ def test_pca_encoding_fit_constant_target():
 
 
 def test_pca_encoding_fit_constant_feature():
-    X = pd.Series(["a", "a","a","a","a"],name="input_feature")
-    y = pd.Series(["x", "y","y","w","q"])
+    X = np.array(["a", "a","a","a","a"])
+    y = np.array(["x", "y","y","w","q"])
 
 
     encoder = PCAEncoder()
