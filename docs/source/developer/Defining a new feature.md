@@ -4,7 +4,7 @@ This guide describes the process of defining a feature, from initial idea to the
 
 ## What kind of new features we are looking for
 The aim of this package is to facilitate the creation of synthetic data. The primary intended audience is government institutions.
-Reliability and trustworthiness are more important than performance. See also [CONTRIBUTING.md](../../../CONTRIBUTING.md). We cannot accept untested and/or unproven technology.
+Reliability and correctness are more important than performance. See also [CONTRIBUTING.md](../../../CONTRIBUTING.md). We cannot accept untested and/or unproven technology.
 On the other hand, new features that improve usability are very welcome. 
 
 More features do not always make for a better package. Adding a new feature has several consequences:
