@@ -185,8 +185,9 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         return ReplaceNoneWithValue()
 
     def _get_tree(self):
-        # TODO: set default params
-        return DecisionTreeClassifier(min_samples_leaf=5)
+        return DecisionTreeClassifier(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
+                                      min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
+                                      ,)
 
 
 class TreeRegressorMethod(_AbstractTreeMethod):
@@ -226,8 +227,9 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         return MissingValuePredictor()
 
     def _get_tree(self):
-        # TODO: set default params
-        return DecisionTreeRegressor(min_samples_leaf=5)
+        return DecisionTreeRegressor(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
+                                      min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
+                                      ,)
 
 
 class CartMethod(base_synth.BaseSynthMethod):
