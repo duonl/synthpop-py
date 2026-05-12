@@ -31,7 +31,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         """
         if arr.ndim >1:
             if arr.shape[1] !=1:
-                raise ValueError("input should be 1D or be 2D with one column")
+                raise ValueError(f"Expected a 1D or a 2D array with exactly one column. Received shape {arr.shape}.")
             else:
                 return arr.reshape(-1)
             
@@ -51,7 +51,9 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
        X_missing = np.isnan(X_val)
         
        # Detect unseen categories
-       unseen_categories = np.setdiff1d(X_val[~X_missing], list(self.mapping_.keys()))
+       seen = set(self.mapping_.keys())
+observed = set(X_val[~X_missing])
+unseen = observed - seen
        if unseen_categories.size >0:
            raise ValueError(f"transform received unseen categories. Unseen values: {unseen_categories}. Ensure input was fitted")
 
@@ -60,7 +62,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         if X_val.shape[0] == 0:
             return np.empty(shape= (0,self.n_features_out_),dtype=np.float32)
  
-        result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32)#preallocation
+        result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32) #pre-allocation
 
         X_missing = np.isnan(X_val)
 
