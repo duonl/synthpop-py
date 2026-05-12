@@ -117,7 +117,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     def get_feature_names_out(self, input_features=None):
         if input_features is None:
-            input_features = getattr(self, "feature_names_in_", [])
+            input_features = getattr(self, "feature_order_", [])
+            return input_features
 
         if self.target_name_ is None:
             return [input_features]
@@ -155,6 +156,22 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
+    Example
+    --------
+        >>> from synthpop.methods.cart_synth import TreeClassifierMethod
+        >>> import numpy as np
+        >>> tree_method = TreeClassifierMethod()
+        >>> X = {
+        ...         "column1":np.array([1.1,2.2]),
+        ...         "column2":np.array([1.4,1.2]),
+        ...         "column3":np.array(["a","b"])
+        ...         }
+        >>> y = np.array(["x","y"])
+        >>> tree_method.fit(X,y)
+        TreeClassifierMethod()
+        >>> tree_method.transform(X)
+        array(['x', 'y'], dtype='<U1')
+
     """
 
     def __init__(self, *, tree=None,encoder=None, missing_handler=None, tree_sampler=None):
@@ -178,6 +195,23 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param encoder: an transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+
+
+    Example
+    --------
+        >>> from synthpop.methods.cart_synth import TreeRegressorMethod
+        >>> import numpy as np
+        >>> tree_method = TreeRegressorMethod()
+        >>> X = {
+        ...         "column1":np.array([1.1,2.2]),
+        ...         "column2":np.array([1.4,1.2]),
+        ...         "column3":np.array(["a","b"])
+        ...         }
+        >>> y = np.array([1,2])
+        >>> tree_method.fit(X,y)
+        TreeRegressorMethod()
+        >>> tree_method.transform(X)
+        array([1, 2])
 
     """
 
