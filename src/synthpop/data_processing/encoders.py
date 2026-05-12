@@ -20,9 +20,9 @@ from synthpop.utils import to_stringdtype_array
 class _BaseEncoder(TransformerMixin, BaseEstimator):
     def to_1D(self,arr):
         """
-        The expected input of the encoders is 2D.
+        The expected input of the encoders at run-time is 2D.
         Conceptually, the encoders operate on a single feature column at a time.
-        This helper converts input to a 1-dimensional array while allowing both:
+        This helper internally converts the 2D input to a 1-dimensional array while allowing both:
           - 1D arrays of shape (n_samples,)
           - 2D single-column arrays of shape (n_samples, 1)
 
@@ -54,8 +54,8 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
        seen = set(self.mapping_.keys())
 observed = set(X_val[~X_missing])
 unseen = observed - seen
-       if unseen_categories.size >0:
-           raise ValueError(f"transform received unseen categories. Unseen values: {unseen_categories}. Ensure input was fitted")
+       if unseen:
+           raise ValueError(f"transform received categories that were not observed during fitting. Unseen values: {sorted(unseen)}. Ensure input was fitted")
 
     def _apply_mapping(self,X_val):
 
@@ -93,7 +93,7 @@ unseen = observed - seen
 class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the amount of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
+    The user can adjust the number of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
 
     :param pca_transform: The pca transform used. The default value is :py:class:`sklearn.decomposition.PCA`. 
          See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principal components are computed and used.
@@ -186,7 +186,7 @@ class PCAEncoder(_BaseEncoder):
         #The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val,pd.isna(y_val))
 
-        if (missing_contingency_table.columns).all():# If there are only missing values for y:
+        if np.isnan(y_val).all():# If there are only missing values for y:
             self.mapping_ = {k: [np.nan] for k in missing_contingency_table.index}
             self.n_features_out_ = 1
             return self  
@@ -217,7 +217,7 @@ class PCAEncoder(_BaseEncoder):
         if isinstance(pca_result,pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
-        self.n_features_out_ = pca_result.shape[1] #needed for transform
+        self.n_features_out_ = np.atleast_2d(pca_result) #needed for transform
     
         mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing
 
