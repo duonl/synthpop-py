@@ -71,10 +71,12 @@ unseen = observed - seen
 
         unique_vals,rev_index = np.unique(X_val,return_inverse=True)
         #Note that rev_index does not reconstruct X_val when X_val is a stringDType array with np.nan:
-        # x_val = np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype)
-        # unique_vals,rev_index = np.unique(x_val,return_inverse=True)
-        # unique_vals[rev_index]
-        # array(['a', 'a', 'b', 'b', 'c', 'c', 'c'],dtype=StringDType(na_object=nan))
+        #>>> x_val = np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype)
+        #>>> unique_vals,rev_index = np.unique(x_val,return_inverse=True)
+        #>>> unique_vals[rev_index]
+        #>>> array(['a', 'a', 'b', 'b', 'c', 'c', 'c'],dtype=StringDType(na_object=nan))
+        #The only differences between the reconstruction and the original are the missing values.
+        # So to avoid searching X_val again to create a reverse index, we use this one instead and correct the missing values.
         
         mapped_vals = np.array([self.mapping_[v] for v in unique_vals],dtype=np.float32)
 
