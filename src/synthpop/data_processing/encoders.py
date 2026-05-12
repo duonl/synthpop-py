@@ -160,7 +160,7 @@ class PCAEncoder(_BaseEncoder):
         tags.estimator_type = "transformer"
         return tags
 
-    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
+    def fit(self,X:npt.NDArray, y: npt.NDArray) -> Self:
         """
         Calculate the encoding.
         
@@ -227,7 +227,7 @@ class PCAEncoder(_BaseEncoder):
 
         return self
 
-    def transform(self, X: npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
+    def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         replaces each level of `X` with the numerical values determined in :py:meth:`fit`
 
@@ -272,7 +272,7 @@ class MeanEncoder(_BaseEncoder):
         tags.estimator_type = "transformer"
         return tags
 
-    def fit(self, X: npt.ArrayLike, y: npt.ArrayLike) -> Self:
+    def fit(self, X: npt.NDArray, y: npt.NDArray) -> Self:
         """
         Calculate average y value for each X category.
         
@@ -323,7 +323,7 @@ class MeanEncoder(_BaseEncoder):
 
         return self
 
-    def transform(self, X: npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
+    def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
         
