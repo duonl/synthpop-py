@@ -310,7 +310,7 @@ def test_pca_transform_exception_on_new_value():
     encoder.mapping_ = {"a": [1.1, 2.2], "c":[3.3,4.4]}
     encoder.n_features_out_ = 2
 
-    with pytest.raises(ValueError, match="transform received unseen categories. Unseen values:"):
+    with pytest.raises(ValueError, match="transform received categories that were not observed during fitting\. Unseen values: \[\'b\'\]\. Ensure input was fitted"):
          encoder.transform(np.array(["b","c"]))
 
 
