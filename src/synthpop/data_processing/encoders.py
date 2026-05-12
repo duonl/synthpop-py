@@ -40,7 +40,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
     def validate_string_array(self,x):
         
         """
-        Transform all missing values in a string array to np.nan.
+        Transform all missing values in a string array to np.nan. It also converts dtype, reshapes and validates dimensionality.
         :param x: an array of strings
         :return: the 1-dimensional array of strings with one value for missing
         """
@@ -52,8 +52,8 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         
        # Detect unseen categories
        seen = set(self.mapping_.keys())
-observed = set(X_val[~X_missing])
-unseen = observed - seen
+       observed = set(X_val[~X_missing])
+       unseen = observed - seen
        if unseen:
            raise ValueError(f"transform received categories that were not observed during fitting. Unseen values: {sorted(unseen)}. Ensure input was fitted")
 
@@ -82,7 +82,7 @@ unseen = observed - seen
 
         result = mapped_vals[rev_index]
 
-        result[X_missing] = [np.nan]*self.n_features_out_
+        result[X_missing,:] = np.nan#[np.nan]*self.n_features_out_
 
         if result.ndim == 1:
             return result.reshape((-1,1))
@@ -217,7 +217,7 @@ class PCAEncoder(_BaseEncoder):
         if isinstance(pca_result,pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
-        self.n_features_out_ = np.atleast_2d(pca_result) #needed for transform
+        self.n_features_out_ = pca_result.shape[1] #needed for transform
     
         mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing
 
