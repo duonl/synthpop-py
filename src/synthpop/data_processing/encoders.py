@@ -48,14 +48,14 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         return self.to_1D(arr)
 
     def _check_unseen_values(self,X_val):
-       X_missing = np.isnan(X_val)
-        
-       # Detect unseen categories
-       seen = set(self.mapping_.keys())
-       observed = set(X_val[~X_missing])
-       unseen = observed - seen
-       if unseen:
-           raise ValueError(f"transform received categories that were not observed during fitting. Unseen values: {sorted(unseen)}. Ensure input was fitted")
+        X_missing = np.isnan(X_val)
+
+        # Detect unseen categories
+        seen = set(self.mapping_.keys())
+        observed = set(X_val[~X_missing])
+        unseen = observed - seen
+        if unseen:
+            raise ValueError(f"transform received categories that were not observed during fitting. Unseen values: {sorted(unseen)}. Ensure input was fitted")
 
     def _apply_mapping(self,X_val):
 
