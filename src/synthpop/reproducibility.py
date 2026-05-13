@@ -3,7 +3,7 @@ from numpy.random import SeedSequence
 
 
 
-class Reseed():
+class RandomStateManager():
     """
     Manages random numbers and reproducibility in this package.
 
@@ -41,6 +41,7 @@ class Reseed():
     def set_root_seed(cls,seed:int,seed_sequence = None):
         """
         Set the root seed.
+        The intended usage is within the Synthesiser class.
         """
         cls._root_seed = seed
         if seed_sequence is None:
@@ -50,20 +51,26 @@ class Reseed():
 
 
     @classmethod
-    def get_new_seed(cls) -> int:
+    def create_new_seed(cls) -> int:
         """
         Returns a seed that can be used to make a RNG.
         The seed is based on the root seed.
+        It is used to make instance seeds and seeds for external dependencies (legacy).
+        The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
+
+        :returns: an integer that can be used as a seed.
         """
         return cls._seed_sequence.spawn(1)[0].generate_state(1)
 
 
     @classmethod
-    def get_rng(cls,seed) ->np.random.Generator:
+    def create_rng(cls,seed:int) ->np.random.Generator:
         """
         Creates an RNG.
         Same root seed + same seed => same RNG.
         This means that executing `Reseed.get_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
+
+        The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
         """
 
         # default_rng uses seed sequences internally, so the easiest and safest way to combine is to pass a list of seeds.
@@ -75,9 +82,9 @@ class Reseed():
         self.old_seed = None
 
     def __enter__(self):
-        self.old_seed = Reseed._root_seed
-        self.old_seed_sequence = Reseed._seed_sequence
-        Reseed.set_root_seed(self.new_seed)
+        self.old_seed = RandomStateManager._root_seed
+        self.old_seed_sequence = RandomStateManager._seed_sequence
+        RandomStateManager.set_root_seed(self.new_seed)
 
     def __exit__(self, type, value, traceback):
-        Reseed.set_root_seed(self.old_seed ,self.old_seed_sequence)
+        RandomStateManager.set_root_seed(self.old_seed ,self.old_seed_sequence)
