@@ -5,6 +5,22 @@ import numpy.typing as npt
 import warnings
 from sklearn.exceptions import NotFittedError
 
+def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarray, n_samples: int):
+    """
+    Helper function that draws samples with replacement from the empirical distribution of an array.
+
+    :param rng: A random number generator.
+    :param counts: Array of the counts for each values.
+    :param values: Array of the distinct values corresponding to `counts`.
+    :n_samples: Number of samples to be drawn.
+    :return: Sampled values.
+    """
+    cum_counts = np.cumsum(counts)
+    r = rng.integers(0, counts.sum(), size=n_samples)
+    idx = np.searchsorted(cum_counts, r, side="right")
+    sampled = values[idx]
+    return sampled
+
 class LeafNodeSampler():
     """
     Leaf-based synthetic target sampler driven by explicit leaf IDs.
@@ -170,15 +186,16 @@ class LeafNodeSampler():
 
             total = counts.sum()
             if total == 0:
-                raise ValueError(
-                    f"Leaf {leaf} has an empty leaf map. This indicates a corrupted or inconsistent LeafNodeSampler state."
-                )
+                raise ValueError(f"Leaf {leaf} has an empty leaf map. This indicates a corrupted or inconsistent LeafNodeSampler state.")
 
-            cum_counts = np.cumsum(counts)
-            r = rng.integers(0, total, size=len(indices))
-            idx = np.searchsorted(cum_counts, r, side="right")
-            for i, v in zip(indices, np.take(values, idx)):
-                y_syn[i] = v
+            sampled = sample_array(
+                rng=rng,
+                counts=counts,
+                values=np.asarray(values, dtype=self._y_dtype),
+                n_samples=len(indices),
+            )
+
+            y_syn[indices] = sampled
 
         return y_syn
 

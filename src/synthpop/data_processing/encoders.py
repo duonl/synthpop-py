@@ -4,23 +4,99 @@ This module contains classes to encode categorical data to numeric data.
 """
 from typing import Self
 from sklearn import clone
-from sklearn.base import OneToOneFeatureMixin, TransformerMixin, BaseEstimator
-from sklearn.utils.validation import check_is_fitted, validate_data
+from sklearn.base import  TransformerMixin, BaseEstimator
+from sklearn.utils.validation import check_is_fitted
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
 
+from synthpop.utils import to_stringdtype_array
 
 
-class PCAEncoder(TransformerMixin, BaseEstimator):
+
+
+class _BaseEncoder(TransformerMixin, BaseEstimator):
+    def to_1D(self,arr):
+        """
+        The expected input of the encoders at run-time is 2D.
+        Conceptually, the encoders operate on a single feature column at a time.
+        This helper internally converts the 2D input to a 1-dimensional array while allowing both:
+          - 1D arrays of shape (n_samples,)
+          - 2D single-column arrays of shape (n_samples, 1)
+
+
+        Arrays with more than one column are rejected.
+        """
+        if arr.ndim >1:
+            if arr.shape[1] !=1:
+                raise ValueError(f"Expected a 1D or a 2D array with exactly one column. Received shape {arr.shape}.")
+            else:
+                return arr.reshape(-1)
+            
+        return arr
+
+    def validate_string_array(self,x):
+        
+        """
+        Transform all missing values in a string array to np.nan. It also converts dtype, reshapes and validates dimensionality.
+        :param x: an array of strings
+        :return: the 1-dimensional array of strings with one value for missing
+        """
+        arr = to_stringdtype_array(x)
+        return self.to_1D(arr)
+
+    def _check_unseen_values(self,X_val):
+        X_missing = np.isnan(X_val)
+
+        # Detect unseen categories
+        seen = set(self.mapping_.keys())
+        observed = set(X_val[~X_missing])
+        unseen = observed - seen
+        if unseen:
+            raise ValueError(f"transform received categories that were not observed during fitting. Unseen values: {sorted(unseen)}. Ensure input was fitted")
+
+    def _apply_mapping(self,X_val):
+
+        if X_val.shape[0] == 0:
+            return np.empty(shape= (0,self.n_features_out_),dtype=np.float32)
+ 
+        result = np.full((len(X_val),self.n_features_out_), np.nan, dtype=np.float32) #pre-allocation
+
+        X_missing = np.isnan(X_val)
+
+        if X_missing.all():
+            return result
+
+        unique_vals,rev_index = np.unique(X_val,return_inverse=True)
+        #Note that rev_index does not reconstruct X_val when X_val is a stringDType array with np.nan:
+        #>>> x_val = np.array(["a", "a", "b", "b", "c",np.nan, "c"],dtype = str_dtype)
+        #>>> unique_vals,rev_index = np.unique(x_val,return_inverse=True)
+        #>>> unique_vals[rev_index]
+        #>>> array(['a', 'a', 'b', 'b', 'c', 'c', 'c'],dtype=StringDType(na_object=nan))
+        #The only differences between the reconstruction and the original are the missing values.
+        # So to avoid searching X_val again to create a reverse index, we use this one instead and correct the missing values.
+        
+        mapped_vals = np.array([self.mapping_[v] for v in unique_vals],dtype=np.float32)
+
+        result = mapped_vals[rev_index]
+
+        result[X_missing,:] = np.nan#[np.nan]*self.n_features_out_
+
+        if result.ndim == 1:
+            return result.reshape((-1,1))
+
+        return result
+        
+
+class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the amount of principle components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
+    The user can adjust the number of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
 
     :param pca_transform: The pca transform used. The default value is :py:class:`sklearn.decomposition.PCA`. 
-         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principle components are computed and used.
+         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principal components are computed and used.
 
     Examples
     --------
@@ -39,20 +115,8 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
         [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
 
-        >>> from synthpop.data_processing.encoders import PCAEncoder
-        >>> import pandas as pd
-        >>> X = pd.Series(["a", "a","b","b","c"],name="input_feature")
-        >>> y = pd.Series(["x", "x","y","z","w"])
-        >>> encoder = PCAEncoder().set_output(transform="pandas")
-        >>> encoder.fit_transform(X=X,y=y)
-        input_feature_pca0  input_feature_pca1  input_feature_pca2
-        0           -1.118034       -1.500000e+00       -1.201987e-16
-        1           -1.118034       -1.500000e+00       -1.201987e-16
-        2            2.236068       -1.295326e-15       -1.201987e-16
-        3            2.236068       -1.295326e-15       -1.201987e-16
-        4           -1.118034        1.500000e+00       -1.201987e-16
     
-        with a different number of principle components (only the first):
+        with a different number of principal components (only the first):
         
         >>> import numpy as np
         >>> from synthpop.data_processing.encoders import PCAEncoder
@@ -96,7 +160,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         tags.estimator_type = "transformer"
         return tags
 
-    def fit(self,X:npt.ArrayLike, y: npt.ArrayLike) -> Self:
+    def fit(self,X:npt.NDArray, y: npt.NDArray) -> Self:
         """
         Calculate the encoding.
         
@@ -107,30 +171,22 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         self.n_features_in_ = 1
 
-        X_val,y_val = validate_data(self,X=np.asarray(X),y=y, validate_separately = (
-            dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
-            ,dict(ensure_2d=False,dtype=["str","object"],ensure_all_finite="allow-nan",ensure_min_samples=0)
-            ))
+        X_val = self.validate_string_array(X)
+        y_val = self.validate_string_array(y)
 
-        if isinstance(X,pd.Series):
-            self.feature_names_in_ = [X.name]
-        if X_val.ndim != 1:
-            raise ValueError("X should be 1D")
-        if y_val.ndim != 1:
-            raise ValueError("Y should be 1D")
         
-        if X_val.shape[0] == 0 and y_val.shape[0]==0:
-            self.mapping_ = {}
-            self.n_features_out_ = 0
-
-            return self
+        if X_val.shape[0] == 0 or y_val.shape[0]==0:
+            raise ValueError("Cannot fit encoder: X and y must be non-empty.")
+        if X_val.shape[0] != y_val.shape[0]:
+            raise ValueError("Number of observations in X and y do not match")
 
         # the core of this implementation
 
 
         #The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val,pd.isna(y_val))
-        if not False in missing_contingency_table:
+
+        if np.isnan(y_val).all():# If there are only missing values for y:
             self.mapping_ = {k: [np.nan] for k in missing_contingency_table.index}
             self.n_features_out_ = 1
             return self  
@@ -161,7 +217,7 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
         if isinstance(pca_result,pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
-        self.n_features_out_ = pca_result.shape[1] #needed for get_feature_names_out
+        self.n_features_out_ = pca_result.shape[1] #needed for transform
     
         mapping_for_missing = {k:[np.nan]*self.n_features_out_ for k in x_such_that_y_is_always_missing}#The values of X s.t. y is always missing
 
@@ -171,51 +227,20 @@ class PCAEncoder(TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self, X: npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
+    def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         replaces each level of `X` with the numerical values determined in :py:meth:`fit`
 
         :param X: the feature to be encoded.
         """
 
-        check_is_fitted(self)
-        # if pd.isna(X).all():
-        #     return np.zeros(X.shape[0])
-        missing_mapping =  {None:[np.nan]*self.n_features_out_, pd.NA:[np.nan]*self.n_features_out_, np.nan:[np.nan]*self.n_features_out_}
-        mapping_including_missing = self.mapping_|missing_mapping if hasattr(self,"mapping_") else missing_mapping
+        check_is_fitted(self, 'mapping_')
+        X_val = self.validate_string_array(X)
+        self._check_unseen_values(X_val)
+        return self._apply_mapping(X_val)
 
-        # if X contains Nones, then the dtype of X is object.
-        # In that case, X cannot be sorted.
-        # many routines of numpy for finding differences between lists depend on the items being sortable.
-        
-        if hasattr(self,"mapping_"):
-            unique_values_in_x =set(X[~pd.isna(X)])#np.unique([v for v in X if not pd.isna(v)])
-            if not unique_values_in_x.issubset(self.mapping_.keys()):
-                raise ValueError("new values not seen during fitting when encoding.")
-
-        x_na = pd.isna(X)
-
-        keys = np.where(x_na,None,X)
-        mapping_to_np_array = {k: np.array(v,dtype=np.float32) for (k,v) in mapping_including_missing.items()}
-        f = np.frompyfunc(mapping_to_np_array.get,nin=1,nout=1)
-        return np.array(np.asanyarray(f(keys)).tolist())
-
-
-    def get_feature_names_out(self,input_features=None):
-        if not hasattr(self,"feature_names_in_"):
-            if input_features is  None:
-                return [f"x{i}" for i in range(self.n_features_out_)]
-            else:
-                return [f"{input_features[0]}_pca{i}" for i in range(self.n_features_out_)]
-
-        if input_features is None:
-            return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
-        if input_features != self.feature_names_in_:
-            raise ValueError(f"input_features is not feature_names_in_. Expected: {self.feature_names_in_}, actual: {input_features}")
-        return [self.feature_names_in_[0]+f"_pca{i}" for i in range(self.n_features_out_)]
-    
    
-class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator): 
+class MeanEncoder(_BaseEncoder):
     """
     Transforms categorical data to numeric using mean encoding. The feature column `X` is encoded based on a numeric target column `y`.
 
@@ -247,7 +272,7 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         tags.estimator_type = "transformer"
         return tags
 
-    def fit(self, X: npt.ArrayLike, y: npt.ArrayLike) -> Self:
+    def fit(self, X: npt.NDArray, y: npt.NDArray) -> Self:
         """
         Calculate average y value for each X category.
         
@@ -263,40 +288,42 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
             >>> encoder.fit(X, y)
         """
 
-        # Required sklearn attributes
-        y = np.array([np.nan if (v is pd.NA ) else v for v in y], dtype=float) #for pd.NA compatibility
+        if not np.issubdtype(y.dtype,np.number):
+            raise ValueError(f"MeanEncoder requires numeric target array y. Received dtype={y.dtype}")
 
-        X_val, y_val = validate_data(self, X=X, y=y, validate_separately = (
-             dict(ensure_2d=False, ensure_min_samples=1, dtype=["str", "object"], ensure_all_finite="allow-nan"),
-             dict(ensure_2d=False, ensure_min_samples=1, dtype='numeric', ensure_all_finite="allow-nan")
-        ))
+        if X.shape[0] == 0 or y.shape[0] == 0:
+            raise ValueError("Cannot fit encoder: X and y must be non-empty.")
 
-        if isinstance(X,pd.Series) and X.name is not None:
-            self.feature_names_in_ = [X.name]
+        
+        
+        X_val = self.validate_string_array(X)
+        y_val = self.to_1D(y)
+
+        if X_val.shape[0] != y_val.shape[0]:
+            raise ValueError("Number of observations in X and y do not match")
+
         self.n_features_in_ = 1
+        self.n_features_out_ = 1
 
 
         # Identify missing
-        X_missing = np.zeros(len(X_val), dtype=bool)
-        X_missing |= pd.isna(X_val)
-        y_missing = pd.isna(y_val)
+        X_missing = np.isnan(X_val)
+        y_missing = np.isnan(y_val)
         
         # Fit encoder
         self.mapping_ = {}
-        unique_categories = np.unique(X_val[~X_missing].astype(str))
+        unique_categories = np.unique(X_val[~X_missing])
         for cat in unique_categories:
-            mask = (~X_missing) & (X_val.astype(str) == cat)
+            mask = (~X_missing) & (X_val == cat)
             valid_targets = y_val[mask & ~y_missing]
             if valid_targets.size == 0:
-                mean_val = np.nan
+                self.mapping_[cat] = np.array([np.nan],dtype=np.float32)
             else:
-                mean_val = valid_targets.mean()
-            
-            self.mapping_[cat] = np.float32(mean_val)
+                self.mapping_[cat] = np.mean(valid_targets, dtype=np.float32,keepdims=True)
 
         return self
 
-    def transform(self, X: npt.ArrayLike) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
+    def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:#float32 is optimal for decision trees.
         """
         Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
         
@@ -315,47 +342,6 @@ class MeanEncoder(OneToOneFeatureMixin,TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self, 'mapping_')
-
-        # Input validation
-        X = np.asarray(X)
-
-        if X.ndim != 1:
-            raise ValueError(f"X must be a 1D array, got shape {X.shape}.")
-        if len(self.mapping_) == 0:
-            return np.full(len(X), np.nan, dtype=np.float32).reshape(-1, 1) #2D output with only nans
-        
-        # Start transform
-        result = np.full(len(X), np.nan, dtype=np.float32)
-
-        # Detect missing
-        X_missing = np.zeros(len(X), dtype=bool)
-        if X.dtype.kind in ("f", "i"):
-            X_missing |= np.isnan(X)
-        X_missing |= np.equal(X, None)
-        
-        # Detect unseen categories
-        unseen_categories = set(X[~X_missing]) - set(self.mapping_.keys())
-        if unseen_categories:
-            raise ValueError(f"Column to be encoded X has unseen categories: {unseen_categories}")
-        
-        # Apply mapping
-        for i, val in enumerate(X):
-            if not X_missing[i]:
-                result[i] = self.mapping_[val]
-
-        return result
-    
-    def get_feature_names_out(self, input_features=None):
-        check_is_fitted(self, "mapping_")
-
-        if input_features is None:
-            if hasattr(self, "feature_names_in_"):
-                input_features = self.feature_names_in_
-            else:
-                input_features = [f"mean_x{i}" for i in range(self.n_features_in_)]
-
-        if hasattr(self, "feature_names_in_"):
-            if not np.array_equal(input_features, self.feature_names_in_):
-                raise ValueError(f"input_features must match feature_names_in_. Expected {self.feature_names_in_}, got {input_features}")
-        base = input_features[0]
-        return np.asarray([f"{base}_mean"], dtype=object)
+        X_val = self.validate_string_array(X)
+        self._check_unseen_values(X_val)
+        return self._apply_mapping(X_val)
