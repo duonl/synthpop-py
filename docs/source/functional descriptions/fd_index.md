@@ -12,4 +12,5 @@ PCA-encoding.md
 MissingValuePredictor.md
 S_pMSE.md
 plotting.md
+reproducibility.md
 ```

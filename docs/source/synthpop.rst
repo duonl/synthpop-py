@@ -22,3 +22,10 @@ synthpop.synthesiser module
    :show-inheritance:
    :undoc-members:
 
+synthpop.reproducibility module
+-------------------------------
+
+.. automodule:: synthpop.reproducibility
+   :members:
+   :show-inheritance:
+   :undoc-members:
