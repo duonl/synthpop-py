@@ -42,14 +42,6 @@ def encoder():
     return TransformStub(transform_return_value=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
 
 
-    
-
-@pytest.fixture
-def encoder():
-    #The result of the transform of encoding is always a 2D np.array of float32, with one or more columns
-    return TransformStub(transform_return_value=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
-
-
 class StubMissingHandler(BaseMissingValueHandler):
     
     def __init__(self, prepared_for_fit_result,post_synth_transform_result):
@@ -85,18 +77,6 @@ def missing_handling(request):
 
 
 
-@pytest.fixture
-def missing_handling(request):
-
-    # The result X of prepare_data_for_fit must contain the same columns as X
-    X = request.node.callspec.params["X"]
-    X_prepare_res = {k:np.array([k]*3) for k in X.keys()}
-    y_prepare_res = np.arange(0,3)
-
-    y_post_synthesis_result = np.arange(3,6)
-    return StubMissingHandler(prepared_for_fit_result=(X_prepare_res,y_prepare_res),post_synth_transform_result=y_post_synthesis_result)
-
-
 class StubLeafNodeSampler():
     def __init__(self,sample_from_leaves_return_value):
         self.sample_from_leaves_return_value = sample_from_leaves_return_value
@@ -117,9 +97,6 @@ class StubLeafNodeSampler():
 def leafnode_sampler():
     return StubLeafNodeSampler(sample_from_leaves_return_value=np.array([1,2,3,4]))
 
-@pytest.fixture
-def leafnode_sampler():
-    return StubLeafNodeSampler(sample_from_leaves_return_value=np.array([1,2,3,4]))
 
 class StubTree():
     def __init__(self,apply_result=None):
@@ -174,21 +151,6 @@ def fitted_tree(tree_method,request):
 
     return tree_method
 
-
-@pytest.fixture()
-def fitted_tree(tree_method,request):
-
-    X = request.node.callspec.params["X"]
-    cat_index = request.node.callspec.params["index_cat"]
-    tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
-    tree_method.missing_handler_ = clone(tree_method.missing_handler)
-    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
-    tree_method.tree_ = clone(tree_method.tree)
-    tree_method.n_features_in_ = len(X.keys())
-
-    tree_method.feature_order_ = list(X.keys())
-
-    return tree_method
 
 
 #---------------------------------------------------
