@@ -13,7 +13,7 @@ This package enforces strong reproducibility guarantees:
 - **Multiple datasets per run**: Users must be able to generate multiple independent datasets from the same observed data within a single script in a controlled and reproducible way.
 - **Explicit seeding**: a root seed must be provided by the user. No implicit or hidden seeding is allowed.
 
-Deteminism assumes identical call order and identical seeds passed to all random number generator (RNG) creating functions.
+Determinism assumes identical call order and identical seeds passed to all random number generator (RNG) creating functions.
 
 ## Randomness
 While deterministic, the system must still produce statistically sound randomness:
