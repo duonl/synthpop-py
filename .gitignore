@@ -2,6 +2,8 @@
 /docs/api reference/
 /docs/build/
 /dist/
-
+*~
+.\#*
+\#*\#
 .coverage
 classes.dot

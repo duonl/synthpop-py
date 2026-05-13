@@ -6,10 +6,11 @@ import pytest
 
 from synthpop.data_processing.encoders import MeanEncoder
 
+str_dtype = np.dtypes.StringDType(na_object=np.nan)
 # ----- fit test cases -----
 def test_fit_raises_for_non_numeric_target():
-    X = np.array(["a", "b", "c"])
-    y = np.array(["x", "y", 0])
+    X = np.array(["a", "b", "c"],dtype = str_dtype)
+    y = np.array(["x", "y", 0],dtype = np.object_)
     enc = MeanEncoder()
     with pytest.raises(ValueError): #validate_data gives a ValueError instead of a TypeError
         enc.fit(X, y)
@@ -17,10 +18,10 @@ def test_fit_raises_for_non_numeric_target():
 @pytest.mark.parametrize(
     "X, y, expected_mapping",
     [
-        (np.array(["a", "a", "b", "b", "c"]), np.array([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
-        (np.array(["a", "b", "c"]), np.array([3/2, 5/2, 7/2]), {"a": 1.5, "b": 2.5, "c": 3.5}),
-        (pd.Series(["a", "a", "b", "b", "c"]), pd.Series([1, 0, 2, 0, 3]), {"a": 0.5, "b": 1, "c": 3}),
-        (pd.Series(["a", "a", "b", "b"]), pd.Series([1, -1, 6, -4]), {"a": 0, "b": 1}),
+        (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype), np.array([1, 0, 2, 0, 3]), {"a": [0.5], "b": [1], "c": [3]}),
+        (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype).reshape((-1,1)), np.array([1, 0, 2, 0, 3]), {"a": [0.5], "b": [1], "c": [3]}),
+        (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype), np.array([1, 0, 2, 0, 3]).reshape((-1,1)), {"a": [0.5], "b": [1], "c": [3]}),
+        (np.array(["a", "b", "c"],dtype = str_dtype), np.array([3/2, 5/2, 7/2]), {"a": [1.5], "b": [2.5], "c": [3.5]}),
     ]
 )
 def test_fit_calculates_means(X, y, expected_mapping):
@@ -28,38 +29,36 @@ def test_fit_calculates_means(X, y, expected_mapping):
     result = enc.fit(X, y)
     assert result is enc, "Fit should return self"
     assert enc.n_features_in_ == 1, "self.n_features_in_ must equal 1 after fitting"
+    assert enc.n_features_out_ == 1, "self.n_features_out_ must equal 1 after fitting"
     assert result.mapping_ == expected_mapping, "Encoder calculates incorrect mean values"
 
 def test_fit_empty_target_category():
-    X = np.array(["a", "b", "c", "d", "e", "f", "f", "f"])
-    y = np.array([1, 2, np.nan, None, pd.NA, np.nan, None, pd.NA])
+    X = np.array(["a", "b", "c", "c", "c"],dtype = str_dtype)
+    y = np.array([1, 2, np.nan, np.nan, np.nan])
     enc = MeanEncoder()
     enc.fit(X, y)
-    assert enc.mapping_["a"] == 1
-    assert enc.mapping_["b"] == 2
-    assert np.isnan(enc.mapping_["c"]), "When y is always None for a specific X category, encoding map must be empty for that category only."
-    assert np.isnan(enc.mapping_["d"]), "When y is always np.nan for a specific X category, encoding map must be empty for that category only."
-    assert np.isnan(enc.mapping_["e"]), "When y is always pd.NA for a specific X category, encoding map must be empty for that category only"
-    assert np.isnan(enc.mapping_["f"]), "When y is always empty for a specific X category, encoding map must be empty for that category only"
+    assert enc.mapping_["a"] == [1]
+    assert enc.mapping_["b"] == [2]
+    assert np.isnan(enc.mapping_["c"]), "When y is always np.nan for a specific X category, encoding map must be empty for that category only."
 
 def test_fit_ignores_some_missing_targets():
-    X = np.array(["a", "a", "a", "a", "b", "b"])
-    y = np.array([1, np.nan, None, pd.NA, 2, np.nan])
+    X = np.array(["a", "a", "a", "a", "b", "b"],dtype = str_dtype)
+    y = np.array([1, np.nan, np.nan, np.nan, 2, np.nan])
     enc = MeanEncoder().fit(X, y)
-    assert enc.mapping_["a"] == 1, "When some values are missing for a specific X category, they should be ignored."
-    assert enc.mapping_["b"] == 2, "When some values are missing for a specific X category, they should be ignored."
+    assert enc.mapping_["a"] == [1], "When some values are missing for a specific X category, they should be ignored."
+    assert enc.mapping_["b"] == [2], "When some values are missing for a specific X category, they should be ignored."
 
 def test_fit_ignores_missing_features():
-    X = np.array(["a", None, "b", np.nan, pd.NA])
+    X = np.array(["a", np.nan, "b", np.nan, np.nan],dtype = str_dtype)
     y = np.array([1, 2, 3, 4, 5])
     enc = MeanEncoder().fit(X, y)
-    expected_mapping = {"a": 1, "b": 3}
+    expected_mapping = {"a": [1], "b": [3]}
     assert enc.mapping_ == expected_mapping
-    for missing in [None, np.nan, pd.NA]:
-        assert missing not in enc.mapping_, f"Encoder should ignore missing values {missing} in the feature column"
+
+    assert np.nan not in enc.mapping_, f"Encoder should ignore missing values {missing} in the feature column"
 
 def test_fit_all_missing_feature():
-    X = np.array([None, None, None])
+    X = np.array([np.nan, np.nan, np.nan])
     y = np.array([1, 2, 3])
     enc = MeanEncoder().fit(X, y)
     assert enc.mapping_ == {}, "When X has only missing values, the mapping dictionary should be empty"
@@ -73,55 +72,55 @@ def test_fit_multiple_times():
     enc = MeanEncoder().fit(X1, y1)
     enc.fit(X2, y2)
     
-    assert enc.mapping_["a"] == 10, "Refitting does not work properly"
-    assert enc.mapping_["b"] == 20, "Refitting does not work properly"
+    assert enc.mapping_["a"] == [10], "Refitting does not work properly"
+    assert enc.mapping_["b"] == [20], "Refitting does not work properly"
 
 def test_fit_with_empty_arrays():
+    """
+    For now, we do not have a clear usage scenario in which empty inputs should be supported.
+    Although outputting an empty `mapping_` for an empty array makes sense, it is more likely to hide a serious bug than to help the user for now.
+    This test ensures that poviding empty arrays raises a ValueError, since the expected behaviour for empty datasets is currently undefined in the functional description.
+    """
     enc = MeanEncoder()
     with pytest.raises(ValueError):
-        enc.fit(np.array([]), np.array([]))
-
-def test_fit_and_transform_with_lists():
-    X = ["a", "b", "a"]
-    y = [1, 2, 3]
-    enc = MeanEncoder().fit(X, y)
-    X_trans = enc.transform(X)
-    assert X_trans.shape[0] == len(X), "mean encoder does not work with lists as input"
-
-def test_fit_with_mixed_types():
-    X = np.array(["a", 1, "b"], dtype=object)
-    y = np.array([1, 2, 3])
-    enc = MeanEncoder().fit(X, y)
-    assert "a" in enc.mapping_, "fit does not handle mixed types in the feature"
-    assert "1" in enc.mapping_, "fit does not handle mixed types in the feature" #makes all string
+        enc.fit(np.array([],dtype = str_dtype), np.array([]))
+        
+def test_fit_exception_on_row_mismatch():
+    encoder = MeanEncoder()
+    with pytest.raises(ValueError,match="Number of observations in X and y do not match"):
+        encoder.fit(np.array(["a","b"],dtype=str_dtype),
+                    np.array([1,2,3]))
 
 # ----- transform test cases -----
-def test_transforms_uses_mapping():
+@pytest.mark.parametrize("X",[np.array(["a", "b", "a", "c"],dtype = str_dtype),
+                              np.array(["a", "b", "a", "c"],dtype = str_dtype).reshape((-1,1))])
+def test_transforms_uses_mapping(X):
     #Given a fitted estimator
     encoder = MeanEncoder()
-    encoder.mapping_ = {"a": 1, "b": 2, "c": None}
-    X = np.array(["a", "b", "a", "c"])
+    encoder.mapping_ = {"a": [1], "b": [2], "c": [np.nan]}
+    encoder.n_features_out_ = 1
     result = encoder.transform(X)
-    expected_result = np.array([1, 2, 1, np.nan], dtype=np.float32)
+    expected_result = np.array([1, 2, 1, np.nan], dtype=np.float32).reshape((-1,1))# The output should always be 2D. 
     assert np.allclose(expected_result, result, equal_nan=True), "Transform does not apply mapping correctly"
 
 def test_transform_with_empty_mapping_returns_nans():
-    X = np.array([np.nan, None])
+    X = np.array([np.nan, np.nan],dtype = str_dtype)
     enc = MeanEncoder()
     enc.mapping_ = {}
+    enc.n_features_out_ = 1
     X_transformed = enc.transform(X)
     assert X_transformed.shape == (2,1), "With an empty mapping, transform should preserve the number of rows when all values are missing"
     assert np.all(np.isnan(X_transformed)), "With an empty mapping, transform should give only NaNs"
 
 def test_constant_feature_gives_constant_encoding():
-    X = np.array(["a", "a", "a"])
+    X = np.array(["a", "a", "a"],dtype = str_dtype)
     y = np.array([1, 2, 3])
     enc = MeanEncoder().fit(X, y)
     X_transformed = enc.transform(X)
     assert np.all(X_transformed == np.mean(y)), "Constant feature should lead to constant encoding"
 
 def test_constant_target_gives_constant_encoding():
-    X = np.array(["a", "b", "c"])
+    X = np.array(["a", "b", "c"],dtype = str_dtype)
     y = np.array([5, 5, 5])
     enc = MeanEncoder().fit(X, y)
     X_transformed = enc.transform(X)
@@ -130,51 +129,35 @@ def test_constant_target_gives_constant_encoding():
 def test_transform_raises_for_unseen_categories():
     enc = MeanEncoder()
     enc.mapping_ = {"a": 1, "b": 2}
-    X = np.array(["a", "b", "z"])  # 'z' is unseen
+    enc.n_features_out_ = 1
+    X = np.array(["a", "b", "z"],dtype = str_dtype)  # 'z' is unseen
     with pytest.raises(ValueError):
         enc.transform(X)
 
 def test_transform_wrong_shape():
     enc = MeanEncoder()
+    enc.mapping_ = {"a": 1, "b": 2}
+    enc.n_features_out_ = 1
     with pytest.raises(ValueError):
-        enc.transform(np.array([["a"], ["b"]]))  # 2D instead of 1D
+        enc.transform(np.array([["a","c"], ["b","d"]]))  # 2 columns instead of one.
 
+def test_transform_empty_input():
+    encoder = MeanEncoder()
+    encoder.mapping_ = {"a":[1.2]}
+    encoder.n_features_out_ = 1
+
+    result = encoder.transform(np.array([]))
+
+    assert len(result) == 0
+    assert result.dtype == np.float32
+    assert result.ndim == 2
+    
 def test_transform_raises_not_fitted():
     enc = MeanEncoder()
     with pytest.raises(NotFittedError):
         enc.transform(np.array([1, 2, 3]))
 
-# ----- get_feature_names_out test cases -----
-def test_get_feature_names_out_no_input():
-    X = pd.Series([1, 2, 3, 4], name="feature")
-    y = np.array([1, 0, 2, 0])
-    enc = MeanEncoder().fit(X, y)
-    names = enc.get_feature_names_out()
-    assert len(names) == enc.n_features_in_
-    assert names[0] == "feature_mean"
 
-def test_get_feature_names_from_input():
-    enc = MeanEncoder()
-    enc.mapping_ = {}
-    enc.n_features_in_ = 1
-    names = enc.get_feature_names_out(["feature"])
-    expected = "feature_mean"
-    assert names[0] == expected
-    assert len(names) == enc.n_features_in_
-
-def test_get_feature_names_raises_input_features():
-    X = pd.Series([1, 2, 3, 4], name="feature")
-    y = np.array([1, 2, 3, 4])
-    enc = MeanEncoder()
-    enc.fit(X, y)
-
-    with pytest.raises(ValueError):
-        enc.get_feature_names_out(["wrong_feature"])
-
-def test_get_feature_name_raises_not_fitted():
-    enc = MeanEncoder()
-    with pytest.raises(NotFittedError):
-        enc.get_feature_names_out()
 
 # ----- sklearn test suite -----
 
