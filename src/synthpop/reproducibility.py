@@ -61,6 +61,8 @@ class RandomStateManager():
 
         :returns: an integer that can be used as a seed.
 
+    Examples
+    --------
         >>> from reproducibility import RandomStateManager
         >>> class UsesRandom:
         ...     def fit(self,X,y):
