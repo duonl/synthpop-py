@@ -15,13 +15,14 @@ from synthpop.data_processing.missing_value_handling import BaseMissingValueHand
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
-from synthpop._validation import validate_dict_x, validate_y
+from synthpop.utils import validate_y
+from synthpop.utils import validate_dict_x
 
 
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions.
-    :param encoder: an transformer object. Default is PCA encoder.
+    :param encoder: an transformer object.
     :param missing_handler: handler for missing values in the target variable.
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
     
@@ -59,10 +60,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         :param y: target to synthesise.
 
         """
-        if hasattr(y, "name"):
-            self.target_name_ = y.name
-        else:
-            self.target_name_ = None
+
+        self.target_name_ = getattr(y, "name", None)
         X_val, n_samples = validate_dict_x(X)
         y = validate_y(y, n_samples)
 
@@ -116,14 +115,15 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return result
 
     def get_feature_names_out(self, input_features=None):
+
+        if not (self.target_name_ is None):
+            return [self.target_name_]
+        
         if input_features is None:
             input_features = getattr(self, "feature_order_", [])
             return input_features
 
-        if self.target_name_ is None:
-            return [input_features]
-
-        return [self.target_name_]
+        return input_features
 
     @abstractmethod
     def _get_encoder(self):
@@ -141,9 +141,9 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         tags = super().__sklearn_tags__()
         tags.estimator_type = "transformer"
         tags.target_tags.required = True
-        tags.input_tags.two_d_array = True
-        tags.input_tags.categorical = True
-        tags.input_tags.string = True
+        tags.input_tags.two_d_array = False
+        tags.input_tags.categorical = False 
+        tags.input_tags.string = False
         tags.input_tags.dict = True
         tags.input_tags.allow_nan = True
         return tags
@@ -152,11 +152,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 class TreeClassifierMethod(_AbstractTreeMethod):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
-    :param encoder: an transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
+    :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
-    Example
+    Examples
     --------
         >>> from synthpop.methods.cart_synth import TreeClassifierMethod
         >>> import numpy as np
@@ -193,12 +193,12 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 class TreeRegressorMethod(_AbstractTreeMethod):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
-    :param encoder: an transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
+    :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
 
-    Example
+    Examples
     --------
         >>> from synthpop.methods.cart_synth import TreeRegressorMethod
         >>> import numpy as np
