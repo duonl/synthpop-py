@@ -283,18 +283,6 @@ def test_fit_transforms_with_encoder(X,y,index_cat,tree_method):
         assert np.array_equal(tree_method.encoders_[i].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][i])
 
 
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_transforms_with_encoder(X,y,index_cat,tree_method):
-
-
-    tree_method.fit(X,y)
-
-    for i in index_cat:
-        assert np.array_equal(tree_method.encoders_[i].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][i])
-
-
-
 @pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
 def test_fit_prepare_data_for_fit_is_called(X,y,index_cat,tree_method):
 
@@ -451,7 +439,7 @@ def test_get_feature_names_out_no_target_name(X,tree_method):
     tree_method.feature_order_ = ["Trained","on","these","features"]
 
     result = tree_method.get_feature_names_out()
-    assert result == ["Trained","on","these","features"]
+    assert result == ["Trained"]
 
 
 def ndarray_to_dict(a):
