@@ -12,17 +12,17 @@ class RandomStateManager():
     Example:
         >>> from reproducibility import RandomStateManager
         >>> RandomStateManager.set_root_seed(42)
-        >>> RandomStateManager.get_rng(seed=7).integers(0, 100, 3)
+        >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
         array([48, 51, 33])
-        >>> RandomStateManager.get_rng(seed=7).integers(0, 100, 3)
+        >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
         array([48, 51, 33])
         >>> with RandomStateManager(6):     
-        ...   RandomStateManager.get_rng(seed=7).integers(0, 100, 3)
-        ...   RandomStateManager.get_rng(seed=7).integers(0, 100, 3)
+        ...   RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
+        ...   RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
         ...
         array([79, 17,  7])
         array([79, 17,  7])
-        >>> RandomStateManager.get_rng(seed=7).integers(0, 100, 3)
+        >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
         array([48, 51, 33])
 
     """
@@ -68,7 +68,7 @@ class RandomStateManager():
         """
         Creates an RNG.
         Same root seed + same seed => same RNG.
-        This means that executing `RandomStateManager.get_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
+        This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
 
         The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
         """
