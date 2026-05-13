@@ -9,7 +9,8 @@ class RandomStateManager():
 
     Instances of this class can be used as a context manager to temporary switch seed:
     
-    Example:
+    Examples
+    --------
         >>> from reproducibility import RandomStateManager
         >>> RandomStateManager.set_root_seed(42)
         >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
