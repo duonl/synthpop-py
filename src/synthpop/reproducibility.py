@@ -59,6 +59,11 @@ class RandomStateManager():
         The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
 
         :returns: an integer that can be used as a seed.
+
+        >>> from reproducibility import RandomStateManager
+        >>> class UsesRandom:
+        ...     def fit(self,X,y):
+        ...             self.random_state_ = RandomStateManager.create_new_seed()
         """
         return cls._seed_sequence.spawn(1)[0].generate_state(1)
 
