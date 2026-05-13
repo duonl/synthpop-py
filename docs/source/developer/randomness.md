@@ -17,8 +17,8 @@ Most of the recommendations of NumPy and the requirements from the functional de
 If you are developing an estimator in this package, the guidelines by scikit-learn apply mostly. The points where we deviate are:
 
 - use **`numpy.random.Generator`** instead of `numpy.random.RandomState`.
-- if no seed is provided in the initialiser, use `RandomStateManager.get_new_seed()` to obtain a deterministic instance seed.
-- use **`RandomStateManager.get_rng(self.random_state_ )`** instead of `check_random_state` to obtain an RNG.
+- if no seed is provided in the initialiser, use `RandomStateManager.create_new_seed()` to obtain a deterministic instance seed.
+- use **`RandomStateManager.create_rng(self.random_state_ )`** instead of `check_random_state` to obtain an RNG.
 - do **not** store the RNG in the object. 
 Using one RNG for the entire object breaks the requirement that methods in this package should yield the same output when called multiple times.
 
@@ -41,14 +41,14 @@ def __init__(self, random_state: int | None = None):
 ```python
 from reproducibility import RandomStateManager
 def fit(self, X, y):
-    self.random_state_ = RandomStateManager.get_new_seed() if self.random_state is None else self.random_state
+    self.random_state_ = RandomStateManager.create_new_seed() if self.random_state is None else self.random_state
 ```
 This root seed is set at the beginning of the synthesis pipeline when creating a `Synthesiser` object. `RandomStateManager` actually derives the instance seed from the root seed.
 
 **3. Create RNGs on demand and do not store them**:
 ```python
 def transform(self, X):
-    rng = RandomStateManager.get_rng(self.random_state_)
+    rng = RandomStateManager.create_rng(self.random_state_)
 ```
 
 **4. Never share RNGs across methods or components**:
@@ -75,13 +75,13 @@ class GaussianNoise(BaseEstimator, TransformerMixin):
 
     # the arguments are ignored anyway, so we make them optional
     def fit(self, X=None, y=None):
-        self.random_state_ = RandomStateManager.get_new_seed() if self.random_state is None else self.random_state
-        rng = RandomStateManager.get_rng(self._seed)
+        self.random_state_ = RandomStateManager.create_new_seed() if self.random_state is None else self.random_state
+        rng = RandomStateManager.create_rng(self._seed)
         # use the RNG when fitting if needed.
 
     def transform(self, X):
         n_samples = X.shape[0]
-        rng = RandomStateManager.get_rng(self._seed)
+        rng = RandomStateManager.create_rng(self._seed)
         return rng.integers(0, 100, size=n_samples)
 ```
 
@@ -91,7 +91,7 @@ Some libraries (including scikit-learn) expect a "random state" argument. In tho
 ## Anti-patterns (do not do this)
 **Storing RNGS**
 ```python
-self.rng = RandomStateManager.get_rng(self.seed)
+self.rng = RandomStateManager.create_rng(self.seed)
 ```
 This breaks reproducibility across repeated calls.
 
