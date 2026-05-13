@@ -1,474 +1,287 @@
+"""
+This module contains the CART method for synthesising data. 
+"""
+from abc import abstractmethod, ABCMeta
+from typing import Self
 import pandas as pd
-import numpy as np
-import numpy.typing as npt
-import pytest
 from sklearn import clone
-from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.exceptions import NotFittedError
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
+from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
+import numpy.typing as npt
+import numpy as np
+from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
+from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
+    MissingValuePredictor, ReplaceNoneWithValue
+from synthpop.methods import base_synth
+from synthpop.methods.tree_utils import LeafNodeSampler
+import synthpop.methods.tree_utils as tree_utils
+from synthpop.utils import validate_y
+from synthpop.utils import validate_dict_x
 
-from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
-from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod
-from sklearn.utils.estimator_checks import parametrize_with_checks
 
-import copy
+class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
+    """
+    :param tree: a Decision Tree to construct the conditional probability distributions.
+    :param encoder: an transformer object.
+    :param missing_handler: handler for missing values in the target variable.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    
+    """
 
-# stubs ---------------------------
-class TransformStub(TransformerMixin, BaseEstimator):
+    def __init__(self, *,tree: BaseDecisionTree | None = None,
+                  encoder: TransformerMixin | None = None,
+                 missing_handler: BaseMissingValueHandler | None = None,
+                 tree_sampler: LeafNodeSampler | None = None,
+                 ):
+        super().__init__()
+        self.encoder = encoder
+        self.missing_handler = missing_handler
+        self.tree_sampler = tree_sampler
+        self.tree = tree
 
-    def __init__(self, fit_return_value=None, transform_return_value=None):
-        self.transform_return_value = transform_return_value
-        self.fit_return_value = fit_return_value
+    def _new_encoder(self):
+        return clone(self.encoder) if self.encoder is not None else self._get_encoder()
 
-    def fit(self, X, y):
-        self.fit_X_ = X
-        self.fit_y_ = y
+    def _new_missing_handling(self):
+        return clone(self.missing_handler) if self.missing_handler is not None else self._get_missing_handling()
+
+    def _new_tree_sampler(self):
+        return clone(self.tree_sampler) if self.tree_sampler is not None else LeafNodeSampler()
+
+    def _new_tree(self):
+        return clone(self.tree) if self.tree is not None else self._get_tree()
+
+
+    def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
+        """
+        Fit to predict `y` using `X`
+
+        :param X: features to predict `y`.
+        :param y: target to synthesise.
+
+        """
+
+        self.target_name_ = getattr(y, "name", None)
+        X_val, n_samples = validate_dict_x(X)
+        y = validate_y(y, n_samples)
+
+        self.n_features_in_ = len(X.keys())
+        self.feature_order_ = list(X.keys())
+
+        self.encoders_ = {name: self._new_encoder().fit(value, y) for (
+            name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
+        self.missing_handler_ = self._new_missing_handling()
+
+        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(X_val, y)
+        
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in prepared_for_fit_X.items()}
+        all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
+
+        self.tree_ = self._new_tree().fit(all_features, prepared_y)
+
+        leaf_ids = self.tree_.apply(all_features)
+
+        self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids, prepared_y)
+
         return self
 
-    def transform(self, X):
-        self.transform_X_ = X
-        return self.transform_return_value
+    def transform(self, X: dict[str, npt.ArrayLike]) -> np.ndarray:
+        """
+        Synthesise new column
 
-    def fit_transform(self, X, y=None, **fit_params):
-        self.fit_X_ = X
-        self.transform_X_ = X
-        self.fit_y_ = y
+        :param X: features used to predict the target variable.
 
-        return self.transform_return_value
-    
+        :return: synthesised column. The name of the synthesised column is the same as the observed column.
 
-@pytest.fixture
-def encoder():
-    #The result of the transform of encoding is always a 2D np.array of float32, with one or more columns
-    return TransformStub(transform_return_value=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
+        """
 
+        # Apply encoding, sample, apply (inverse) handling of missing values.
+        check_is_fitted(self)
+        X_val, _ = validate_dict_x(X)
 
-class StubMissingHandler(BaseMissingValueHandler):
-    
-    def __init__(self, prepared_for_fit_result,post_synth_transform_result):
-        self.prepared_for_fit_result = prepared_for_fit_result
-        self.post_synth_transform_result = post_synth_transform_result
-    
-    def prepare_data_for_fit(self, X, y):
-        self.prepare_data_for_fit_X = X
-        self.prepare_data_for_fit_y = y
-        return self.prepared_for_fit_result
-    
-    def post_synth_transform(self, X, y):
-        self.post_synth_transform_X = X
-        self.post_synth_transform_y = y
-        return self.post_synth_transform_result
-    
-    def clone(self):
-        return copy.copy(self)
-    
-    def __sklearn_clone__(self):
-        return copy.copy(self)
+        n_features_given = len(X.keys())
+        if n_features_given != self.n_features_in_:
+            raise ValueError(
+                f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
-@pytest.fixture
-def missing_handling(request):
+        
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in X_val.items()}
 
-    # The result X of prepare_data_for_fit must contain the same columns as X
-    X = request.node.callspec.params["X"]
-    X_prepare_res = {k:np.array([k]*3) for k in X.keys()}
-    y_prepare_res = np.arange(0,3)
+        all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
+        leaf_ids = self.tree_.apply(all_features)
 
-    y_post_synthesis_result = np.arange(3,6)
-    return StubMissingHandler(prepared_for_fit_result=(X_prepare_res,y_prepare_res),post_synth_transform_result=y_post_synthesis_result)
+        sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
+        result = self.missing_handler_.post_synth_transform(X_val, sample)
+        return result
 
+    def get_feature_names_out(self, input_features=None):
 
+        if not (self.target_name_ is None):
+            return [self.target_name_]
+        
+        if input_features is None:
+            input_features = getattr(self, "feature_order_", [])
+            return [input_features[0]]
 
-class StubLeafNodeSampler():
-    def __init__(self,sample_from_leaves_return_value):
-        self.sample_from_leaves_return_value = sample_from_leaves_return_value
-    
-    def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike):
-        self.fit_sampler_leaf_ids = leaf_ids
-        self.fit_sampler_y = y
-        return self
-    
-    def sample_from_leaves(self, leaf_ids: npt.ArrayLike) -> np.ndarray:
-        self.sample_from_leaves_leaf_ids = leaf_ids
-        return self.sample_from_leaves_return_value
-    
-    def __sklearn_clone__(self):
-        return copy.copy(self)
+        return input_features
 
-@pytest.fixture
-def leafnode_sampler():
-    return StubLeafNodeSampler(sample_from_leaves_return_value=np.array([1,2,3,4]))
-
-
-class StubTree():
-    def __init__(self,apply_result=None):
-        self.apply_result=apply_result
+    @abstractmethod
+    def _get_encoder(self):
         pass
 
-    def fit(self,X,y):
-        self.fit_X_ = X
-        self.fit_y_ = y
-        return self
-    
-    def apply(self,X):
-        self.apply_X_ = X
-        return self.apply_result
-    def __sklearn_clone__(self):
-        return copy.copy(self)
+    @abstractmethod
+    def _get_missing_handling(self):
+        pass
 
-class TestTreeMethod(_AbstractTreeMethod):
-    def __init__(self, *,
-                 encoder = None,
-                missing_handling = None,
-                tree_sampler = None,
-                tree = None):
-        super().__init__(encoder=encoder, missing_handler=missing_handling, tree_sampler=tree_sampler,tree=tree)
+    @abstractmethod
+    def _get_tree(self):
+        pass
 
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.estimator_type = "transformer"
+        tags.target_tags.required = True
+        tags.input_tags.two_d_array = False
+        tags.input_tags.categorical = False 
+        tags.input_tags.string = False
+        tags.input_tags.dict = True
+        tags.input_tags.allow_nan = True
+        return tags
+
+
+class TreeClassifierMethod(_AbstractTreeMethod):
+    """
+    :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
+    :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
+    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+
+    Examples
+    --------
+        >>> from synthpop.methods.cart_synth import TreeClassifierMethod
+        >>> import numpy as np
+        >>> tree_method = TreeClassifierMethod()
+        >>> X = {
+        ...         "column1":np.array([1.1,2.2]),
+        ...         "column2":np.array([1.4,1.2]),
+        ...         "column3":np.array(["a","b"])
+        ...         }
+        >>> y = np.array(["x","y"])
+        >>> tree_method.fit(X,y)
+        TreeClassifierMethod()
+        >>> tree_method.transform(X)
+        array(['x', 'y'], dtype='<U1')
+
+    """
+
+    def __init__(self, *, tree=None,encoder=None, missing_handler=None, tree_sampler=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler,
+                         tree_sampler=tree_sampler, tree=tree)
 
     def _get_encoder(self):
-        return TransformStub()
-    
-    def _get_tree(self):
-        return StubTree()
-    
+        return PCAEncoder()
+
     def _get_missing_handling(self):
-        return super()._get_missing_handling()
-    
-@pytest.fixture
-def tree_method(encoder,missing_handling,leafnode_sampler):
-    return TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
-
-@pytest.fixture()
-def fitted_tree(tree_method,request):
-
-    X = request.node.callspec.params["X"]
-    cat_index = request.node.callspec.params["index_cat"]
-    tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
-    tree_method.missing_handler_ = clone(tree_method.missing_handler)
-    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
-    tree_method.tree_ = clone(tree_method.tree)
-    tree_method.n_features_in_ = len(X.keys())
-
-    tree_method.feature_order_ = list(X.keys())
-
-    return tree_method
-
-
-
-#---------------------------------------------------
-
-def assert_dict_array_equal(expected,actual):
-
-    for (k,v) in expected.items():
-        assert np.array_equal(v,actual[k]), f"expected (key = {k}): {v}. Actual: {actual[k]}"
-
-    assert len(expected.keys()) == len(actual.keys()), f"actual has more keys than expected. Expected: {len(expected.keys())}. Actual: {actual.keys()}"
-
-# Test data ---------------------------------------------------------------------------------------
-
-
-def get_input_test_data():
-
-    X1 = {
-        "num_1":np.array([1,2,5,2,5,3]),
-        "cat_1":["a","b","c","d","e","f"],
-        "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
-        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
-    }
-
-    X2 = {
-        "num_1":np.array([1,2,5,2,5,3]),
-        "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
-    }
-
-    X3 = {
-        "cat_1":np.array(["a","b","c","d","e","f"]),
-        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
-    }
-
-    y1 = np.array([1.2,2.3,3.4,5.6,7.8,8.9])
-    y2 = np.array(["a","b","c","d","e","f"])
-
-
-    # Some tests need a ground truth of which columns are categorical.
-    # That is why a list of categorical columns is supplied to each test.
-    base_cases_numpy = [ (X1,y1,["cat_1","cat_2"]),
-                        (X2,y2,[]),
-                        (X3,y1,["cat_1","cat_2"]),
-                        ]
-
-    return base_cases_numpy
-
-def get_exp_feature_matrix():
-    return np.array([[1,2],[3,4]])
-# Fixtures ----------------------------------------------------------------------------------------
-
-
-@pytest.fixture
-def apply_result(missing_handling):
-    n = len(missing_handling.prepared_for_fit_result[0])
-    apply_result = np.array([i%3 for i in range(n)])
-    return apply_result
-
-
-@pytest.fixture(autouse=True)
-def stub_build_feature_matrix(request,monkeypatch):
-    # The test should not use the real implementation of build_feature_matrix.
-    # The test should use a stub of that function instead.
-    # There is one exception to this: the standard tests of sklearn do need the real build_feature_matrix.
-
-    # setting autouse=True causes this fixture to be used in every test.
-    # to enable the exception, we check for the 'noautofixt' mark.
-    if 'noautofixt' in request.keywords:
-        return
-    
-    #We need to import tree utils here so that we can replace build_feature_matrix with our stub.
-    from synthpop.methods import tree_utils
-
-    # We define the stub
-    def stub_build_feature_matrix(X,feature_order):
-        return get_exp_feature_matrix()
-    
-    # and use monkey patching to replace the method with the stub.
-    monkeypatch.setattr(tree_utils,"build_feature_matrix",stub_build_feature_matrix)
-
-
-# test fit ----------------------------------------------------------------------------------------
-@pytest.mark.parametrize(
-    "X",
-    [
-        {"a": [[1, 2]], "b": [1, 2]},   # 2-dimensional
-        {"a": [], "b": [1, 2]},         # empty column
-        {"a": [1, 2], "b": [1]},        # length mismatch
-        {"a": []},                       # empty key
-        {}
-    ],
-)
-def test_validate_fit_raises_bad_shapes(tree_method, X):
-    y = [0,1]
-    with pytest.raises(ValueError):
-        tree_method.fit(X, y)
-
-@pytest.mark.parametrize(
-        "X,y", [({1:[1,2]}, y) for y in [{"a": [1, 2]}, [[1], [2]], None, "invalid", 123, []]])
-def test_validate_fit_raises_invalid_y(tree_method,X, y):
-    with pytest.raises(ValueError):
-        tree_method.fit(X, y)
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_n_features_in(X,y,index_cat,tree_method):
-
-    tree_method.fit(X, y)
-    assert tree_method.n_features_in_ == len(X)
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_trains_encoder(X,y,index_cat,tree_method):
-
-    
-    tree_method.fit(X,y)
-
-    for i in index_cat:
-        assert np.array_equal(tree_method.encoders_[i].fit_X_,X[i])
-        assert np.array_equal(tree_method.encoders_[i].fit_y_,y)
-        assert not ( tree_method.encoders_[i] is tree_method.encoder)
-
-        for i2 in index_cat:
-            assert (not ( tree_method.encoders_[i] is tree_method.encoders_[i2])) or i2==i
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_transforms_with_encoder(X,y,index_cat,tree_method):
-
-
-    tree_method.fit(X,y)
-
-    for i in index_cat:
-        assert np.array_equal(tree_method.encoders_[i].transform_X_,tree_method.missing_handler_.prepared_for_fit_result[0][i])
-
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_prepare_data_for_fit_is_called(X,y,index_cat,tree_method):
-
-    tree_method.fit(X,y)
-
-    assert_dict_array_equal(expected=X,actual=tree_method.missing_handler_.prepare_data_for_fit_X)
-
-    assert np.array_equal(tree_method.missing_handler_.prepare_data_for_fit_y,y)
-    assert not (tree_method.missing_handler_ is tree_method.missing_handler)
-
-@pytest.mark.parametrize("X,y",[(v[0],v[1]) for v in get_input_test_data()])
-def test_fit_sets_order(X,y,tree_method):
-
-    tree_method.fit(X,y)
-
-    assert list(X.keys()) == tree_method.feature_order_
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_build_feature_matrix(X,y,index_cat,tree_method,mocker):
-    from synthpop.methods import tree_utils
-
-    spy = mocker.spy(tree_utils,"build_feature_matrix")
-
-    tree_method.fit(X,y)
-    X_exp = {k: tree_method.encoders_[k].transform_return_value if k in index_cat else v for (k,v) in tree_method.missing_handler_.prepared_for_fit_result[0].items()}
-
-    expected_order = tree_method.feature_order_
-    spy.assert_called_once_with(X_exp,expected_order)
-    
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_tree_is_fit(X,y,index_cat,tree_method):
-
-
-    tree_method.fit(X,y)
-
-    assert np.array_equal(get_exp_feature_matrix(),tree_method.tree_.fit_X_,equal_nan=True)
-
-    assert np.array_equal(tree_method.missing_handler_.prepared_for_fit_result[1],tree_method.tree_.fit_y_)
-
-
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_tree_is_applied(X,y,index_cat,tree_method):
-
-    tree_method.fit(X,y)
-
-    assert np.array_equal(get_exp_feature_matrix(),tree_method.tree_.apply_X_,equal_nan=True)
-
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_sampler_fit(X,y,index_cat,tree_method):
-    tree_method.fit(X,y)
-
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,tree_method.tree_.apply_result), "input of the sampler must be the output of the tree"
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler_.prepared_for_fit_result[1])
-    assert not (tree_method.tree_sampler is tree_method.tree_sampler_)
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_set_feature_names_out(X,y,index_cat,tree_method):
-
-    y = pd.Series(y,name="target_name")
-
-    tree_method.fit(X,y)
-
-    assert tree_method.target_name_ == "target_name"
-
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_set_feature_names_out_no_target_name(X,y,index_cat,tree_method):
-
-
-    tree_method.fit(X,y)
-
-    assert tree_method.target_name_ is None
-
-# test transform ----------------------------------------------------------------------------------
-
-
-
-@pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_encodes_data(X,index_cat,fitted_tree):
-
-    fitted_tree.transform(X)
-
-    for i in index_cat:
-        assert isinstance(fitted_tree.encoders_[i].transform_X_,np.ndarray)
-        assert np.array_equal(X[i],fitted_tree.encoders_[i].transform_X_)
-
-
-@pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_build_feature_matrix(X,index_cat,fitted_tree,mocker):
-    from synthpop.methods import tree_utils
-
-    spy = mocker.spy(tree_utils,"build_feature_matrix")
-    tree_method = fitted_tree 
-
-    # we need to verify that the feature order seen when fitting is used.
-    # setting feature_order_ to a random sequence guarantees that the tree method uses feature_order_ and does not use list(X.keys())
-    tree_method.feature_order_ = ["some","random","order"]
-
-    tree_method.transform(X)
-    X_exp = {k: tree_method.encoders_[k].transform_return_value if k in index_cat else v for (k,v) in X.items()}
-    spy.assert_called_once_with(X_exp,tree_method.feature_order_ )
-
-@pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_applies_fitted_tree(X,index_cat,fitted_tree):
-    tree_method =fitted_tree
-
-    tree_method.transform(X)
-
-    expected_input_for_tree = get_exp_feature_matrix()
-
-    assert np.array_equal(expected_input_for_tree,tree_method.tree_.apply_X_,equal_nan=True)
-
-
-
-@pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_uses_sampler(X,index_cat,fitted_tree):
-
-    tree_method =fitted_tree
-
-    tree_method.transform(X)
-
-    assert np.array_equal(tree_method.tree_.apply_result,tree_method.tree_sampler_.sample_from_leaves_leaf_ids)
-
-@pytest.mark.parametrize("X,index_cat",[(v[0],v[2]) for v in get_input_test_data()])
-def test_transform_calls_post_synth_transform(X,index_cat,fitted_tree):
-    
-    tree_method = fitted_tree
-
-    result = tree_method.transform(X)
-
-    assert_dict_array_equal(X, tree_method.missing_handler_.post_synth_transform_X)
-    assert np.array_equal(tree_method.tree_sampler_.sample_from_leaves_return_value,tree_method.missing_handler_.post_synth_transform_y)
-    assert np.array_equal(result, tree_method.missing_handler_.post_synth_transform_result)
-
-@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
-def test_transform_raises_error_when_not_fitted(X,tree_method):
-    
-    with pytest.raises(NotFittedError):
-        tree_method.transform(X)
-#general tests ------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
-def test_get_feature_names_out(X,tree_method):
-    tree_method.target_name_ = "name_of_target"
-
-    result = tree_method.get_feature_names_out()
-    assert result == ["name_of_target"]
-
-@pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
-def test_get_feature_names_out_no_target_name(X,tree_method):
-    tree_method.target_name_ = None
-    tree_method.feature_order_ = ["Trained","on","these","features"]
-
-    result = tree_method.get_feature_names_out()
-    assert result == ["Trained"]
-
-
-def ndarray_to_dict(a):
-    if isinstance(a,np.ndarray):
-        return {i: a[:,i] for i in range(a.shape[1])}
-    return a
-@parametrize_with_checks([TreeClassifierMethod(),TreeRegressorMethod()], legacy=False, expected_failed_checks=lambda x: {
-    "check_fit_score_takes_y":"tests with a score component"
-})
-@pytest.mark.noautofixt
-def test_TreeMethod_is_sklearn_compatible(estimator, check):
-    # sklearn provides valuable tests.
-    # Those test assume that the input is a numpy array.
-    # The tree methods assume that the input is a dictionary.
-
-    # We want to test if the tree method that the user is going to use are sklearn compatible.
-    # So we cannot use the TestTreeMethod as in all other tests.
-
-    # The solution is that a class is constructed in each sklearn test.
-    # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
-    class EstimatorWrap(estimator.__class__):
-        def fit(self,X,y):
-            return super().fit(ndarray_to_dict(X),y)
-        
-        def transform(self,X):
-            return super().transform(ndarray_to_dict(X))
-        
-    #This is needed to change the datatype of the estimator to the child class.
-    #estimator.__class__ = EstimatorWrap
-    wrapped = EstimatorWrap(**estimator.get_params())
-
-    check(wrapped)
+        return ReplaceNoneWithValue()
+
+    def _get_tree(self):
+        return DecisionTreeClassifier(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
+                                      min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
+                                      ,)
+
+
+class TreeRegressorMethod(_AbstractTreeMethod):
+    """
+    :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
+    :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+
+
+    Examples
+    --------
+        >>> from synthpop.methods.cart_synth import TreeRegressorMethod
+        >>> import numpy as np
+        >>> tree_method = TreeRegressorMethod()
+        >>> X = {
+        ...         "column1":np.array([1.1,2.2]),
+        ...         "column2":np.array([1.4,1.2]),
+        ...         "column3":np.array(["a","b"])
+        ...         }
+        >>> y = np.array([1,2])
+        >>> tree_method.fit(X,y)
+        TreeRegressorMethod()
+        >>> tree_method.transform(X)
+        array([1, 2])
+
+    """
+
+    def __init__(self, *, tree=None,encoder=None, missing_handler=None, tree_sampler=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler,
+                         tree_sampler=tree_sampler, tree=tree)
+
+    def _get_encoder(self):
+        return MeanEncoder()
+
+    def _get_missing_handling(self):
+        return MissingValuePredictor()
+
+    def _get_tree(self):
+        return DecisionTreeRegressor(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
+                                      min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
+                                      ,)
+
+
+class CartMethod(base_synth.BaseSynthMethod):
+    """
+    Assigns the right decision tree model based on the target variable data type: if numeric, we use a regressor, if categorical, we use a classifier.
+
+    :class:`CartMethod` is the default method in :class:`Synthesiser`. Following requirements of its parent class :class:`BaseSynthMethod`, a fit and a transform methods are implemented.
+
+    :param regressor: a TreeRegressorMethod object. It is the selected algorithm if the target variable is numeric. 
+    :param classifier: a TreeClassifierMethod object. It is the selected algorithm if the target variable is categorical.
+
+    """
+
+    def __init__(self, regressor: TreeRegressorMethod | None = None, classifier: TreeClassifierMethod | None = None) -> None:
+        super().__init__()
+        # see https://scikit-learn.org/stable/developers/develop.html#instantiation
+        self.reg = regressor
+        self.classi = classifier
+
+        # parameters of TreeRegressorMethod and TreeClassifierMethod should not be set in this __init__, for consistency:
+        # The user could specify contradicting values.
+
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
+        """
+        Assess data type of target variable and calls the :py:meth:`fit` of the correct regressor or classifier.
+
+        :param X: Features dataset.
+        :param y: Target variable. Length must be equal to number of rows in X.
+        :return: Fitted estimator.
+        """
+        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
+        # That method sets the attribute.
+        # For example:
+        # from sklearn.utils.validation import validate_data
+        # ....
+        # X, y = validate_data(self, X, y)
+
+        # The return values of (TreeRegressorMethod/TreeClassifierMethod).fit() should be stored in an attribute that ends in an underscore.
+        # In this way, the check_is_fitted method still works. See https://scikit-learn.org/stable/modules/generated/sklearn.utils.validation.check_is_fitted.html#sklearn.utils.validation.check_is_fitted
+
+        return self
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate a new column to ``X`` using the fitted model.
+
+        :param X: Input dataset
+        :return: Input dataset with predicted column.
+        """
+        # should call sklearn.utils.validation.check_is_fitted(self),
+        return pd.DataFrame()
+
+    def get_feature_names_out(self, input_features=None):
+        # delegates to TreeRegressorMethod/TreeClassifierMethod
+        pass
