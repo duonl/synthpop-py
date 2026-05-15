@@ -219,9 +219,9 @@ class LeafNodeSampler():
 
 def build_feature_matrix(X: dict[str, np.ndarray],feature_order:list[str]) -> np.ndarray:
 
-    if set(X.keys())>set(feature_order):
+    if len(set(X.keys())-set(feature_order))>0:
         raise ValueError("cannot build feature matrix: received more columns than expected")
-    if set(X.keys())<set(feature_order):
+    if len(set(feature_order)-set(X.keys()))>0:
         raise ValueError("cannot build feature matrix: received less columns than expected")
     if len(X.keys()) == 0:
         return np.empty(shape=(0,0))

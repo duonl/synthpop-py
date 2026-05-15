@@ -229,3 +229,22 @@ def test_no_information_lost_when_apply_tree(method,X,y):
 
     assert method.tree_.apply_X.shape[0] == list(X.values())[0].shape[0]
     assert method.tree_.apply_X.shape[1] == len(X.values())
+
+@pytest.mark.parametrize("estimator", [TreeRegressorMethod(),TreeClassifierMethod()])
+def test_transform_raises_when_feature_names_differ(estimator):
+    X_fit = {
+        "a": np.array([1, 2]),
+        "b": np.array([3, 4]),
+    }
+
+    y = np.array([0, 1])
+
+    estimator.fit(X_fit, y)
+
+    X_bad = {
+        "a": np.array([1, 2]),
+        "c": np.array([3, 4]),
+    }
+
+    with pytest.raises(ValueError):
+        estimator.transform(X_bad)

@@ -9,6 +9,9 @@ def to_stringdtype_array(x):
 
 
 def validate_dict_x(X):
+
+    if not isinstance(X, dict):
+        raise TypeError("X must be a dictionary of column arrays.")
     if len(X) == 0:
         raise ValueError("X must contain at least one feature.")
     first_len = None

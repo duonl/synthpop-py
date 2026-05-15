@@ -39,7 +39,7 @@ class TransformStub(TransformerMixin, BaseEstimator):
 @pytest.fixture
 def encoder():
     #The result of the transform of encoding is always a 2D np.array of float32, with one or more columns
-    return TransformStub(transform_return_value=np.array([1.1,2.2,3.3,4.4,5.5,6.6]))
+    return TransformStub(transform_return_value=np.array([[1.1],[2.2],[3.3],[4.4],[5.5],[6.6]]))
 
 
 class StubMissingHandler(BaseMissingValueHandler):

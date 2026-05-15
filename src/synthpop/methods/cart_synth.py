@@ -22,7 +22,7 @@ from synthpop.utils import validate_dict_x
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions.
-    :param encoder: an transformer object.
+    :param encoder: a transformer object.
     :param missing_handler: handler for missing values in the target variable.
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
     

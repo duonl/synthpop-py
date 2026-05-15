@@ -62,4 +62,22 @@ def test_build_feature_matrix_raise_on_columns_mismatch():
     with pytest.raises(ValueError,match="cannot build feature matrix: received less columns than expected"):
         result = build_feature_matrix(X,["a","b","c"])
 
+def test_build_feature_matrix_raise_on_wrong_column_names():
+    X = {
+        "a": np.array([1, 2]),
+        "c": np.array([3, 4]),
+    }
+
+    with pytest.raises( ValueError):
+        build_feature_matrix(X, ["a", "b"])
+
+def test_build_feature_matrix_raises_on_row_mismatch():
+    X = {
+        "a": np.array([1, 2]),
+        "b": np.array([3, 4, 5]),
+    }
+
+    with pytest.raises(ValueError):
+        build_feature_matrix(X, ["a", "b"])
+
 
