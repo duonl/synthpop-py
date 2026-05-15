@@ -15,7 +15,7 @@ from synthpop.data_processing.missing_value_handling import BaseMissingValueHand
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
-from synthpop.utils import validate_y
+from synthpop.utils import validate_y, validate_dict_x
 from synthpop.utils import validate_dict_x
 
 
