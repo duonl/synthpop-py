@@ -90,15 +90,15 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         :param X: features used to predict the target variable.
 
-        :return: synthesised column. The name of the synthesised column is the same as the observed column.
+        :return: synthesised column.
 
         """
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
-        check_is_fitted(
-    self,
-    ["tree_", "tree_sampler_", "missing_handler_", "feature_order_"]
-)
+        check_is_fitted(self
+                        ,["tree_", "tree_sampler_", "missing_handler_", "feature_order_"]
+                        )
+        
         X_val, _ = validate_dict_x(X)
 
         n_features_given = len(X.keys())
@@ -118,14 +118,22 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     def get_feature_names_out(self, input_features=None):
 
-        if not (self.target_name_ is None):
-            return [self.target_name_]
-        
         if input_features is None:
             input_features = getattr(self, "feature_order_", [])
-            return [input_features[0]]
 
-        return input_features
+        if self.target_name_ is None:
+            return [input_features]
+
+        return [self.target_name_]
+
+        # if not (self.target_name_ is None):
+        #     return [self.target_name_]
+        
+        # if input_features is None:
+        #     input_features = getattr(self, "feature_order_", [])
+        #     return [input_features[0]]
+
+        # return input_features
 
     @abstractmethod
     def _get_encoder(self):
