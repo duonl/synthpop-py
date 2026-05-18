@@ -439,7 +439,7 @@ def test_get_feature_names_out_no_target_name(X,tree_method):
     tree_method.feature_order_ = ["Trained","on","these","features"]
 
     result = tree_method.get_feature_names_out()
-    assert result == ["Trained"]
+    assert result == [["Trained","on","these","features"]]
 
 
 def ndarray_to_dict(a):
