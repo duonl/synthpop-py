@@ -16,7 +16,6 @@ from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
 from synthpop.utils import validate_y, validate_dict_x
-from synthpop.utils import validate_dict_x
 
 
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
@@ -96,7 +95,10 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
-        check_is_fitted(self)
+        check_is_fitted(
+    self,
+    ["tree_", "tree_sampler_", "missing_handler_", "feature_order_"]
+)
         X_val, _ = validate_dict_x(X)
 
         n_features_given = len(X.keys())
