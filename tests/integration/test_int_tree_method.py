@@ -98,8 +98,6 @@ def test_general_usage(method,X,y):
 def make_data_missing(X):
 
     for ik, k in enumerate(X.keys()):
-
-
         X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=np.dtypes.StringDType(na_object=np.nan))
 
     return X
@@ -187,6 +185,39 @@ def test_input_to_tree_is_array_of_float32(method,X,y):
 
     assert isinstance(method.tree_.apply_X,np.ndarray)
     assert method.tree_.apply_X.dtype == np.dtype(np.float32)
+
+@pytest.mark.parametrize("method,X,y",[
+    (rigged_tree_classifier_method(),*get_test_data_classifier()),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor()),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_missing_features= True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
+                                       ])
+def test_order_of_input_dict_does_not_change_output(method,X,y):
+
+    method.fit(X,y)
+
+    feature_matrix_fit = method.tree_.fit_X
+
+    method.transform(X)
+
+    feature_matrix_apply = method.tree_.apply_X
+
+    assert np.array_equal(feature_matrix_fit,feature_matrix_apply,equal_nan=True)
+
+    X_different_order = {k:X[k] for k in sorted(X.keys(),reverse=True)}
+
+    assert list(X_different_order.keys()) != list(X.keys()), "test invalid, order of features has not been changed"
+
+    method.transform(X_different_order)
+
+    feature_matrix_different_order = method.tree_.apply_X
+
+    assert np.array_equal(feature_matrix_fit,feature_matrix_different_order,equal_nan=True)
+
 
 def histogram_matches(a,b):
     hist_a =np.sort(np.unique(a,return_counts=True)[1])
