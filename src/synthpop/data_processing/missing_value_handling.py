@@ -84,6 +84,10 @@ class MissingValuePredictor(BaseMissingValueHandler):
     >>>
     >>> mvp = MissingValuePredictor()
     >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
+    >>> X_clean
+    {'num': array([[25], [35]]), 'cat': array([['A'], ['A']], dtype=StringDType(na_object=nan))}
+    >>> y_clean
+    array([1., 3.])
     >>>
     >>> #simulate synthetic generation step
     >>> y_synth = np.array([10, 20, 30, 40])
@@ -141,9 +145,9 @@ class MissingValuePredictor(BaseMissingValueHandler):
         >>> mvp = MissingValuePredictor()
         >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
         >>> X_clean
-        {'num': array([25, 35]), 'cat': array(['A', 'A'], dtype=StringDType(na_object=nan))}
+        {'num': array([[25], [35]]), 'cat': array([['A'], ['A']], dtype=StringDType(na_object=nan))}
         >>> y_clean
-        array([1.0, 3.0])
+        array([1., 3.])
 
         """
         # input validation
