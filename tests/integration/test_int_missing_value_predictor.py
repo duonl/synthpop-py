@@ -2,25 +2,28 @@ import pytest
 import pandas as pd
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
+
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler
 
+str_dtype = np.dtypes.StringDType(na_object=np.nan)
+
 def test_missing_value_predictor_happy_path():
     predictor = MissingValuePredictor(
-        encoding=MeanEncoder(),
+        encoder=MeanEncoder(),
         tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=0),
         tree_sampler=LeafNodeSampler()
     )
 
-    X = {"a": [1, 2, 3, 4], "b": [10, 20, 30, 40]}
+    X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
     y_train = np.array([100, np.nan, 300, np.nan])
 
     X_filtered, y_filtered = predictor.prepare_data_for_fit(X, y_train)
 
     # sanity: rows removed correctly
     assert len(y_filtered) == 2
-    assert np.isnan(y_filtered).sum() == 0
+    assert pd.isna(y_filtered).sum() == 0
 
     y_input = np.array([100, 200, 300, 400])
 
@@ -29,17 +32,17 @@ def test_missing_value_predictor_happy_path():
     assert out.shape == y_input.shape
 
     # must preserve non-missing positions OR introduce new NaNs
-    assert np.isnan(out).any()
-    assert np.all(out[~np.isnan(out)] == y_input[~np.isnan(out)])
+    assert pd.isna(out).any()
+    assert np.all(out[~pd.isna(out)] == y_input[~pd.isna(out)])
 
-def test_feature_order_and_encoding_integration():
+def test_feature_order_and_encoder_integration():
     predictor = MissingValuePredictor(
-        encoding=MeanEncoder(),
+        encoder=MeanEncoder(),
         tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=0),
         tree_sampler=LeafNodeSampler()
     )
 
-    X = {"b": [10, 20, 30, 40], "a": [1, 2, 3, 4]}
+    X = {"b": np.array([10, 20, 30, 40]), "a": np.array([1, 2, 3, 4])}
     y = np.array([100, np.nan, 300, np.nan])
 
     predictor.prepare_data_for_fit(X, y)
@@ -51,12 +54,12 @@ def test_feature_order_and_encoding_integration():
 
 def test_tree_sampler_integration():
     predictor = MissingValuePredictor(
-        encoding=MeanEncoder(),
+        encoder=MeanEncoder(),
         tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=0),
         tree_sampler=LeafNodeSampler()
     )
 
-    X = {"a": [1, 2, 3, 4], "b": [10, 20, 30, 40]}
+    X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
     y = np.array([100, np.nan, 300, np.nan])
 
     predictor.prepare_data_for_fit(X, y)
@@ -75,15 +78,12 @@ def test_tree_sampler_integration():
 
 def test_missingness_determinism():
     predictor = MissingValuePredictor(
-        encoding=MeanEncoder(),
+        encoder=MeanEncoder(),
         tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=42),
         tree_sampler=LeafNodeSampler()
     )
 
-    X = {
-        "a": [1, 2, 3, 4],
-        "b": [10, 20, 30, 40]
-    }
+    X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
 
     y = np.array([100, np.nan, 300, np.nan])
 
