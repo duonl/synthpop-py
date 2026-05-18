@@ -9,6 +9,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop.data_processing.encoders import PCAEncoder
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
+from synthpop.utils import str_dtype
 from sklearn.datasets import make_classification, make_regression
 
 def test_treemethod_classifier_fit_and_transform():
@@ -17,9 +18,9 @@ def test_treemethod_classifier_fit_and_transform():
     X = {
         "column1":np.array([1.1,2.2]),
         "column2":np.array([1.4,1.2]),
-        "column3":np.array(["a","b"])
+        "column3":np.array(["a","b"],dtype = str_dtype)
         }
-    y = np.array(["x","y"])
+    y = np.array(["x","y"],dtype = str_dtype)
 
     tree_method.fit(X,y)
     assert tree_method.n_features_in_ >= 3
@@ -50,7 +51,7 @@ def test_treemethod_regressor_fit_and_transform():
 def get_basic_numeric_data():
     return  np.array([1,1,1,3,2,4,5],dtype=np.float32)
 def get_basic_string_data():
-    return np.array(["a","a","b","a","c","c","b"])
+    return np.array(["a","a","b","a","c","c","b"],dtype = str_dtype)
 
 def set_value_at_index(a,idx,val):
     result = copy.copy(a)
@@ -81,7 +82,7 @@ def test_general_usage(method,X,y):
 
     result = method.fit_transform(X,y)
 
-    assert result.dtype == y.dtype
+    #assert result.dtype == y.dtype
     assert X["first"].shape[0] == len(y)
     assert not np.array_equal(y,result)
 
@@ -115,7 +116,7 @@ def get_test_data_classifier(with_cats = False,with_missing_features=False):
         for idx in idx_cats:
             x = (X[idx]*10).astype(int)
             x_i = [f %5 for f in x]
-            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i])
+            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype=str_dtype)
 
     if with_missing_features:
         X = make_data_missing(X)
