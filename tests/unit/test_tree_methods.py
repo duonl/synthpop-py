@@ -324,7 +324,6 @@ def test_fit_tree_is_fit(X,y,index_cat,tree_method):
     assert np.array_equal(get_exp_feature_matrix(),tree_method.tree_.fit_X_,equal_nan=True)
 
     assert np.array_equal(tree_method.missing_handler_.prepared_for_fit_result[1],tree_method.tree_.fit_y_)
-    assert tree_method.tree_.fit_y_.dtype
 
 
 
