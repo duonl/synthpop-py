@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 import numpy.typing as npt
 from typing import Dict
@@ -51,7 +52,7 @@ def validate_2d_dict(X: Dict[str, npt.NDArray]) -> tuple[Dict[str, npt.NDArray],
             elif arr.shape[0] != n_samples:
                 raise ValueError(f"All columns in X must contain the same number of samples. Expected {n_samples}, received {len(arr)} for '{key}'.")
 
-            if not (np.issubdtype(arr.dtype, np.number) or arr.dtype == np.bool_):
+            if not pd.api.types.is_numeric_dtype(arr.dtype):
                 validate_stringdtype_array(arr)
 
             X_out[key] = arr
@@ -79,7 +80,7 @@ def validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
         if y.shape[0] != n_samples:
             raise ValueError(f"X and y contain a different number of samples: {n_samples} != {y.shape[0]}.")
 
-    if not (np.issubdtype(y.dtype, np.number) or y.dtype == np.bool_):
+    if not pd.api.types.is_numeric_dtype(y.dtype):
         validate_stringdtype_array(y)
 
     return y
