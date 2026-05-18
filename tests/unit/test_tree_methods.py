@@ -12,6 +12,8 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 
 import copy
 
+str_dtype = np.dtypes.StringDType(na_object=np.nan)
+
 # stubs ---------------------------
 class TransformStub(TransformerMixin, BaseEstimator):
 
@@ -171,7 +173,7 @@ def get_input_test_data():
         "num_1":np.array([1,2,5,2,5,3]),
         "cat_1":["a","b","c","d","e","f"],
         "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
-        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"]),
+        "cat_2":np.array(["aa","bc","cc","dD","eE","fF"],dtype=str_dtype),
     }
 
     X2 = {
@@ -185,7 +187,7 @@ def get_input_test_data():
     }
 
     y1 = np.array([1.2,2.3,3.4,5.6,7.8,8.9])
-    y2 = np.array(["a","b","c","d","e","f"])
+    y2 = np.array(["a","b","c","d","e","f"],dtype=str_dtype)
 
 
     # Some tests need a ground truth of which columns are categorical.
@@ -322,6 +324,7 @@ def test_fit_tree_is_fit(X,y,index_cat,tree_method):
     assert np.array_equal(get_exp_feature_matrix(),tree_method.tree_.fit_X_,equal_nan=True)
 
     assert np.array_equal(tree_method.missing_handler_.prepared_for_fit_result[1],tree_method.tree_.fit_y_)
+    assert tree_method.tree_.fit_y_.dtype
 
 
 
