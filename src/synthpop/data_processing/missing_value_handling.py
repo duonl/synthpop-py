@@ -7,10 +7,12 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.exceptions import NotFittedError
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.utils import validate_y,validate_dict_x
 import numpy.typing as npt
 import numpy as np
 import pandas as pd
 from typing import Dict
+
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -106,32 +108,9 @@ class MissingValuePredictor(BaseMissingValueHandler):
         """
         if not isinstance(X, dict):
             raise TypeError(f"X must be a dict[str, array-like], got {type(X)}.")
-        if len(X) == 0:
-            raise ValueError("X must contain at least one feature.")
-
-        X_out = {}
-        lengths = set()
-
-        for key, col in X.items():
-            arr = np.asarray(col)
-            if arr.ndim != 1:
-                raise ValueError(f"Column '{key}' must be 1-dimensional, got shape {arr.shape}.")
-            if len(arr) == 0:
-                raise ValueError(f"Column '{key}' is empty.")
-            X_out[key] = arr
-            lengths.add(len(arr))
-
-        if len(lengths) != 1:
-            raise ValueError(f"All columns in X must have the same length, got lengths {lengths}.")
-
-        n_samples = lengths.pop()
-
-        y_out = np.asarray(y)
-
-        if y_out.ndim != 1:
-            raise ValueError(f"y must be 1-dimensional, got shape {y_out.shape}.")
-        if len(y_out) != n_samples:
-            raise ValueError(f"X and y must have the same number of samples. Got {n_samples} and {len(y_out)}.")
+        
+        X_out,n_samples = validate_dict_x(X)
+        y_out = validate_y(y,n_samples=n_samples)
 
         return X_out, y_out
     
@@ -181,6 +160,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         """
         # input validation
+
         X_val, y_val = self._validate_X_y_dict(X, y)
 
         self.feature_order_ = list(X_val.keys())
@@ -344,7 +324,13 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         if np.any(np.equal(y_arr[~missing_mask], self.missing_replacement)) and missing_mask.any():
             raise ValueError(f"the value {self.missing_replacement} already occurs in y")
 
-        
+        if missing_mask.all():
+            value = [self.missing_replacement]*len(missing_mask)
+            if isinstance(y,pd.Series):
+                y_out = pd.Series(value,name = y.name)
+            else:
+                y_out = np.array(value)
+            return (X,y_out)
         y_arr[missing_mask] = self.missing_replacement
         return(X,y_arr.astype(np.str_))
 

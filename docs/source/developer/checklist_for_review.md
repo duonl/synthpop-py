@@ -98,7 +98,7 @@ This checks whether the implementation is correctly manages data flow and avoids
 ## 7. Scikit-learn estimator compliance (if applicable)
 This checks whether the implementation conforms to scikit-learn's API and behavioural contract, if applicable. See [scikit-learn's developer guides](https://scikit-learn.org/stable/developers/develop.html)
 - [ ] Estimator passes `check_estimator` or `parametrize_with_checks`
-- [ ] `fit`, `transform`, etc. behave correctly and consistenly
+- [ ] `fit`, `transform`, etc. behave correctly and consistently
 - [ ] `get_params` and `set_params` work correctly
 - [ ] Inference methods (e.g. `transform` and `predict`) are deterministic and do not alter estimator state
 - [ ] There are no mutable default arguments

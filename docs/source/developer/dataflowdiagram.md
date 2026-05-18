@@ -60,9 +60,9 @@ combined_features-->remove_missing["remove rows where target is missing"]-->ft_n
 np_target-->remove_missing-->tg_no_nan[("target with missing values removed: **np.array(float)**")]-->fit_tree_reg
 
 
-np_target-->binarize["binarize for missing or not"]
+np_target-->binarise["binarise for missing or not"]
 
-binarize-->missing_target[("**np.Array(bool)** for missing values")]
+binarise-->missing_target[("**np.Array(bool)** for missing values")]
 cat_f-->mean_encoding_missing["mean encode for missing values"]-->encoded_for_missing[("encoded with missing target: **np.array(numeric)**")]-->combine_feat_missing["combine features for missing target"]
 num_f-->combine_feat_missing
 missing_target-->mean_encoding_missing

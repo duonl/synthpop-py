@@ -19,7 +19,7 @@ CART synth module
 .. automodule:: synthpop.methods.cart_synth
    :members:
    :show-inheritance:
-   :undoc-members:
+   :inherited-members: BaseEstimator,_MetadataRequester,_SetOutputMixin
 
 
 Copy synth module

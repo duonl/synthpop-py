@@ -1,156 +1,245 @@
 """
 This module contains the CART method for synthesising data. 
 """
-from typing import Literal, Mapping, Self, Sequence
-from numpy.random import RandomState
+from abc import abstractmethod, ABCMeta
+from typing import Self
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.base import TransformerMixin
-from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
-from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
-from synthpop.methods import base_synth, tree_utils
+from sklearn import clone
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
+from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
 import numpy.typing as npt
+import numpy as np
+from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
+from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
+    MissingValuePredictor, ReplaceNoneWithValue
+from synthpop.methods import base_synth
+from synthpop.methods.tree_utils import LeafNodeSampler
+import synthpop.methods.tree_utils as tree_utils
+from synthpop.utils import validate_y, validate_dict_x
 
-class TreeClassifierMethod(DecisionTreeClassifier):
+
+class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
-    A decision tree classifier algorithm, augmented with PCA encoding and NA predictor.
-
-    :param encoder: an transformer object. Default is PCA encoder.
-    :param rest: Parameters inherent to DecisionTreeClassifier
+    :param tree: a Decision Tree to construct the conditional probability distributions.
+    :param encoder: a transformer object.
+    :param missing_handler: handler for missing values in the target variable.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    
     """
 
-    def __init__(self, *,
-                 encoder: TransformerMixin = PCAEncoder(),
-                 missing_handling: BaseMissingValueHandler = ReplaceNoneWithValue(),
-                 tree_sampler: tree_utils.LeafNodeSampler | None = None,
-                 criterion: Literal['gini'] | Literal['entropy'] | Literal['log_loss'] = "gini",
-                 splitter: Literal['best'] | Literal['random'] = "best",
-                 max_depth: None | int = None,
-                 min_samples_split: float = 2,
-                 min_samples_leaf: float = 1,
-                 min_weight_fraction_leaf: float = 0,
-                 max_features: float | None | Literal['auto'] | Literal['sqrt'] | Literal['log2'] = None,
-                 random_state: RandomState | None | int = None,
-                 max_leaf_nodes: None | int = None,
-                 min_impurity_decrease: float = 0,
-                 class_weight: None | Mapping | str | Sequence[Mapping] = None,
-                 ccp_alpha: float = 0,
-                 ) -> None:
-        super().__init__(criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf,
-                         max_features=max_features, random_state=random_state, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, class_weight=class_weight, ccp_alpha=ccp_alpha
-                         )
-        self.random_state = random_state  # mandated by scikit-learn developer guide
+    def __init__(self, *,tree: BaseDecisionTree | None = None,
+                  encoder: TransformerMixin | None = None,
+                 missing_handler: BaseMissingValueHandler | None = None,
+                 tree_sampler: LeafNodeSampler | None = None,
+                 ):
+        super().__init__()
+        self.encoder = encoder
+        self.missing_handler = missing_handler
         self.tree_sampler = tree_sampler
+        self.tree = tree
 
-    def fit(self, X: dict[str,npt.ArrayLike], y: npt.ArrayLike) -> Self:
-        """
-        Fit PCA encoder on X, build a decision tree classifier on (encoded_X, y), and build a decision tree classifier to forecast missing values in y. 
+    def _new_encoder(self):
+        return clone(self.encoder) if self.encoder is not None else self._get_encoder()
 
-        :param X: Features dataset.
-        :param y: Target variable. Length must be equal to number of rows in X.
-        :return: Fitted estimator.
+    def _new_missing_handling(self):
+        return clone(self.missing_handler) if self.missing_handler is not None else self._get_missing_handling()
+
+    def _new_tree_sampler(self):
+        return clone(self.tree_sampler) if self.tree_sampler is not None else LeafNodeSampler()
+
+    def _new_tree(self):
+        return clone(self.tree) if self.tree is not None else self._get_tree()
+
+
+    def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
-        # sklearn.utils.validation.validate_data is called in super().fit(), therefore we don't need to do it here.
-        # mandated by scikit-learn developer guide since we need the rng after fitting.
-        # self.random_state_ = check_random_state(self.random_state)
-        # self.encoder.fit(X)
-        # data_encoded = self.encoder.transform(X)
-        # super().fit(data_encoded, y)
-        # leaf_ids = self.apply(data_encoded)
-        # if self.tree_sampler is None:
-        #     self.tree_sampler_= LeafNodeSampler(random_state = self.random_state_)
-        # else:
-        #     self.tree_sampler_ = clone(self.tree_sampler)
-        # self.tree_sampler_.fit_sampler(leaf_ids, y)
+        Fit to predict `y` using `X`
+
+        :param X: features to predict `y`.
+        :param y: target to synthesise.
+
+        """
+
+        self.target_name_ = getattr(y, "name", None)
+        X_val, n_samples = validate_dict_x(X)
+        y = validate_y(y, n_samples)
+
+        self.n_features_in_ = len(X.keys())
+        self.feature_order_ = list(X.keys())
+
+        self.encoders_ = {name: self._new_encoder().fit(value, y) for (
+            name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
+        self.missing_handler_ = self._new_missing_handling()
+
+        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(X_val, y)
+        
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in prepared_for_fit_X.items()}
+        all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
+
+        self.tree_ = self._new_tree().fit(all_features, prepared_y)
+
+        leaf_ids = self.tree_.apply(all_features)
+
+        self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids, prepared_y)
+
         return self
 
-    def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
+    def transform(self, X: dict[str, npt.ArrayLike]) -> np.ndarray:
         """
-        Go through decision tree classifier using the encoded X and sample from the corresponding leaf node. Use the NullPredictor to determine which output values should be missing.
+        Synthesise new column
 
-        :param X: Input dataset
-        :return: Input dataset with predicted column.
+        :param X: features used to predict the target variable.
+
+        :return: synthesised column.
+
         """
-        # should call sklearn.utils.validation.check_is_fitted(self)
-        # data_encoded = self.encoder.transform(X)
-        # leaf_ids = self.apply(data_encoded)
-        # return self.tree_sampler_.sample_from_leaves(leaf_ids)
-        return pd.DataFrame()
 
-    def get_feature_names_out(self):
+        # Apply encoding, sample, apply (inverse) handling of missing values.
+        check_is_fitted(self
+                        ,["tree_", "tree_sampler_", "missing_handler_", "feature_order_"]
+                        )
+        
+        X_val, _ = validate_dict_x(X)
+
+        n_features_given = len(X.keys())
+        if n_features_given != self.n_features_in_:
+            raise ValueError(
+                f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
+
+        
+        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in X_val.items()}
+
+        all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
+        leaf_ids = self.tree_.apply(all_features)
+
+        sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
+        result = self.missing_handler_.post_synth_transform(X_val, sample)
+        return result
+
+    def get_feature_names_out(self, input_features=None):
+
+        if input_features is None:
+            input_features = getattr(self, "feature_order_", [])
+
+        if self.target_name_ is None:
+            return [input_features]
+
+        return [self.target_name_]
+
+        # if not (self.target_name_ is None):
+        #     return [self.target_name_]
+        
+        # if input_features is None:
+        #     input_features = getattr(self, "feature_order_", [])
+        #     return [input_features[0]]
+
+        # return input_features
+
+    @abstractmethod
+    def _get_encoder(self):
         pass
 
-
-class TreeRegressorMethod(DecisionTreeRegressor):
-    """
-    A decision tree regressor algorithm, augmented with PCA encoding and NA predictor.
-
-    :param encoder: an transformer object. Default is PCA encoder.
-    :param rest: Parameters inherent to DecisionTreeRegressor
-    """
-
-
-    def __init__(self, *,
-                 encoder: TransformerMixin = MeanEncoder(),
-                 missing_handling: BaseMissingValueHandler = MissingValuePredictor(),
-                 tree_sampler: tree_utils.LeafNodeSampler | None = None,
-                 criterion: Literal['squared_error'] | Literal['friedman_mse'] | Literal[
-                     'absolute_error'] | Literal['poisson'] = "squared_error",
-                 splitter: Literal['best'] | Literal['random'] = "best",
-                 max_depth: None | int = None,
-                 min_samples_split: float = 2,
-                 min_samples_leaf: float = 1,
-                 min_weight_fraction_leaf: float = 0,
-                 max_features: float | None | Literal['auto'] | Literal['sqrt'] | Literal['log2'] = None,
-                 random_state: RandomState | None | int = None,
-                 max_leaf_nodes: None | int = None,
-                 min_impurity_decrease: float = 0,
-                 ccp_alpha: float = 0
-                 ) -> None:
-
-        super().__init__(criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf,
-                         max_features=max_features, random_state=random_state, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, ccp_alpha=ccp_alpha)
-        self.random_state = random_state  # mandated by scikit-learn developer guide
-
-    def fit(self, X: dict[str,npt.ArrayLike], y: npt.ArrayLike)->Self:
-        """
-        Fit mean encoder on X, build a decision tree regressor on (encoded_X, y), and build a decision tree classifier to forecast missing values in y. 
-
-        :param X: Features dataset.
-        :param y: Target variable. Length must be equal to number of rows in X.
-        :return: Fitted estimator.
-        """
-        # sklearn.utils.validation.validate_data is called in super().fit(), therefore we don't need to do it here.
-        # mandated by scikit-learn developer guide since we need the rng after fitting.
-        self.random_state_ = check_random_state(self.random_state)
-        self.encoder.fit(X)
-        data_encoded = self.encoder.transform(X)
-        super().fit(data_encoded, y)
-
-        leaf_ids = self.apply(data_encoded)
-        if self.tree_sampler is None:
-            self.tree_sampler_= LeafNodeSampler(random_state=self.random_state_)
-        else:
-            self.tree_sampler_ = clone(self.tree_sampler)
-
-        self.tree_sampler_.fit_sampler(leaf_ids, y)
-        return self
-
-    def transform(self, X: dict[str,npt.ArrayLike]) -> npt.ArrayLike:
-        """
-        Go through decision tree classifier using the encoded X and sample from the corresponding leaf node. Use the NullPredictor to determine which output values should be missing.
-
-        :param X: Input dataset
-        :return: Input dataset with predicted column.
-        """
-        # should call sklearn.utils.validation.check_is_fitted(self)
-        # data_encoded = self.encoder.transform(X)
-        # leaf_ids = self.apply(data_encoded)
-        # return self.tree_sampler_.sample_from_leaves(leaf_ids)
-        return pd.DataFrame()
-
-    def get_feature_names_out(self):
+    @abstractmethod
+    def _get_missing_handling(self):
         pass
+
+    @abstractmethod
+    def _get_tree(self):
+        pass
+
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.estimator_type = "transformer"
+        tags.target_tags.required = True
+        tags.input_tags.two_d_array = False
+        tags.input_tags.categorical = False 
+        tags.input_tags.string = False
+        tags.input_tags.dict = True
+        tags.input_tags.allow_nan = True
+        return tags
+
+
+class TreeClassifierMethod(_AbstractTreeMethod):
+    """
+    :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
+    :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
+    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+
+    Examples
+    --------
+        >>> from synthpop.methods.cart_synth import TreeClassifierMethod
+        >>> import numpy as np
+        >>> tree_method = TreeClassifierMethod()
+        >>> X = {
+        ...         "column1":np.array([1.1,2.2]),
+        ...         "column2":np.array([1.4,1.2]),
+        ...         "column3":np.array(["a","b"])
+        ...         }
+        >>> y = np.array(["x","y"])
+        >>> tree_method.fit(X,y)
+        TreeClassifierMethod()
+        >>> tree_method.transform(X)
+        array(['x', 'y'], dtype='<U1')
+
+    """
+
+    def __init__(self, *, tree=None,encoder=None, missing_handler=None, tree_sampler=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler,
+                         tree_sampler=tree_sampler, tree=tree)
+
+    def _get_encoder(self):
+        return PCAEncoder()
+
+    def _get_missing_handling(self):
+        return ReplaceNoneWithValue()
+
+    def _get_tree(self):
+        return DecisionTreeClassifier(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
+                                      min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
+                                      ,)
+
+
+class TreeRegressorMethod(_AbstractTreeMethod):
+    """
+    :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
+    :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+
+
+    Examples
+    --------
+        >>> from synthpop.methods.cart_synth import TreeRegressorMethod
+        >>> import numpy as np
+        >>> tree_method = TreeRegressorMethod()
+        >>> X = {
+        ...         "column1":np.array([1.1,2.2]),
+        ...         "column2":np.array([1.4,1.2]),
+        ...         "column3":np.array(["a","b"])
+        ...         }
+        >>> y = np.array([1,2])
+        >>> tree_method.fit(X,y)
+        TreeRegressorMethod()
+        >>> tree_method.transform(X)
+        array([1, 2])
+
+    """
+
+    def __init__(self, *, tree=None,encoder=None, missing_handler=None, tree_sampler=None):
+        super().__init__(encoder=encoder, missing_handler=missing_handler,
+                         tree_sampler=tree_sampler, tree=tree)
+
+    def _get_encoder(self):
+        return MeanEncoder()
+
+    def _get_missing_handling(self):
+        return MissingValuePredictor()
+
+    def _get_tree(self):
+        return DecisionTreeRegressor(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
+                                      min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
+                                      ,)
 
 
 class CartMethod(base_synth.BaseSynthMethod):

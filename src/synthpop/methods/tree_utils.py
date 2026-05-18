@@ -215,3 +215,15 @@ class LeafNodeSampler():
         >>> sampler = LeafNodeSampler().clone()
         """
         return self.__class__(random_state=self.random_state)
+    
+
+def build_feature_matrix(X: dict[str, np.ndarray],feature_order:list[str]) -> np.ndarray:
+
+    if len(set(X.keys())-set(feature_order))>0:
+        raise ValueError("cannot build feature matrix: received more columns than expected")
+    if len(set(feature_order)-set(X.keys()))>0:
+        raise ValueError("cannot build feature matrix: received less columns than expected")
+    if len(X.keys()) == 0:
+        return np.empty(shape=(0,0), dtype=np.float32)
+    
+    return np.hstack([X[k].reshape(-1,1) if X[k].ndim==1 else X[k] for k in feature_order],dtype=np.float32)
