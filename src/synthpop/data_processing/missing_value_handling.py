@@ -7,13 +7,12 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.exceptions import NotFittedError
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler
-from synthpop.utils import validate_y
+from synthpop.utils import validate_y,validate_dict_x
 import numpy.typing as npt
 import numpy as np
 import pandas as pd
 from typing import Dict
 
-from synthpop.utils import validate_dict_x
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
