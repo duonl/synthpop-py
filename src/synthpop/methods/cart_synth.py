@@ -242,6 +242,19 @@ class TreeRegressorMethod(_AbstractTreeMethod):
                                       ,)
 
 
+def conventionalize_x_data(X)->dict[str, npt.ArrayLike]:
+    
+    if isinstance(X,pd.DataFrame):
+        X_d = X.to_dict()
+    else:
+        X_d = X
+    
+    return {k:np.asanyarray(v) for k,v in X_d.items()}
+
+def conventionalize_1d_array_like(y)-> np.ndarray:
+    return np.asanyarray(y)
+
+
 class CartMethod(base_synth.BaseSynthMethod):
     """
     Assigns the right decision tree model based on the target variable data type: if numeric, we use a regressor, if categorical, we use a classifier.
@@ -279,6 +292,8 @@ class CartMethod(base_synth.BaseSynthMethod):
 
         # The return values of (TreeRegressorMethod/TreeClassifierMethod).fit() should be stored in an attribute that ends in an underscore.
         # In this way, the check_is_fitted method still works. See https://scikit-learn.org/stable/modules/generated/sklearn.utils.validation.check_is_fitted.html#sklearn.utils.validation.check_is_fitted
+
+        return conventionalize_x_data(X)
 
         return self
 
