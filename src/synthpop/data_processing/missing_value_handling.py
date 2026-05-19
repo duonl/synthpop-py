@@ -13,6 +13,7 @@ import pandas as pd
 from typing import Dict
 
 from synthpop.utils import validate_2d_dict, validate_1d_target
+from synthpop.methods.tree_utils import build_feature_matrix
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -104,24 +105,6 @@ class MissingValuePredictor(BaseMissingValueHandler):
         self.encoder = encoder
         self.tree = tree
         self.tree_sampler = tree_sampler
-   
-    def _build_X_matrix(self, X, fit=False):
-        feature_order = getattr(self, "feature_order_", None)
-        if feature_order is None:
-            feature_order = list(X.keys())
-            self.feature_order_ = feature_order
-
-        X_encoded = []
-        for col in feature_order:
-            values = X[col]
-            if col in self.encoders_:
-                encoded = self.encoders_[col].transform(values)
-            else:
-                encoded  = values
-            
-            X_encoded.append(encoded)
-
-        return np.column_stack(X_encoded)
     
     def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
@@ -177,7 +160,19 @@ class MissingValuePredictor(BaseMissingValueHandler):
             else:
                 continue
         
-        X_matrix = self._build_X_matrix(X_val)    
+        X_encoded = {}
+        
+        for col in self.feature_order_:
+            values = X_val[col]
+            
+            if col in self.encoders_:
+                transformed = self.encoders_[col].transform(values)
+            else:
+                transformed = values
+            
+            X_encoded[col] = np.asarray(transformed)
+
+        X_matrix = build_feature_matrix(X_encoded, feature_order=self.feature_order_)    
 
         if not self._all_missing and not self._no_missing:
             self.tree_.fit(X_matrix, z)
@@ -238,7 +233,19 @@ class MissingValuePredictor(BaseMissingValueHandler):
         X_val, n_samples = validate_2d_dict(X)
         y_val = validate_1d_target(y, n_samples)
         
-        X_matrix = self._build_X_matrix(X_val)
+        X_encoded = {}
+        
+        for col in self.feature_order_:
+            values = X_val[col]
+            
+            if col in self.encoders_:
+                transformed = self.encoders_[col].transform(values)
+            else:
+                transformed = values
+            
+            X_encoded[col] = np.asarray(transformed)
+
+        X_matrix = build_feature_matrix(X_encoded, feature_order=self.feature_order_)  
 
         leaf_ids = self.tree_.apply(X_matrix)
         missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
