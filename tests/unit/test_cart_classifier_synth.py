@@ -37,7 +37,6 @@ class StubTreeMethod():
                                                (np.array(["a","2","3"],dtype=str_dtype),True)
                                                ])
 def test_cartmethod_fit_dataflow_classifier(y_clean,cat_target,mocker):
-    #TODO: test over cat target and num target
 
     exp_result = np.array([1,2,3])
     tree_method = StubTreeMethod(transform_result=exp_result)
@@ -69,4 +68,6 @@ def test_cartmethod_fit_dataflow_classifier(y_clean,cat_target,mocker):
     assert np.array_equal(tree_method.fit_y, y_clean)
 
 
-#TODO: test get_feature_names_out. 
+#TODO: test get_feature_names_out.
+#TODO: test cloning of tree methods
+#TODO: implement cloning of CartMethod 

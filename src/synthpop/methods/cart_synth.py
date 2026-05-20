@@ -249,10 +249,16 @@ def conventionalize_x_data(X)->dict[str, npt.ArrayLike]:
     else:
         X_d = X
     
-    return {k:np.asanyarray(v) for k,v in X_d.items()}
+    return {k: conventionalize_1d_array_like(v) for k,v in X_d.items()}
 
 def conventionalize_1d_array_like(y)-> np.ndarray:
-    return np.asanyarray(y)
+    y_arr = np.asanyarray(y)
+
+    if not pd.api.types.is_numeric_dtype(y_arr.dtype):
+        na_mask = pd.isna(y)
+        return np.array([v if not pd.isna(v) else np.nan for v in y],dtype=str_dtype)
+
+    return y_arr.astype(np.float32)
 
 
 class CartMethod(base_synth.BaseSynthMethod):
