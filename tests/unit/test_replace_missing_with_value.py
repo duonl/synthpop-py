@@ -11,7 +11,7 @@ def get_test_data():
 
     test_data_np_arrays = [
 #               X_in                            y_in                                             y_exp
-    *[(np.array(["a","b","a"], str_dtype), np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
+    *[({"a":np.array(["a","b","a"], str_dtype)}, np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
     *[(np.array(["a","b",np.nan],dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), "N.a.N.")],
     *[(np.array(["a","b","a"], dtype=str_dtype), np.array(["x","y", "y"],dtype=str_dtype),np.array(["x","y", "y"], dtype=str_dtype), "N.a.N.")],
     *[(np.array(["a","b","a"], dtype=str_dtype), np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators]

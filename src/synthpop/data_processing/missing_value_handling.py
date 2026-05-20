@@ -298,7 +298,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return: a tuple `(X,y)`. Leaves `X` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of `y`. 
         """
-        y_val = validate_1d_target(y.copy(), len(X))
+        y_val = validate_1d_target(y.copy(), len(y))
 
         missing_mask = pd.isna(y_val)
 
