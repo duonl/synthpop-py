@@ -275,8 +275,8 @@ class CartMethod(base_synth.BaseSynthMethod):
     def __init__(self, regressor: TreeRegressorMethod | None = None, classifier: TreeClassifierMethod | None = None) -> None:
         super().__init__()
         # see https://scikit-learn.org/stable/developers/develop.html#instantiation
-        self.reg = regressor
-        self.classi = classifier
+        self.regressor = regressor
+        self.classifier = classifier
 
         # parameters of TreeRegressorMethod and TreeClassifierMethod should not be set in this __init__, for consistency:
         # The user could specify contradicting values.
@@ -303,9 +303,11 @@ class CartMethod(base_synth.BaseSynthMethod):
         y_clean = conventionalize_1d_array_like(y)
 
         if y_clean.dtype == str_dtype:
-            self.classi.fit(x_clean,y_clean)
+            self.classifier_ = clone(self.classifier).fit(x_clean,y_clean)
+            self.regressor_ = None
         else:
-            self.reg.fit(x_clean,y_clean)
+            self.regressor_ = clone(self.regressor).fit(x_clean,y_clean)
+            self.classifier_ = None 
 
         return self
 

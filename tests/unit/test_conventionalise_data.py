@@ -78,10 +78,6 @@ def test_conventionalize_cat_y_output_is_np_array_float32(y):
 
     assert result.dtype == np.float32
 
-    
-#TODO: test normalisation of different missings
-#TODO: test numeric dtypes
 #TODO: test shape (2D).
-#TODO: assert shapes
 
 

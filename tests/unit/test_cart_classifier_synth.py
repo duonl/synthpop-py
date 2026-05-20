@@ -18,9 +18,10 @@ import pandas as pd
 import numpy as np
 from synthpop.methods.cart_synth import CartMethod
 import pytest
+from sklearn.base import BaseEstimator, TransformerMixin
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
-class StubTreeMethod():
+class StubTreeMethod(TransformerMixin, BaseEstimator):
     def __init__(self,transform_result):
         self.transform_result = transform_result
 
@@ -64,8 +65,15 @@ def test_cartmethod_fit_dataflow_classifier(y_clean,cat_target,mocker):
     mocked_conventionalise_x.assert_called_with(X)
     mocked_conventionalise_y.assert_called_with(y)
 
-    assert tree_method.fit_x == clean_X
-    assert np.array_equal(tree_method.fit_y, y_clean)
+    if cat_target:
+        assert cart.classifier_.fit_x == clean_X
+        assert np.array_equal(cart.classifier_.fit_y, y_clean)
+    else:
+        assert cart.regressor_.fit_x == clean_X
+        assert np.array_equal(cart.regressor_.fit_y, y_clean)
+
+    assert not (cart.regressor_ is tree_method)
+    assert not (cart.classifier_ is tree_method)
 
 
 #TODO: test get_feature_names_out.
