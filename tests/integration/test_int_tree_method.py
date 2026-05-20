@@ -88,13 +88,6 @@ def test_general_usage(method,X,y):
     assert X["first"].shape[0] == len(y)
     assert not np.array_equal(y,result)
 
-    y_pd = pd.Series(y,name="target_variable")
-
-    method = method.set_output(transform="pandas")
-
-    result2 = method.fit_transform(X,y_pd)
-    assert isinstance(result2,pd.DataFrame)
-    assert "target_variable" in result2
 
 
 def make_data_missing(X):

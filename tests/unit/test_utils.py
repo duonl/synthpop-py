@@ -82,6 +82,12 @@ def test_validate_1d_target_accepts_stringdtype():
 
     assert result.dtype == str_dtype
 
+def test_validate_1d_target_converts_to_stringdtype():
+    y = np.array(["a", "b"])
+    result = validate_1d_target(y, None)
+
+    assert result.dtype == str_dtype
+
 def test_validate_1d_target_reshapes_single_column_2d():
     y = np.array([[1], [2]])
     result = validate_1d_target(y, 2)
@@ -95,7 +101,6 @@ def test_validate_1d_target_rejects_wrong_sample_count():
 @pytest.mark.parametrize(
         "y",
         [
-            np.array(["a", "b"]),
             np.array(["a", "b", np.nan], dtype=object),
             np.array(["a", None], dtype=np.dtypes.StringDType(na_object=None))
         ]
