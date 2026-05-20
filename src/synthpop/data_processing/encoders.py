@@ -288,13 +288,11 @@ class MeanEncoder(_BaseEncoder):
             >>> encoder.fit(X, y)
         """
 
-        if not np.issubdtype(y.dtype,np.number):
+        if not pd.api.types.is_numeric_dtype(y):
             raise ValueError(f"MeanEncoder requires numeric target array y. Received dtype={y.dtype}")
 
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
-
-        
         
         X_val = self.validate_string_array(X)
         y_val = self.to_1D(y)
