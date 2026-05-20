@@ -71,7 +71,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
-    :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`.
+    :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
     :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_.
     :param tree_sampler: Leaf node sampler. Default is :py:meth:LeafNodeSampler.
 
@@ -149,27 +149,18 @@ class MissingValuePredictor(BaseMissingValueHandler):
         self._no_missing = not np.any(z)
 
         self.encoders_ = {}
+        X_encoded = {}
 
         for col in self.feature_order_:
             values = X_val[col]
 
             if not pd.api.types.is_numeric_dtype(values.dtype):
                 encoder = clone(self.encoder) if self.encoder else MeanEncoder()
-                encoder.fit(values, z)
+                transformed = encoder.fit_transform(values, z)
                 self.encoders_[col] = encoder
             else:
-                continue
-        
-        X_encoded = {}
-        
-        for col in self.feature_order_:
-            values = X_val[col]
-            
-            if col in self.encoders_:
-                transformed = self.encoders_[col].transform(values)
-            else:
                 transformed = values
-            
+
             X_encoded[col] = np.asarray(transformed)
 
         X_matrix = build_feature_matrix(X_encoded, feature_order=self.feature_order_)    

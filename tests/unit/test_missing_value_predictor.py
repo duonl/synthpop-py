@@ -29,6 +29,12 @@ def stub_encoder():
             if self.transform_return is None:
                 self.transform_return = np.ones(len(X))
             return self.transform_return
+        
+        def fit_transform(self, X, y=None):
+            self.fit_transform_inputs = (X, y)
+            self.fit(X, y)
+            self.fit_transform_return = np.ones(len(X))
+            return self.fit_transform_return
     
     return EncoderStub()
 
@@ -101,7 +107,7 @@ def test_prepare_data_for_fit_accepts_1d_inputs(predictor):
     
     predictor.prepare_data_for_fit(X, y)
 
-    fit_X, _ = predictor.encoders_["cat"].fit_inputs
+    fit_X, _ = predictor.encoders_["cat"].fit_transform_inputs
 
     assert fit_X.shape == (4, 1)
 
@@ -122,7 +128,7 @@ def test_prepare_data_missing_data_flow_correct(predictor):
 
     for col in ["cat1", "cat2"]:
         enc = predictor.encoders_[col]
-        fit_X, fit_y = enc.fit_inputs
+        fit_X, fit_y = enc.fit_transform_inputs
 
         assert np.array_equal(fit_X, X[col])
         assert np.array_equal(fit_y, expected_mask)
@@ -131,8 +137,8 @@ def test_prepare_data_missing_data_flow_correct(predictor):
     tree_X, z = tree.fit_inputs
 
     # --- check full matrix composition ---
-    encoded_cat1 = predictor.encoders_["cat1"].transform_return.reshape(-1, 1)
-    encoded_cat2 = predictor.encoders_["cat2"].transform_return.reshape(-1, 1)
+    encoded_cat1 = predictor.encoders_["cat1"].fit_transform_return.reshape(-1, 1)
+    encoded_cat2 = predictor.encoders_["cat2"].fit_transform_return.reshape(-1, 1)
 
     expected_matrix = np.column_stack([
         encoded_cat1,
@@ -169,7 +175,7 @@ def test_prepare_data_no_missing_data_flow(predictor):
     assert len(predictor.encoders_) == 1
 
     enc_cat = predictor.encoders_["cat"]
-    fit_X, fit_y = enc_cat.fit_inputs
+    fit_X, fit_y = enc_cat.fit_transform_inputs
     assert np.array_equal(fit_X, X["cat"]), "encoder input should be original X"
     assert np.array_equal(fit_y, [False]*len(y))
 
