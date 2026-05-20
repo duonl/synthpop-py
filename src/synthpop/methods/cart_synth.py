@@ -15,7 +15,7 @@ from synthpop.data_processing.missing_value_handling import BaseMissingValueHand
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
-from synthpop.utils import validate_y, validate_dict_x
+from synthpop.utils import validate_y, validate_dict_x,str_dtype
 
 
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
@@ -291,9 +291,15 @@ class CartMethod(base_synth.BaseSynthMethod):
         # X, y = validate_data(self, X, y)
 
         # The return values of (TreeRegressorMethod/TreeClassifierMethod).fit() should be stored in an attribute that ends in an underscore.
-        # In this way, the check_is_fitted method still works. See https://scikit-learn.org/stable/modules/generated/sklearn.utils.validation.check_is_fitted.html#sklearn.utils.validation.check_is_fitted
+        # In this way, the check_is_fitted method still works. See https://scikit-learn.org/stable/modules/generated/sklearn.utils.validation.check_is_fitted.html#sklearn.utils.validation.check_is_
 
-        return conventionalize_x_data(X)
+        x_clean = conventionalize_x_data(X)
+        y_clean = conventionalize_1d_array_like(y)
+
+        if y_clean.dtype == str_dtype:
+            self.classi.fit(x_clean,y_clean)
+        else:
+            self.reg.fit(x_clean,y_clean)
 
         return self
 
