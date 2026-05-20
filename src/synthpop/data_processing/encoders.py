@@ -343,7 +343,3 @@ class MeanEncoder(_BaseEncoder):
         X_val = self.validate_string_array(X)
         self._check_unseen_values(X_val)
         return self._apply_mapping(X_val)
-    
-    def fit_transform(self, X: npt.NDArray, y: npt.NDArray) -> npt.NDArray[np.float32]:
-        self.fit(X, y)
-        return self.transform(X)
