@@ -35,6 +35,11 @@ dev = [
 [tool.poetry]
 packages = [{include = "synthpop", from = "src"}]
 
+[[tool.poetry.source]]
+name = "artifactory"
+url = "https://artifactory.lin.ota.duo.nl:443/artifactory/api/pypi/pypi-virtual/simple"
+priority = "primary"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
