@@ -24,6 +24,7 @@ def test_treemethod_classifier_fit_and_transform():
 
     tree_method.fit(X,y)
     assert tree_method.n_features_in_ >= 3
+    assert y.dtype == str_dtype
 
     result = tree_method.transform(X)
 
@@ -36,12 +37,13 @@ def test_treemethod_regressor_fit_and_transform():
     X = {
         "column1":np.array([1.1,2.2]),
         "column2":np.array([1.4,1.2]),
-        "column3":np.array(["a","b"])
+        "column3":np.array(["a","b"],dtype = str_dtype)
         }
     y = np.array([1,2])
 
     tree_method.fit(X,y)
     assert tree_method.n_features_in_ >= 3
+    
 
     result = tree_method.transform(X)
 
@@ -62,8 +64,8 @@ def get_x_test_data():
     num_d = get_basic_numeric_data()
     str_d = get_basic_string_data()
     x1 = {"first":num_d,"second":str_d}
-    x2 = {"first":num_d,"second":str_d, "third": num_d*1.2,"fourth":np.array([s*3 for s in str_d])}
-    x3 = {"first":set_value_at_index(num_d,3,np.nan),"second":set_value_at_index(str_d,4,None), "third":np.array(num_d)*1.2,"fourth":np.array([s*3 for s in str_d])}
+    x2 = {"first":num_d,"second":str_d, "third": num_d*1.2,"fourth":np.array([s*3 for s in str_d],dtype = str_dtype)}
+    x3 = {"first":set_value_at_index(num_d,3,np.nan),"second":set_value_at_index(str_d,4,np.nan), "third":np.array(num_d)*1.2,"fourth":np.array([s*3 for s in str_d],dtype = str_dtype)}
     return [x1,x2,x3]
 
 def get_test_data():
@@ -262,14 +264,12 @@ def test_no_information_lost_when_apply_tree(method,X,y):
     assert method.tree_.apply_X.shape[0] == list(X.values())[0].shape[0]
     assert method.tree_.apply_X.shape[1] == len(X.values())
 
-@pytest.mark.parametrize("estimator", [TreeRegressorMethod(),TreeClassifierMethod()])
-def test_transform_raises_when_feature_names_differ(estimator):
+@pytest.mark.parametrize("estimator,y", [(TreeRegressorMethod(),np.array([0, 1])),(TreeClassifierMethod(),np.array(["aaa","bbb"]))])
+def test_transform_raises_when_feature_names_differ(estimator,y):
     X_fit = {
         "a": np.array([1, 2]),
         "b": np.array([3, 4]),
     }
-
-    y = np.array([0, 1])
 
     estimator.fit(X_fit, y)
 
