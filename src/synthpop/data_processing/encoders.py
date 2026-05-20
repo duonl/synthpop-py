@@ -288,7 +288,7 @@ class MeanEncoder(_BaseEncoder):
             >>> encoder.fit(X, y)
         """
 
-        if not (np.issubdtype(y.dtype,np.number) or y.dtype == np.bool_):
+        if not pd.api.types.is_numeric_dtype(y):
             raise ValueError(f"MeanEncoder requires numeric target array y. Received dtype={y.dtype}")
 
         if X.shape[0] == 0 or y.shape[0] == 0:
