@@ -293,8 +293,6 @@ class MeanEncoder(_BaseEncoder):
 
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
-
-        
         
         X_val = self.validate_string_array(X)
         y_val = self.to_1D(y)
