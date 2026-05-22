@@ -481,3 +481,9 @@ def test_to_fixed_lenght_string_array():
 
     assert result.dtype == np.str_
     assert np.array_equal(result,["a","b"])
+
+    x = np.array(["aa","bb"],dtype=str_dtype)
+    result = to_fixed_lenght_string_array(x)
+
+    assert result.dtype == np.str_
+    assert np.array_equal(result,["aa","bb"])
