@@ -106,7 +106,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         self.tree = tree
         self.tree_sampler = tree_sampler
     
-    def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
+    def prepare_data_for_fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Trains a decision tree to predict when y is missing. Removes rows from both `X` and `y` when `y` is missing.
 
@@ -289,7 +289,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         super().__init__()
         self.missing_marker = missing_marker
     
-    def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
+    def prepare_data_for_fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Replaces missing values in the target with "N.a.N."
 
@@ -311,7 +311,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         return(X, y_val)
 
-    def post_synth_transform(self, X: npt.NDArray, y: npt.NDArray) -> npt.NDArray:
+    def post_synth_transform(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> npt.NDArray:
         """
         Replaces "N.a.N." with missing values.
 
