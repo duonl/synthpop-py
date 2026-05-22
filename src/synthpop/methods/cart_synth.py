@@ -17,7 +17,8 @@ from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
 from synthpop.utils import validate_y, validate_dict_x
 
-
+def to_fixed_lenght_string_array(a):
+    pass
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions.

@@ -7,7 +7,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
-from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod
+from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod,to_fixed_lenght_string_array
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
 import copy
@@ -474,3 +474,10 @@ def test_TreeMethod_is_sklearn_compatible(estimator, check):
     wrapped = EstimatorWrap(**estimator.get_params())
 
     check(wrapped)
+
+def test_to_fixed_lenght_string_array():
+    x = np.array(["a","b"],dtype=str_dtype)
+    result = to_fixed_lenght_string_array(x)
+
+    assert result.dtype == np.str_
+    assert np.array_equal(result,["a","b"])
