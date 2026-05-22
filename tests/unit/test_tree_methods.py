@@ -360,6 +360,27 @@ def test_fit_set_feature_names_out_no_target_name(X,y,index_cat,tree_method):
 
     assert tree_method.target_name_ is None
 
+def test_fit_classifier_convert_to_str(encoder,leafnode_sampler,mocker):
+    X = {"a":np.array([1,2])}
+    y = np.array(["a","b"],dtype=str_dtype)
+
+    # the missing handling can return a y of str_dtype.
+    missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
+    
+    str_y = np.array(["x","y"])
+    mocked_to_str= mocker.patch('synthpop.methods.cart_synth.to_fixed_lenght_string_array',return_value=str_y)
+
+    tree_method = TreeClassifierMethod(encoder=encoder,missing_handler=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
+    
+
+    tree_method.fit(X,y)
+
+    mocked_to_str.assert_called_with(y)
+    assert np.array_equal(str_y,tree_method.tree_.fit_y_)
+    
+
+    
+
 # test transform ----------------------------------------------------------------------------------
 
 

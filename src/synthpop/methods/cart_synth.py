@@ -53,6 +53,10 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
 
+    def _convert_y(self,y):
+        #overwritten in TreeClassifiermethod
+        return y
+
 
     def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
         """
@@ -79,7 +83,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k,v) in prepared_for_fit_X.items()}
         all_features = tree_utils.build_feature_matrix(all_features_dict,self.feature_order_)
 
-        self.tree_ = self._new_tree().fit(all_features, prepared_y)
+        self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
 
         leaf_ids = self.tree_.apply(all_features)
 
@@ -201,6 +205,9 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         return DecisionTreeClassifier(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
                                       min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
                                       ,)
+
+    def _convert_y(self,y):
+        return to_fixed_lenght_string_array(y)
 
 
 class TreeRegressorMethod(_AbstractTreeMethod):
