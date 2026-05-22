@@ -289,7 +289,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         super().__init__()
         self.missing_marker = missing_marker
     
-    def prepare_data_for_fit(self, X: npt.NDArray, y: npt.NDArray)-> tuple[npt.NDArray, npt.NDArray]:
+    def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Replaces missing values in the target with "N.a.N."
 

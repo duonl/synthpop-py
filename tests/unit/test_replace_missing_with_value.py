@@ -14,7 +14,9 @@ def get_test_data():
     *[({"a":np.array(["a","b","a"], str_dtype)}, np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
     *[({"b":np.array(["a","b",np.nan],dtype=str_dtype)}, np.array(["x","y","y"], dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), "N.a.N.")],
     *[({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array(["x","y", "y"],dtype=str_dtype),np.array(["x","y", "y"], dtype=str_dtype), "N.a.N.")],
-    *[({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators]
+    *[({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
+    ({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([1,2,3]),np.array([1,2,3]), -8),
+    ({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([1,np.nan,3]),np.array([1,-8,3],dtype=np.float64), -8),
     ]
 
     return test_data_np_arrays
