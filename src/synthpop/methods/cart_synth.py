@@ -18,7 +18,9 @@ import synthpop.methods.tree_utils as tree_utils
 from synthpop.utils import validate_y, validate_dict_x
 
 def to_fixed_lenght_string_array(a):
-    pass
+    max_length = max([len(v) for v in a])
+    return a.astype("U"+str(max_length))
+
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions.

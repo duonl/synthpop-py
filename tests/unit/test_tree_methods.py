@@ -479,11 +479,11 @@ def test_to_fixed_lenght_string_array():
     x = np.array(["a","b"],dtype=str_dtype)
     result = to_fixed_lenght_string_array(x)
 
-    assert result.dtype == np.str_
+    assert result.dtype == "U1"
     assert np.array_equal(result,["a","b"])
 
-    x = np.array(["aa","bb"],dtype=str_dtype)
+    x = np.array(["aa","bb","c"],dtype=str_dtype)
     result = to_fixed_lenght_string_array(x)
 
-    assert result.dtype == np.str_
-    assert np.array_equal(result,["aa","bb"])
+    assert result.dtype == "U2"
+    assert np.array_equal(result,["aa","bb","c"])
