@@ -320,7 +320,8 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return:  The synthesised target with missing values.
         """ 
-        y_val = validate_1d_target(y.copy(), len(X))
+
+        y_val = validate_1d_target(y.copy(), None)
 
         y_val[y_val == self.missing_marker] = np.nan
 

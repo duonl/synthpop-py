@@ -22,7 +22,7 @@ def get_test_data():
     return test_data_np_arrays
 
 def get_post_synth_test_data():
-    x_values = np.array(["a","b", "c", "d"], dtype=str_dtype)
+    x_values = {"a":np.array(["a","b", "c", "d"], dtype=str_dtype)}
     missing_markers = ["N.a.N.","missing marker"]
 
     #               y_in                            y_exp                              missing_marker
@@ -99,12 +99,6 @@ def test_post_synth_transform_does_nothing_when_no_nan():
     result = replace_nan.post_synth_transform(X, y)
     assert (result == y).all()
 
-def test_post_synth_transform_empty():
-    replace_nan = ReplaceNoneWithValue()
-
-    with pytest.raises(ValueError):
-        y_res = replace_nan.post_synth_transform(np.array(["s"], dtype=str_dtype), np.array([]))
-    # no longer gives an empty array back, X and y must have the same number of rows
 
 # ----- clonability tests -----
 def test_clone_works_and_fitted_does_not_preserve_state():
