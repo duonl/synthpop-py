@@ -11,16 +11,16 @@ def get_test_data():
 
     test_data_np_arrays = [
 #               X_in                            y_in                                             y_exp
-    *[({"a":np.array(["a","b","a"], str_dtype)}, np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator]), missing_indicator) for missing_indicator in missing_indicators],
-    *[(np.array(["a","b",np.nan],dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), np.array(["x","y","y"]), "N.a.N.")],
-    *[(np.array(["a","b","a"], dtype=str_dtype), np.array(["x","y", "y"],dtype=str_dtype),np.array(["x","y", "y"]), "N.a.N.")],
-    *[(np.array(["a","b","a"], dtype=str_dtype), np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator]), missing_indicator) for missing_indicator in missing_indicators]
+    *[(np.array(["a","b","a"], str_dtype), np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
+    *[(np.array(["a","b",np.nan],dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), "N.a.N.")],
+    *[(np.array(["a","b","a"], dtype=str_dtype), np.array(["x","y", "y"],dtype=str_dtype),np.array(["x","y", "y"], dtype=str_dtype), "N.a.N.")],
+    *[(np.array(["a","b","a"], dtype=str_dtype), np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators]
     ]
 
     return test_data_np_arrays
 
 def get_post_synth_test_data():
-    x_values ={"a": np.array(["a","b", "c", "d"], dtype=str_dtype)}
+    x_values = np.array(["a","b", "c", "d"], dtype=str_dtype)
     missing_markers = ["N.a.N.","missing marker"]
 
     #               y_in                            y_exp                              missing_marker
@@ -37,7 +37,7 @@ def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,y_exp,missing_indica
 
     X_res,y_res = replace_nan.prepare_data_for_fit(X_in, y_in)
     assert X_res is X_in
-    assert np.array_equal(y_exp, y_res)
+    assert np.array_equal(y_exp, y_res, equal_nan=True)
     assert y_exp.dtype == y_res.dtype
 
 def test_prepare_data_for_fit_does_not_change_arguments():

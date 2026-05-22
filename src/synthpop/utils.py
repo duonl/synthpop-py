@@ -81,9 +81,6 @@ def validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
             raise ValueError(f"X and y contain a different number of samples: {n_samples} != {y.shape[0]}.")
 
     if not pd.api.types.is_numeric_dtype(y.dtype):
-
-        if np.issubdtype(y.dtype,np.str_):
-            y= y.astype(str_dtype)
         validate_stringdtype_array(y)
 
     return y

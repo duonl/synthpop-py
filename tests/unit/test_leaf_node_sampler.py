@@ -65,7 +65,7 @@ def test_fit_sampler_raises_shape_mismatch():
 
     with pytest.raises(ValueError, match="must have the same number of samples"):
         sampler.fit_sampler(leaf_ids, y)
-199
+
 def test_fit_sampler_raises_dimension_mismatch():
     sampler = LeafNodeSampler()
     leaf_ids = [[10], [10], [20]]

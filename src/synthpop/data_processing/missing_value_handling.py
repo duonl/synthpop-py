@@ -298,7 +298,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return: a tuple `(X,y)`. Leaves `X` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of `y`. 
         """
-        y_val = validate_1d_target(y.copy(), len(y))#y.copy()# validating that the dtype is str_dtype forces needless casts. #validate_1d_target(y.copy(), len(y))
+        y_val = validate_1d_target(y.copy(), len(X))
 
         missing_mask = pd.isna(y_val)
 
@@ -307,9 +307,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         y_val[missing_mask] = self.missing_marker
 
-        max_str_len = max([len(v) for v in y_val])
-
-        return(X, y_val.astype(f"U{max_str_len}"))
+        return(X, y_val)
 
     def post_synth_transform(self, X: npt.NDArray, y: npt.NDArray) -> npt.NDArray:
         """
@@ -320,7 +318,7 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return:  The synthesised target with missing values.
         """ 
-        y_val = y#validate_1d_target(y.copy(), len(y))
+        y_val = validate_1d_target(y.copy(), len(X))
 
         y_val[y_val == self.missing_marker] = np.nan
 
