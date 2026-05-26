@@ -115,7 +115,7 @@ def get_test_data_classifier(with_cats = False,with_missing_features=False):
         X = make_data_missing(X)
 
 
-    y = np.array([string.ascii_lowercase[i] for i in y])
+    y = np.array([string.ascii_lowercase[i] for i in y],dtype=str_dtype)
     return (X,y)
 
 
@@ -232,7 +232,7 @@ def test_no_information_lost_when_fitting_tree(method,X,y):
     method.fit(X,y)
 
     for (i,k) in enumerate(X.keys()):
-        assert histogram_matches(X[k],method.tree_.fit_X[:,i])
+        assert histogram_matches(X[k],method.tree_.fit_X[:,i]), f"histogram mismatch on key {k}"
 
     assert method.tree_.fit_X.shape[0] == list(X.values())[0].shape[0]
     assert method.tree_.fit_X.shape[1] == len(X.values())
@@ -257,7 +257,7 @@ def test_no_information_lost_when_apply_tree(method,X,y):
     assert method.tree_.apply_X.shape[0] == list(X.values())[0].shape[0]
     assert method.tree_.apply_X.shape[1] == len(X.values())
 
-@pytest.mark.parametrize("estimator,y", [(TreeRegressorMethod(),np.array([0, 1])),(TreeClassifierMethod(),np.array(["aaa","bbb"]))])
+@pytest.mark.parametrize("estimator,y", [(TreeRegressorMethod(),np.array([0, 1])),(TreeClassifierMethod(),np.array(["aaa","bbb"],dtype=str_dtype))])
 def test_transform_raises_when_feature_names_differ(estimator,y):
     X_fit = {
         "a": np.array([1, 2]),
