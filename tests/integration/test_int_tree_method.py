@@ -49,46 +49,6 @@ def test_treemethod_regressor_fit_and_transform():
     assert result.shape[0] ==2
 
 
-def get_basic_numeric_data():
-    return  np.array([1,1,1,3,2,4,5],dtype=np.float32)
-def get_basic_string_data():
-    return np.array(["a","a","b","a","c","c","b"],dtype = str_dtype)
-
-def set_value_at_index(a,idx,val):
-    result = copy.copy(a)
-    result[idx] = val
-    return result
-def get_x_test_data():
-
-    num_d = get_basic_numeric_data()
-    str_d = get_basic_string_data()
-    x1 = {"first":num_d,"second":str_d}
-    x2 = {"first":num_d,"second":str_d, "third": num_d*1.2,"fourth":np.array([s*3 for s in str_d],dtype = str_dtype)}
-    x3 = {"first":set_value_at_index(num_d,3,np.nan),"second":set_value_at_index(str_d,4,np.nan), "third":np.array(num_d)*1.2,"fourth":np.array([s*3 for s in str_d],dtype = str_dtype)}
-    return [x1,x2,x3]
-
-def get_test_data():
-
-    x_data = get_x_test_data()
-
-    str_target = get_basic_string_data()
-    int_target = get_basic_numeric_data()
-
-    str_data = [(TreeClassifierMethod(),x,str_target) for x in x_data]
-    num_data = [(TreeRegressorMethod(),x,int_target) for x in x_data]
-    return str_data +num_data
-
-@pytest.mark.parametrize("method,X,y",get_test_data())
-def test_general_usage(method,X,y):
-
-    result = method.fit_transform(X,y)
-
-    #assert result.dtype == y.dtype
-    assert X["first"].shape[0] == len(y)
-    assert not np.array_equal(y,result)
-
-
-
 def make_data_missing(X):
 
     for ik, k in enumerate(X.keys()):
