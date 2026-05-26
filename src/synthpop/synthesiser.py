@@ -3,6 +3,7 @@ module for generating synthetic data
 """
 from typing import Self
 import pandas as pd
+from sklearn import clone
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
 
@@ -22,6 +23,8 @@ class Synthesiser:
                  default_syn_method: BaseSynthMethod | None = None,
                  special_syn_method: dict[str, BaseSynthMethod] | None = None,
                  ) -> None:
+        
+        self.default_syn_method = default_syn_method
         pass
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:
@@ -36,6 +39,20 @@ class Synthesiser:
 
         :return: Fitted synthesiser.
         """
+
+        order = X.columns
+        self.models_ = {}
+        for i,y in enumerate(order):
+
+            if i == 0:
+                pred = pd.DataFrame({"init":[0]*X.shape[0]})
+            else:
+                pred = X[order[0:i]]
+
+
+
+            self.models_[order[i]] = clone(self.default_syn_method).fit(pred,X[y])
+
         return self
 
     def generate(self, n: int | None = None, random_state: int = 42) -> pd.DataFrame:
