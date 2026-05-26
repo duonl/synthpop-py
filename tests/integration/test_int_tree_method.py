@@ -44,7 +44,6 @@ def test_treemethod_regressor_fit_and_transform():
     tree_method.fit(X,y)
     assert tree_method.n_features_in_ >= 3
     
-
     result = tree_method.transform(X)
 
     assert result.shape[0] ==2
@@ -93,12 +92,15 @@ def test_general_usage(method,X,y):
 def make_data_missing(X):
 
     for ik, k in enumerate(X.keys()):
-        X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=np.dtypes.StringDType(na_object=np.nan))
+        if pd.api.types.is_numeric_dtype(X[k].dtype):
+            X[k]=np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])])
+        else:
+            X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=np.dtypes.StringDType(na_object=np.nan))
 
     return X
 
 
-def get_test_data_classifier(with_cats = False,with_missing_features=False):
+def get_test_data_classifier(with_cats = False,with_missing_features=False,with_missing_target=False):
     X,y = make_classification(n_classes=10,n_informative=11)
     
     X = {i:X[:,i] for i in range(X.shape[1])}
@@ -114,12 +116,14 @@ def get_test_data_classifier(with_cats = False,with_missing_features=False):
     if with_missing_features:
         X = make_data_missing(X)
 
-
-    y = np.array([string.ascii_lowercase[i] for i in y],dtype=str_dtype)
+    if with_missing_target:
+        y = np.array([string.ascii_lowercase[i] if i%5 !=0 else np.nan for i in y],dtype=str_dtype)
+    else:
+        y = np.array([string.ascii_lowercase[i] for i in y],dtype=str_dtype)
     return (X,y)
 
 
-def get_test_data_regressor(with_cats=False,with_missing_features=False):
+def get_test_data_regressor(with_cats=False,with_missing_features=False,with_missing_target=False):
     X,y = make_regression()
     X = {i:X[:,i] for i in range(X.shape[1])}
 
@@ -132,6 +136,9 @@ def get_test_data_regressor(with_cats=False,with_missing_features=False):
 
     if with_missing_features:
         X = make_data_missing(X)
+
+    if with_missing_target:
+        y = np.array([v if i%5 !=0 else np.nan for i,v in enumerate(y)])
 
     return (X,y)
 
@@ -171,6 +178,8 @@ def rigged_tree_regressor_method():
     (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
     (rigged_tree_regressor_method(),*get_test_data_regressor(with_missing_features= True)),
     (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True,with_missing_target=True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True,with_missing_target=True)),
                                        ])
 def test_input_to_tree_is_array_of_float32(method,X,y):
 
@@ -181,6 +190,36 @@ def test_input_to_tree_is_array_of_float32(method,X,y):
     assert isinstance(method.tree_.apply_X,np.ndarray)
     assert method.tree_.apply_X.dtype == np.dtype(np.float32)
 
+
+@pytest.mark.parametrize("method,X,y",[
+    (TreeClassifierMethod(),*get_test_data_classifier()),
+    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True)),
+    (TreeRegressorMethod(),*get_test_data_regressor()),
+    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True)),
+    (TreeClassifierMethod(),*get_test_data_classifier(with_missing_features= True)),
+    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
+    (TreeRegressorMethod(),*get_test_data_regressor(with_missing_features= True)),
+    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
+    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True,with_missing_features= True,with_missing_target=True)),
+    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True,with_missing_features= True,with_missing_target=True)),
+                                       ])
+def test_output_is_not_a_copy(method,X,y):
+
+    result = method.fit_transform(X,y)
+
+    assert not np.array_equal(y,result,equal_nan= True)
+
+def test_output_is_not_a_copy_unique_data():
+    X,y = get_test_data_classifier()
+
+    for k in X.keys():
+        X[k] = X[k].astype(str_dtype)
+
+    method = TreeClassifierMethod()
+
+    result = method.fit_transform(X,y)
+
+    assert not np.array_equal(y,result)
 @pytest.mark.parametrize("method,X,y",[
     (rigged_tree_classifier_method(),*get_test_data_classifier()),
     (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
@@ -219,6 +258,8 @@ def histogram_matches(a,b):
     hist_b =np.sort(np.unique(b,return_counts=True)[1])
 
     return np.array_equal(hist_a,hist_b)
+
+
 @pytest.mark.parametrize("method,X,y",[
     (rigged_tree_classifier_method(),*get_test_data_classifier()),
     (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
@@ -273,3 +314,24 @@ def test_transform_raises_when_feature_names_differ(estimator,y):
 
     with pytest.raises(ValueError):
         estimator.transform(X_bad)
+
+
+@pytest.mark.parametrize("method,X,y",[
+    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True)),
+    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True,with_missing_features=True)),
+                                       ])
+def test_classifier_missing_target(method,X,y):
+    y = np.array([v if i%3 == 0 else np.nan for (i,v) in enumerate(y)], dtype = str_dtype)
+
+    result = method.fit_transform(X,y)
+
+    assert result.dtype == str_dtype
+    assert len(y) == len(result)
+    n_missing = pd.isna(result).sum()
+
+    frac_missing_result = n_missing/len(result)
+    frac_missing_observed = pd.isna(y).sum()/len(y)
+
+    assert frac_missing_result >(frac_missing_observed-0.1)
+    assert frac_missing_result <(frac_missing_observed+0.1)
+
