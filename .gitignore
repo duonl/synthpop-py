@@ -8,3 +8,4 @@
 .coverage
 classes.dot
 pyproject.toml
+tests/unit/__pycache__/
