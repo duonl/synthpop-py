@@ -9,7 +9,7 @@ from synthpop.utility_metrics.spmse import pairwise_spmse, preprocessing, joint_
     [
         (pd.DataFrame([[1,2],[3,4]], columns=['c1', 'c2']), 
         pd.DataFrame([[1,2],[3,4]], columns=['c1', 'c2']), 
-        pd.DataFrame([['c1', 'c1', 0],['c1', 'c2', 0],['c2','c2',0]], columns=['column1', 'column2', 'S_pSME'])) #Desired output format.
+        pd.DataFrame([['c1', 'c1', 0.],['c1', 'c2', 0.],['c2','c2',0.]], columns=['column1', 'column2', 'S_pMSE'])) #Desired output format.
     ] #The S_pSME should be 0 for all three as the synthetic and original are the exact same!
 )
 def test_pairwise_spmse_output(orig_df, syn_df, expected):
