@@ -1,5 +1,5 @@
 """
-This module contains the CART method for synthesising data. 
+This module contains the CART method for synthesising data. Test.
 """
 from abc import abstractmethod, ABCMeta
 from typing import Self
