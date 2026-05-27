@@ -50,11 +50,20 @@ def test_treemethod_regressor_fit_and_transform():
 
 def make_data_missing(X):
 
+    #We need a pattern of missingness that is different for each column
+    # The missingness pattern should not be too predictable.
+
     for ik, k in enumerate(X.keys()):
+
+        # The missingness is periodic. ever p-th element is missing.
+        # The value of p decreases for each column.
+        p = (len(X.keys())-ik) 
+
+        values = [v if i % p !=1 else np.nan for i,v in enumerate(X[k])]
         if pd.api.types.is_numeric_dtype(X[k].dtype):
-            X[k]=np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])])
+            X[k]=np.array(values)
         else:
-            X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=str_dtype)
+            X[k] = np.array(values,dtype=str_dtype)
 
     return X
 
@@ -70,15 +79,15 @@ def get_test_data_classifier(with_cats = False,with_missing_features=False,with_
         for idx in idx_cats:
             x = (X[idx]*10).astype(int)
             x_i = [f %5 for f in x]
-            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype=str_dtype)
+            X[idx] = np.array([string.ascii_lowercase[i%26] for i in x_i],dtype=str_dtype)
 
     if with_missing_features:
         X = make_data_missing(X)
 
     if with_missing_target:
-        y = np.array([string.ascii_lowercase[i] if i%5 !=0 else np.nan for i in y],dtype=str_dtype)
+        y = np.array([string.ascii_lowercase[i%26] if i%5 !=0 else np.nan for i in y],dtype=str_dtype)
     else:
-        y = np.array([string.ascii_lowercase[i] for i in y],dtype=str_dtype)
+        y = np.array([string.ascii_lowercase[i%26] for i in y],dtype=str_dtype)
     return (X,y)
 
 
@@ -127,20 +136,37 @@ def rigged_tree_regressor_method():
     tree = spy_tree_wrapper(DecisionTreeRegressor())
     return TreeRegressorMethod(tree=tree)
 
-    
-@pytest.mark.parametrize("method,X,y",[
+CLASSIFIER_CASES = [
     (rigged_tree_classifier_method(),*get_test_data_classifier()),
     (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
-    (rigged_tree_regressor_method(),*get_test_data_regressor()),
-    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
     (rigged_tree_classifier_method(),*get_test_data_classifier(with_missing_features= True)),
     (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True,with_missing_target=True)),
+
+]
+
+REGRESSOR_CASES = [
+    (rigged_tree_regressor_method(),*get_test_data_regressor()),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
     (rigged_tree_regressor_method(),*get_test_data_regressor(with_missing_features= True)),
     (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
     (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True,with_missing_target=True)),
-    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True,with_missing_target=True)),
-                                       ])
+]
+
+NO_MISSING_TARGET = [
+    (rigged_tree_classifier_method(),*get_test_data_classifier()),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_missing_features= True)),
+    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor()),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_missing_features= True)),
+    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
+
+]
+@pytest.mark.parametrize("method,X,y",[*CLASSIFIER_CASES,*REGRESSOR_CASES ])
 def test_input_to_tree_is_array_of_float32(method,X,y):
+    
 
     method.fit(X,y)
     assert isinstance(method.tree_.fit_X,np.ndarray)
@@ -149,21 +175,34 @@ def test_input_to_tree_is_array_of_float32(method,X,y):
     assert isinstance(method.tree_.apply_X,np.ndarray)
     assert method.tree_.apply_X.dtype == np.dtype(np.float32)
 
+@pytest.mark.parametrize("method,X,y",REGRESSOR_CASES)
+def test_regressor_y_is_array_of_float32(method,X,y):
+    
 
-@pytest.mark.parametrize("method,X,y",[
-    (TreeClassifierMethod(),*get_test_data_classifier()),
-    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True)),
-    (TreeRegressorMethod(),*get_test_data_regressor()),
-    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True)),
-    (TreeClassifierMethod(),*get_test_data_classifier(with_missing_features= True)),
-    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
-    (TreeRegressorMethod(),*get_test_data_regressor(with_missing_features= True)),
-    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
-    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True,with_missing_features= True,with_missing_target=True)),
-    (TreeClassifierMethod(),*get_test_data_classifier(with_cats=True,with_missing_features= True,with_missing_target=True)),
-                                       ])
-def test_output_is_not_a_copy(method,X,y):
+    result = method.fit_transform(X,y)
+    assert isinstance(method.tree_.fit_y,np.ndarray)
+    assert method.tree_.fit_y.dtype == np.dtype(np.float32)
 
+    assert result.dtype ==np.float32
+
+@pytest.mark.parametrize("method,X,y",CLASSIFIER_CASES)
+def test_classifier_result_is_array_of_str_dtype(method,X,y):
+    
+    result = method.fit_transform(X,y)
+    assert result.dtype ==str_dtype
+
+@pytest.mark.parametrize("method,X,y",CLASSIFIER_CASES)
+def test_output_is_not_a_copy_classifier(method,X,y):
+
+    method = TreeClassifierMethod()
+    result = method.fit_transform(X,y)
+
+    assert not np.array_equal(y,result,equal_nan= True)
+
+@pytest.mark.parametrize("method,X,y",[*REGRESSOR_CASES,])
+def test_output_is_not_a_copy_regressor(method,X,y):
+
+    method = TreeRegressorMethod()
     result = method.fit_transform(X,y)
 
     assert not np.array_equal(y,result,equal_nan= True)
@@ -179,16 +218,7 @@ def test_output_is_not_a_copy_unique_data():
     result = method.fit_transform(X,y)
 
     assert not np.array_equal(y,result)
-@pytest.mark.parametrize("method,X,y",[
-    (rigged_tree_classifier_method(),*get_test_data_classifier()),
-    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
-    (rigged_tree_regressor_method(),*get_test_data_regressor()),
-    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
-    (rigged_tree_classifier_method(),*get_test_data_classifier(with_missing_features= True)),
-    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True,with_missing_features= True)),
-    (rigged_tree_regressor_method(),*get_test_data_regressor(with_missing_features= True)),
-    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True,with_missing_features= True)),
-                                       ])
+@pytest.mark.parametrize("method,X,y",NO_MISSING_TARGET)
 def test_order_of_input_dict_does_not_change_output(method,X,y):
 
     method.fit(X,y)
@@ -212,19 +242,18 @@ def test_order_of_input_dict_does_not_change_output(method,X,y):
     assert np.array_equal(feature_matrix_fit,feature_matrix_different_order,equal_nan=True)
 
 
-def histogram_matches(a,b):
-    hist_a =np.sort(np.unique(a,return_counts=True)[1])
-    hist_b =np.sort(np.unique(b,return_counts=True)[1])
+def multiset_frequency_structure_matches(a,b):
 
-    return np.array_equal(hist_a,hist_b)
+    a_not_nan = ~pd.isna(a)
+    b_not_nan = ~pd.isna(b)
+
+    hist_a =np.sort(np.unique(a[a_not_nan],return_counts=True,equal_nan=True)[1])
+    hist_b =np.sort(np.unique(b[b_not_nan],return_counts=True,equal_nan=True)[1])
+
+    return np.array_equal(hist_a,hist_b) and (pd.isna(a).sum()==pd.isna(b).sum())
 
 
-@pytest.mark.parametrize("method,X,y",[
-    (rigged_tree_classifier_method(),*get_test_data_classifier()),
-    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
-    (rigged_tree_regressor_method(),*get_test_data_regressor()),
-    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
-                                       ])
+@pytest.mark.parametrize("method,X,y",NO_MISSING_TARGET )
 def test_no_information_lost_when_fitting_tree(method,X,y):
     """
     test bijection of X and tree input.
@@ -232,18 +261,13 @@ def test_no_information_lost_when_fitting_tree(method,X,y):
     method.fit(X,y)
 
     for (i,k) in enumerate(X.keys()):
-        assert histogram_matches(X[k],method.tree_.fit_X[:,i]), f"histogram mismatch on key {k}"
+        assert multiset_frequency_structure_matches(X[k],method.tree_.fit_X[:,i]), f"histogram mismatch on key {k}"
 
     assert method.tree_.fit_X.shape[0] == list(X.values())[0].shape[0]
     assert method.tree_.fit_X.shape[1] == len(X.values())
 
 
-@pytest.mark.parametrize("method,X,y",[
-    (rigged_tree_classifier_method(),*get_test_data_classifier()),
-    (rigged_tree_classifier_method(),*get_test_data_classifier(with_cats=True)),
-    (rigged_tree_regressor_method(),*get_test_data_regressor()),
-    (rigged_tree_regressor_method(),*get_test_data_regressor(with_cats=True)),
-                                       ])
+@pytest.mark.parametrize("method,X,y",NO_MISSING_TARGET )
 def test_no_information_lost_when_apply_tree(method,X,y):
     """
     test bijection of X and tree input.
@@ -252,7 +276,7 @@ def test_no_information_lost_when_apply_tree(method,X,y):
     method.fit(X,y)
 
     for (i,k) in enumerate(X.keys()):
-        assert histogram_matches(X[k],method.tree_.apply_X[:,i])
+        assert multiset_frequency_structure_matches(X[k],method.tree_.apply_X[:,i])
 
     assert method.tree_.apply_X.shape[0] == list(X.values())[0].shape[0]
     assert method.tree_.apply_X.shape[1] == len(X.values())
@@ -294,3 +318,22 @@ def test_classifier_missing_target(method,X,y):
     assert frac_missing_result >(frac_missing_observed-0.1)
     assert frac_missing_result <(frac_missing_observed+0.1)
 
+
+@pytest.mark.parametrize("method,X,y",[
+    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True)),
+    (TreeRegressorMethod(),*get_test_data_regressor(with_cats=True,with_missing_features=True)),
+                                       ])
+def test_regressor_missing_target(method,X,y):
+    y = np.array([v if i%3 == 0 else np.nan for (i,v) in enumerate(y)])
+
+    result = method.fit_transform(X,y)
+
+    assert result.dtype == np.float32
+    assert len(y) == len(result)
+    n_missing = pd.isna(result).sum()
+
+    frac_missing_result = n_missing/len(result)
+    frac_missing_observed = pd.isna(y).sum()/len(y)
+
+    assert frac_missing_result >(frac_missing_observed-0.1)
+    assert frac_missing_result <(frac_missing_observed+0.1)

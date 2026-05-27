@@ -7,7 +7,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
-from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod,to_fixed_lenght_string_array
+from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod,to_fixed_length_string_array
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
 import copy
@@ -171,7 +171,7 @@ def get_input_test_data():
 
     X1 = {
         "num_1":np.array([1,2,5,2,5,3]),
-        "cat_1":["a","b","c","d","e","f"],
+        "cat_1":np.array(["a","b","c","d","e","f"],dtype=str_dtype),
         "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
         "cat_2":np.array(["aa","bc","cc","dD","eE","fF"],dtype=str_dtype),
     }
@@ -232,28 +232,40 @@ def stub_build_feature_matrix(request,monkeypatch):
     # and use monkey patching to replace the method with the stub.
     monkeypatch.setattr(tree_utils,"build_feature_matrix",stub_build_feature_matrix)
 
+@pytest.fixture(autouse=True)
+def stub_validate_dict(request,monkeypatch):
+
+    # validating the input is delegated to functions in utils.py.
+    # So for these unit test, we need to stub those functions
+
+    # setting autouse=True causes this fixture to be used in every test.
+    # to enable the exception, we check for the 'noautofixt' mark.
+    if 'noautofixt' in request.keywords:
+        return
+    
+    #We need to import tree utils here so that we can replace build_feature_matrix with our stub.
+    from synthpop import utils
+
+    # and use monkey patching to replace the method with the stub.
+    monkeypatch.setattr(utils,"validate_2d_dict",lambda X: (X,42))
+    monkeypatch.setattr(utils,"validate_y",lambda y,n_samples: y)
+
 
 # test fit ----------------------------------------------------------------------------------------
-@pytest.mark.parametrize(
-    "X",
-    [
-        {"a": [[1, 2]], "b": [1, 2]},   # 2-dimensional
-        {"a": [], "b": [1, 2]},         # empty column
-        {"a": [1, 2], "b": [1]},        # length mismatch
-        {"a": []},                       # empty key
-        {}
-    ],
-)
-def test_validate_fit_raises_bad_shapes(tree_method, X):
-    y = [0,1]
-    with pytest.raises(ValueError):
-        tree_method.fit(X, y)
+# Note: raising errors on bad shapes is delegated to utils.validate_dict_x and utils.validate_y
+# In the unit tests of tree methods, we only check that de delegation happens.
+@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
+def test_fit_validates_X_and_y(X,y,index_cat,tree_method,mocker):
+    from synthpop import utils
 
-@pytest.mark.parametrize(
-        "X,y", [({1:[1,2]}, y) for y in [{"a": [1, 2]}, [[1], [2]], None, "invalid", 123, []]])
-def test_validate_fit_raises_invalid_y(tree_method,X, y):
-    with pytest.raises(ValueError):
-        tree_method.fit(X, y)
+    X_spy = mocker.spy(utils,"validate_2d_dict")
+    y_spy = mocker.spy(utils,"validate_y")
+
+    tree_method.fit(X,y)
+
+    X_spy.assert_called_once_with(X)
+    y_spy.assert_called_once_with(y,42)#42 is the hardcoded n_samples value of the validate_dict_x stub
+
 
 @pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
 def test_n_features_in(X,y,index_cat,tree_method):
@@ -368,7 +380,7 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
     
     str_y = np.array(["x","y"])
-    mocked_to_str= mocker.patch('synthpop.methods.cart_synth.to_fixed_lenght_string_array',return_value=str_y)
+    mocked_to_str= mocker.patch('synthpop.methods.cart_synth.to_fixed_length_string_array',return_value=str_y)
 
     tree_method = TreeClassifierMethod(encoder=encoder,missing_handler=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
     
@@ -378,6 +390,22 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     mocked_to_str.assert_called_with(y)
     assert np.array_equal(str_y,tree_method.tree_.fit_y_)
     
+def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler):
+    X = {"a":np.array([1,2])}
+    y = np.array([1,2.0],dtype=np.float64)
+
+    # the missing handling can return a y of np.float64
+    missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
+    
+    converted_y = np.array([1,2.0],dtype=np.float32)
+
+    tree_method = TreeRegressorMethod(encoder=encoder,missing_handler=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
+    
+
+    tree_method.fit(X,y)
+
+    assert np.array_equal(converted_y,tree_method.tree_.fit_y_)
+    assert tree_method.tree_.fit_y_.dtype == np.float32
 
     
 
@@ -447,6 +475,29 @@ def test_transform_raises_error_when_not_fitted(X,tree_method):
     
     with pytest.raises(NotFittedError):
         tree_method.transform(X)
+
+def test_regressor_transform_returns_float32(leafnode_sampler):
+    X = {"a":np.array([1,2])}
+    y = np.array([1,2.0],dtype=np.float64)
+
+    # the missing handling can return a y of np.float64
+    missing_handling = StubMissingHandler(prepared_for_fit_result=None,post_synth_transform_result=y)
+    
+    tree_method = TreeRegressorMethod(encoder=None,missing_handler=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
+    tree_method.encoders_ =  {}
+    tree_method.missing_handler_ = missing_handling
+    tree_method.tree_sampler_ = leafnode_sampler
+    tree_method.tree_ = StubTree()
+    tree_method.n_features_in_ = len(X.keys())
+    tree_method.feature_order_ = list(X.keys())
+    
+
+    result = tree_method.transform(X)
+
+    assert np.array_equal(result,tree_method.missing_handler_.post_synth_transform_result)
+    assert result.dtype == np.float32
+
+
 #general tests ------------------------------------------------------------------------------------
 
 @pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
@@ -498,13 +549,13 @@ def test_TreeMethod_is_sklearn_compatible(estimator, check):
 
 def test_to_fixed_lenght_string_array():
     x = np.array(["a","b"],dtype=str_dtype)
-    result = to_fixed_lenght_string_array(x)
+    result = to_fixed_length_string_array(x)
 
     assert result.dtype == "U1"
     assert np.array_equal(result,["a","b"])
 
     x = np.array(["aa","bb","c"],dtype=str_dtype)
-    result = to_fixed_lenght_string_array(x)
+    result = to_fixed_length_string_array(x)
 
     assert result.dtype == "U2"
     assert np.array_equal(result,["aa","bb","c"])

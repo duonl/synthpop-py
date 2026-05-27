@@ -15,9 +15,10 @@ from synthpop.data_processing.missing_value_handling import BaseMissingValueHand
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
-from synthpop.utils import validate_y, validate_dict_x
+from synthpop import utils 
+from synthpop.utils import validate_dict_x
 
-def to_fixed_lenght_string_array(a):
+def to_fixed_length_string_array(a):
     max_length = max([len(v) for v in a])
     return a.astype("U"+str(max_length))
 
@@ -54,7 +55,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return clone(self.tree) if self.tree is not None else self._get_tree()
 
     def _convert_y(self,y):
-        #overwritten in TreeClassifiermethod
+        #overwritten in TreeClassifiermethod and TreeRegressorMethod
         return y
 
 
@@ -68,8 +69,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         self.target_name_ = getattr(y, "name", None)
-        X_val, n_samples = validate_dict_x(X)
-        y = validate_y(y, n_samples)
+        X_val, n_samples = utils.validate_2d_dict(X)
+        y = utils.validate_y(y, n_samples)
 
         self.n_features_in_ = len(X.keys())
         self.feature_order_ = list(X.keys())
@@ -106,7 +107,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
                         ,["tree_", "encoders_",  "missing_handler_", "tree_sampler_", "feature_order_"]
                         )
         
-        X_val, _ = validate_dict_x(X)
+        X_val, _ = utils.validate_2d_dict(X)
 
         n_features_given = len(X.keys())
         if n_features_given != self.n_features_in_:
@@ -125,7 +126,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     def get_feature_names_out(self, input_features=None):
 
-check_is_fitted(self, "target_name_")
+        check_is_fitted(self, "target_name_")
 
         if input_features is None:
             input_features = getattr(self, "feature_order_", [])
@@ -135,14 +136,6 @@ check_is_fitted(self, "target_name_")
 
         return [self.target_name_]
 
-        # if not (self.target_name_ is None):
-        #     return [self.target_name_]
-        
-        # if input_features is None:
-        #     input_features = getattr(self, "feature_order_", [])
-        #     return [input_features[0]]
-
-        # return input_features
 
     @abstractmethod
     def _get_encoder(self):
@@ -175,21 +168,26 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
+    The output wil always be a numpy array. Numeric output will always have np.float32 as dtype. Categorical output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
+    Missing values will always be represented with `np.nan`.
+
+
     Examples
     --------
         >>> from synthpop.methods.cart_synth import TreeClassifierMethod
         >>> import numpy as np
-        >>> tree_method = TreeClassifierMethod()
+        >>> from synthpop.utils import str_dtype
         >>> X = {
         ...         "column1":np.array([1.1,2.2]),
         ...         "column2":np.array([1.4,1.2]),
-        ...         "column3":np.array(["a","b"])
+        ...         "column3":np.array(["a","b"],dtype=str_dtype)
         ...         }
-        >>> y = np.array(["x","y"])
+        >>> y = np.array(["x","y"],dtype=str_dtype)
+        >>> tree_method = TreeClassifierMethod()
         >>> tree_method.fit(X,y)
         TreeClassifierMethod()
         >>> tree_method.transform(X)
-        array(['x', 'y'], dtype='<U1')
+        array(['x', 'y'], dtype=StringDType(na_object=nan))
 
     """
 
@@ -209,7 +207,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
                                       ,)
 
     def _convert_y(self,y):
-        return to_fixed_lenght_string_array(y)
+        return to_fixed_length_string_array(y)
 
 
 class TreeRegressorMethod(_AbstractTreeMethod):
@@ -252,6 +250,12 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         return DecisionTreeRegressor(min_samples_leaf=5, #equivalent to minbucket in synthpop-r
                                       min_impurity_decrease= 1e-08# equivalent to cp in synthpop-r
                                       ,)
+    
+    def _convert_y(self,y):
+        return y.astype(np.float32,copy=False)
+    
+    def transform(self, X):
+        return super().transform(X).astype(np.float32,copy=False)
 
 
 class CartMethod(base_synth.BaseSynthMethod):
