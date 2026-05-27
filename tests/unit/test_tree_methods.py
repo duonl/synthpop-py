@@ -360,7 +360,7 @@ def test_fit_set_feature_names_out_no_target_name(X,y,index_cat,tree_method):
 
     assert tree_method.target_name_ is None
 
-def test_fit_classifier_convert_to_str(encoder,leafnode_sampler,mocker):
+def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array(["a","b"],dtype=str_dtype)
 

@@ -1,5 +1,5 @@
 """
-This module contains the CART method for synthesising data. Test.
+This module contains the CART method for synthesising data.
 """
 from abc import abstractmethod, ABCMeta
 from typing import Self
@@ -103,7 +103,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(self
-                        ,["tree_", "tree_sampler_", "missing_handler_", "feature_order_"]
+                        ,["tree_", "encoders_",  "missing_handler_", "tree_sampler_", "feature_order_"]
                         )
         
         X_val, _ = validate_dict_x(X)
@@ -124,6 +124,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return result
 
     def get_feature_names_out(self, input_features=None):
+
+check_is_fitted(self, "target_name_")
 
         if input_features is None:
             input_features = getattr(self, "feature_order_", [])

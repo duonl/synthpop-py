@@ -1,4 +1,3 @@
-import copy
 import pytest
 import pandas as pd
 import numpy as np
@@ -55,7 +54,7 @@ def make_data_missing(X):
         if pd.api.types.is_numeric_dtype(X[k].dtype):
             X[k]=np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])])
         else:
-            X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=np.dtypes.StringDType(na_object=np.nan))
+            X[k] = np.array([v if (i )% (len(X.keys())-ik) !=1 else np.nan for i,v in enumerate(X[k])],dtype=str_dtype)
 
     return X
 
@@ -92,7 +91,7 @@ def get_test_data_regressor(with_cats=False,with_missing_features=False,with_mis
         for idx in idx_cats:
             x = (X[idx]*10).astype(int)
             x_i = [f %26 for f in x]
-            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype = np.dtypes.StringDType(na_object=np.nan))
+            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype = str_dtype)
 
     if with_missing_features:
         X = make_data_missing(X)
