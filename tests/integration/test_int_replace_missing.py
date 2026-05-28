@@ -8,7 +8,7 @@ str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
 def test_round_trip():
     replace_missing = ReplaceNoneWithValue()
-    X = np.array(["a","b","c","c"], dtype=str_dtype)
+    X = {"a":np.array(["a","b","c","c"], dtype=str_dtype)}
     y = np.array(["x","y",np.nan,"z"], dtype=str_dtype)
 
     y_res = replace_missing.post_synth_transform(*replace_missing.prepare_data_for_fit(X,y))
