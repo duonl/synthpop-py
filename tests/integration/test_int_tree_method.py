@@ -111,9 +111,7 @@ def get_test_data_regressor(with_cats=False,with_missing_features=False,with_mis
     return (X,y)
 
     
-    
-def spy_tree_wrapper(obj):
-    class spy_wrapper(obj.__class__):
+class SpyDecisionTreeClassifier(DecisionTreeClassifier):
         def fit(self,X,y):
             self.fit_X = X
             self.fit_y = y
@@ -123,17 +121,23 @@ def spy_tree_wrapper(obj):
             self.apply_X = X
             return super().apply(X)
         
-    obj.__class__ = spy_wrapper
-
-    return obj
+class SpyDecisionTreeRegressor(DecisionTreeRegressor):
+        def fit(self,X,y):
+            self.fit_X = X
+            self.fit_y = y
+            return super().fit(X,y)
+        
+        def apply(self,X):
+            self.apply_X = X
+            return super().apply(X)
         
 
 def rigged_tree_classifier_method(pca_components = 1):
-    tree = spy_tree_wrapper(DecisionTreeClassifier())
+    tree = SpyDecisionTreeClassifier()
     return TreeClassifierMethod(tree=tree,encoder=PCAEncoder(pca_transform= PCA(n_components=pca_components)))
 
 def rigged_tree_regressor_method():
-    tree = spy_tree_wrapper(DecisionTreeRegressor())
+    tree = SpyDecisionTreeRegressor()
     return TreeRegressorMethod(tree=tree)
 
 CLASSIFIER_CASES = [

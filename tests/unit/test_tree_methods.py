@@ -160,7 +160,7 @@ def fitted_tree(tree_method,request):
 def assert_dict_array_equal(expected,actual):
 
     for (k,v) in expected.items():
-        assert np.array_equal(v,actual[k]), f"expected (key = {k}): {v}. Actual: {actual[k]}"
+        assert np.array_equal(v,actual[k],equal_nan=True), f"expected (key = {k}): {v}. Actual: {actual[k]}"
 
     assert len(expected.keys()) == len(actual.keys()), f"actual has more keys than expected. Expected: {len(expected.keys())}. Actual: {actual.keys()}"
 
@@ -170,7 +170,7 @@ def assert_dict_array_equal(expected,actual):
 def get_input_test_data():
 
     X1 = {
-        "num_1":np.array([1,2,5,2,5,3]),
+        "num_1":np.array([1,2,np.nan,2,5,3]),
         "cat_1":np.array(["a","b","c","d","e","f"],dtype=str_dtype),
         "num_2":np.array([1.1,2.2,5.5,2.2,5.5,3.3]),
         "cat_2":np.array(["aa","bc","cc","dD","eE","fF"],dtype=str_dtype),
@@ -248,7 +248,7 @@ def stub_validate_dict(request,monkeypatch):
 
     # and use monkey patching to replace the method with the stub.
     monkeypatch.setattr(utils,"validate_2d_dict",lambda X: (X,42))
-    monkeypatch.setattr(utils,"validate_y",lambda y,n_samples: y)
+    monkeypatch.setattr(utils,"validate_1d_target",lambda y,n_samples: y)
 
 
 # test fit ----------------------------------------------------------------------------------------
@@ -259,7 +259,7 @@ def test_fit_validates_X_and_y(X,y,index_cat,tree_method,mocker):
     from synthpop import utils
 
     X_spy = mocker.spy(utils,"validate_2d_dict")
-    y_spy = mocker.spy(utils,"validate_y")
+    y_spy = mocker.spy(utils,"validate_1d_target")
 
     tree_method.fit(X,y)
 
