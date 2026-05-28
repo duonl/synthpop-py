@@ -16,7 +16,6 @@ from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
 from synthpop import utils 
-from synthpop.utils import validate_dict_x
 
 def to_fixed_length_string_array(a):
     max_length = max([len(v) for v in a])
@@ -70,7 +69,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         self.target_name_ = getattr(y, "name", None)
         X_val, n_samples = utils.validate_2d_dict(X)
-        y = utils.validate_y(y, n_samples)
+        y = utils.validate_1d_target(y, n_samples)
 
         self.n_features_in_ = len(X.keys())
         self.feature_order_ = list(X.keys())

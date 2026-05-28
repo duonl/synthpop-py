@@ -165,7 +165,7 @@ NO_MISSING_TARGET = [
 
 ]
 @pytest.mark.parametrize("method,X,y",[*CLASSIFIER_CASES,*REGRESSOR_CASES ])
-def test_input_to_tree_is_array_of_float32(method,X,y):
+def test_tree_received_float32_feature_matrix(method,X,y):
     
 
     method.fit(X,y)
@@ -254,7 +254,7 @@ def multiset_frequency_structure_matches(a,b):
 
 
 @pytest.mark.parametrize("method,X,y",NO_MISSING_TARGET )
-def test_no_information_lost_when_fitting_tree(method,X,y):
+def test_fit_preserves_feature_value_frequencies(method,X,y):
     """
     test bijection of X and tree input.
     """
