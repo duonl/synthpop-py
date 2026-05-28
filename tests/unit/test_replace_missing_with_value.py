@@ -100,7 +100,6 @@ def test_post_synth_transform_does_nothing_when_no_nan():
     assert (result == y).all()
 
 
-
 # ----- clonability tests -----
 def test_clone_works_and_fitted_does_not_preserve_state():
     rpnwv = ReplaceNoneWithValue(missing_marker="N.a.N.")
