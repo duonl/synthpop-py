@@ -1,10 +1,11 @@
 import pytest 
 from synthpop.synthesiser import Synthesiser
-from synthpop.methods.cart_synth import CartMethod
+from synthpop.methods.base_synth import BaseSynthMethod
 import pandas as pd
 import copy
 
-
+class StubSynthMethod(BaseSynthMethod):
+    pass
 def test_synthesiser_default_synthesis(mocker):
 
     mock_cart = mocker.patch("synthpop.methods.cart_synth.CartMethod",spec=True)
