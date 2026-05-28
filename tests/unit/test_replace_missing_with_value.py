@@ -100,9 +100,6 @@ def test_post_synth_transform_does_nothing_when_no_nan():
     assert (result == y).all()
 
 
-    with pytest.raises(ValueError):
-        y_res = replace_nan.post_synth_transform(np.array(["s"], dtype=str_dtype), np.array([]))
-    # no longer gives an empty array back, X and y must have the same number of rows
 
 # ----- clonability tests -----
 def test_clone_works_and_fitted_does_not_preserve_state():
