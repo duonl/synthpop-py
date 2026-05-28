@@ -1,22 +1,10 @@
+from typing import Any, Literal
+
 import pandas as pd
 import numpy as np
 import pytest
 
 from synthpop.utility_metrics.spmse import pairwise_spmse, preprocessing, joint_frequencies, Calc_S_pSME
-
-@pytest.mark.parametrize(
-    "orig_df, syn_df, expected",
-    [
-        (pd.DataFrame([[1,2],[3,4]], columns=['c1', 'c2']), 
-        pd.DataFrame([[1,2],[3,4]], columns=['c1', 'c2']), 
-        pd.DataFrame([['c1', 'c1', 0.],['c1', 'c2', 0.],['c2','c2',0.]], columns=['column1', 'column2', 'S_pMSE'])) #Desired output format.
-    ] #The S_pSME should be 0 for all three as the synthetic and original are the exact same!
-)
-def test_pairwise_spmse_output(orig_df, syn_df, expected):
-
-    output = pairwise_spmse(orig_df, syn_df)
-
-    assert output.equals(expected)
 
 @pytest.mark.parametrize(
     "orig_df, syn_df, max_bins",
@@ -26,74 +14,75 @@ def test_pairwise_spmse_output(orig_df, syn_df, expected):
         ([],[], 12), #Check for non pandas dataframes
         (pd.DataFrame(), pd.DataFrame(), 25.), #Check if max_bins is not an integer
         (pd.DataFrame(), pd.DataFrame(), -12), #Check for negative bins
-        (pd.DataFrame(), pd.DataFrame(), 35) #Check empty DataFrames
+        (pd.DataFrame(), pd.DataFrame(), 35), #Check empty DataFrames
+        (pd.DataFrame(['a', 'N.a.N.'], dtype=str), (pd.DataFrame(['a', 'N.a.N.'], dtype=str)), 25) #Check if N.a.N. is already in use
     ] 
 )
 def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins):
     with pytest.raises(ValueError):
         pairwise_spmse(orig_df, syn_df, max_bins)
 
-def test_preprocessing():
-    df = pd.DataFrame({
-        "a": [0, 25, 50, 75, 100],
-        "b": ["this", "is", "a", "test", "case"]
-    })
-    num_bins=10
-    
-    result = preprocessing(df.copy(), max_bins=num_bins)
-    expected_a = pd.cut(df["a"], num_bins, labels=range(num_bins)) #run the pd cut on numeric column
-    
-    assert result["a"].tolist() == expected_a.tolist()
-    assert result["b"].tolist() == df["b"].tolist() #check if string column remains unaffected
-
 @pytest.mark.parametrize(
-    "df_input, output",
+    "orig_df, syn_df, expected, na_label",
     [
-    (pd.DataFrame({"c1" : [0,0]}), {('c1', 'c1'): pd.DataFrame({"c1" : [0], 'x': [2]})}),
-    (pd.DataFrame({"c1" : [0,0], "c2" : [1,1]}), {('c1', 'c1'): pd.DataFrame({"c1" : [0], 'x': [2]}),
-                                                    ('c1', 'c2'): pd.DataFrame({"c1" : [0], "c2" : [1], 'x': [2]}),
-                                                    ('c2', 'c2'): pd.DataFrame({"c2" : [1], 'x': [2]})})
+        (pd.DataFrame([[1,2],[3,4]], columns=['c1', 'c2']), 
+        pd.DataFrame([[1,2],[3,4]], columns=['c1', 'c2']), 
+        pd.DataFrame([['c1', 'c1', 0.],['c1', 'c2', 0.],['c2','c2',0.]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'),#Desired output format.
+        #Results should all be zero as original dataset=synthetic
+
+        (pd.DataFrame([['a', 0], ['a', 0], ['b',1]], columns=['c1', 'c2']), 
+        pd.DataFrame([['a', 1], ['b', 0], ['b',1]], columns=['c1', 'c2']), 
+        pd.DataFrame([['c1', 'c1', 2/3],['c1', 'c2', 2/3],['c2','c2',2/3]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'),
+        #A non-zero answer, calculated by hand
+
+        (pd.DataFrame([[0], [0], [0],[1]], columns=['c1']), 
+        pd.DataFrame([[0], [1]], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 1/4]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'),
+        #A one-dimensional input with different number of rows
+
+        (pd.DataFrame([['nan'], ['nan'], ['nan'],[np.nan]], columns=['c1']), 
+        pd.DataFrame([['nan'], [np.nan]], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 1/4]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'), #Check missing value handling
+
+        (pd.DataFrame([[0], [0], [0],[np.nan]], columns=['c1']), 
+        pd.DataFrame([[0], [np.nan]], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 1/4]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'), #Check missing value handling
+
+        (pd.DataFrame([['a'], ['a'], ['a'],[np.nan]], columns=['c1']), 
+        pd.DataFrame([['a'], [np.nan]], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 1/4]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'), #Check missing value handling
+
+        (pd.DataFrame([['a'], ['a'], ['a'],[pd.NA]], columns=['c1']), 
+        pd.DataFrame([['a'], [pd.NA]], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 1/4]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.'), #Check missing value handling
+
+        (pd.DataFrame([['a'], ['a'], ['a'],['Different N.a.N.']], columns=['c1']), 
+        pd.DataFrame([['a'], ['Different N.a.N.']], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 1/4]], columns=['column1', 'column2', 'S_pMSE']), 'N.a.N.') #Check missing value handling
+        #This should also work because Different N.a.N. is not exactly equal to N.a.N.
     ] 
 )
-def test_joint_frequencies(df_input,output):
-    res = joint_frequencies(df_input, 'x')
-    for k in output:
-        assert k in res
-        assert res[k].equals(output[k])
+def test_pairwise_spmse_output(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame, na_label : str):
+
+    output = pairwise_spmse(orig_df, syn_df, na_label=na_label)
+
+    assert output.equals(expected)
+
 
 @pytest.mark.parametrize(
-    "orig_df, syn_df, should_raise",
+    "orig_df, syn_df, expected",
     [
-        ({('c1', 'c1'): pd.DataFrame({"c1" : [0], 'f_or': [2]})}, {('c1', 'c1'): pd.DataFrame({"c1" : [0], 'f_syn': [2]})}, True),     #THIS SHOULD RAISE AN ERROR as k=1
-        
-        ({('c1', 'c2'): pd.DataFrame({"c1" : [0,1],  "c2" : [2,3],'f_or': [0,0]})},
-        {('c1', 'c2'): pd.DataFrame({"c1" : [0,1], "c2" : [2,3], 'f_syn': [0,0]})}, 
-        True), #THIS SHOULD RAISE AN ERROR as E will give negative numbers
-
-        ({('c1', 'c1'): pd.DataFrame({"c1" : [0,1], 'f_or': [2,2]}), 
-        ('c1', 'c2'): pd.DataFrame({"c1" : [0,1], "c2" : [1,2], 'f_or': [2,2]}),
-        ('c2', 'c2'): pd.DataFrame({"c2" : [1,2], 'f_or': [2,2]})},
-        
-        {('c1', 'c1'): pd.DataFrame({"c1" : [0,1], 'f_syn': [2,2]}), 
-        ('c1', 'c2'): pd.DataFrame({"c1" : [0,1], "c2" : [1,2], 'f_syn': [2,2]}),
-        ('c2', 'c2'): pd.DataFrame({"c2" : [1,2], 'f_syn': [2,2]})},
-        False) #In this case f_orig=f_synth, so outcome statistic should be 0!
-
-    ] 
+        (pd.DataFrame([[0], [0]], columns=['c1']), 
+        pd.DataFrame([[0], [0], [0],[0]], columns=['c1']), 
+        pd.DataFrame([['c1', 'c1', 0.]], columns=['column1', 'column2', 'S_pMSE']))
+        #If both variables are constant and equal, k=1 so the statistic is undefined due to division by zero. 
+        #The function sends a warning and returns 0 for the variable pair.
+    ]
 )
-def test_calc_S_pMSE(orig_df, syn_df, should_raise):
-    n_s, n_o = 2, 2
-    f_origxy= 'f_or'
-    f_synthxy= 'f_syn'
-    if should_raise:
-        with pytest.raises(ValueError):
-            for key in orig_df:
-                Calc_S_pSME(orig_df[key], syn_df[key], n_o, n_s,  f_origxy, f_synthxy)
-    else:
-        res = {}
-        for key in orig_df:
-            res[key] = Calc_S_pSME(orig_df[key], syn_df[key], n_o, n_s,  f_origxy, f_synthxy)
-        assert all(v == 0. for v in res.values())
-    return
+def test_warning(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
 
+    with pytest.warns(UserWarning) as record:
+        output = pairwise_spmse(orig_df, syn_df)
 
+    assert output.equals(expected)
+    assert "c1" in str(record[0].message)
