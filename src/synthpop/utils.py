@@ -85,7 +85,32 @@ def validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
 
     return y
 
+def standardise_array_dtypes(X: npt.ArrayLike)-> npt.NDArray:
+    """
+    Helper to standardise a 1D array-like object to either:
+    - float32 for numeric data
+    - `StringDType(na_object = np.nan)` for non-numeric data
 
+    Missing values are normalised to `np.nan`.
+    """
+    arr = np.asanyarray(X)
+
+    if pd.api.types.is_numeric_dtype(arr):
+        return np.array([v if not pd.isna(v) else np.nan for v in arr], dtype=np.float32)
+    else:
+        return(np.array([v if not pd.isna(v) else np.nan for v in arr], dtype=str_dtype))
+
+def to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
+    """
+    Helper to ensure that X is a dictionary of arrays with dtype `np.float32` or `StringDType(na_object = np.nan)`.
+    Input can be a pandas DataFrame or a dictionary.
+    """    
+    if isinstance(X, pd.DataFrame):
+        data = {col: X[col].to_numpy() for col in X.columns}
+    else:
+        data = X
+    
+    return {key: standardise_array_dtypes(value) for key, value in data.items()}
 
 # these validation statements are kept as they are included in the three methods and those methods are not yet updated to stringdtype
 def validate_dict_x(X):
