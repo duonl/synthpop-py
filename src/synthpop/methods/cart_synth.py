@@ -2,7 +2,7 @@
 This module contains the CART method for synthesising data.
 """
 from abc import abstractmethod, ABCMeta
-from typing import Self
+from typing import Self, Dict
 import pandas as pd
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
@@ -19,7 +19,7 @@ from synthpop import utils
 
 def to_fixed_length_string_array(a):
     """
-    Converts an array of string_dtype to a array of fixed length string dtype.
+    Converts an array of StringDType to a array of fixed length string dtype.
     Missing values are not supported.
     """
     max_length = max([len(v) for v in a])
@@ -62,7 +62,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return y
 
 
-    def fit(self, X: dict[str, npt.ArrayLike], y: npt.ArrayLike) -> Self:
+    def fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> Self:
         """
         Fit to predict `y` using `X`
 
@@ -95,7 +95,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         return self
 
-    def transform(self, X: dict[str, npt.ArrayLike]) -> np.ndarray:
+    def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         """
         Synthesise new column
 
@@ -257,7 +257,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def _convert_y(self,y):
         return y.astype(np.float32,copy=False)
     
-    def transform(self, X):
+    def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         return super().transform(X).astype(np.float32,copy=False)
 
 
