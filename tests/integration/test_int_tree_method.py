@@ -1,3 +1,4 @@
+import copy
 import pytest
 import pandas as pd
 import numpy as np
@@ -227,11 +228,11 @@ def test_order_of_input_dict_does_not_change_output(method,X,y):
 
     method.fit(X,y)
 
-    feature_matrix_fit = method.tree_.fit_X
+    feature_matrix_fit = copy.copy(method.tree_.fit_X)
 
     method.transform(X)
 
-    feature_matrix_apply = method.tree_.apply_X
+    feature_matrix_apply = copy.copy(method.tree_.apply_X)
 
     assert np.array_equal(feature_matrix_fit,feature_matrix_apply,equal_nan=True)
 
@@ -241,7 +242,7 @@ def test_order_of_input_dict_does_not_change_output(method,X,y):
 
     method.transform(X_different_order)
 
-    feature_matrix_different_order = method.tree_.apply_X
+    feature_matrix_different_order = copy.copy(method.tree_.apply_X)
 
     assert np.array_equal(feature_matrix_fit,feature_matrix_different_order,equal_nan=True)
 
