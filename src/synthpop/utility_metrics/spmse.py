@@ -10,10 +10,17 @@ def preprocessing(df, max_bins=25, na_label= 'N.a.N.'):
     for colname in df:
         if (df[colname] == na_label).any():
             raise ValueError(f"column {colname} contains N.a.N. This value should be reserved for handling missing values implemented by Synthpop")
+        
+        if isinstance(df[colname].dtype, pd.CategoricalDtype):
+            df[colname] = df[colname].cat.add_categories([na_label])
+        
         if pd.api.types.is_numeric_dtype(df[colname]):
-            binned_column = pd.cut(df[colname],max_bins, labels=range(max_bins)) 
-            df[colname] =binned_column
-            df[colname].cat.add_categories([na_label]).fillna(na_label)
+            if df[colname].notna().any():
+                binned_column = pd.cut(df[colname],max_bins, labels=range(max_bins)) 
+                df[colname] =binned_column
+                df[colname].cat.add_categories([na_label]).fillna(na_label)
+            else: #Special case if entire array is NAN
+                df[colname] = pd.Series(na_label, index=df[colname].index, dtype=pd.CategoricalDtype)
         else:
             mask = pd.isna(df[colname])
             df.loc[mask, colname] = na_label
@@ -76,14 +83,12 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
         raise ValueError('Both the original and synthetic dataframe should consist out of non-zero rows')
     if len(orig_df.columns) != len(syn_df.columns) or not all(orig_df.columns==syn_df.columns):
         raise ValueError("Original and synthetic dataframes must have the same shape and column names.")
-    if max_bins <= 1 or not isinstance(max_bins, int):
+    if max_bins < 1 or not isinstance(max_bins, int):
         raise ValueError("The number of bins should be a positive integer.")
-    #Wellicht kan dit ook als onderdeel van een class. Maar idk of het 'omgooien' nodig is. In dat geval kan je ook de tabellen e.d. opslaan als self. ...
 
     """Start calculations here"""
     binned_orig = preprocessing(orig_df.copy(),max_bins=max_bins, na_label=na_label)
     binned_synth = preprocessing(syn_df.copy(),max_bins=max_bins, na_label=na_label)
-    #Hier ontbreekt nog een NaN handling
 
     joint_frequencies_orig = joint_frequencies(binned_orig)
     joint_frequencies_synth = joint_frequencies(binned_synth)
@@ -93,5 +98,4 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     
     S_pMSEdf = pd.DataFrame(S_pMSEdict, index=[0]) #make it a dataframe
     correct_form = S_pMSEdf.T.rename_axis(["column1", "column2"]).reset_index().rename(columns={0: 'S_pMSE'}) #make it a dataframe with 3 colums: col1, col2, S_pMSE
-    print(correct_form)
     return correct_form
