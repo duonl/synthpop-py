@@ -87,18 +87,35 @@ def validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
 
 def standardise_array_dtypes(X: npt.ArrayLike)-> npt.NDArray:
     """
-    Helper to standardise a 1D array-like object to either:
+    Helper to standardise a 1D or 2D array-like object to either:
     - float32 for numeric data
     - `StringDType(na_object = np.nan)` for non-numeric data
 
     Missing values are normalised to `np.nan`.
     """
-    arr = np.asanyarray(X)
 
-    if pd.api.types.is_numeric_dtype(arr):
-        return np.array([v if not pd.isna(v) else np.nan for v in arr], dtype=np.float32)
+    is_numeric = pd.api.types.is_numeric_dtype(np.asanyarray(X))
+    arr = np.asanyarray(X, dtype=object) #to avoid casting van np.nan to 'nan'
+
+    if arr.ndim not in (1, 2):
+        raise TypeError(f"Input must be a 1D or 2D array-like object, received {arr.ndim} instead.")
+
+    original_shape = arr.shape
+    flat = arr.reshape(-1)
+
+    if is_numeric:
+        result = np.array(
+            [v if not pd.isna(v) else np.nan for v in flat],
+            dtype=np.float32,
+        )
+
     else:
-        return(np.array([v if not pd.isna(v) else np.nan for v in arr], dtype=str_dtype))
+        result = np.array(
+            [v if not pd.isna(v) else np.nan for v in flat],
+            dtype=str_dtype,
+        )
+
+    return result.reshape(original_shape)
 
 def to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
     """
