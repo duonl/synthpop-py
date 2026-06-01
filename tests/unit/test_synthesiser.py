@@ -5,6 +5,12 @@ import pandas as pd
 import copy
 
 class StubSynthMethod(BaseSynthMethod):
+
+    def fit(self, X, y):
+        return super().fit(X, y)
+    
+    def transform(self, X):
+        return super().transform(X)
     pass
 def test_synthesiser_default_synthesis(mocker):
 
