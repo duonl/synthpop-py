@@ -67,4 +67,16 @@ class Synthesiser:
         
         :return: Synthetic dataset
         """
-        return pd.DataFrame()
+
+        result = pd.DataFrame()
+
+        for i,y in enumerate(self.column_order_):
+
+            if i == 0:
+                pred = pd.DataFrame({"init":[0]*self.n_samples_})
+            else:
+                pred = result
+
+            new_syn_column = self.models_[y].transform(X=pred)
+            result[new_syn_column.name] = new_syn_column
+        return result

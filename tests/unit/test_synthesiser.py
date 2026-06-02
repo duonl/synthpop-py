@@ -21,7 +21,7 @@ class StubSynthMethod(BaseSynthMethod):
         return self
     
     def transform(self, X):
-        self.transform_X = self.transform_X + [X]
+        self.transform_X = self.transform_X + [copy.copy(X)]
         return self.transform_result
     
     def get_feature_names_out(self, input_features=None):
@@ -30,7 +30,6 @@ class StubSynthMethod(BaseSynthMethod):
 
 def test_synthesiser_default_synthesis(mocker):
 
-    
     synth_method = StubSynthMethod()
     test_data  = pd.DataFrame({
         "a":[1,2],
@@ -68,7 +67,36 @@ def test_synthesiser_default_synthesis(mocker):
     assert synth.models_["c"].fit_X[0].equals(test_data[["a","b"]]), "the first column should be a predictor for the second column"
     assert synth.models_["c"].fit_y[0].equals(test_data["c"])
     assert len(synth.models_["c"].fit_X) == 1, "fitting should happen 1 time per column"
+    #TODO: column order in fitting
+    #TODO: n_samples
 
+
+def test_default_generate():
+
+    synth = Synthesiser(random_seed=2)
+
+    expected_result = pd.DataFrame({
+        "a":["x","y"],
+        "b":[1,2],
+        "c":["q","w"]
+    })
+
+    expected_initial_data = pd.DataFrame({"init":[0,0,0]})
+
+    synth.column_order_ = ["a","b","c"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+    synth.models_["a"] = StubSynthMethod(transform_result=expected_result["a"])
+    synth.models_["b"] = StubSynthMethod(transform_result=expected_result["b"])
+    synth.models_["c"] = StubSynthMethod(transform_result=expected_result["c"])
+
+    result = synth.generate()
+    assert isinstance(result,pd.DataFrame)
+    assert expected_result.equals(result)
+
+    assert synth.models_["a"].transform_X[0].equals(expected_initial_data)
+    assert synth.models_["b"].transform_X[0].equals(expected_result[["a"]])
+    assert synth.models_["c"].transform_X[0].equals(expected_result[["a","b"]])
     
 
     
