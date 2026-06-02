@@ -49,8 +49,6 @@ class Synthesiser:
             else:
                 pred = X[order[0:i]]
 
-
-
             self.models_[order[i]] = clone(self.default_syn_method).fit(pred,X[y])
 
         return self
