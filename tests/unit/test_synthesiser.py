@@ -28,6 +28,23 @@ class StubSynthMethod(BaseSynthMethod):
         raise Exception()
         return ""
 
+def assert_fit_call(model,expected_X,expected_y,expected_model):
+    assert isinstance(model,expected_model)
+    #assert not synth.models_["a"] is synth_method
+    assert isinstance(model.fit_X[0],pd.DataFrame)
+    assert model.fit_X[0].equals(expected_X)
+    assert model.fit_y[0].equals(expected_y)
+    assert len(model.fit_X) == 1, "fitting should happen 1 time per column"
+
+def assert_distinct_instances(objects,origin):
+    for a in objects:
+        assert not (objects[a] is origin), "instance should not be original"
+        for b in objects:
+
+            if a == b:
+                continue
+            
+            assert not (objects[a] is objects[b]), "instances are not distinct"
 def test_synthesiser_default_synthesis(mocker):
 
     synth_method = StubSynthMethod()
@@ -41,34 +58,17 @@ def test_synthesiser_default_synthesis(mocker):
 
     synth.fit(test_data)
 
+    assert synth.n_samples_ == 2
+    assert synth.column_order_ == ["a","b","c"]
+
     expected_initial_data = pd.DataFrame({"init":[0,0]})
 
-    assert isinstance(synth.models_["a"],StubSynthMethod)
-    assert not synth.models_["a"] is synth_method
-    assert isinstance(synth.models_["a"].fit_X[0],pd.DataFrame)
-    assert synth.models_["a"].fit_X[0].equals(expected_initial_data)
-    assert synth.models_["a"].fit_y[0].equals(test_data["a"])
-    assert len(synth.models_["a"].fit_X) == 1, "fitting should happen 1 time per column"
+    assert_fit_call(synth.models_["a"],expected_X=expected_initial_data,expected_y=test_data["a"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["b"],expected_X=test_data[["a"]],expected_y=test_data["b"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["c"],expected_X=test_data[["a","b"]],expected_y=test_data["c"],expected_model=StubSynthMethod)
 
+    assert_distinct_instances(synth.models_,origin=synth_method)
 
-    assert isinstance(synth.models_["b"],StubSynthMethod)
-    assert not synth.models_["b"] is synth_method
-    assert not synth.models_["b"] is synth.models_["a"]
-    assert isinstance(synth.models_["b"].fit_X[0],pd.DataFrame)
-    assert synth.models_["b"].fit_X[0].equals(test_data[["a"]]), "the first column should be a predictor for the second column"
-    assert synth.models_["b"].fit_y[0].equals(test_data["b"])
-    assert len(synth.models_["b"].fit_X) == 1, "fitting should happen 1 time per column"
-
-    assert isinstance(synth.models_["c"],StubSynthMethod)
-    assert not synth.models_["c"] is synth_method
-    assert not synth.models_["c"] is synth.models_["a"]
-    assert not synth.models_["c"] is synth.models_["b"]
-    assert isinstance(synth.models_["c"].fit_X[0],pd.DataFrame)
-    assert synth.models_["c"].fit_X[0].equals(test_data[["a","b"]]), "the first column should be a predictor for the second column"
-    assert synth.models_["c"].fit_y[0].equals(test_data["c"])
-    assert len(synth.models_["c"].fit_X) == 1, "fitting should happen 1 time per column"
-    #TODO: column order in fitting
-    #TODO: n_samples
 
 
 def test_default_generate():
@@ -76,9 +76,9 @@ def test_default_generate():
     synth = Synthesiser(random_seed=2)
 
     expected_result = pd.DataFrame({
-        "a":["x","y"],
-        "b":[1,2],
-        "c":["q","w"]
+        "a":["x","y","z"],
+        "b":[1,2,3],
+        "c":["q","w","e"]
     })
 
     expected_initial_data = pd.DataFrame({"init":[0,0,0]})

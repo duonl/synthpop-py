@@ -40,16 +40,17 @@ class Synthesiser:
         :return: Fitted synthesiser.
         """
 
-        order = X.columns
+        self.column_order_ = X.columns.to_list()
         self.models_ = {}
-        for i,y in enumerate(order):
+        self.n_samples_ = X.shape[0]
+        for i,y in enumerate(self.column_order_):
 
             if i == 0:
-                pred = pd.DataFrame({"init":[0]*X.shape[0]})
+                predictors = pd.DataFrame({"init":[0]*X.shape[0]})
             else:
-                pred = X[order[0:i]]
+                predictors = X[self.column_order_[0:i]]
 
-            self.models_[order[i]] = clone(self.default_syn_method).fit(pred,X[y])
+            self.models_[self.column_order_[i]] = clone(self.default_syn_method).fit(predictors,X[y])
 
         return self
 
