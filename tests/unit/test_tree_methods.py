@@ -498,6 +498,35 @@ def test_regressor_transform_returns_float32(leafnode_sampler):
     assert result.dtype == np.float32
 
 
+def test_classifier_transform_returns_str_dtype(leafnode_sampler):
+    """
+    The output of the classifier method should ALWAYS be str_dtype.
+    With the default values of the TreeClassifierMethod, no explicit conversion is needed.
+    However, if MissingValuePredictor is used as missing handler, it might happen that the output is not already str_dtype.
+    Since the consequence of such an unexpected dtype could be that np.nan becomes "NaN" (which would be a silent error), we need to explicitly deal with this situation.
+    """
+    
+    X = {"a":np.array([1,2])}
+    y = np.array(["a","b"],dtype=np.str_)
+
+    # the missing handling can return a y of np.float64
+    missing_handling = StubMissingHandler(prepared_for_fit_result=None,post_synth_transform_result=y)
+    
+    tree_method = TreeClassifierMethod(encoder=None,missing_handler=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
+    tree_method.encoders_ =  {}
+    tree_method.missing_handler_ = missing_handling
+    tree_method.tree_sampler_ = leafnode_sampler
+    tree_method.tree_ = StubTree()
+    tree_method.n_features_in_ = len(X.keys())
+    tree_method.feature_order_ = list(X.keys())
+    
+
+    result = tree_method.transform(X)
+
+    assert np.array_equal(result,tree_method.missing_handler_.post_synth_transform_result)
+    assert result.dtype == str_dtype
+
+
 #general tests ------------------------------------------------------------------------------------
 
 @pytest.mark.parametrize("X",[v[0] for v in get_input_test_data()])
