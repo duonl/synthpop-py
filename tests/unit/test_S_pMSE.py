@@ -9,39 +9,54 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
 @pytest.mark.parametrize(
     "orig_df, syn_df, max_bins, error",
     [
-        (pd.DataFrame([[1,2],[3,4]]), pd.DataFrame([[1,2,3],[4,5,6]]), 25, "must have the same shape and column names."), #Check for unequal number of columns
-        (pd.DataFrame({"A": [10], "B": [20]}), pd.DataFrame({"A": [10], "C": [20]}), 25 , "must have the same shape and column names."), #Check column names not equal
-        ([],[], 12, "both be a pandas dataframe"), #Check for non pandas dataframes
-        (pd.DataFrame([0]), pd.DataFrame([0]), 25., "The number of bins should be a positive integer."), #Check if max_bins is not an integer
-        (pd.DataFrame([0]), pd.DataFrame([0]), -12, "The number of bins should be a positive integer."), #Check for negative bins
-        (pd.DataFrame(), pd.DataFrame(), 35, "dataframe should consist out of non-zero rows"), #Check empty DataFrames
-        (pd.DataFrame(['a', 'N.a.N.'], dtype=str), (pd.DataFrame(['a', 'N.a.N.'], dtype=str)), 25, "This value should be reserved for handling missing values") #Check if N.a.N. is already in use
+        
+        (pd.DataFrame([[1,2],[3,4]]), pd.DataFrame([[1,2,3],[4,5,6]]), 25, "must have the same shape and column names."), 
+        #Check for unequal number of columns
+
+        (pd.DataFrame({"A": [10], "B": [20]}), pd.DataFrame({"A": [10], "C": [20]}), 25 , "must have the same shape and column names."), 
+        #Check column names not equal
+
+        ([],[], 12, "both be a pandas dataframe"), 
+        #Check for non pandas dataframes
+
+        (pd.DataFrame([0]), pd.DataFrame([0]), 25., "with value larger than 1."), 
+        #Check if max_bins is not an integer
+
+        (pd.DataFrame([0]), pd.DataFrame([0]), -12, "with value larger than 1."), 
+        #Check for negative bins
+
+        (pd.DataFrame(), pd.DataFrame(), 35, "dataframe should consist out of non-zero rows"), 
+        #Check empty DataFrames
+
+        (pd.DataFrame(['a', 'N.a.N.'], dtype=str), (pd.DataFrame(['a', 'N.a.N.'], dtype=str)), 25, "This value should be reserved for handling missing values") 
+        #Check if N.a.N. is already in use
+
     ] 
 )
 def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
+
     with pytest.raises(ValueError, match=error):
         pairwise_spmse(orig_df, syn_df, max_bins)
 
 @pytest.mark.parametrize(
     "orig_df, syn_df, expected, na_label, max_bins",
     [
+
         (pd.DataFrame({"c1": [1, 3],"c2": [2, 4]}), 
         pd.DataFrame({"c1": [1, 3],"c2": [2, 4]}), 
-        pd.DataFrame({"column1": ["c1", "c1", "c2"], "column2": ["c1", "c2", "c2"], "S_pMSE": [0.0, 0.0, 0.0]}), 'N.a.N.', 25),#Desired output format.
-        #Results should all be zero as original dataset=synthetic
+        pd.DataFrame({"column1": ["c1", "c1", "c2"], "column2": ["c1", "c2", "c2"], "S_pMSE": [0.0, 0.0, 0.0]}), 'N.a.N.', 25),
+        #S_pMSE should all be zero as the original_dataset=the synthetic_dataset
         
         (pd.DataFrame({"c1": ["a", "a", "b"],"c2": [0, 0, 1]}),
         pd.DataFrame({"c1": ["a", "b", "b"],"c2": [1, 0, 1]}),
-        pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [2/3, 2/3, 2/3]}),"N.a.N.", 1000), #high number of bins
-        #A non-zero answer, calculated by hand
+        pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [2/3, 2/3, 2/3]}),"N.a.N.", 1000), 
+        #A non-zero answer to the S_pMSE, calculated by hand, with a high value of bins
         
         (pd.DataFrame({"c1": ["a", "a", "b"],"c2": [0, 0, 1]}),
         pd.DataFrame({"c1": ["a", "b", "b"],"c2": [1, 0, 1]}),
         pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [2/3, 2/3, 2/3]}),"N.a.N.", 2), 
         #Check for two bins
 
-        #Also make a check for a single bin
-        #test with categorical dtype
         (pd.DataFrame({"c1": [0, 0, 0, 1]}), 
         pd.DataFrame({"c1": [0, 1]}),
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25),
@@ -52,29 +67,30 @@ def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25),
         #A one-dimensional input with different number of rows using datatype category
 
-        (pd.DataFrame({"c1": [1, 3],"c2": [2, 4]}), 
-        pd.DataFrame({"c1": [1, 3],"c2": [2, 4]}), 
-        pd.DataFrame({"column1": ["c1", "c1", "c2"], "column2": ["c1", "c2", "c2"], "S_pMSE": [0.0, 0.0, 0.0]}), 'N.a.N.', 25),#Desired output format and should be zero as both are the same.
-
         (pd.DataFrame({"c1": ['nan', 'nan', 'nan', np.nan]}), 
         pd.DataFrame({"c1": ['nan', np.nan]}),
-        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), #Check missing value handling, np.nan+strings that spell nan (str DataFrame)
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), 
+        #Check missing value handling, np.nan+strings that spell nan (str DataFrame)
 
         (pd.DataFrame({"c1": [np.nan, np.nan, np.nan, 'nan']}), 
         pd.DataFrame({"c1": [np.nan, 'nan']}),
-        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), #Check missing value handling, Multiple occurences
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), 
+        #Check missing value handling, Multiple occurrences of nan
 
         (pd.DataFrame({"c1": [0, 0, 0, np.nan]}), 
         pd.DataFrame({"c1": [0, np.nan]}),
-        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), #Check missing value handling, np.nan+integers (float DataFrame)
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), 
+        #Check missing value handling, np.nan+integers (float DataFrame)
 
         (pd.DataFrame({"c1": ['a', 'a', 'a', pd.NA]}), 
         pd.DataFrame({"c1": ['a', pd.NA]}),
-        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), #Check missing value handling, (str + pd.NA)
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), 
+        #Check missing value handling, (str + pd.NA)
 
         (pd.DataFrame({"c1": ['a', 'a', 'a', 'Different N.a.N.']}), 
         pd.DataFrame({"c1": ['a', 'Different N.a.N.']}),
-        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), #Check missing value handling, and whether it takes N.a.N. as values
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25), 
+        #Check missing value handling, and whether it takes N.a.N. as values
         #This should also not raise an error because 'Different N.a.N.' is not exactly equal to N.a.N.
 
         (pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}), 
@@ -85,12 +101,12 @@ def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
         (pd.DataFrame({"c1": [0.,0.,0.,0.]}), 
         pd.DataFrame({"c1": [0.,0.,0.,0.]}),
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [0.]}), "N.a.N.", 25)
-    ] #Unbinnable data
+
+    ] #Data where every value will fall into the same bin
 )
 def test_pairwise_spmse_output(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame, na_label : str, max_bins : int):
 
     output = pairwise_spmse(orig_df, syn_df, na_label=na_label, max_bins=max_bins)
-
     assert output.equals(expected)
 
 

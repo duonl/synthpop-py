@@ -6,53 +6,86 @@ from itertools import combinations_with_replacement
 import numpy as np
 import warnings
 
-def preprocessing(df, max_bins=25, na_label= 'N.a.N.'):
-    for colname in df:
-        if (df[colname] == na_label).any():
-            raise ValueError(f"column {colname} contains N.a.N. This value should be reserved for handling missing values implemented by Synthpop")
-        
-        if isinstance(df[colname].dtype, pd.CategoricalDtype):
-            df[colname] = df[colname].cat.add_categories([na_label])
-        
-        if pd.api.types.is_numeric_dtype(df[colname]):
-            if df[colname].notna().any():
-                binned_column = pd.cut(df[colname],max_bins, labels=range(max_bins)) 
-                df[colname] =binned_column
-                df[colname].cat.add_categories([na_label]).fillna(na_label)
-            else: #Special case if entire array is NAN
-                df[colname] = pd.Series(na_label, index=df[colname].index, dtype=pd.CategoricalDtype)
-        else:
-            mask = pd.isna(df[colname])
-            df.loc[mask, colname] = na_label
-    return df
+def preprocessing(column: pd.Series, bins=None, na_label= 'N.a.N.'):
+    """
+    Preprocessing of the dataframes s.t. S_pMSE statistic can be calculated
+    Checks if the na_label is already in use, and if not, fills nan values accordingly
+    Bins numerical values in bins
+    :param column: the specific column. 
+    :type: pd.DataFrame Datatypes can be numeric, categorical, or string
+    :param bins: array of bin edges
+    :type: None (for non numerical columns) or a sequence (array/list)
+    :param na_label: Label for NaN values
+    :type: str
+    """
 
-def joint_frequencies(df):
+    if (column == na_label).any():
+        raise ValueError(f"column {column.dtype} contains N.a.N. This value should be reserved for handling missing values implemented by Synthpop.")
+        
+    if isinstance(column.dtype, pd.CategoricalDtype):
+        column = column.cat.add_categories([na_label])
+        
+    if pd.api.types.is_numeric_dtype(column):
+        if column.notna().any():
+            binned_column = pd.cut(column,bins) 
+            column = binned_column
+            column = column.cat.add_categories([na_label]).fillna(na_label)
+        else: #Special case for when entire array is nan
+            column = pd.Series(na_label, index=column.index, dtype=pd.CategoricalDtype)
+
+    else:
+        mask = pd.isna(column)
+        column.loc[mask]= na_label
+    
+    return column
+
+def joint_frequencies(df: pd.DataFrame, col1: str, col2: str):
     """
-    Create pairwise joint frequency tables for all variable pairs.
+    Calculate joint frequency tables for variable pairs.
+    :param df: Dataset
+    :type: DataFrame
+    :param col1: column name 1
+    :type: str
+    :param col1: column name 2
+    :type: str
     """
-    results = {}
-    for col1, col2 in combinations_with_replacement(df.columns, 2):
-        if col1 == col2:
-            all_idx = df[col1].unique() #Makes sure you also return combinations with count=0
-            group = (df.groupby(col1, dropna=False).size().reindex(all_idx, fill_value=0))
-        else:
-            all_idx = pd.MultiIndex.from_product(
+
+    if col1 == col2:
+        all_idx = df[col1].unique()
+        jf = (df.groupby(col1, dropna=False).size().reindex(all_idx, fill_value=0))
+
+    else:
+        all_idx = pd.MultiIndex.from_product(
             [df[col1].unique(), df[col2].unique()],
-            names=[col1, col2]
-            )
-            group = (df.groupby([col1, col2], dropna=False).size().reindex(all_idx, fill_value=0))
-        results[(col1, col2)] = group
-    return results
+            names=[col1, col2])
+        jf = (df.groupby([col1, col2], dropna=False).size().reindex(all_idx, fill_value=0))
+    
+    return jf
 
-def Calc_S_pSME(jf_or: pd.DataFrame, jf_syn: pd.DataFrame, n_o: int, n_s: int):
-    rescaled_differences = jf_syn-n_s/n_o*jf_or
-    expected_frequency = (jf_or+jf_syn)*(n_s/(n_o+n_s))
+def Calc_S_pSME(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
+    """
+    Calculates the S_pSME for a combination of two columns from the joint frequency tables
+    :param jf_or: Original dataset joint frequency table
+    :type: Series
+    :param jf_syn: Synthetic dataset joint frequency table
+    :type: Series
+    :param n_o: number of rows in original dataset
+    :type: int
+    :param n_s: number of rows in synthetic dataset
+    :type: int
+    """
+
+    rescaled_differences = jf_syn - (n_s / n_o) * jf_or
+    expected_frequency = (jf_or + jf_syn) * n_s/ (n_o + n_s)
+
     k = (expected_frequency>0)
     if k.sum()>1:
-        S_pMSE = 1/(k.sum()-1)*np.nansum(rescaled_differences[k]**2)/np.nansum(expected_frequency[k])
+        S_pMSE = 1/(k.sum()-1) * np.nansum(rescaled_differences[k]**2) / np.nansum(expected_frequency[k])
+
     else: #k=1 
         S_pMSE = 0.
         warnings.warn(f'both variables are constant and equal, so the statistic is undefined. Return 0 for variable pair: {jf_syn.index.name}')
+
     return S_pMSE
 
 def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 25, na_label: str = "N.a.N.") -> pd.DataFrame:
@@ -81,21 +114,35 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
 
     if n_o == 0 or n_s ==0:
         raise ValueError('Both the original and synthetic dataframe should consist out of non-zero rows')
+    
     if len(orig_df.columns) != len(syn_df.columns) or not all(orig_df.columns==syn_df.columns):
         raise ValueError("Original and synthetic dataframes must have the same shape and column names.")
-    if max_bins < 1 or not isinstance(max_bins, int):
-        raise ValueError("The number of bins should be a positive integer.")
-
-    """Start calculations here"""
-    binned_orig = preprocessing(orig_df.copy(),max_bins=max_bins, na_label=na_label)
-    binned_synth = preprocessing(syn_df.copy(),max_bins=max_bins, na_label=na_label)
-
-    joint_frequencies_orig = joint_frequencies(binned_orig)
-    joint_frequencies_synth = joint_frequencies(binned_synth)
-    S_pMSEdict = {}
-    for key in joint_frequencies_orig:
-        S_pMSEdict[key] = Calc_S_pSME(joint_frequencies_orig[key], joint_frequencies_synth[key], n_o, n_s)
     
-    S_pMSEdf = pd.DataFrame(S_pMSEdict, index=[0]) #make it a dataframe
-    correct_form = S_pMSEdf.T.rename_axis(["column1", "column2"]).reset_index().rename(columns={0: 'S_pMSE'}) #make it a dataframe with 3 colums: col1, col2, S_pMSE
-    return correct_form
+    if max_bins < 1 or not isinstance(max_bins, int):
+        raise ValueError("The number of bins should be an integer with value larger than 1.")
+
+    #Start calculations for preprocessing here
+    for column_name in orig_df:
+
+        if pd.api.types.is_numeric_dtype(orig_df[column_name]):
+            combined = pd.concat([orig_df[column_name], syn_df[column_name]])
+            _, bins = pd.cut(combined, bins=max_bins, retbins=True, duplicates='drop')
+
+        else:
+            bins=None
+
+        orig_df[column_name] = preprocessing(orig_df[column_name],bins=bins, na_label=na_label)
+        syn_df[column_name] = preprocessing(syn_df[column_name],bins=bins, na_label=na_label)
+
+    #Calculate joint frequency tables and S_pMSE calculations here
+    rows= []
+
+    for col1, col2 in combinations_with_replacement(orig_df.columns, 2):
+
+        jf_orig = joint_frequencies(orig_df,col1,col2)
+        jf_syn = joint_frequencies(syn_df,col1,col2)
+
+        rows.append([col1, col2, Calc_S_pSME(jf_orig, jf_syn, n_o, n_s)])
+
+    S_pMSEdf = pd.DataFrame(rows, columns=["column1", "column2", "S_pMSE"])
+    return S_pMSEdf
