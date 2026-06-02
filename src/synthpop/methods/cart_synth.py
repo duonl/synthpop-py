@@ -19,7 +19,7 @@ from synthpop import utils
 
 def to_fixed_length_string_array(a):
     """
-    Converts an array of StringDType to a array of fixed length string dtype.
+    Converts an array of StringDType to an array of fixed length string dtype.
     Missing values are not supported.
     """
     max_length = max([len(v) for v in a])
