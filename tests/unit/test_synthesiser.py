@@ -147,6 +147,9 @@ def test_synthesiser_fit_custom_order_by_column_index():
 
     assert_distinct_instances(synth.models_,origin=synth_method)
 
+def test_synthesiser_fit_throws_on_non_dataframe():
+    assert False
+    
 def test_generate_default():
 
     synth = Synthesiser(random_seed=2)
