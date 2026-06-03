@@ -148,8 +148,13 @@ def test_synthesiser_fit_custom_order_by_column_index():
     assert_distinct_instances(synth.models_,origin=synth_method)
 
 def test_synthesiser_fit_throws_on_non_dataframe():
-    assert False
+    not_a_df = {}
+    synth = Synthesiser()
+
+    with pytest.raises(ValueError,"only pandas dataframes are supported"):
+        synth.fit(not_a_df)
     
+
 def test_generate_default():
 
     synth = Synthesiser(random_seed=2)
