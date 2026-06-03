@@ -30,7 +30,6 @@ class StubSynthMethod(BaseSynthMethod):
 
 def assert_fit_call(model,expected_X,expected_y,expected_model):
     assert isinstance(model,expected_model)
-    #assert not synth.models_["a"] is synth_method
     assert isinstance(model.fit_X[0],pd.DataFrame)
     assert model.fit_X[0].equals(expected_X)
     assert model.fit_y[0].equals(expected_y)
@@ -45,7 +44,7 @@ def assert_distinct_instances(objects,origin):
                 continue
             
             assert not (objects[a] is objects[b]), "instances are not distinct"
-def test_synthesiser_default_synthesis(mocker):
+def test_synthesiser_fit_default_synthesis():
 
     synth_method = StubSynthMethod()
     test_data  = pd.DataFrame({
@@ -70,8 +69,57 @@ def test_synthesiser_default_synthesis(mocker):
     assert_distinct_instances(synth.models_,origin=synth_method)
 
 
+def test_synthesiser_fit_custom_order_by_column_name():
 
-def test_default_generate():
+    synth_method = StubSynthMethod()
+    test_data  = pd.DataFrame({
+        "a":[1,2],
+        "b":[3,4],
+        "c":[5,6]
+    })
+
+    synth = Synthesiser(random_seed=2,default_syn_method=synth_method,column_order=["b","a","c"])
+
+    synth.fit(test_data)
+
+    assert synth.n_samples_ == 2
+    assert synth.column_order_ == ["b","a","c"]
+
+    expected_initial_data = pd.DataFrame({"init":[0,0]})
+
+    assert_fit_call(synth.models_["b"],expected_X=expected_initial_data,expected_y=test_data["b"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["a"],expected_X=test_data[["b"]],expected_y=test_data["a"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["c"],expected_X=test_data[["b","a"]],expected_y=test_data["c"],expected_model=StubSynthMethod)
+
+    assert_distinct_instances(synth.models_,origin=synth_method)
+
+def test_synthesiser_fit_custom_order_by_column_index():
+
+    synth_method = StubSynthMethod()
+    test_data  = pd.DataFrame({
+        "a":[1,2],
+        "b":[3,4],
+        "c":[5,6]
+    })
+
+    synth = Synthesiser(random_seed=2,default_syn_method=synth_method,column_order=[2,1,0])
+
+    synth.fit(test_data)
+
+    assert synth.n_samples_ == 2
+    assert synth.column_order_ == ["c","b","a"]
+
+    expected_initial_data = pd.DataFrame({"init":[0,0]})
+
+    assert_fit_call(synth.models_["c"],expected_X=expected_initial_data,expected_y=test_data["c"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["b"],expected_X=test_data[["c"]],expected_y=test_data["b"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["a"],expected_X=test_data[["c","b"]],expected_y=test_data["a"],expected_model=StubSynthMethod)
+
+    assert_distinct_instances(synth.models_,origin=synth_method)
+
+
+
+def test_generate_default():
 
     synth = Synthesiser(random_seed=2)
 

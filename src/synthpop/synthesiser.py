@@ -25,7 +25,7 @@ class Synthesiser:
                  ) -> None:
         
         self.default_syn_method = default_syn_method
-        pass
+        self.column_order = column_order
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:
         """
@@ -39,8 +39,13 @@ class Synthesiser:
 
         :return: Fitted synthesiser.
         """
+        if self.column_order is None:
+            self.column_order_ = X.columns.to_list()
+        elif all([isinstance(item, int) for item in self.column_order]):
+            self.column_order_ = X.columns[self.column_order].to_list()
+        else:
+            self.column_order_ = self.column_order
 
-        self.column_order_ = X.columns.to_list()
         self.models_ = {}
         self.n_samples_ = X.shape[0]
         for i,y in enumerate(self.column_order_):
