@@ -52,18 +52,29 @@ def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
         pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [2/3, 2/3, 2/3]}),"N.a.N.", 1000), 
         #A non-zero answer to the S_pMSE, calculated by hand, with a high value of bins
         
-        (pd.DataFrame({"c1": ["a", "a", "b"],"c2": [0, 0, 1]}),
-        pd.DataFrame({"c1": ["a", "b", "b"],"c2": [1, 0, 1]}),
-        pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [2/3, 2/3, 2/3]}),"N.a.N.", 2), 
+        (pd.DataFrame({"c1": [0,1,2]}),
+        pd.DataFrame({"c1": [1,2]}),
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/9]}), "N.a.N.", 2), 
         #Check for two bins
+
+        (pd.DataFrame({"c1": [0,1,2]}),
+        pd.DataFrame({"c1": [1,2]}),
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/6]}), "N.a.N.", 3), 
+        #Check for three bins, same input as above. but number of bins will produce different output
+        #This test will produce a floating point error if pd.DataFrame.equals() is used
+
+        (pd.DataFrame({"c1": ['a', 'b', 'c']}),
+        pd.DataFrame({"c1": ['b','c']}),
+        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/6]}), "N.a.N.", 25), 
+        #Check statistics if not every value of the original dataset is represented in the synthetic dataset
 
         (pd.DataFrame({"c1": [0, 0, 0, 1]}), 
         pd.DataFrame({"c1": [0, 1]}),
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25),
         #A one-dimensional input with different number of rows
 
-        (pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='category'), 
-        pd.DataFrame({"c1": [0, 1]}, dtype='category'),
+        (pd.DataFrame({"c1": ['a', 'a', 'a', 'b']}, dtype='category'), 
+        pd.DataFrame({"c1": ['a', 'b']}, dtype='category'),
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [1/4]}), "N.a.N.", 25),
         #A one-dimensional input with different number of rows using datatype category
 
@@ -107,20 +118,15 @@ def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
 def test_pairwise_spmse_output(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame, na_label : str, max_bins : int):
 
     output = pairwise_spmse(orig_df, syn_df, na_label=na_label, max_bins=max_bins)
-    assert output.equals(expected)
+    pd.testing.assert_frame_equal(output, expected, check_exact=False, rtol=1e-9)
+    #Test with index 3 will produce a floating point error, and hence assert, if pd.DataFrame.equals() is used.
 
 
-@pytest.mark.parametrize(
-    "orig_df, syn_df, expected",
-    [
-        (pd.DataFrame([[0], [0]], columns=['c1']), 
-        pd.DataFrame([[0], [0], [0],[0]], columns=['c1']), 
-        pd.DataFrame([['c1', 'c1', 0.]], columns=['column1', 'column2', 'S_pMSE']))
-        #If both variables are constant and equal, k=1 so the statistic is undefined due to division by zero. 
-        #The function sends a warning and returns 0 for the variable pair.
-    ]
-)
-def test_warning(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
+def test_warning():
+
+    orig_df = pd.DataFrame({'c1': [0, 0]})
+    syn_df = pd.DataFrame({'c1': [0, 0, 0, 0]})
+    expected = pd.DataFrame({"column1": ['c1'], "column2": ['c1'], "S_pMSE": [0.0]})
 
     with pytest.warns(UserWarning) as record:
         output = pairwise_spmse(orig_df, syn_df)

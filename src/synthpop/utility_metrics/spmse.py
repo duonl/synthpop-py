@@ -30,8 +30,9 @@ def preprocessing(column: pd.Series, bins=None, na_label= 'N.a.N.'):
             binned_column = pd.cut(column,bins) 
             column = binned_column
             column = column.cat.add_categories([na_label]).fillna(na_label)
+            
         else: #Special case for when entire array is nan
-            column = pd.Series(na_label, index=column.index, dtype=pd.CategoricalDtype)
+            column = pd.Series(na_label, index=column.index, dtype='category')
 
     else:
         mask = pd.isna(column)
@@ -39,7 +40,19 @@ def preprocessing(column: pd.Series, bins=None, na_label= 'N.a.N.'):
     
     return column
 
-def joint_frequencies(df: pd.DataFrame, col1: str, col2: str):
+def make_joint_frequencies_indices(df_orig: pd.DataFrame, df_syn: pd.DataFrame, col1: str, col2: str):
+
+    if col1 == col2:
+        all_idx = pd.Index(df_orig[col1].unique()).union(df_syn[col1].unique())
+    
+    else:
+        idx1 = pd.Index(df_orig[col1].unique()).union(df_syn[col1].unique())
+        idx2 = pd.Index(df_orig[col2].unique()).union(df_syn[col2].unique())
+
+        all_idx = pd.MultiIndex.from_product([idx1, idx2],names=[col1, col2])    
+    return all_idx
+
+def joint_frequencies(df: pd.DataFrame, col1: str, col2: str, full_idx: pd.MultiIndex | list):
     """
     Calculate joint frequency tables for variable pairs.
     :param df: Dataset
@@ -48,18 +61,14 @@ def joint_frequencies(df: pd.DataFrame, col1: str, col2: str):
     :type: str
     :param col1: column name 2
     :type: str
+    :param full_idx: list of indices for both synthetic and original frame
+    :type: Either pd.MultiIndex or list of names
     """
 
     if col1 == col2:
-        all_idx = df[col1].unique()
-        jf = (df.groupby(col1, dropna=False).size().reindex(all_idx, fill_value=0))
-
+        jf = df[col1].value_counts(dropna=False).reindex(full_idx, fill_value=0).rename(col1)
     else:
-        all_idx = pd.MultiIndex.from_product(
-            [df[col1].unique(), df[col2].unique()],
-            names=[col1, col2])
-        jf = (df.groupby([col1, col2], dropna=False).size().reindex(all_idx, fill_value=0))
-    
+        jf = df[[col1,col2]].value_counts(dropna=False).reindex(full_idx, fill_value=0).rename(col1+','+col2)
     return jf
 
 def Calc_S_pSME(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
@@ -84,7 +93,7 @@ def Calc_S_pSME(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
 
     else: #k=1 
         S_pMSE = 0.
-        warnings.warn(f'both variables are constant and equal, so the statistic is undefined. Return 0 for variable pair: {jf_syn.index.name}')
+        warnings.warn(f'both variables are constant and equal, so the statistic is undefined. Return 0 for variable pair: {jf_syn.name}')
 
     return S_pMSE
 
@@ -138,10 +147,11 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     rows= []
 
     for col1, col2 in combinations_with_replacement(orig_df.columns, 2):
+        
+        full_idx = make_joint_frequencies_indices(orig_df, syn_df, col1, col2)
 
-        jf_orig = joint_frequencies(orig_df,col1,col2)
-        jf_syn = joint_frequencies(syn_df,col1,col2)
-
+        jf_orig = joint_frequencies(orig_df,col1,col2, full_idx)
+        jf_syn = joint_frequencies(syn_df,col1,col2, full_idx)
         rows.append([col1, col2, Calc_S_pSME(jf_orig, jf_syn, n_o, n_s)])
 
     S_pMSEdf = pd.DataFrame(rows, columns=["column1", "column2", "S_pMSE"])
