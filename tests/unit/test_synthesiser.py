@@ -117,8 +117,6 @@ def test_synthesiser_fit_custom_order_by_column_index():
 
     assert_distinct_instances(synth.models_,origin=synth_method)
 
-
-
 def test_generate_default():
 
     synth = Synthesiser(random_seed=2)
@@ -146,5 +144,29 @@ def test_generate_default():
     assert synth.models_["b"].transform_X[0].equals(expected_result[["a"]])
     assert synth.models_["c"].transform_X[0].equals(expected_result[["a","b"]])
     
+def test_generate_custom_order():
+    synth = Synthesiser(random_seed=2)
 
+    expected_result = pd.DataFrame({
+        "c":["q","w","e"],
+        "a":["x","y","z"],
+        "b":[1,2,3]
+    })
+
+    expected_initial_data = pd.DataFrame({"init":[0,0,0]})
+
+    synth.column_order_ = ["c","a","b"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+    synth.models_["a"] = StubSynthMethod(transform_result=expected_result["a"])
+    synth.models_["b"] = StubSynthMethod(transform_result=expected_result["b"])
+    synth.models_["c"] = StubSynthMethod(transform_result=expected_result["c"])
+
+    result = synth.generate()
+    assert isinstance(result,pd.DataFrame)
+    assert expected_result.equals(result)
+
+    assert synth.models_["c"].transform_X[0].equals(expected_initial_data)
+    assert synth.models_["a"].transform_X[0].equals(expected_result[["c"]])
+    assert synth.models_["b"].transform_X[0].equals(expected_result[["c","a"]])
     
