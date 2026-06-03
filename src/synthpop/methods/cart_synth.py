@@ -171,7 +171,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
-    The output wil always be a numpy array. Numeric output will always have np.float32 as dtype. Categorical output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
+    The output wil always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
     Missing values will always be represented with `np.nan`.
 
 
@@ -223,7 +223,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
-    The output wil always be a numpy array. Numeric output will always have np.float32 as dtype.
+    The output wil always be a numpy array. The output will always have np.float32 as dtype.
     Missing values will always be represented with `np.nan`.
 
 
