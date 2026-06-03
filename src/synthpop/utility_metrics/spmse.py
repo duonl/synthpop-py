@@ -6,41 +6,41 @@ from itertools import combinations_with_replacement
 import numpy as np
 import warnings
 
-def preprocessing(column: pd.Series, bins=None, na_label= 'N.a.N.'):
+def preprocessing(column: pd.Series, bins=None):
     """
     Preprocessing of the dataframes s.t. S_pMSE statistic can be calculated
-    Checks if the na_label is already in use, and if not, fills nan values accordingly
     Bins numerical values in bins
     :param column: the specific column. 
     :type: pd.DataFrame Datatypes can be numeric, categorical, or string
     :param bins: array of bin edges
     :type: None (for non numerical columns) or a sequence (array/list)
-    :param na_label: Label for NaN values
-    :type: str
     """
 
-    if (column == na_label).any():
-        raise ValueError(f"column {column.dtype} contains N.a.N. This value should be reserved for handling missing values implemented by Synthpop.")
-        
-    if isinstance(column.dtype, pd.CategoricalDtype):
-        column = column.cat.add_categories([na_label])
-        
     if pd.api.types.is_numeric_dtype(column):
+
         if column.notna().any():
             binned_column = pd.cut(column,bins) 
             column = binned_column
-            column = column.cat.add_categories([na_label]).fillna(na_label)
-            
-        else: #Special case for when entire array is nan
-            column = pd.Series(na_label, index=column.index, dtype='category')
 
     else:
         mask = pd.isna(column)
-        column.loc[mask]= na_label
+        column.loc[mask]= np.nan
     
     return column
 
 def make_joint_frequencies_indices(df_orig: pd.DataFrame, df_syn: pd.DataFrame, col1: str, col2: str):
+    """
+    Makes all the required indices of possible combinations (x,y), for x as element of col1 and y as element of col2
+    Takes both the synthetic as the original dataset into account, as specific combinations might be present in one or the other
+    :param orig_df: Original dataset.
+    :type orig_df: pd.DataFrame
+    :param syn_df: Synthetic dataset. 
+    :type syn_df: pd.DataFrame
+    :param col1: column name 1
+    :type: str
+    :param col1: column name 2
+    :type: str
+    """
 
     if col1 == col2:
         all_idx = pd.Index(df_orig[col1].unique()).union(df_syn[col1].unique())
@@ -49,7 +49,8 @@ def make_joint_frequencies_indices(df_orig: pd.DataFrame, df_syn: pd.DataFrame, 
         idx1 = pd.Index(df_orig[col1].unique()).union(df_syn[col1].unique())
         idx2 = pd.Index(df_orig[col2].unique()).union(df_syn[col2].unique())
 
-        all_idx = pd.MultiIndex.from_product([idx1, idx2],names=[col1, col2])    
+        all_idx = pd.MultiIndex.from_product([idx1, idx2],names=[col1, col2])  
+
     return all_idx
 
 def joint_frequencies(df: pd.DataFrame, col1: str, col2: str, full_idx: pd.MultiIndex | list):
@@ -97,7 +98,7 @@ def Calc_S_pSME(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
 
     return S_pMSE
 
-def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 25, na_label: str = "N.a.N.") -> pd.DataFrame:
+def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 25) -> pd.DataFrame:
     """
     Compute the Standardized propensity Mean Squared Error (S_pMSE) as defined in [1] for all pairs of variables 
     between two similarly-structured dataframes: one original dataset and one synthetic version of the original dataset,
@@ -109,8 +110,6 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     :type syn_df: pd.DataFrame
     :param max_bins: Maximum number categories in which numeric variables can be discretized. Missing values are discretized in bin number=max_bin+1. Default value is 25.
     :type max_bins: int
-    :param na_label: String value to be given to missing values. Default is N.a.N.
-    :type na_label: str
     :return: Dataset of variable pairs along with their corresponding S_pMSE value.
     :rtype: DataFrame
     """
@@ -140,8 +139,8 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
         else:
             bins=None
 
-        orig_df[column_name] = preprocessing(orig_df[column_name],bins=bins, na_label=na_label)
-        syn_df[column_name] = preprocessing(syn_df[column_name],bins=bins, na_label=na_label)
+        orig_df[column_name] = preprocessing(orig_df[column_name],bins=bins)
+        syn_df[column_name] = preprocessing(syn_df[column_name],bins=bins)
 
     #Calculate joint frequency tables and S_pMSE calculations here
     rows= []
