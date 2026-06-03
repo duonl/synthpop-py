@@ -22,6 +22,7 @@ def test_fit_raises_for_non_numeric_target():
         (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype).reshape((-1,1)), np.array([1, 0, 2, 0, 3]), {"a": [0.5], "b": [1], "c": [3]}),
         (np.array(["a", "a", "b", "b", "c"],dtype = str_dtype), np.array([1, 0, 2, 0, 3]).reshape((-1,1)), {"a": [0.5], "b": [1], "c": [3]}),
         (np.array(["a", "b", "c"],dtype = str_dtype), np.array([3/2, 5/2, 7/2]), {"a": [1.5], "b": [2.5], "c": [3.5]}),
+         (np.array(["a", "a", "c"],dtype = str_dtype), np.array([True, False, True]), {"a": [0.5], "c": [1.0]}),
     ]
 )
 def test_fit_calculates_means(X, y, expected_mapping):
