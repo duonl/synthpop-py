@@ -57,6 +57,9 @@ class Synthesiser:
 
         :return: Fitted synthesiser.
         """
+
+        if not isinstance(X,pd.DataFrame):
+            raise ValueError("only pandas dataframes are supported")
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
         elif all([isinstance(item, int) for item in self.column_order]):

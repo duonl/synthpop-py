@@ -149,9 +149,9 @@ def test_synthesiser_fit_custom_order_by_column_index():
 
 def test_synthesiser_fit_throws_on_non_dataframe():
     not_a_df = {}
-    synth = Synthesiser()
+    synth = Synthesiser(random_seed=3)
 
-    with pytest.raises(ValueError,"only pandas dataframes are supported"):
+    with pytest.raises(ValueError,match="only pandas dataframes are supported"):
         synth.fit(not_a_df)
     
 
