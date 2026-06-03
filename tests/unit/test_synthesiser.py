@@ -6,12 +6,13 @@ import copy
 
 class StubSynthMethod(BaseSynthMethod):
 
-    def __init__(self,transform_result=None):
+    def __init__(self,transform_result=None, name = None):
         super().__init__()
         self.transform_result = transform_result
         self.fit_X = []
         self.fit_y = []
         self.transform_X = []
+        self.name = name
 
     def fit(self, X, y):
 
@@ -44,6 +45,36 @@ def assert_distinct_instances(objects,origin):
                 continue
             
             assert not (objects[a] is objects[b]), "instances are not distinct"
+
+def test_synthesiser_fit_special_syn_method():
+    synth_method = StubSynthMethod()
+    test_data  = pd.DataFrame({
+        "a":[1,2],
+        "b":[3,4],
+        "c":[5,6]
+    })
+
+    synth = Synthesiser(random_seed=2
+                        ,default_syn_method=synth_method
+                        ,special_syn_method={
+                            "a":StubSynthMethod(name="method for a"),
+                            "c":StubSynthMethod(name="method for c"),
+                        })
+
+    synth.fit(test_data)
+
+    assert synth.n_samples_ == 2
+    assert synth.column_order_ == ["a","b","c"]
+
+    expected_initial_data = pd.DataFrame({"init":[0,0]})
+
+    assert_fit_call(synth.models_["a"],expected_X=expected_initial_data,expected_y=test_data["a"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["b"],expected_X=test_data[["a"]],expected_y=test_data["b"],expected_model=StubSynthMethod)
+    assert_fit_call(synth.models_["c"],expected_X=test_data[["a","b"]],expected_y=test_data["c"],expected_model=StubSynthMethod)
+
+    assert synth.models_["a"].name == "method for a"
+    assert synth.models_["c"].name == "method for c"
+
 def test_synthesiser_fit_default_synthesis():
 
     synth_method = StubSynthMethod()
@@ -67,7 +98,6 @@ def test_synthesiser_fit_default_synthesis():
     assert_fit_call(synth.models_["c"],expected_X=test_data[["a","b"]],expected_y=test_data["c"],expected_model=StubSynthMethod)
 
     assert_distinct_instances(synth.models_,origin=synth_method)
-
 
 def test_synthesiser_fit_custom_order_by_column_name():
 

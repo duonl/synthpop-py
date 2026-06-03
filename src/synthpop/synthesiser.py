@@ -26,6 +26,24 @@ class Synthesiser:
         
         self.default_syn_method = default_syn_method
         self.column_order = column_order
+        self.special_syn_method = special_syn_method
+
+    def _get_model(self,y):
+
+        if not (self.default_syn_method is None):
+            effective_default_method = clone(self.default_syn_method)
+        else:
+            effective_default_method = CartMethod()
+
+        if self.special_syn_method is None:
+            model = effective_default_method
+        elif y in self.special_syn_method:
+            model = clone(self.special_syn_method[y])
+        else:
+            model = effective_default_method
+
+        return model
+
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:
         """
@@ -55,7 +73,9 @@ class Synthesiser:
             else:
                 predictors = X[self.column_order_[0:i]]
 
-            self.models_[self.column_order_[i]] = clone(self.default_syn_method).fit(predictors,X[y])
+            model = self._get_model(y)
+
+            self.models_[self.column_order_[i]] = model.fit(predictors,X[y])
 
         return self
 
