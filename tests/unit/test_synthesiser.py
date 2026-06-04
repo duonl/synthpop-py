@@ -26,8 +26,11 @@ class StubSynthMethod(BaseSynthMethod):
         return self.transform_result
     
     def get_feature_names_out(self, input_features=None):
-        raise Exception()
-        return ""
+        # get_feature_names_out is required when inheriting from BaseSynthMethod
+        # However, the Synthesiser class does not need it and should not call it. 
+        # That is why it raises an exception when this method is called, so that the test fails.
+        raise Exception("get_feature_names_out should not be called in these tests.")
+
 
 def assert_fit_call(model,expected_X,expected_y,expected_model):
     assert isinstance(model,expected_model)
@@ -151,9 +154,15 @@ def test_synthesiser_fit_throws_on_non_dataframe():
     not_a_df = {}
     synth = Synthesiser(random_seed=3)
 
-    with pytest.raises(ValueError,match="only pandas dataframes are supported"):
+    with pytest.raises(ValueError,match="X must be a pandas DataFrame, got <class 'dict'> instead."):
         synth.fit(not_a_df)
     
+def test_synthesiser_fit_throws_on_empty_dataframe():
+    df = pd.DataFrame()
+    synth = Synthesiser(random_seed=3)
+    with pytest.raises(ValueError,match="X can not be empty."):
+        synth.fit(X=df)
+
 
 def test_generate_default():
 
