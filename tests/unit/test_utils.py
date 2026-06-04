@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
+import pandas as pd
 
-from synthpop.utils import validate_stringdtype_array, validate_2d_dict, validate_1d_target
+from synthpop.utils import str_dtype, validate_stringdtype_array, validate_2d_dict, validate_1d_target, standardise_array_dtypes, to_standardised_array_dict
 
-str_dtype = np.dtypes.StringDType(na_object=np.nan) 
 
 # ----- validate_stringdtype_array -----
 def test_validate_stringdtype_array_accepts_valid_array():
@@ -103,3 +103,208 @@ def test_validate_1d_target_rejects_wrong_sample_count():
 def test_validate_1D_target_rejects_wrong_non_numeric_dtype(y):
     with pytest.raises(TypeError):
         validate_1d_target(y, None)
+
+# ----- standardise_array_dtypes -----
+def get_one_var_data_str_standardise_array_dtypes():
+    return [
+        pd.Series(["a", "b", "c"], dtype="string"),
+        pd.Series(["1", "2", "3"], dtype="category"),
+        ["a", "b", None],
+        pd.Series(["a", pd.NA, "c"]),
+        np.array(["a", np.nan, "b"], dtype=str_dtype),
+        pd.Series([1, pd.NA, 2], dtype=object)
+    ]
+
+def get_one_var_data_num_standardise_array_dtypes():
+    return [
+        pd.Series([1, 2, 3]),
+        [1.1, 2.2, np.nan],
+        pd.Series([1.1, pd.NA, 2.2], dtype="Float64"),
+        pd.Series([1, None, 3], dtype="Int64"),
+        np.array([1.2, np.nan, 3.4]),
+    ]
+
+#NON-NUMERIC CASES
+@pytest.mark.parametrize("y", get_one_var_data_str_standardise_array_dtypes())
+def test_standardise_array_dtypes_string_output_is_ndarray(y):
+    result = standardise_array_dtypes(y)
+
+    assert isinstance(result, np.ndarray)
+
+
+@pytest.mark.parametrize("y", get_one_var_data_str_standardise_array_dtypes())
+def test_standardise_array_dtypes_string_output_has_stringdtype(y):
+    result = standardise_array_dtypes(y)
+
+    assert result.dtype == str_dtype
+
+
+@pytest.mark.parametrize("y", get_one_var_data_str_standardise_array_dtypes())
+def test_standardise_array_dtypes_string_missing_values_are_normalised(y):
+    result = standardise_array_dtypes(y)
+
+    assert np.array_equal(
+        pd.isna(y),
+        pd.isna(result),
+    ), "Missing values are not handled correctly"
+
+def test_standardise_array_dtypes_preserves_2d_string_shape():
+    arr = np.array([["a", None], ["c", "d"]])
+    result = standardise_array_dtypes(arr)
+
+    assert result.shape == (2, 2)
+    assert result.dtype == str_dtype
+    assert pd.isna(result[0, 1])
+
+def test_standardise_array_dtypes_mixed_object_array_becomes_stringdtype():
+
+    arr = np.array([1, "a", None], dtype=object)
+
+    result = standardise_array_dtypes(arr)
+
+    assert result.dtype == str_dtype
+    assert result[0] == "1"
+    assert result[1] == "a"
+    assert pd.isna(result[2])
+
+# NUMERIC CASES
+@pytest.mark.parametrize("y", get_one_var_data_num_standardise_array_dtypes())
+def test_standardise_array_dtypes_numeric_output_is_ndarray(y):
+    result = standardise_array_dtypes(y)
+
+    assert isinstance(result, np.ndarray)
+
+
+@pytest.mark.parametrize("y", get_one_var_data_num_standardise_array_dtypes())
+def test_standardise_array_dtypes_numeric_output_has_float32_dtype(y):
+    result = standardise_array_dtypes(y)
+    assert result.dtype == np.float32
+
+
+@pytest.mark.parametrize("y", get_one_var_data_num_standardise_array_dtypes())
+def test_standardise_array_dtypes_numeric_missing_values_are_normalised(y):
+    result = standardise_array_dtypes(y)
+
+    assert np.array_equal(
+        pd.isna(y),
+        pd.isna(result),
+    ), "Missing values are not handled correctly"
+
+
+def test_standardise_array_dtypes_preserves_2d_numeric_shape():
+    arr = np.array([[1, np.nan], [3, 4]])
+    result = standardise_array_dtypes(arr)
+
+    assert result.shape == (2, 2)
+    assert result.dtype == np.float32
+    assert np.isnan(result[0, 1])
+
+@pytest.mark.parametrize(
+    "bad_input",
+    [
+        {"a": object()},
+        object(),
+        lambda x: x,
+    ],
+)
+def test_standardise_array_dtypes_unsupported_inputs_raise(bad_input):
+
+    with pytest.raises((TypeError, ValueError)):
+        standardise_array_dtypes(bad_input)
+
+@pytest.mark.parametrize("series",
+                         [pd.Series([1, None, 3], dtype="Int64"),
+                          pd.Series([1, None, 3], dtype="Float64")])
+
+def test_standardise_array_dtypes_nullable_dtype(series):
+    result = standardise_array_dtypes(series)
+
+    assert result.dtype == np.float32
+
+    expected = np.array([1, np.nan, 3], dtype=np.float32)
+
+    assert np.array_equal(result, expected, equal_nan=True)
+    
+# ----- to_standardised_array_dict -----
+def get_x_input_data_to_standardised_array_dict():
+    x_dict = {
+        "a": [1, 2, np.nan],
+        "b": ["x", "y", np.nan]
+    }
+
+    x_dataframe = pd.DataFrame(x_dict)
+
+    return [x_dict, x_dataframe]
+
+@pytest.mark.parametrize("X", get_x_input_data_to_standardised_array_dict())
+def test_to_standardised_array_dict_returns_dict(X):
+
+    result = to_standardised_array_dict(X)
+
+    assert isinstance(result, dict)
+
+    for key, value in result.items():
+        assert isinstance(key, str)
+        assert isinstance(value, np.ndarray)
+
+@pytest.mark.parametrize("X", get_x_input_data_to_standardised_array_dict())
+def test_to_standardised_array_dict_standardises_numeric_columns(X):
+
+    result = to_standardised_array_dict(X)
+
+    assert result["a"].dtype == np.float32
+
+    expected = np.array([1, 2, np.nan], dtype=np.float32)
+
+    assert np.array_equal(result["a"], expected, equal_nan=True)
+
+
+@pytest.mark.parametrize("X", get_x_input_data_to_standardised_array_dict())
+def test_to_standardised_array_dict_standardises_string_columns(X):
+
+    result = to_standardised_array_dict(X)
+
+    assert result["b"].dtype == str_dtype
+
+    expected = np.array(["x", "y", np.nan], dtype=str_dtype)
+
+    assert np.array_equal(result["b"], expected, equal_nan=True)
+
+def test_to_standardised_array_dict_preserves_2d_column_shapes():
+
+    X = {
+        "a": np.array([[1], [2], [3]]),
+        "b": np.array([["x"], ["y"], ["z"]]),
+    }
+
+    result = to_standardised_array_dict(X)
+
+    assert result["a"].shape == (3, 1)
+    assert result["b"].shape == (3, 1)
+
+    assert result["a"].dtype == np.float32
+    assert result["b"].dtype == str_dtype
+
+def test_to_standardised_array_dict_preserves_column_names():
+    X = pd.DataFrame({
+        "col1": [1, 2],
+        "col2": ["a", "b"],
+    })
+
+    result = to_standardised_array_dict(X)
+
+    assert list(result.keys()) == ["col1", "col2"]
+
+
+def test_to_standardised_array_dict_with_numpy_inputs():
+    X = {
+        "num": np.array([1, 2, 3], dtype=np.int64),
+        "cat": np.array(["a", "b", "c"], dtype=object),
+    }
+
+    result = to_standardised_array_dict(X)
+
+    assert result["num"].dtype == np.float32
+    assert result["cat"].dtype == str_dtype
+
+
