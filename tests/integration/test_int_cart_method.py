@@ -9,6 +9,7 @@ def test_numeric_target_uses_regressor():
         {
             "age": [20, 30, 40, 50],
             "income": [1000.0, 2000.0, 3000.0, 4000.0],
+            "blood type": ["A", "O", "AB", "O"]
         }
     )
 
@@ -27,10 +28,11 @@ def test_numeric_target_uses_regressor():
 
 def test_string_target_uses_classifier():
     X = pd.DataFrame(
-        {"age": [20, 30, 40, 50]}
+        {"age": [20, 30, 40, 50],
+         "letter": ["A", "B", "C", "A"]}
     )
 
-    y = pd.Series(["A", "B", "A", "B"], name="group", dtype="string")
+    y = pd.Series(["A", "B", "A", "B"], name="group")
 
     cart = CartMethod()
     cart.fit(X, y)
@@ -86,7 +88,7 @@ def test_transform_accepts_reordered_columns():
         {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
-            "c": [9, 10, 11, 12],
+            "c": ["9", "10", "11", "12"],
         }
     )
 
@@ -106,7 +108,7 @@ def test_transform_accepts_extra_columns():
     X_fit = pd.DataFrame(
         {
             "a": [1, 2, 3, 4],
-            "b": [5, 6, 7, 8],
+            "b": ["a", "b", "c", "d"],
         }
     )
 
@@ -126,7 +128,8 @@ def test_transform_accepts_extra_columns():
 
 def test_transform_preserves_index_and_name():
     X = pd.DataFrame(
-        {"a": [1, 2, 3]},
+        {"a": [1, 2, 3],
+         "b": ["x", "y", "z"]},
         index=["row1", "row2", "row3"],
     )
 
@@ -148,7 +151,7 @@ def test_fit_sets_all_fitted_attributes():
     X = pd.DataFrame(
         {
             "a": [1, 2],
-            "b": [3, 4],
+            "b": ["3", "4"],
         }
     )
 
@@ -174,7 +177,8 @@ def test_fit_sets_all_fitted_attributes():
 )
 def test_numeric_target_dtypes_dispatch_to_regressor(y):
     X = pd.DataFrame(
-        {"x": [1, 2, 3, 4]}
+        {"x1": [1, 2, 3, 4],
+         "x2": ["y", "n", "n", "y"]}
     )
 
     cart = CartMethod()
@@ -192,7 +196,8 @@ def test_numeric_target_dtypes_dispatch_to_regressor(y):
 )
 def test_non_numeric_target_dtypes_dispatch_to_classifier(y):
     X = pd.DataFrame(
-        {"x": [1, 2, 3, 4]}
+        {"x1": [1, 2, 3, 4],
+         "x2": ["hello", "world", "hello", "world"]}
     )
 
     cart = CartMethod()
@@ -243,7 +248,8 @@ def test_fit_transform_with_missing_values_in_predictors():
 )
 def test_fit_transform_with_missing_values_in_target(y):
     X = pd.DataFrame(
-        {"x": [1, 2, 3, 4]}
+        {"x1": [1, 2, 3, 4],
+         "x2": ["a", "b", "y", "z"]}
     )
 
     cart = CartMethod()
