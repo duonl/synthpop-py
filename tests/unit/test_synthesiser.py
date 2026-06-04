@@ -3,6 +3,7 @@ from synthpop.synthesiser import Synthesiser
 from synthpop.methods.base_synth import BaseSynthMethod
 import pandas as pd
 import copy
+from sklearn.exceptions import NotFittedError
 
 class StubSynthMethod(BaseSynthMethod):
 
@@ -244,5 +245,7 @@ def test_generate_custom_order():
 
 def test_generate_raises_when_not_fitted():
     X = pd.DataFrame({"a":[0]})
-    with pytest.raises(NotFittedException)
+    synth = Synthesiser(random_seed=0)
+    with pytest.raises(NotFittedError):
+        synth.generate()
     
