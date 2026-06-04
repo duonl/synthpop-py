@@ -190,6 +190,31 @@ def test_generate_default():
     assert synth.models_["a"].transform_X[0].equals(expected_initial_data)
     assert synth.models_["b"].transform_X[0].equals(expected_result[["a"]])
     assert synth.models_["c"].transform_X[0].equals(expected_result[["a","b"]])
+
+def test_generate_different_rowcount():
+
+    synth = Synthesiser(random_seed=2)
+
+    expected_result = pd.DataFrame({
+        "a":["x","y","z"],
+    })
+
+    expected_row_count = 5
+
+    expected_initial_data = pd.DataFrame({"init":[0]*expected_row_count})
+
+    synth.column_order_ = ["a"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+    synth.models_["a"] = StubSynthMethod(transform_result=expected_result["a"])
+
+
+    result = synth.generate(n = expected_row_count)
+    assert isinstance(result,pd.DataFrame)
+    assert expected_result.equals(result)
+
+    assert synth.models_["a"].transform_X[0].equals(expected_initial_data)
+
     
 def test_generate_custom_order():
     synth = Synthesiser(random_seed=2)
@@ -216,4 +241,8 @@ def test_generate_custom_order():
     assert synth.models_["c"].transform_X[0].equals(expected_initial_data)
     assert synth.models_["a"].transform_X[0].equals(expected_result[["c"]])
     assert synth.models_["b"].transform_X[0].equals(expected_result[["c","a"]])
+
+def test_generate_raises_when_not_fitted():
+    X = pd.DataFrame({"a":[0]})
+    with pytest.raises(NotFittedException)
     

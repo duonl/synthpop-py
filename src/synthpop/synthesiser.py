@@ -102,10 +102,15 @@ class Synthesiser:
 
         result = pd.DataFrame()
 
+        if n is None:
+            n_syn_rows = self.n_samples_
+        else:
+            n_syn_rows = n
+
         for i,y in enumerate(self.column_order_):
 
             if i == 0:
-                pred = pd.DataFrame({"init":[0]*self.n_samples_})
+                pred = pd.DataFrame({"init":[0]*n_syn_rows})
             else:
                 pred = result
 
