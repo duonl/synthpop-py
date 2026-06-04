@@ -1,7 +1,7 @@
 """
 module for generating synthetic data
 """
-from typing import Self
+from typing import Self, Dict
 import pandas as pd
 from sklearn import clone
 from synthpop.methods.base_synth import BaseSynthMethod
@@ -21,14 +21,14 @@ class Synthesiser:
     def __init__(self, random_seed: int,
                  column_order: list[str] | list[int] | None = None,
                  default_syn_method: BaseSynthMethod | None = None,
-                 special_syn_method: dict[str, BaseSynthMethod] | None = None,
+                 special_syn_method: Dict[str, BaseSynthMethod] | None = None,
                  ) -> None:
         
         self.default_syn_method = default_syn_method
         self.column_order = column_order
         self.special_syn_method = special_syn_method
 
-    def _get_model(self,y):
+    def _get_model(self, y):
 
         if not (self.default_syn_method is None):
             effective_default_method = clone(self.default_syn_method)
@@ -58,8 +58,8 @@ class Synthesiser:
         :return: Fitted synthesiser.
         """
 
-        if not isinstance(X,pd.DataFrame):
-            raise ValueError("only pandas dataframes are supported")
+        if not isinstance(X, pd.DataFrame):
+            raise ValueError(f"X must be a pandas DataFrame, got {type(X)} instead.")
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
         elif all([isinstance(item, int) for item in self.column_order]):
@@ -69,7 +69,7 @@ class Synthesiser:
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
-        for i,y in enumerate(self.column_order_):
+        for i, y in enumerate(self.column_order_):
 
             if i == 0:
                 predictors = pd.DataFrame({"init":[0]*X.shape[0]})
