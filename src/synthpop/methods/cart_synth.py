@@ -273,6 +273,8 @@ class CartMethod(base_synth.BaseSynthMethod):
     CART synthesiser wrapper that automatically selects either a
     TreeClassifierMethod or TreeRegressorMethod depending on the dtype of `y`.
 
+    When called without existing predictors (`X` is empty), CART automatically samples to create a synthetic `y`.
+
     Input/output API uses pandas objects exclusively:
     - X must be a pandas DataFrame
     - y must be a pandas Series
@@ -291,16 +293,36 @@ class CartMethod(base_synth.BaseSynthMethod):
     :param regressor: a TreeRegressorMethod object. It is the selected algorithm if the target variable is numeric. 
     :param classifier: a TreeClassifierMethod object. It is the selected algorithm if the target variable is non-numeric.
 
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from synthpop.methods.cart_synth import CartMethod
+    >>>
+    >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
+    >>> y_num = pd.Series([50, 60, 70], name = 'length')
+    >>> y_cat = pd.Series(['A', 'B', 'AB'], name = 'blood type')
+    >>> method = CartMethod()
+    >>> method.fit(X, y_num)                                                                                                                                                                                                    
+    CartMethod()                                                                                                                                                                                                                
+    >>> method.transform(X)                                                                                                                                                                                                     
+    0    50.0                                                                                                                                                                                                                   
+    1    70.0                                                                                                                                                                                                                   
+    2    60.0                                                                                                                                                                                                                   
+    Name: length, dtype: float32
+    >>>
+    >>> method.fit(X, y_cat)                                                                                                                                                                                                    
+    CartMethod()  
+    >>> method.transform(X)                                                                                                                                                                                                     
+    0     A                                                                                                                                                                                                                     
+    1    AB                                                                                                                                                                                                                     
+    2     B                                                                                                                                                                                                                     
+    Name: blood type, dtype: object         
     """
 
     def __init__(self, regressor: TreeRegressorMethod | None = None, classifier: TreeClassifierMethod | None = None) -> None:
         super().__init__()
-        # see https://scikit-learn.org/stable/developers/develop.html#instantiation
         self.regressor = regressor
         self.classifier = classifier
-
-        # parameters of TreeRegressorMethod and TreeClassifierMethod 
-        # should not be set in this __init__ to avoid contradictory values.
 
     def _new_regressor(self) -> TreeRegressorMethod:
         return(
