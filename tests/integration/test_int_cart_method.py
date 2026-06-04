@@ -4,12 +4,13 @@ import numpy as np
 
 from synthpop.methods.cart_synth import CartMethod, TreeRegressorMethod, TreeClassifierMethod
 
+
 def test_numeric_target_uses_regressor():
     X = pd.DataFrame(
         {
             "age": [20, 30, 40, 50],
             "income": [1000.0, 2000.0, 3000.0, 4000.0],
-            "blood type": ["A", "O", "AB", "O"]
+            "blood type": ["A", "O", "AB", "O"],
         }
     )
 
@@ -128,12 +129,14 @@ def test_transform_accepts_extra_columns():
 
 def test_transform_preserves_index_and_name():
     X = pd.DataFrame(
-        {"a": [1, 2, 3],
-         "b": ["x", "y", "z"]},
+        {
+            "a": [1, 2, 3],
+            "b": ["x", "y", "z"],
+         },
         index=["row1", "row2", "row3"],
     )
 
-    y = pd.Series([10.0, 20.0, 30.0], index=["row1", "row2", "row3"], name="salary",)
+    y = pd.Series([10.0, 20.0, 30.0], index=["row1", "row2", "row3"], name="salary")
 
     cart = CartMethod()
     cart.fit(X, y)
@@ -238,13 +241,13 @@ def test_fit_transform_with_missing_values_in_predictors():
     assert len(out) == len(X)
 
 @pytest.mark.parametrize(
-        "y",
-        [
-            pd.Series(["A", None, "A", "B"], dtype="string", name="target"),
-            pd.Series([1, 2, np.nan, 4], name="target"),
-            pd.Series([True, False, True, pd.NA], name="target"),
-            pd.Series([1, None, 2, np.nan], name="target"),
-        ],
+    "y",
+    [
+        pd.Series(["A", None, "A", "B"], dtype="string", name="target"),
+        pd.Series([1, 2, np.nan, 4], name="target"),
+        pd.Series([True, False, True, pd.NA], name="target"),
+        pd.Series([1, None, 2, np.nan], name="target"),
+    ],
 )
 def test_fit_transform_with_missing_values_in_target(y):
     X = pd.DataFrame(
