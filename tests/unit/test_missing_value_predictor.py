@@ -217,7 +217,11 @@ def test_prepare_data_does_not_mutate_inputs(predictor):
     # ----- post synth transform tests -----
 def test_post_synth_all_missing(predictor):
     predictor._all_missing = True
-    predictor._no_missing = False
+    predictor._none_missing = False
+    predictor.tree_ = None  # all set to none as they are irrelevant to this test but need to be set to avoid NotFittedError
+    predictor.tree_sampler_ = None
+    predictor.encoders_ = None
+    predictor.feature_order_ = None
     X = {"a": np.array([1, 2, 3])}
     y = np.array([1, 2, 3])
 
@@ -227,7 +231,11 @@ def test_post_synth_all_missing(predictor):
 
 def test_post_synth_no_missing(predictor):
     predictor._all_missing = False
-    predictor._no_missing = True
+    predictor._none_missing = True
+    predictor.tree_ = None  # all set to none as they are irrelevant to this test but need to be set to avoid NotFittedError
+    predictor.tree_sampler_ = None
+    predictor.encoders_ = None
+    predictor.feature_order_ = None
     X = {"a": np.array([1, 2, 3])}
     y = np.array([1, 2, 3])
 
@@ -241,7 +249,7 @@ def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_
     predictor.tree_sampler_ = stub_sampler
     predictor.tree_sampler_.sample_return = np.array([False, True, False, False])
     predictor._all_missing = False
-    predictor._no_missing = False
+    predictor._none_missing = False
     encoder_a = stub_encoder
     encoder_a.transform_return = np.array([1, 2, 3, 4])
     encoder_b = copy.copy(stub_encoder)
@@ -278,7 +286,7 @@ def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler, stub_
     predictor.tree_sampler_ = stub_sampler
     predictor.tree_sampler_.sample_return = np.array([False, True, False, False])
     predictor._all_missing = False
-    predictor._no_missing = False
+    predictor._none_missing = False
 
     encoder_b = stub_encoder
     encoder_b.transform_return = np.array([[1], [2], [1], [2]], dtype=np.float32)
