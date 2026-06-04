@@ -4,6 +4,7 @@ module for generating synthetic data
 from typing import Self, Dict
 import pandas as pd
 from sklearn import clone
+from sklearn.exceptions import NotFittedError
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
 
@@ -99,6 +100,9 @@ class Synthesiser:
         
         :return: Synthetic dataset
         """
+
+        if not hasattr(self,"models_"):
+            raise NotFittedError("synthesiser has not been fitted.")
 
         result = pd.DataFrame()
 
