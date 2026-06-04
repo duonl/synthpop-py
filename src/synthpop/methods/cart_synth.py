@@ -3,15 +3,16 @@ This module contains the CART method for synthesising data.
 """
 from abc import abstractmethod, ABCMeta
 from typing import Self, Dict
+
 import pandas as pd
+import numpy as np
+import numpy.typing as npt
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
-import numpy.typing as npt
-import numpy as np
+
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
-from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
-    MissingValuePredictor, ReplaceNoneWithValue
+from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
@@ -24,6 +25,7 @@ def to_fixed_length_string_array(a):
     """
     max_length = max([len(v) for v in a])
     return a.astype("U"+str(max_length))
+
 
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
@@ -60,7 +62,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def _convert_y(self,y):
         #overwritten in TreeClassifiermethod and TreeRegressorMethod
         return y
-
 
     def fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> Self:
         """
@@ -289,7 +290,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     - np.float32 for numeric data
     - StringDType(na_object=np.nan) for non-numeric data
 
-    :class:`CartMethod` is the default method in :class:`Synthesiser`. Following requirements of its parent class :class:`BaseSynthMethod`, a fit and a transform methods are implemented.
+    :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 
     :param regressor: a TreeRegressorMethod object. It is the selected algorithm if the target variable is numeric. 
     :param classifier: a TreeClassifierMethod object. It is the selected algorithm if the target variable is non-numeric.
@@ -300,8 +301,8 @@ class CartMethod(base_synth.BaseSynthMethod):
     >>> from synthpop.methods.cart_synth import CartMethod
     >>>
     >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
-    >>> y_num = pd.Series([50, 60, 70], name = 'length')
-    >>> y_cat = pd.Series(['A', 'B', 'AB'], name = 'blood type')
+    >>> y_num = pd.Series([50, 60, 70], name='length')
+    >>> y_cat = pd.Series(['A', 'B', 'AB'], name='blood type')
     >>> method = CartMethod()
     >>> method.fit(X, y_num)                                                                                                                                                                                                    
     CartMethod()                                                                                                                                                                                                                
@@ -320,7 +321,9 @@ class CartMethod(base_synth.BaseSynthMethod):
     Name: blood type, dtype: object         
     """
 
-    def __init__(self, regressor: TreeRegressorMethod | None = None, classifier: TreeClassifierMethod | None = None) -> None:
+    def __init__(self, 
+                 regressor: TreeRegressorMethod | None = None, 
+                 classifier: TreeClassifierMethod | None = None) -> None:
         super().__init__()
         self.regressor = regressor
         self.classifier = classifier
@@ -340,7 +343,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         Fits the CART synthesiser by assessing the data type of the target variable and
         calls the :py:meth:`fit` of the correct regressor or classifier.
 
-        :param X: Features dataset.
+        :param X: Feature dataset.
         :param y: Target variable. Length must be equal to number of rows in `X`.
         :return: Fitted estimator.
         """
@@ -350,7 +353,8 @@ class CartMethod(base_synth.BaseSynthMethod):
         if not isinstance(y, pd.Series):
             raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
         if len(X) != len(y):
-            raise ValueError(f"X and y must contain the same number of samples: {len(X)} != {len(y)}.")
+            raise ValueError(f"X and y must contain the same number of samples: "
+                             f"{len(X)} != {len(y)}.")
         
         self.feature_names_in_ = list(X.columns)
         self.target_name_ = y.name
@@ -371,7 +375,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         """
         Synthesise the target column using the fitted model.
 
-        :param X: Features dataset.
+        :param X: Feature dataset.
         :return: Synthesised target variable.
         """
 
@@ -392,10 +396,10 @@ class CartMethod(base_synth.BaseSynthMethod):
         return pd.Series(
             result,
             index=X.index,
-            name=self.target_name_
+            name=self.target_name_,
         )
 
-    def get_feature_names_out(self, input_features=None):
+    def get_feature_names_out(self, input_features: list[str] | None = None):
         check_is_fitted(self, ["method_"])
         return self.method_.get_feature_names_out(input_features)
         
