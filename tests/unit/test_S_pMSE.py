@@ -125,7 +125,7 @@ def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
         #Data where every value will fall into the same bin
 
         (pd.DataFrame({"c1": [1, 0, np.nan], "c2": ['a', pd.NA, 'c'], "c3": [6, 7, 3]}), 
-        pd.DataFrame({ "c2": [pd.NA, pd.NA, pd.NA], "c3": [6, 3, 6], "c1": [np.nan, np.nan, 0]}),
+        pd.DataFrame({ "c2": [pd.NA, pd.NA, pd.NA] , "c3": [6, 3, 6], "c1": [np.nan, np.nan, 0]}),
         pd.DataFrame({"column1": ["c1", "c1", "c1",
                                 "c2", "c2", "c3"], 
 
