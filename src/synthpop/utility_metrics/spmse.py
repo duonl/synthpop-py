@@ -8,7 +8,7 @@ import warnings
 
 __all__ = ["pairwise_spmse"]
 
-def _preprocessing(column: pd.Series, bins: Sequence[float] | None =None):
+def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None =None):
     """
     Preprocessing of the dataframes s.t. S_pMSE statistic can be calculated
     Bins numerical values in bins
@@ -18,15 +18,22 @@ def _preprocessing(column: pd.Series, bins: Sequence[float] | None =None):
     :type: None (for non numerical columns) or a sequence (array/list)
     """
 
-    if pd.api.types.is_numeric_dtype(column):
+    if column.notna().any():
+        binned_column = pd.cut(column,bins)
+        column = binned_column
+    
+    return column
 
-        if column.notna().any():
-            binned_column = pd.cut(column,bins)
-            column = binned_column
+def _preprocessing_non_numeric(column: pd.Series):
+    """
+    Preprocessing of the dataframes s.t. S_pMSE statistic can be calculated
+    Sets every missing value to np.nan
+    :param column: the specific column. 
+    :type: pd.DataFrame Datatypes can be numeric, categorical, or string
+    """
 
-    else:
-        mask = pd.isna(column)
-        column.loc[mask]= np.nan
+    mask = pd.isna(column)
+    column.loc[mask]= np.nan
     
     return column
 
@@ -59,16 +66,29 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
     :type: int
     """
 
-    rescaled_differences = jf_syn.sub((n_s / n_o) * jf_or, fill_value=0)
-    expected_frequency = jf_syn.add(jf_or, fill_value=0) * n_s/ (n_o + n_s)
-
-    non_zero_variable_pairs_mask = (expected_frequency>0)
-    num_independent_combinations = non_zero_variable_pairs_mask.sum()
+    rescaled_differences = jf_syn.sub(
+                                    (n_s / n_o) * jf_or, 
+                                    fill_value=0
+                                    )
     
-    if num_independent_combinations>1:
-        S_pMSE = 1/(num_independent_combinations-1) * np.nansum(rescaled_differences[k]**2 / expected_frequency[k])
+    expected_frequency = jf_syn.add(
+                                    jf_or, 
+                                    fill_value=0
+                                    )\
+                                    *n_s/ (n_o + n_s)
 
-    else: #k=1 
+    num_independent_combinations = len(expected_frequency.index)
+
+    if num_independent_combinations>1:
+
+        S_pMSE = 1/(num_independent_combinations-1)\
+                *np.sum(
+                    np.power(rescaled_differences,2)\
+                    / expected_frequency
+                    )
+
+    else: #number_independent_combinations=1 
+
         S_pMSE = 0.
         warnings.warn(f'both variables are constant and equal, so the statistic is undefined. Return 0 for variable pair: {jf_syn.name}')
 
@@ -115,12 +135,12 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
         if pd.api.types.is_numeric_dtype(o_df[column_name]):
             combined = pd.concat([o_df[column_name], s_df[column_name]])
             _, bins = pd.cut(combined, bins=max_bins, retbins=True, duplicates='drop')
+            o_df[column_name] = _preprocessing_numeric(o_df[column_name],bins=bins)
+            s_df[column_name] = _preprocessing_numeric(s_df[column_name],bins=bins)
 
         else:
-            bins=None
-
-        o_df[column_name] = _preprocessing(o_df[column_name],bins=bins)
-        s_df[column_name] = _preprocessing(s_df[column_name],bins=bins)
+            o_df[column_name] = _preprocessing_non_numeric(o_df[column_name])
+            s_df[column_name] = _preprocessing_non_numeric(s_df[column_name])
 
     #Calculate joint frequency tables and s_pmse calculations below
     rows= []
