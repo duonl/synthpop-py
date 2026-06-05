@@ -164,3 +164,35 @@ def test_feature_matrix_dtype_is_float32(predictor):
     X_matrix = build_feature_matrix(X_encoded, predictor.feature_order_,)
 
     assert X_matrix.dtype == np.float32
+
+def test_places_missings_unbiased():
+    predictor = MissingValuePredictor()
+    n_samples = 300
+
+    perc_one = 1/2
+    perc_two = 1/3
+    perc_missing = 1 - perc_one -perc_two
+
+
+    n_samples = 3000
+
+    one_list = ([1.1]*int(n_samples*perc_one)) 
+    two_list = ([2]*int(n_samples*perc_two)) 
+    missing_list = ([np.nan]*int(n_samples*perc_missing)) 
+
+    X = {"initial_column": np.array([0]*n_samples)}
+    y = np.array(one_list + two_list+missing_list)
+
+    predictor.prepare_data_for_fit(X,y)
+
+    adjusted_proportions = {
+        1.1: perc_one/(perc_one+perc_two),
+        2:perc_two/(perc_one+perc_two),
+    }
+    y_sampled = np.array([1.1]*int(n_samples*adjusted_proportions[1.1]) + [2]*int(n_samples*adjusted_proportions[2])) 
+    result = predictor.post_synth_transform(X,y_sampled)
+
+    counts_after_transfom = np.unique(result,return_counts=True,equal_nan=True)
+    counts_before_transfom = np.unique(y,return_counts=True,equal_nan=True)
+
+    assert counts_after_transfom[1][0] != counts_before_transfom[1][0], "setting missing values did not change the frequency of 1.1"
