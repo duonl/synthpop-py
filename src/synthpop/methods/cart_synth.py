@@ -3,15 +3,16 @@ This module contains the CART method for synthesising data.
 """
 from abc import abstractmethod, ABCMeta
 from typing import Self, Dict
+
 import pandas as pd
+import numpy as np
+import numpy.typing as npt
 from sklearn import clone
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, BaseDecisionTree
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
-import numpy.typing as npt
-import numpy as np
+
 from synthpop.data_processing.encoders import PCAEncoder, MeanEncoder
-from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, \
-    MissingValuePredictor, ReplaceNoneWithValue
+from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler, MissingValuePredictor, ReplaceNoneWithValue
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
@@ -24,6 +25,7 @@ def to_fixed_length_string_array(a):
     """
     max_length = max([len(v) for v in a])
     return a.astype("U"+str(max_length))
+
 
 class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
@@ -60,7 +62,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def _convert_y(self,y):
         #overwritten in TreeClassifiermethod and TreeRegressorMethod
         return y
-
 
     def fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> Self:
         """
@@ -270,54 +271,136 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
 class CartMethod(base_synth.BaseSynthMethod):
     """
-    Assigns the right decision tree model based on the target variable data type: if numeric, we use a regressor, if categorical, we use a classifier.
+    CART synthesiser wrapper that automatically selects either a
+    TreeClassifierMethod or TreeRegressorMethod depending on the dtype of `y`.
 
-    :class:`CartMethod` is the default method in :class:`Synthesiser`. Following requirements of its parent class :class:`BaseSynthMethod`, a fit and a transform methods are implemented.
+    When called without existing predictors (`X` is empty), CART automatically samples to create a synthetic `y`.
+    When `X` has columns during `transform` that were not present during `fit`, those columns are ignored.
+
+    Input/output API uses pandas objects exclusively:
+    - X must be a pandas DataFrame
+    - y must be a pandas Series
+    - transform returns a pandas Series
+
+    Internal tree methods operate on:
+    - dict[str, np.ndarray] for X
+    - np.ndarray for y
+
+    Arrays are standardised to:
+    - np.float32 for numeric data
+    - StringDType(na_object=np.nan) for non-numeric data
+
+    :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 
     :param regressor: a TreeRegressorMethod object. It is the selected algorithm if the target variable is numeric. 
-    :param classifier: a TreeClassifierMethod object. It is the selected algorithm if the target variable is categorical.
+    :param classifier: a TreeClassifierMethod object. It is the selected algorithm if the target variable is non-numeric.
 
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from synthpop.methods.cart_synth import CartMethod
+    >>>
+    >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
+    >>> y_num = pd.Series([50, 60, 70], name='length')
+    >>> y_cat = pd.Series(['A', 'B', 'AB'], name='blood type')
+    >>> method = CartMethod()
+    >>> method.fit(X, y_num)                                                                                                                                                                                                    
+    CartMethod()                                                                                                                                                                                                                
+    >>> method.transform(X)                                                                                                                                                                                                     
+    0    50.0                                                                                                                                                                                                                   
+    1    70.0                                                                                                                                                                                                                   
+    2    60.0                                                                                                                                                                                                                   
+    Name: length, dtype: float32
+    >>>
+    >>> method.fit(X, y_cat)                                                                                                                                                                                                    
+    CartMethod()  
+    >>> method.transform(X)                                                                                                                                                                                                     
+    0     A                                                                                                                                                                                                                     
+    1    AB                                                                                                                                                                                                                     
+    2     B                                                                                                                                                                                                                     
+    Name: blood type, dtype: object         
     """
 
-    def __init__(self, regressor: TreeRegressorMethod | None = None, classifier: TreeClassifierMethod | None = None) -> None:
+    def __init__(self, 
+                 regressor: TreeRegressorMethod | None = None, 
+                 classifier: TreeClassifierMethod | None = None) -> None:
         super().__init__()
-        # see https://scikit-learn.org/stable/developers/develop.html#instantiation
-        self.reg = regressor
-        self.classi = classifier
+        self.regressor = regressor
+        self.classifier = classifier
 
-        # parameters of TreeRegressorMethod and TreeClassifierMethod should not be set in this __init__, for consistency:
-        # The user could specify contradicting values.
+    def _new_regressor(self) -> TreeRegressorMethod:
+        return(
+            clone(self.regressor) if self.regressor is not None else TreeRegressorMethod()
+        )
+    
+    def _new_classifier(self) -> TreeClassifierMethod:
+        return(
+            clone(self.classifier) if self.classifier is not None else TreeClassifierMethod()
+        )
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
         """
-        Assess data type of target variable and calls the :py:meth:`fit` of the correct regressor or classifier.
+        Fits the CART synthesiser by assessing the data type of the target variable and
+        calls the :py:meth:`fit` of the correct regressor or classifier.
 
-        :param X: Features dataset.
-        :param y: Target variable. Length must be equal to number of rows in X.
+        :param X: Feature dataset.
+        :param y: Target variable. Length must be equal to number of rows in `X`.
         :return: Fitted estimator.
         """
-        # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
-        # That method sets the attribute.
-        # For example:
-        # from sklearn.utils.validation import validate_data
-        # ....
-        # X, y = validate_data(self, X, y)
 
-        # The return values of (TreeRegressorMethod/TreeClassifierMethod).fit() should be stored in an attribute that ends in an underscore.
-        # In this way, the check_is_fitted method still works. See https://scikit-learn.org/stable/modules/generated/sklearn.utils.validation.check_is_fitted.html#sklearn.utils.validation.check_is_fitted
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError(f"X must be a pandas DataFrame, got {type(X)} instead.")
+        if not isinstance(y, pd.Series):
+            raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
+        if len(X) != len(y):
+            raise ValueError(f"X and y must contain the same number of samples: "
+                             f"{len(X)} != {len(y)}.")
+        
+        self.feature_names_in_ = list(X.columns)
+        self.target_name_ = y.name
+
+        X_dict = utils.to_standardised_array_dict(X)
+        y_array = utils.standardise_array_dtypes(y)
+
+        if pd.api.types.is_numeric_dtype(y_array.dtype):
+            self.method_ = self._new_regressor()
+        else:
+            self.method_ = self._new_classifier()
+
+        self.method_.fit(X_dict, y_array)
 
         return self
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame) -> pd.Series:
         """
-        Generate a new column to ``X`` using the fitted model.
+        Synthesise the target column using the fitted model.
 
-        :param X: Input dataset
-        :return: Input dataset with predicted column.
+        :param X: Feature dataset.
+        :return: Synthesised target variable.
         """
-        # should call sklearn.utils.validation.check_is_fitted(self),
-        return pd.DataFrame()
 
-    def get_feature_names_out(self, input_features=None):
-        # delegates to TreeRegressorMethod/TreeClassifierMethod
-        pass
+        check_is_fitted(self, ["method_", "feature_names_in_", "target_name_"])
+
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError(f"X must be a pandas DataFrame, got {type(X)} instead.")
+        
+        missing_cols = [col for col in self.feature_names_in_ if col not in X.columns]
+        if missing_cols:
+            raise ValueError(f"X is missing required columns: {missing_cols}.")
+        
+        # preserve original feature ordering used during fit
+        X_dict = utils.to_standardised_array_dict(X[self.feature_names_in_])
+
+        result = self.method_.transform(X_dict)
+
+        return pd.Series(
+            result,
+            index=X.index,
+            name=self.target_name_,
+        )
+
+    def get_feature_names_out(self, input_features: list[str] | None = None):
+        check_is_fitted(self, ["method_"])
+        return self.method_.get_feature_names_out(input_features)
+        
+        
