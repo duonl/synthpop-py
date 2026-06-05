@@ -19,7 +19,7 @@ def test_synthesiser_correct_default_methods():
     assert isinstance(synth.models_["c"],CartMethod)
 
 
-def test_synthesiser_first_column_is_sampled():
+def test_synthesiser_first_column_is_sampled_categorical():
     expected_proportions = {
         "a": 1/2,
         "b": 1/3,
@@ -43,4 +43,30 @@ def test_synthesiser_first_column_is_sampled():
 
     assert np.abs(expected_proportions["a"] - result_proportions["a"])<0.05
     assert np.abs(expected_proportions["b"] - result_proportions["b"])<0.05
-    assert np.abs(expected_proportions[np.nan] - result_proportions[np.nan])<0.05
+    assert np.abs(expected_proportions["missing"] - result_proportions[np.nan])<0.05
+
+def test_synthesiser_first_column_is_sampled_numeric():
+    expected_proportions = {
+        '1.1': 1/2,
+        '2': 1/3,
+        "missing": 1/6
+    }
+
+    n_samples = 3000
+
+    one_list = ([1.1]*int(n_samples*expected_proportions["1.1"])) 
+    two_list = ([2]*int(n_samples*expected_proportions["2"])) 
+    missing_list = ([np.nan]*int(n_samples*expected_proportions["missing"])) 
+    test_data = pd.DataFrame({
+        "first_column": one_list + two_list+missing_list
+    })
+
+    synth = Synthesiser(random_seed=2)
+
+    result = synth.fit(test_data).generate()
+
+    result_proportions = result["first_column"].value_counts(dropna = False,normalize=True)
+
+    assert np.abs(expected_proportions["1.1"] - result_proportions[1.1])<0.05
+    assert np.abs(expected_proportions["2"] - result_proportions[2])<0.05
+    assert np.abs(expected_proportions["missing"] - result_proportions[np.nan])<0.05
