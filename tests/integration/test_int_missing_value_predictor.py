@@ -166,6 +166,10 @@ def test_feature_matrix_dtype_is_float32(predictor):
     assert X_matrix.dtype == np.float32
 
 def test_places_missings_unbiased():
+    #Attempt to reproduce #130.
+
+    #The way MissingValuePredictor is called seems identical to the way it happens in #130
+    #Yet, this test passes and does not reproduce the bug.
     predictor = MissingValuePredictor()
     n_samples = 300
 
@@ -180,19 +184,19 @@ def test_places_missings_unbiased():
     two_list = ([2]*int(n_samples*perc_two)) 
     missing_list = ([np.nan]*int(n_samples*perc_missing)) 
 
-    X = {"initial_column": np.array([0]*n_samples)}
-    y = np.array(one_list + two_list+missing_list)
+    X = {"initial_column": np.array([0]*n_samples,dtype=np.float32)}
+    y = np.array(one_list + two_list+missing_list,dtype=np.float32)
 
     predictor.prepare_data_for_fit(X,y)
 
-    adjusted_proportions = {
-        1.1: perc_one/(perc_one+perc_two),
-        2:perc_two/(perc_one+perc_two),
-    }
-    y_sampled = np.array([1.1]*int(n_samples*adjusted_proportions[1.1]) + [2]*int(n_samples*adjusted_proportions[2])) 
+    perc_one_adj = perc_one /(perc_one+perc_two)
+    perc_two_adj = perc_two /(perc_one+perc_two)
+
+    y_sampled = np.array( [2]*int(n_samples*perc_two_adj) + [1.1]*int(n_samples*perc_one_adj),dtype=np.float32) 
     result = predictor.post_synth_transform(X,y_sampled)
 
     counts_after_transfom = np.unique(result,return_counts=True,equal_nan=True)
-    counts_before_transfom = np.unique(y,return_counts=True,equal_nan=True)
+    counts_before_transfom = np.unique(y_sampled,return_counts=True,equal_nan=True)
 
     assert counts_after_transfom[1][0] != counts_before_transfom[1][0], "setting missing values did not change the frequency of 1.1"
+    assert counts_after_transfom[1][1] != counts_before_transfom[1][1], "setting missing values did not change the frequency of 2"
