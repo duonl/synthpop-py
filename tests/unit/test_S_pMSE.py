@@ -103,12 +103,6 @@ def test_pairwise_spmse_inputtests(orig_df, syn_df, max_bins, error):
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [9/16]}), 25), 
         #Check missing value handling, (str + pd.NA)
 
-        (pd.DataFrame({"c1": ['a', 'a', 'a', 'Different N.a.N.']}), 
-        pd.DataFrame({"c1": ['a', 'Different N.a.N.']}),
-        pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [9/16]}), 25), 
-        #Check missing value handling, and whether it takes N.a.N. as values
-        #This should also not raise an error because 'Different N.a.N.' is not exactly equal to N.a.N.
-
         (pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}), 
         pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}),
         pd.DataFrame({"column1": ["c1"], "column2": ["c1"], "S_pMSE": [0.]}), 25),

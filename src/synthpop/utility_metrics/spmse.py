@@ -5,6 +5,7 @@ import pandas as pd
 from itertools import combinations_with_replacement
 import numpy as np
 import warnings
+from typing import Sequence
 
 __all__ = ["pairwise_spmse"]
 
@@ -13,9 +14,7 @@ def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None =None
     Preprocessing of the dataframes s.t. S_pMSE statistic can be calculated
     Bins numerical values in bins
     :param column: the specific column. 
-    :type: pd.DataFrame Datatypes can be numeric, categorical, or string
     :param bins: array of bin edges
-    :type: None (for non numerical columns) or a sequence (array/list)
     """
 
     if column.notna().any():
@@ -119,15 +118,15 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     if n_o == 0 or n_s ==0:
         raise ValueError('Both the original and synthetic dataframe should consist out of non-zero rows')
     
-    if len(orig_df.columns) != len(syn_df.columns) or set(orig_df.columns) != set(syn_df.columns):
+    if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError("Original and synthetic dataframes must have the same shape and column names.")
     
     if max_bins < 1 or not isinstance(max_bins, int):
         raise ValueError("The number of bins should be an integer with value of at least 1.")
 
     #Make sure the original DataFrames are not modified 
-    o_df = orig_df.copy(deep=True)
-    s_df = syn_df.copy(deep=True)
+    o_df = orig_df.copy(deep=False)
+    s_df = syn_df.copy(deep=False)
 
     #Start calculations for preprocessing here
     for column_name in orig_df:
