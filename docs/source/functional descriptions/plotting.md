@@ -61,7 +61,7 @@ The resulting matrix is always square and symmetric. Diagonal elements do not ca
 
 ### 5. Edge cases and special situations
 #### 5.1 Missing values
-If S_pMSE values are missing for certain variable pairs, the cells in the heatmap for these corresponding pairs have no value written down and will be grey.
+If S_pMSE values for certain variable pairs are missing they are considered undefined. The corresponding heatmap cells have no value written down and will be clearly distinguishable from the consequential color scheme as determined in section 3.2, including after grayscale transformation.
 
 #### 5.2 Execution in headless or non-interactive environments
 When the method is executed in a headless environment, interactive rendering is not available or desirable. In such cases the visualisation should be saved to file only, rendering to a display should be disabled or skipped, and the saved image becomes the primary output artefact. File path and folder creation are handled automatically. This ensures that the method remains robust and usable in automated workflows and production environments.
