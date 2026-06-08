@@ -1,17 +1,22 @@
-import pytest
-
-import pandas as pd
+import tempfile
+import webbrowser
 from pathlib import Path
+
+import pytest
+import pandas as pd
 
 from synthpop.plotting.plot import plot_univariate_distributions
 
 # ----- univariate distribution tests -----
 @pytest.fixture
-def mocked_filesystem(monkeypatch):
+def mocked_environment(monkeypatch):
     state = {
         "mkdir_calls": [],
         "write_calls": [],
         "written_html": None,
+        "browser_calls": [],
+        "tempfile_calls": [],
+        "tempfile_html": None,
     }
 
     def fake_mkdir(*args, **kwargs):
@@ -21,8 +26,30 @@ def mocked_filesystem(monkeypatch):
         state["write_calls"].append((self, text))
         state["written_html"] = text
 
+    def fake_browser_open(*args, **kwargs):
+        state["browser_calls"].append((args, kwargs))
+
+    class FakeTempFile:
+        name = "/fake/temp/univariate_distribution_comparison.html"
+
+        def write(self, text):
+            state["tempfile_html"] = text
+
+        def __enter__(self):
+            state["tempfile_calls"].append(True)
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            return False
+
     monkeypatch.setattr(Path, "mkdir", fake_mkdir)
     monkeypatch.setattr(Path, "write_text", fake_write_text)
+    monkeypatch.setattr(webbrowser, "open", fake_browser_open)
+    monkeypatch.setattr(
+        tempfile,
+        "NamedTemporaryFile",
+        lambda *args, **kwargs: FakeTempFile(),
+    )
 
     return state
 
@@ -49,7 +76,7 @@ def test_column_mismatch_raises():
     with pytest.raises(ValueError, match="datasets must have identical columns"):
         plot_univariate_distributions(obs, syn, None)
 
-def test_no_save_when_location_none(mocked_filesystem):
+def test_no_save_and_no_browser_when_non_interactive(mocked_environment):
     obs = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
 
@@ -57,12 +84,15 @@ def test_no_save_when_location_none(mocked_filesystem):
         obs,
         syn,
         saving_location=None,
+        interactive=False
     )
 
-    assert mocked_filesystem["mkdir_calls"] == []
-    assert len(mocked_filesystem["write_calls"]) == 0
+    assert len(mocked_environment["mkdir_calls"]) == 0
+    assert len(mocked_environment["write_calls"]) == 0
+    assert len(mocked_environment["tempfile_calls"]) == 0
+    assert len(mocked_environment["browser_calls"]) == 0
 
-def test_save_called_when_location_provided(mocked_filesystem):
+def test_save_and_no_browser_when_non_interactive(mocked_environment):
     obs = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
 
@@ -70,12 +100,48 @@ def test_save_called_when_location_provided(mocked_filesystem):
         obs,
         syn,
         saving_location="/some/folder",
+        interactive=False
     )
 
-    assert len(mocked_filesystem["mkdir_calls"]) == 1
-    assert len(mocked_filesystem["write_calls"]) == 1
+    assert len(mocked_environment["mkdir_calls"]) == 1
+    assert len(mocked_environment["write_calls"]) == 1
+    assert len(mocked_environment["tempfile_calls"]) == 0
+    assert len(mocked_environment["browser_calls"]) == 0
 
-def test_written_html_contains_column_name(mocked_filesystem):
+def test_save_and_browser_when_interactive(mocked_environment):
+    obs = pd.DataFrame({"x": [1, 2, 3]})
+    syn = pd.DataFrame({"x": [1, 2, 3]})
+
+    plot_univariate_distributions(
+        obs,
+        syn,
+        saving_location="/some/folder",
+        interactive=True,
+    )
+
+    assert len(mocked_environment["mkdir_calls"]) == 1
+    assert len(mocked_environment["write_calls"]) == 1
+    assert len(mocked_environment["tempfile_calls"]) == 0
+    assert len(mocked_environment["browser_calls"]) == 1
+    
+def test_browser_opens_when_interactive_without_save_location(mocked_environment):
+    obs = pd.DataFrame({"x": [1, 2, 3]})
+    syn = pd.DataFrame({"x": [1, 2, 3]})
+
+    plot_univariate_distributions(
+        obs,
+        syn,
+        saving_location=None,
+        interactive=True,
+    )
+
+    assert len(mocked_environment["mkdir_calls"]) == 0
+    assert len(mocked_environment["write_calls"]) == 0
+    assert len(mocked_environment["tempfile_calls"]) == 1
+    assert mocked_environment["tempfile_html"] is not None
+    assert len(mocked_environment["browser_calls"]) == 1
+
+def test_written_html_contains_column_name(mocked_environment):
     obs = pd.DataFrame({"age": [20, 30, 40]})
     syn = pd.DataFrame({"age": [21, 31, 41]})
 
@@ -85,12 +151,12 @@ def test_written_html_contains_column_name(mocked_filesystem):
         saving_location="/some/folder",
     )
 
-    html = mocked_filesystem["written_html"]
+    html = mocked_environment["written_html"]
 
     assert "age" in html
     assert "Distribution comparison: age" in html
 
-def test_missing_value_annotation_in_html(mocked_filesystem):
+def test_missing_value_annotation_in_html(mocked_environment):
     obs = pd.DataFrame({"x": [1, None, 3]})
     syn = pd.DataFrame({"x": [None, 2, 3]})
 
@@ -100,7 +166,7 @@ def test_missing_value_annotation_in_html(mocked_filesystem):
         saving_location="/some/folder",
     )
 
-    html = mocked_filesystem["written_html"]
+    html = mocked_environment["written_html"]
 
     assert "Observed: 1" in html
     assert "Synthetic: 1" in html

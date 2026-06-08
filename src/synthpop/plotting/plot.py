@@ -3,6 +3,8 @@ This module contains functions to visually inspect synthetic data and evaluate i
 """
 from __future__ import annotations
 from pathlib import Path
+import tempfile
+import webbrowser
 
 import numpy as np
 import pandas as pd
@@ -13,7 +15,8 @@ from plotly.io import to_html
 def plot_univariate_distributions(
         obs_df: pd.DataFrame, 
         syn_df: pd.DataFrame, 
-        saving_location: str | None
+        saving_location: str | None =  None,
+        interactive: bool = True,
         ) -> None:
     """
     Plot comparisons of the univariate distribution between the observed and synthetic data.
@@ -22,6 +25,7 @@ def plot_univariate_distributions(
     :param syn_df: Synthetic dataset.
     :param saving_location: Folder where the HTML file should be written. If None,
         the plots will not be saved.
+    :param open_browser: In headless running set to False
 
     :return: None
     """
@@ -266,6 +270,16 @@ def plot_univariate_distributions(
     html_content = "\n".join(html_parts)
 
     if saving_location is None:
+        if interactive:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=".html",
+                delete=False,
+                encoding="utf-8",
+            ) as temp_file:
+                temp_file.write(html_content)
+
+            webbrowser.open(Path(temp_file.name).resolve().as_uri())
         return
     
     output_dir = Path(saving_location)
@@ -273,6 +287,9 @@ def plot_univariate_distributions(
 
     output_file = output_dir / "univariate_distribution_comparison.html"
     output_file.write_text(html_content, encoding="utf-8")
+
+    if interactive:
+        webbrowser.open(output_file.resolve().as_uri())
     
 
 def plot_spmse(spmse: pd.DataFrame, target_file: str | None) -> None:
