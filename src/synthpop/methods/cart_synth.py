@@ -23,7 +23,7 @@ from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
 
 
-def to_fixed_length_string_array(a: npt.NDArray) -> npt.NDArray:
+def _to_fixed_length_string_array(a: npt.NDArray) -> npt.NDArray:
     """
     Converts an array of StringDType to an array of fixed length string dtype.
     Missing values are not supported.
@@ -232,7 +232,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
                                       ,)
 
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
-        return to_fixed_length_string_array(y)
+        return _to_fixed_length_string_array(y)
     
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         return super().transform(X).astype(utils.str_dtype, copy=False)
