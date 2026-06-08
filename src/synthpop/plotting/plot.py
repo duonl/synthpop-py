@@ -19,15 +19,86 @@ def plot_univariate_distributions(
         interactive: bool = True,
         ) -> None:
     """
-    Plot comparisons of the univariate distribution between the observed and synthetic data.
+    Create interactive univariate distribution plots comparing observed and 
+    synthetic datasets.
+
+    For each variable in the datasets, a separate Plotly visualisation is
+    generated and added to a single HTML document. Numeric variables are
+    displayed as overlapping density histograms, while categorical variables
+    are displayed as side-by-side relative frequency bar charts. Missing value
+    counts for both datasets are included as plot annotations.
+
+    The observed and synthetic datasets must contain identical columns.
+    Variables are processed independently and visualised sequentially in a 
+    single HTML document to support scrolling and browser-based search.
+
+    If a saving location is provided, the generated HTML document is written
+    to `univariate_distribution_comparison.html` in the specified directory.
+    If interactive mode is enabled, the resulting HTML document is
+    automatically opened in the default web browser. When no saving location
+    is provided, a temporary HTML file is created and opened only when
+    interactive mode is enabled.
+
+    Notes
+    -----
+    Histograms are normalised to probability densities to allow comparison
+    between datasets of different sizes. For categorical variables, relative
+    frequencies are displayed and category levels missing from either dataset
+    are assigned a density of zero to maintain comparability.
     
     :param obs_df: Original/observed dataset.
-    :param syn_df: Synthetic dataset.
-    :param saving_location: Folder where the HTML file should be written. If None,
-        the plots will not be saved.
-    :param open_browser: In headless running set to False
+    :param syn_df: Synthetic dataset. Must contain the same columns as `obs_df`.
+    :param saving_location: Directory where the HTML output file should be written.
+        If `None` (default), no permanent output file is created.
+    :param interactive: Whether to automatically open the generated visualisation
+        in the default web browser. Default is `True`. When running headless,
+        the parameter should be set to `False`.
 
     :return: None
+
+    Examples
+    --------
+    Using the default parameters:
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from synthpop.plotting.plot import plot_univariate_distributions
+        >>>
+        >>> np.random.seed(42)
+        >>>
+        >>> obs_df = pd.DataFrame(
+        ...     {
+        ...         "age": np.random.normal(50, 10, 1000),
+        ...         "children": np.random.poisson(2, 1000),
+        ...         "sex": np.random.choice(
+        ...             ["Male", "Female"],
+        ...             size=1000,
+        ...             p=[0.45, 0.55],
+        ...         ),
+        ...     }
+        ... )
+        >>>
+        >>> syn_df = pd.DataFrame(
+        ...     {
+        ...         "age": np.random.normal(52, 12, 1000),
+        ...         "children": np.random.poisson(3, 1000),
+        ...         "sex": np.random.choice(
+        ...             ["Male", "Female"],
+        ...             size=1000,
+        ...             p=[0.40, 0.60],
+        ...         ),
+        ...     }
+        ... )
+        >>>
+        >>> obs_df.loc[:50, "age"] = np.nan # add missing
+        >>> syn_df.loc[:30, "age"] = np.nan
+        >>>
+        >>> plot_univariate_distributions(
+        ...     obs_df=obs_df,
+        ...     syn_df=syn_df,
+        ...     saving_location=None,
+        ...     interactive=True,
+        ... )
+        
     """
     if not isinstance(obs_df, pd.DataFrame):
         raise ValueError(f"The observed data should be a pandas DataFrame, got {type(obs_df)} instead.")
