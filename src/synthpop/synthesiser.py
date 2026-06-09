@@ -92,7 +92,7 @@ class Synthesiser:
     def _validate_column_order_unique(self,column_order):
         unique_column_order = np.unique_counts(column_order)
 
-        if (unique_column_order.counts >1).any():
+        if (unique_column_order.counts > 1).any():
             duplicate_list = unique_column_order.values[unique_column_order.counts >1]
             raise ValueError(f"The following columns occur multiple times in Synthesiser.column_order: {duplicate_list}")
 
@@ -114,7 +114,7 @@ class Synthesiser:
             raise ValueError(f"X must be a pandas DataFrame, got {type(X)} instead.")
         
         if len(X) == 0:
-            raise ValueError("X can not be empty.")
+            raise ValueError("X cannot be empty.")
 
 
         if self.column_order is None:
@@ -140,7 +140,7 @@ class Synthesiser:
         for i, y in enumerate(self.column_order_):
 
             if i == 0:
-                predictors = pd.DataFrame({"init":[0]*X.shape[0]})
+                predictors = pd.DataFrame({"init": np.zeros(X.shape[0], dtype=int)})
             else:
                 predictors = X[self.column_order_[0:i]]
 
@@ -175,7 +175,7 @@ class Synthesiser:
         for i,y in enumerate(self.column_order_):
 
             if i == 0:
-                pred = pd.DataFrame({"init":[0]*n_syn_rows})
+                pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
             else:
                 pred = result
 

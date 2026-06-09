@@ -162,7 +162,7 @@ def test_synthesiser_fit_throws_on_non_dataframe():
 def test_synthesiser_fit_throws_on_empty_dataframe():
     df = pd.DataFrame()
     synth = Synthesiser(random_seed=3)
-    with pytest.raises(ValueError,match="X can not be empty."):
+    with pytest.raises(ValueError,match="X cannot be empty."):
         synth.fit(X=df)
 
 
