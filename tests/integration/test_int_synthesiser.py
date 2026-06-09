@@ -115,9 +115,9 @@ def test_synthesiser_preserves_1D_statistics():
     """
 
     n_samples_orig = 1000
-    n_samples_synthetic = 2000
+    n_samples_synthetic= 2000
     original_data,index_num, index_cat = simulate_realistic_dataset_correlations(n_samples=n_samples_orig)
-    synthesiser = Synthesiser(random_seed=74123)
+    synthesiser = Synthesiser(random_seed=74124)
 
     syn_df = synthesiser.fit(original_data).generate(n=n_samples_synthetic)
 
@@ -135,3 +135,40 @@ def test_synthesiser_preserves_1D_statistics():
         synthetic_dist = syn_df[cat_col].value_counts(dropna = False,normalize=True)
         max_diff = np.max(np.abs(original_dist - synthetic_dist))
         assert max_diff <0.02
+
+def test_synthesiser_preserves_num_num_relation():
+    n_samples_orig = 1000
+    original_data,index_num, index_cat = simulate_realistic_dataset_correlations(n_samples=n_samples_orig)
+    synthesiser = Synthesiser(random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+    obs_corr = original_data[["first","second"]].corr()["second"]["first"]
+    syn_corr = syn_df[["first","second"]].corr()["second"]["first"]
+    assert np.abs(obs_corr - syn_corr) < 0.01
+
+def test_synthesiser_preserves_cat_num_relation():
+    n_samples_orig = 1000
+    original_data,index_num, index_cat = simulate_realistic_dataset_correlations(n_samples=n_samples_orig)
+    synthesiser = Synthesiser(random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+    syn_means = syn_df.groupby("third")["fourth"].mean()
+    obs_means = original_data.groupby("third")["fourth"].mean()
+    assert np.max(np.abs(syn_means - obs_means))/max(obs_means) < 0.05
+
+def test_synthesiser_preserves_cat_cat_relation():
+    n_samples_orig = 10000
+    original_data,index_num, index_cat = simulate_realistic_dataset_correlations(n_samples=n_samples_orig)
+    synthesiser = Synthesiser(random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+    syn_ct = pd.crosstab(syn_df["third"],syn_df["fifth"],normalize = 'columns')
+    obs_ct = pd.crosstab(original_data["third"], original_data["fifth"],normalize = 'columns')
+
+    for col in obs_ct.columns:
+        value = np.max(np.abs(obs_ct[col] - syn_ct[col] ))
+        assert value < 0.1
+
