@@ -108,7 +108,7 @@ class Synthesiser:
 
         return self
 
-    def generate(self, n: int | None = None, random_state: int = 42) -> pd.DataFrame:
+    def generate(self, n: int | None = None, random_seed: int = 42) -> pd.DataFrame:
         """
         Generate a synthetic dataset of ``n`` rows. 
 
