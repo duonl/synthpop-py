@@ -3,6 +3,7 @@ module for generating synthetic data
 """
 from typing import Self, Dict
 import pandas as pd
+import numpy as np
 from sklearn import clone
 from sklearn.exceptions import NotFittedError
 from synthpop.methods.base_synth import BaseSynthMethod
@@ -46,6 +47,14 @@ class Synthesiser:
         return model
 
 
+    def _validate_column_order_unique(self,column_order):
+        unique_column_order = np.unique_counts(column_order)
+
+        if (unique_column_order.counts >1).any():
+            duplicate_list = unique_column_order.values[unique_column_order.counts >1]
+            raise ValueError(f"The following columns occur multiple times in Synthesiser.column_order: {duplicate_list}")
+
+
     def fit(self, X: pd.DataFrame, y=None) -> Self:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
@@ -64,11 +73,24 @@ class Synthesiser:
         
         if len(X) == 0:
             raise ValueError("X can not be empty.")
+
+
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
         elif all(isinstance(item, int) for item in self.column_order):
+
+            self._validate_column_order_unique(self.column_order)
+
+            array_columns = np.array(self.column_order)
+            out_of_bounds = array_columns >= len(X.columns)
+            if out_of_bounds.any():
+                raise ValueError(f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
             self.column_order_ = X.columns[self.column_order].to_list()
         else:
+            self._validate_column_order_unique(self.column_order)
+            columns_not_in_df = set(self.column_order) - set(X.columns)
+            if len(columns_not_in_df)> 0:
+                raise ValueError(f"The following columns of Synthesiser.column_order are not in the dataframe: {sorted(columns_not_in_df)}")
             self.column_order_ = self.column_order
 
         self.models_ = {}

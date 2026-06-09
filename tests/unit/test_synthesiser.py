@@ -4,6 +4,7 @@ from synthpop.methods.base_synth import BaseSynthMethod
 import pandas as pd
 import copy
 from sklearn.exceptions import NotFittedError
+import re
 
 class StubSynthMethod(BaseSynthMethod):
 
@@ -163,6 +164,29 @@ def test_synthesiser_fit_throws_on_empty_dataframe():
     synth = Synthesiser(random_seed=3)
     with pytest.raises(ValueError,match="X can not be empty."):
         synth.fit(X=df)
+
+
+@pytest.mark.parametrize("column_order,expected_message",
+[
+    (["a","a","b","b","c"], "The following columns occur multiple times in Synthesiser.column_order: ['a' 'b']"),
+    ([2,2,1,1,0], "The following columns occur multiple times in Synthesiser.column_order: [1 2]"),
+    (["a","d","c","x"], "The following columns of Synthesiser.column_order are not in the dataframe: ['d', 'x']"),
+    ([0,3,2,4], "The following indices of Synthesiser.column_order are out of bounds: [3 4]"),
+])
+def test_synthesiser_fit_throws_on_invalid_column_order(column_order,expected_message):
+
+    test_data  = pd.DataFrame({
+        "a":[1,2],
+        "b":[3,4],
+        "c":[5,6]
+    })
+
+    synth = Synthesiser(column_order=column_order,random_seed=2)
+    
+    with pytest.raises(ValueError,match=re.escape(expected_message)):
+        synth.fit(test_data)
+
+
 
 
 def test_generate_default():
