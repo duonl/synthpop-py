@@ -333,12 +333,14 @@ def plot_univariate_distributions(
         >>> orig_df.loc[:50, "age"] = np.nan # add missing
         >>> syn_df.loc[:30, "age"] = np.nan
         >>>
-        >>> plot_univariate_distributions(
+        >>> plots = plot_univariate_distributions(
         ...     orig_df=orig_df,
         ...     syn_df=syn_df,
         ...     saving_location=None,
         ...     interactive=False,
         ... )
+        >>> for fig in plots:
+        ...     fig.show()
         
     """
     if not isinstance(orig_df, pd.DataFrame):
