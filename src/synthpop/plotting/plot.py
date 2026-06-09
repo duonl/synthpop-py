@@ -19,6 +19,31 @@ def plot_univariate_distributions(obs_df: pd.DataFrame, syn_df: pd.DataFrame, ta
     """
     return None
 
+def _make_matrix(df,value_string = "S_pMSE"):
+    """
+    Makes a Matrix of the 3xN S_pMSE array
+    
+    :param df: Pandas DataFrame, should be 3xN
+    
+    return: NxN matrix
+    """
+
+    matrix = df.pivot(index="column1", columns="column2", values=value_string)
+    matrix = matrix.combine_first(matrix.T)
+    
+    return matrix.iloc[::-1] #invert s.t. the diagonal goes from upper-left to lower-right
+
+def _get_colorscale():
+    """"Helper function to obtain the colorscale given the predetermined bins"""
+    colors = ['rgb(255,255,255)']+ px.colors.sequential.YlOrBr[:5]
+
+    colorscale = []
+    n = len(colors)
+    for i, color in enumerate(colors):
+        colorscale.append([i/n, color])
+        colorscale.append([(i+1)/n, color])
+
+    return colorscale
 
 def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> Figure:
     """
@@ -31,54 +56,47 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> Fi
     :type: str
     :param show_plot: Boolean index on whether the plot pops up in an interactive window
     :type: Boolean
-    :return: None
+    :return: plotly.Figure
     """
 
-    if len(spmse.columns) != 3:
-        raise ValueError("The dataframe should be of shape 3xN. With index 0 and 1 column names of the data and index 2 the S_pMSE output.") 
+    if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
+        raise ValueError("The dataframe should be of shape 3xN. With index 0 and 1 named column1 and column2 and index 2 S_pMSE") 
     
     bins = [0, 3, 10, 30, 100, np.inf]
-    colors = ['rgb(0,0,0)']+ px.colors.sequential.YlOrBr[:5]
     bin_labels = ["MISSING", "(0,3]", "(3,10]", "(10,30]", "(30,100]", '(100,+)']
-    #To reviewer, I tried r'$\infty' instead of +, but that broke the code (i.e. no error but showed nothing)
-
-    variables = sorted(list(set(spmse.iloc[:, 0])))
-    
-    matrix = pd.DataFrame(index=variables[::-1], columns=variables, dtype=float)
-    matrix_orig = pd.DataFrame(index=variables[::-1], columns=variables, dtype=float)
 
     spmse["category"] = np.digitize(spmse.iloc[:,2], bins=bins, right=True)
 
-    for _, row in spmse.iterrows():
-        var1, var2, spmse_val, cat = row.iloc[0], row.iloc[1], row.iloc[2], row["category"]
-        matrix.loc[var1, var2] = cat
-        matrix.loc[var2, var1] = cat
-        matrix_orig.loc[var1, var2] = spmse_val
-        matrix_orig.loc[var2, var1] = spmse_val
+    matrix = _make_matrix(spmse, "category")
+    matrix_orig = _make_matrix(spmse, "S_pMSE")
 
-    colorscale = []
-    n = len(colors)
-    for i, color in enumerate(colors):
-        colorscale.append([i/n, color])
-        colorscale.append([(i+1)/n, color])
+    #Preprocessing for Plotting
+    text_matrix = matrix_orig.round(2).astype(str)
+    text_matrix = text_matrix.mask(matrix_orig == 0, "MISSING")
 
+    colorscale = _get_colorscale()
+
+    #plotting
     fig = go.Figure(
         data = go.Heatmap(
             z=matrix.values,
             x=matrix.columns,
             y=matrix.index,
-            text=np.round(matrix_orig.values,4),
-            texttemplate="%{text}",
+            text=text_matrix.values,
+            texttemplate="<b>%{text}</b>",
             colorscale=colorscale,
             zmin=0,
-            zmax=len(colors),
+            zmax=len(bins),
             colorbar=dict(
                 tickmode="array",
-                tickvals=np.array(range(len(colors)))+0.5,
+                tickvals=np.array(range(len(bins)))+0.5,
                 ticktext=bin_labels,
-                title="S_pMSE bins"
+                title="S_pMSE bins",
+                outlinecolor="black",
+                outlinewidth=2,
             )
         ),
+        
         layout=dict(
             title="S_pMSE Heatmap",
             title_x=0.5,

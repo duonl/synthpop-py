@@ -3,25 +3,126 @@ import numpy as np
 import pandas as pd
 from synthpop.plotting.plot import plot_spmse
 
+@pytest.fixture
+def spmse_df():
+    return pd.DataFrame(
+        {
+            "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
+            "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
+            "S_pMSE": [
+                0,
+                473842.48534952759345,
+                12.4598375983543,
+                4.0,
+                46.485343962786234,
+                0.0001,
+            ],
+        }
+    )
+
 
 @pytest.mark.parametrize(
-    "s_pmse",
-    [
-        (pd.DataFrame({"column1": ["c1"], "column2":[2], 
-                    "column3": ["c3"], "column4":[2]})), #Can only be exactly 3 columns
-    ],
+        "df", [
+            (pd.DataFrame({
+                "column1": ["c1"], 
+                "column2": [2], 
+                "column3": ["c3"], 
+                "column4":[2]})
+                ), #Can only be exactly 3 columns
+
+                pd.DataFrame({
+                "column1": ["c1"], 
+                "column2": ["c1"], 
+                "spmse": [1.0]}
+                )#Wrong capitalization
+    ], 
 )
-def test_input_errors(s_pmse):
-    with pytest.raises(ValueError, match ="should be of shape 3xN"):
-        output = plot_spmse(s_pmse,  None, False)
+def test_input_errors(df):
+    """Test that invalid column names raise a ValueError."""
 
-def test_plotting():
-    s_pmse = pd.DataFrame({"column1": ["c1", "c1", "c1",
-                                "c2", "c2", "c3"], 
+    with pytest.raises(ValueError, match="should be of shape 3xN"):
+        plot_spmse(df, None, False)
+        
+def test_returns_figure(spmse_df):
+    """Test that function returns a Figure."""
+    fig = plot_spmse(spmse_df, None, False)
+    assert fig is not None
+    assert len(fig.data) == 1
 
-                        "column2": ["c1", "c2", "c3",
-                                "c2", "c3", "c3"], 
+def test_heatmap_trace(spmse_df):
+    """Test that the trace is a heatmap."""
+    fig = plot_spmse(spmse_df, None, False)
+    heatmap = fig.data[0]
+    assert heatmap.type == "heatmap"
 
-                        "S_pMSE": [0, 473842, 12, 
-                                4., 46, 0.]})
-    plot_spmse(s_pmse, None, True)
+def test_heatmap_shape(spmse_df):
+    """Test that the heatmap z matrix has correct shape."""
+    fig = plot_spmse(spmse_df, None, False)
+    z = fig.data[0].z
+    assert np.shape(z) == (3, 3)
+
+def test_binning(spmse_df):
+    """Test that binned categories are correct (0-5)."""
+    fig = plot_spmse(spmse_df, None, False)
+    z = np.array(fig.data[0].z)
+    assert z.min() == 0
+    assert z.max() == 5
+
+def test_missing_text(spmse_df):
+    """Test that cells with 0 S_pMSE are shown as 'MISSING'."""
+    fig = plot_spmse(spmse_df, None, False)
+    text = np.array(fig.data[0].text)
+    assert "MISSING" in text
+
+def test_colorbar_labels(spmse_df):
+    """Test that colorbar labels match the bin_labels."""
+    fig = plot_spmse(spmse_df, None, False)
+    colorbar = fig.data[0].colorbar
+    assert list(colorbar.ticktext) == [
+        "MISSING",
+        "(0,3]",
+        "(3,10]",
+        "(10,30]",
+        "(30,100]",
+        "(100,+)",
+    ]
+
+def test_layout_properties(spmse_df):
+    """Test that figure layout has correct title, width, height."""
+    fig = plot_spmse(spmse_df, None, False)
+    assert fig.layout.title.text == "S_pMSE Heatmap"
+    assert fig.layout.width == 900
+    assert fig.layout.height == 845
+
+def test_save_image(monkeypatch, tmp_path, spmse_df):
+    """Test that write_image is called when save_path is given."""
+    called = False
+
+    def fake_write_image(*args, **kwargs):
+        nonlocal called
+        called = True
+
+    from plotly.graph_objects import Figure
+    monkeypatch.setattr(Figure, "write_image", fake_write_image)
+
+    outfile = tmp_path / "plot.png"
+    plot_spmse(spmse_df, str(outfile), False)
+    assert called
+
+def test_show_not_called(monkeypatch, spmse_df):
+    """Test that show() is not called when show_plot=False."""
+    called = False
+
+    def fake_show(*args, **kwargs):
+        nonlocal called
+        called = True
+
+    from plotly.graph_objects import Figure
+    monkeypatch.setattr(Figure, "show", fake_show)
+
+    plot_spmse(spmse_df, None, False)
+    assert not called
+
+def test_plot_visual(spmse_df):
+    """Test to visually inspect the plot"""
+    plot_spmse(spmse_df, None, True)
