@@ -74,7 +74,7 @@ def test_synthesiser_first_column_is_sampled_numeric():
     assert np.abs(expected_proportions["missing"] - result_proportions[np.nan])<0.05
 
 
-def simulate_realistic_dataset(n_samples=100):
+def simulate_realistic_dataset_correlations(n_samples=100):
     rng = np.random.default_rng(seed=852456)
 
     first_column = rng.random((n_samples,)) #first column is uniform random between 0 and 1.
@@ -101,10 +101,37 @@ def simulate_realistic_dataset(n_samples=100):
         "first":first_column,
         "second": second_column,
         "third":third_column,
-        "fourth_column":fourth_column,
+        "fourth":fourth_column,
         "fifth":fifth_column
     })
 
-#TODO: add missingness 
+    return (dataset, ["first", "second","fourth"], ["third", "fifth"])
 
-    return dataset
+def test_synthesiser_preserves_1D_statistics():
+    """
+    The aim of this test is to see if the means and univariate distributions are not wildly different.
+    The goal is not to test that the synthetic data has a certain utility.
+    The goal is to test that the synthetic data is reasonable. Benchmarking for utility should happen in other tests.
+    """
+
+    n_samples_orig = 1000
+    n_samples_synthetic = 2000
+    original_data,index_num, index_cat = simulate_realistic_dataset_correlations(n_samples=n_samples_orig)
+    synthesiser = Synthesiser(random_seed=74123)
+
+    syn_df = synthesiser.fit(original_data).generate(n=n_samples_synthetic)
+
+    assert syn_df.shape[0] == n_samples_synthetic
+
+    for num_col in index_num:
+        original_mean = original_data[num_col].mean()
+        synthetic_mean = syn_df[num_col].mean()
+
+        assert np.abs(original_mean-synthetic_mean) > 1e-3, "original and synthetic are too close"
+        assert np.abs(original_mean-synthetic_mean)/original_mean <0.05, "original and synthetic are too different"
+
+    for cat_col in index_cat:
+        original_dist = original_data[cat_col].value_counts(dropna = False,normalize=True)
+        synthetic_dist = syn_df[cat_col].value_counts(dropna = False,normalize=True)
+        max_diff = np.max(np.abs(original_dist - synthetic_dist))
+        assert max_diff <0.02
