@@ -18,6 +18,48 @@ class Synthesiser:
     :param column_order: list of variable names or list of indexes to define the order in which the columns will be synthesised. Default is the column order of the original dataset.
     :param default_syn_method: BaseSynth object. Synthesis method to apply to each column, except the first one and the ones defined in special_syn_method. Default synthesis method is CartSynth. 
     :param special_syn_method: Dictionary of special synthesis method per variable. If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynth objects. By default, there is no special synthesis method.
+
+    Examples
+    --------
+        >>> import pandas as pd
+        >>> from synthpop.synthesiser import Synthesiser
+        >>> data = pd.DataFrame({
+        ...     "first column":[1,2,3,2,1,3],
+        ...     "second column":["a","a","b","c","b","c"],
+        ...     "third column":[0.2,-3.4,1000.3,33,0,0]
+        ... })
+        >>> data
+        first column second column  third column
+        0             1             a           0.2
+        1             2             a          -3.4
+        2             3             b        1000.3
+        3             2             c          33.0
+        4             1             b           0.0
+        5             3             c           0.0
+        >>> synth = Synthesiser(random_seed=963214)
+        >>> synth.fit(data)
+        <synthpop.synthesiser.Synthesiser object at 0x000001F4BB6B9160>
+        >>> synth.generate()
+        first column second column  third column
+        0           1.0             a      0.200000
+        1           3.0             c      0.000000
+        2           2.0             b     33.000000
+        3           2.0             b   1000.299988
+        4           2.0             b   1000.299988
+        5           3.0             c      0.000000
+        >>> synth.generate(n=10)
+        first column second column  third column
+        0           1.0             a      0.200000
+        1           3.0             c      0.000000
+        2           2.0             b     33.000000
+        3           2.0             b   1000.299988
+        4           2.0             b   1000.299988
+        5           3.0             c      0.000000
+        6           1.0             a      0.200000
+        7           3.0             c      0.000000
+        8           1.0             a     -3.400000
+        9           1.0             a      0.200000
+
     """
     def __init__(self, random_seed: int,
                  column_order: list[str] | list[int] | None = None,
