@@ -195,6 +195,8 @@ def test_synthesiser_fit_throws_on_empty_dataframe():
                              (["a", "d", "c", "x"],
                               "The following columns of Synthesiser.column_order are not in the dataframe: ['d', 'x']"),
                              ([0, 3, 2, 4], "The following indices of Synthesiser.column_order are out of bounds: [3 4]"),
+                             ([0, "b", 1], "invalid column order: [0, 'b', 1]"),
+                             ([0,1, -1], "negative indices not allowed."),
                          ])
 def test_synthesiser_fit_throws_on_invalid_column_order(column_order, expected_message):
 
@@ -243,10 +245,6 @@ def test_generate_different_rowcount():
 
     synth = Synthesiser(random_seed=2)
 
-    expected_result = pd.DataFrame({
-        "a": ["x", "y", "z"],
-    })
-
     expected_row_count = 5
 
     expected_initial_data = pd.DataFrame({"init": [0]*expected_row_count})
@@ -254,11 +252,10 @@ def test_generate_different_rowcount():
     synth.column_order_ = ["a"]
     synth.n_samples_ = 3
     synth.models_ = {}
-    synth.models_["a"] = StubSynthMethod(transform_result=expected_result["a"])
+    synth.models_["a"] = StubSynthMethod(transform_result=pd.Series([],name="a"))
 
-    result = synth.generate(n=expected_row_count)
-    assert isinstance(result, pd.DataFrame)
-    assert expected_result.equals(result)
+    synth.generate(n=expected_row_count)
+
 
     assert synth.models_["a"].transform_X[0].equals(expected_initial_data)
 

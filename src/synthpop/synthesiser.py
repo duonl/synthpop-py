@@ -125,11 +125,18 @@ class Synthesiser:
             self._validate_column_order_unique(self.column_order)
 
             array_columns = np.array(self.column_order)
-            out_of_bounds = array_columns >= len(X.columns)
+            out_of_bounds = (array_columns >= len(X.columns))
             if out_of_bounds.any():
                 raise ValueError(
                     f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
+            
+            negative_indices = array_columns <0
+            if negative_indices.any():
+                raise ValueError(f"negative indices not allowed.")
+
             self.column_order_ = X.columns[self.column_order].to_list()
+        elif not all(isinstance(item, str) for item in self.column_order):
+            raise ValueError(f"invalid column order: {self.column_order}")
         else:
             self._validate_column_order_unique(self.column_order)
             columns_not_in_df = set(self.column_order) - set(X.columns)
