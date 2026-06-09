@@ -2,10 +2,12 @@
 module for generating synthetic data
 """
 from typing import Self, Dict
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 from sklearn import clone
 from sklearn.exceptions import NotFittedError
+
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
 
@@ -61,12 +63,13 @@ class Synthesiser:
         9           1.0             a      0.200000
 
     """
+
     def __init__(self, random_seed: int,
                  column_order: list[str] | list[int] | None = None,
                  default_syn_method: BaseSynthMethod | None = None,
                  special_syn_method: Dict[str, BaseSynthMethod] | None = None,
                  ) -> None:
-        
+
         self.default_syn_method = default_syn_method
         self.column_order = column_order
         self.special_syn_method = special_syn_method
@@ -77,7 +80,6 @@ class Synthesiser:
             effective_default_method = CartMethod()
         else:
             effective_default_method = clone(self.default_syn_method)
-            
 
         if self.special_syn_method is None:
             model = effective_default_method
@@ -88,19 +90,18 @@ class Synthesiser:
 
         return model
 
-
-    def _validate_column_order_unique(self,column_order):
+    def _validate_column_order_unique(self, column_order):
         unique_column_order = np.unique_counts(column_order)
 
         if (unique_column_order.counts > 1).any():
-            duplicate_list = unique_column_order.values[unique_column_order.counts >1]
-            raise ValueError(f"The following columns occur multiple times in Synthesiser.column_order: {duplicate_list}")
-
+            duplicate_list = unique_column_order.values[unique_column_order.counts > 1]
+            raise ValueError(
+                f"The following columns occur multiple times in Synthesiser.column_order: {duplicate_list}")
 
     def fit(self, X: pd.DataFrame, y=None) -> Self:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
-        
+
         If the variable name is found in keys of ``special_syn_method``, its corresponding value is the object used to synthesise that variable. The `fit` method of that object will be called.
         Otherwise, we use the object defined in ``default_syn_method``.
 
@@ -111,11 +112,11 @@ class Synthesiser:
         """
 
         if not isinstance(X, pd.DataFrame):
-            raise ValueError(f"X must be a pandas DataFrame, got {type(X)} instead.")
-        
+            raise ValueError(
+                f"X must be a pandas DataFrame, got {type(X)} instead.")
+
         if len(X) == 0:
             raise ValueError("X cannot be empty.")
-
 
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
@@ -126,13 +127,15 @@ class Synthesiser:
             array_columns = np.array(self.column_order)
             out_of_bounds = array_columns >= len(X.columns)
             if out_of_bounds.any():
-                raise ValueError(f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
+                raise ValueError(
+                    f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
             self.column_order_ = X.columns[self.column_order].to_list()
         else:
             self._validate_column_order_unique(self.column_order)
             columns_not_in_df = set(self.column_order) - set(X.columns)
-            if len(columns_not_in_df)> 0:
-                raise ValueError(f"The following columns of Synthesiser.column_order are not in the dataframe: {sorted(columns_not_in_df)}")
+            if len(columns_not_in_df) > 0:
+                raise ValueError(
+                    f"The following columns of Synthesiser.column_order are not in the dataframe: {sorted(columns_not_in_df)}")
             self.column_order_ = self.column_order
 
         self.models_ = {}
@@ -140,13 +143,14 @@ class Synthesiser:
         for i, y in enumerate(self.column_order_):
 
             if i == 0:
-                predictors = pd.DataFrame({"init": np.zeros(X.shape[0], dtype=int)})
+                predictors = pd.DataFrame(
+                    {"init": np.zeros(X.shape[0], dtype=int)})
             else:
                 predictors = X[self.column_order_[0:i]]
 
             model = self._get_model(y)
 
-            self.models_[self.column_order_[i]] = model.fit(predictors,X[y])
+            self.models_[self.column_order_[i]] = model.fit(predictors, X[y])
 
         return self
 
@@ -155,14 +159,14 @@ class Synthesiser:
         Generate a synthetic dataset of ``n`` rows. 
 
         This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in `fit`.
-        
+
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
         :param random_state: Random seed generator. Default is 42. 
-        
+
         :return: Synthetic dataset
         """
 
-        if not hasattr(self,"models_"):
+        if not hasattr(self, "models_"):
             raise NotFittedError("synthesiser has not been fitted.")
 
         result = pd.DataFrame()
@@ -172,7 +176,7 @@ class Synthesiser:
         else:
             n_syn_rows = n
 
-        for i,y in enumerate(self.column_order_):
+        for i, y in enumerate(self.column_order_):
 
             if i == 0:
                 pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
