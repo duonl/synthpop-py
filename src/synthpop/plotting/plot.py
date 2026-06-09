@@ -208,11 +208,11 @@ def _build_html(figures: list[go.Figure]) -> str:
         """
     ]
 
-    for fig in figures:
+    for idx, fig in enumerate(figures):
         html_parts.append(
             to_html(
                 fig,
-                include_plotlyjs="cdn",
+                include_plotlyjs=(idx == 0),
                 full_html=False,
             )
         )
@@ -257,8 +257,8 @@ def plot_univariate_distributions(
         orig_df: pd.DataFrame, 
         syn_df: pd.DataFrame, 
         saving_location: str | None =  None,
-        interactive: bool = True,
-        ) -> None:
+        interactive: bool = False,
+        ) -> list[go.Figure]:
     """
     Create interactive univariate distribution plots comparing original and 
     synthetic datasets.
@@ -285,10 +285,10 @@ def plot_univariate_distributions(
     :param saving_location: Directory where the HTML output file should be written.
         If `None` (default), no permanent output file is created.
     :param interactive: Whether to automatically open the generated visualisation
-        in the default web browser. Default is `True`. When running headless,
+        in the default web browser. Default is `False`. When running headless,
         the parameter should be set to `False`.
 
-    :return: None
+    :return: List of plots.
 
     Notes
     -----
@@ -337,7 +337,7 @@ def plot_univariate_distributions(
         ...     orig_df=orig_df,
         ...     syn_df=syn_df,
         ...     saving_location=None,
-        ...     interactive=True,
+        ...     interactive=False,
         ... )
         
     """
@@ -358,7 +358,7 @@ def plot_univariate_distributions(
     ]
 
     if saving_location is None and not interactive:
-        return
+        return figures
 
     html_content = _build_html(figures)
 
@@ -366,3 +366,5 @@ def plot_univariate_distributions(
 
     if interactive:
         webbrowser.open(html_file.resolve().as_uri())
+    
+    return figures
