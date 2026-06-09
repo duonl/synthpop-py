@@ -53,10 +53,10 @@ def mocked_environment(monkeypatch):
 
     return state
 
-def test_obs_df_must_be_dataframe():
-    with pytest.raises(ValueError, match="observed data should be a pandas DataFrame"):
+def test_orig_df_must_be_dataframe():
+    with pytest.raises(ValueError, match="original data should be a pandas DataFrame"):
         plot_univariate_distributions(
-            obs_df=[],
+            orig_df=[],
             syn_df=pd.DataFrame({"x": [1, 2]}),
             saving_location=None
         )
@@ -64,24 +64,24 @@ def test_obs_df_must_be_dataframe():
 def test_syn_df_must_be_dataframe():
     with pytest.raises(ValueError, match="synthetic data should be a pandas DataFrame"):
         plot_univariate_distributions(
-            obs_df=pd.DataFrame({"x": [1, 2]}),
+            orig_df=pd.DataFrame({"x": [1, 2]}),
             syn_df=[],
             saving_location=None
         )
 
 def test_column_mismatch_raises():
-    obs = pd.DataFrame({"a": [1, 2]})
+    orig = pd.DataFrame({"a": [1, 2]})
     syn = pd.DataFrame({"b": [1, 2]})
 
     with pytest.raises(ValueError, match="datasets must have identical columns"):
-        plot_univariate_distributions(obs, syn, None)
+        plot_univariate_distributions(orig, syn, None)
 
 def test_no_save_and_no_browser_when_non_interactive(mocked_environment):
-    obs = pd.DataFrame({"x": [1, 2, 3]})
+    orig = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
 
     plot_univariate_distributions(
-        obs,
+        orig,
         syn,
         saving_location=None,
         interactive=False
@@ -93,11 +93,11 @@ def test_no_save_and_no_browser_when_non_interactive(mocked_environment):
     assert len(mocked_environment["browser_calls"]) == 0
 
 def test_save_and_no_browser_when_non_interactive(mocked_environment):
-    obs = pd.DataFrame({"x": [1, 2, 3]})
+    orig = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
 
     plot_univariate_distributions(
-        obs,
+        orig,
         syn,
         saving_location="/some/folder",
         interactive=False
@@ -109,11 +109,11 @@ def test_save_and_no_browser_when_non_interactive(mocked_environment):
     assert len(mocked_environment["browser_calls"]) == 0
 
 def test_save_and_browser_when_interactive(mocked_environment):
-    obs = pd.DataFrame({"x": [1, 2, 3]})
+    orig = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
 
     plot_univariate_distributions(
-        obs,
+        orig,
         syn,
         saving_location="/some/folder",
         interactive=True,
@@ -125,11 +125,11 @@ def test_save_and_browser_when_interactive(mocked_environment):
     assert len(mocked_environment["browser_calls"]) == 1
     
 def test_browser_opens_when_interactive_without_save_location(mocked_environment):
-    obs = pd.DataFrame({"x": [1, 2, 3]})
+    orig = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
 
     plot_univariate_distributions(
-        obs,
+        orig,
         syn,
         saving_location=None,
         interactive=True,
@@ -142,11 +142,11 @@ def test_browser_opens_when_interactive_without_save_location(mocked_environment
     assert len(mocked_environment["browser_calls"]) == 1
 
 def test_written_html_contains_column_name(mocked_environment):
-    obs = pd.DataFrame({"age": [20, 30, 40]})
+    orig = pd.DataFrame({"age": [20, 30, 40]})
     syn = pd.DataFrame({"age": [21, 31, 41]})
 
     plot_univariate_distributions(
-        obs,
+        orig,
         syn,
         saving_location="/some/folder",
     )
@@ -157,16 +157,16 @@ def test_written_html_contains_column_name(mocked_environment):
     assert "Distribution comparison: age" in html
 
 def test_missing_value_annotation_in_html(mocked_environment):
-    obs = pd.DataFrame({"x": [1, None, 3]})
+    orig = pd.DataFrame({"x": [1, None, 3]})
     syn = pd.DataFrame({"x": [None, 2, 3]})
 
     plot_univariate_distributions(
-        obs,
+        orig,
         syn,
         saving_location="/some/folder",
     )
 
     html = mocked_environment["written_html"]
 
-    assert "Observed: 1" in html
+    assert "Original: 1" in html
     assert "Synthetic: 1" in html
