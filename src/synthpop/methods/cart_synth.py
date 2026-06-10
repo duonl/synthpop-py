@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn import clone
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
 from sklearn.tree import BaseDecisionTree, DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.decomposition import PCA
 
 from synthpop import utils
 import synthpop.methods.tree_utils as tree_utils
@@ -432,3 +433,38 @@ class CartMethod(base_synth.BaseSynthMethod):
         return self.method_.get_feature_names_out(input_features)
         
         
+def tune_cart(n_leaves:int = 5, n_components: int | float | None=None)-> CartMethod:
+    """
+    shortcut to set parameters of the CartMethod.
+
+    :param n_leaves: minimum number of samples in the leaf nodes. 
+    This parameter is applied to the decision trees used for classification, regression, and predicting missing values.
+    :param n_components: sets the number of principle components used in encoding in the classifier.
+    for float values between 0 and 1, it is the percentage of variance that should be explained by the principle components. 
+    For integers =>1, it is the number of principle components.
+
+    :return: a CartMethod object with the parameters consistently applied.
+
+
+
+    """
+    return CartMethod(
+        regressor=TreeRegressorMethod(
+            tree = DecisionTreeRegressor(
+                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
+            ),
+            missing_handler=MissingValuePredictor(
+                tree = DecisionTreeClassifier(min_samples_leaf=n_leaves)
+            )
+        ),
+        classifier=TreeClassifierMethod(
+            tree = DecisionTreeClassifier(
+                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
+            ),
+            encoder=PCAEncoder(
+                pca_transform=PCA(n_components=n_components)
+            )
+        )
+    )
