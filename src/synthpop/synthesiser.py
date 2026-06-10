@@ -98,7 +98,7 @@ class Synthesiser:
             raise ValueError(
                 f"The following columns occur multiple times in Synthesiser.column_order: {duplicate_list}")
 
-    def fit(self, X: pd.DataFrame, y=None) -> Self:
+    def fit(self, X: pd.DataFrame) -> Self:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
 
@@ -106,7 +106,6 @@ class Synthesiser:
         Otherwise, we use the object defined in ``default_syn_method``.
 
         :param X: An original dataset on which to fit the synthesiser.
-        :param y: Ignored. This parameter exists only for compatibility with sklearn estimators.
 
         :return: Fitted synthesiser.
         """
