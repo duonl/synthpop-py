@@ -123,7 +123,7 @@ class LeafNodeSampler():
             self._seed = None
             self.random_state_ = self.random_state
         else:
-            self._seed = 42 if self.random_state is None else self.random_state
+            self._seed = np.random.default_rng() if self.random_state is None else self.random_state
             self.random_state_ = np.random.default_rng(self._seed)
         
         self._y_dtype = np.asarray(y).dtype
