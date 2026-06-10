@@ -15,6 +15,7 @@ def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None =None
 
     Numeric values are assigned to bin intervals using the provided bin edges.
     Missing values are preserved and are not modified.
+
     :param column: Numeric column to be discretised.
     :param bins: Bin edges used for discretisation. If `None`, no binning is applied.
     """
@@ -33,7 +34,6 @@ def _preprocessing_non_numeric(column: pd.Series):
     handling across categorical and string variables during S_pMSE computation.
 
     :param column: the specific column. 
-    :type: pd.DataFrame Datatypes can be numeric, categorical, or string
     """
 
     mask = pd.isna(column)
@@ -44,30 +44,27 @@ def _preprocessing_non_numeric(column: pd.Series):
 def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str):
     """
     Calculate the joint frequency tables for variable pairs.
+
     :param df: Dataset
-    :type: DataFrame
     :param col1: column name 1
-    :type: str
     :param col2: column name 2
-    :type: str
     """
+
     if col1 == col2:
         jf = df.groupby(col1, dropna=False, observed=True).size().rename(col1)
     else:
         jf = df.groupby([col1, col2], dropna=False, observed=True).size().rename(col1+','+col2)
+
     return jf
 
 def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
     """
     Calculates the S_pSME for a combination of two columns from the joint frequency tables
+
     :param jf_or: Original dataset joint frequency table
-    :type: Series
     :param jf_syn: Synthetic dataset joint frequency table
-    :type: Series
     :param n_o: number of rows in original dataset
-    :type: int
     :param n_s: number of rows in synthetic dataset
-    :type: int
     """
 
     rescaled_differences = jf_syn.sub(
@@ -103,21 +100,36 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     Compute the pairwise Standardised propensity Mean Squared Error (S_pMSE) between an original and a synthetic dataset.
 
     The metric compares the preservation of pairwise joint distributions between corresponding variables in both datasets.
-
-    Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the orignal and synthetic dataset. Categorical and string variables are used directly.
-
+    Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the orignal and synthetic dataset. 
+    Categorical and string variables are used directly.
     Missing values are treated as a separate category (np.nan).
 
-
-    
     :param orig_df: Original dataset.
-    :type orig_df: pd.DataFrame
     :param syn_df: Synthetic dataset. Should have the same columns as the original dataset, in the same order and the same number of rows.
-    :type syn_df: pd.DataFrame
     :param max_bins: Maximum number categories in which numeric variables can be discretised. Missing values are discretised in bin number=max_bin+1. Default value is 25.
-    :type max_bins: int
     :return: Dataset of variable pairs along with their corresponding S_pMSE value.
-    :rtype: DataFrame
+
+    Example:
+    --------
+    >>> import pandas as pd
+    >>> from synthpop.utility_metrics.spmse import pairwise_spmse
+    >>>
+    >>> orig_data = pd.DataFrame({
+    ...     "sex": ["M", "M", "F"],
+    ...     "income": [50000, 50000, 60000],
+    ... })
+    >>>
+    >>> syn_data = pd.DataFrame({
+    ...     "sex": ["M", "F", "F"],
+    ...     "income": [60000, 50000, 60000],
+    ... })
+    >>>
+    >>> result = pairwise_spmse(orig_data, syn_data)
+    >>> print(result)
+    column1 column2    S_pMSE
+    0     sex     sex  1.333333
+    1     sex  income  2.666667
+    2  income  income  1.333333
     """
     
     if not isinstance(orig_df, pd.DataFrame) or not isinstance(syn_df, pd.DataFrame):

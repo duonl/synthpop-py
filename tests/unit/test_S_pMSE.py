@@ -45,14 +45,14 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
         pd.DataFrame({"column1": ["c1", "c1", "c2"], "column2": ["c1", "c2", "c2"], "S_pMSE": [0.0, 0.0, 0.0]}), 25),
         # S_pMSE should all be zero as the original_dataset=the synthetic_dataset
         
-        (pd.DataFrame({"c1": ["a", "a", "b"],"c2": [0, 0, 1]}),
-        pd.DataFrame({"c1": ["a", "b", "b"],"c2": [1, 0, 1]}),
-        pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [4/3, 8/3, 4/3]}), 1000), 
-        # A non-zero answer to the S_pMSE, calculated by hand, with a high value of bins
+        (pd.DataFrame({"sex": ["M", "M", "F"], "income": [50000, 50000, 60000]}),
+        pd.DataFrame({"sex": ["M", "F", "F"], "income": [60000, 50000, 60000]}),
+        pd.DataFrame({"column1": ["sex", "sex", "income"], "column2": ["sex", "income", "income"], "S_pMSE": [4/3, 8/3, 4/3]}), 1000), 
+        # A non-zero answer to the S_pMSE, calculated by hand, with a high value of bins. Also this is the example in the docstrings
         
-        (pd.DataFrame({"c1": ["a", "a", "b"],"c2": [0, 0, 1]}),
-        pd.DataFrame({"c2": [1, 0, 1],"c1": ["a", "b", "b"]}),
-        pd.DataFrame({"column1": ["c1", "c1", "c2"],"column2": ["c1", "c2", "c2"],"S_pMSE": [4/3, 8/3, 4/3]}), 25), 
+        (pd.DataFrame({"c1": ["a", "a", "b"], "c2": [0, 0, 1]}),
+        pd.DataFrame({"c2": [1, 0, 1], "c1": ["a", "b", "b"]}),
+        pd.DataFrame({"column1": ["c1", "c1", "c2"], "column2": ["c1", "c2", "c2"], "S_pMSE": [4/3, 8/3, 4/3]}), 25), 
         # A non-zero answer to the S_pMSE, calculated by hand, with different column order
 
         (pd.DataFrame({"c1": [0, 1, 2]}),
