@@ -16,8 +16,8 @@ from synthpop import utils
 import synthpop.methods.tree_utils as tree_utils
 from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
-    BaseMissingValueHandler, 
-    MissingValuePredictor, 
+    BaseMissingValueHandler,
+    MissingValuePredictor,
     ReplaceNoneWithValue
 )
 from synthpop.methods import base_synth
@@ -39,17 +39,17 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param encoder: a transformer object.
     :param missing_handler: handler for missing values in the target variable.
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    
+
     """
 
     def __init__(
-            self, 
-            *, 
-            tree: BaseDecisionTree | None = None,
-            encoder: TransformerMixin | None = None,
-            missing_handler: BaseMissingValueHandler | None = None,
-            tree_sampler: LeafNodeSampler | None = None,
-        ) -> None:
+        self,
+        *,
+        tree: BaseDecisionTree | None = None,
+        encoder: TransformerMixin | None = None,
+        missing_handler: BaseMissingValueHandler | None = None,
+        tree_sampler: LeafNodeSampler | None = None,
+    ) -> None:
         super().__init__()
         self.encoder = encoder
         self.missing_handler = missing_handler
@@ -92,10 +92,13 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
         self.missing_handler_ = self._new_missing_handling()
 
-        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(X_val, y)
-        
-        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k, v) in prepared_for_fit_X.items()}
-        all_features = tree_utils.build_feature_matrix(all_features_dict, self.feature_order_)
+        prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(
+            X_val, y)
+
+        all_features_dict = {k: self.encoders_[k].transform(
+            v) if k in self.encoders_ else v for (k, v) in prepared_for_fit_X.items()}
+        all_features = tree_utils.build_feature_matrix(
+            all_features_dict, self.feature_order_)
 
         self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
 
@@ -117,16 +120,16 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
-            self, 
+            self,
             [
-                "tree_", 
-                "encoders_",  
-                "missing_handler_", 
-                "tree_sampler_", 
+                "tree_",
+                "encoders_",
+                "missing_handler_",
+                "tree_sampler_",
                 "feature_order_"
-                ],
+            ],
         )
-        
+
         X_val, _ = utils.validate_2d_dict(X)
 
         n_features_given = len(X.keys())
@@ -134,10 +137,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             raise ValueError(
                 f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
-        
-        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k, v) in X_val.items()}
+        all_features_dict = {k: self.encoders_[k].transform(
+            v) if k in self.encoders_ else v for (k, v) in X_val.items()}
 
-        all_features = tree_utils.build_feature_matrix(all_features_dict, self.feature_order_)
+        all_features = tree_utils.build_feature_matrix(
+            all_features_dict, self.feature_order_)
         leaf_ids = self.tree_.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
@@ -211,11 +215,11 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     """
 
     def __init__(
-            self, 
-            *, 
+            self,
+            *,
             tree=None,
-            encoder=None, 
-            missing_handler=None, 
+            encoder=None,
+            missing_handler=None,
             tree_sampler=None
     ) -> None:
         super().__init__(encoder=encoder, missing_handler=missing_handler,
@@ -234,7 +238,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return _to_fixed_length_string_array(y)
-    
+
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         return super().transform(X).astype(utils.str_dtype, copy=False)
 
@@ -270,11 +274,11 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     """
 
     def __init__(
-            self, 
-            *, 
+            self,
+            *,
             tree=None,
-            encoder=None, 
-            missing_handler=None, 
+            encoder=None,
+            missing_handler=None,
             tree_sampler=None
     ) -> None:
         super().__init__(encoder=encoder, missing_handler=missing_handler,
@@ -288,12 +292,12 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     def _get_tree(self):
         return DecisionTreeRegressor(min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
-                                    min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
-                                    )
-    
+                                     min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                                     )
+
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return y.astype(np.float32, copy=False)
-    
+
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         return super().transform(X).astype(np.float32, copy=False)
 
@@ -350,21 +354,22 @@ class CartMethod(base_synth.BaseSynthMethod):
     Name: blood type, dtype: object         
     """
 
-    def __init__(self, 
-                 regressor: TreeRegressorMethod | None = None, 
+    def __init__(self,
+                 regressor: TreeRegressorMethod | None = None,
                  classifier: TreeClassifierMethod | None = None) -> None:
         super().__init__()
         self.regressor = regressor
         self.classifier = classifier
 
     def _new_regressor(self) -> TreeRegressorMethod:
-        return(
+        return (
             clone(self.regressor) if self.regressor is not None else TreeRegressorMethod()
         )
-    
+
     def _new_classifier(self) -> TreeClassifierMethod:
-        return(
-            clone(self.classifier) if self.classifier is not None else TreeClassifierMethod()
+        return (
+            clone(
+                self.classifier) if self.classifier is not None else TreeClassifierMethod()
         )
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
@@ -378,13 +383,15 @@ class CartMethod(base_synth.BaseSynthMethod):
         """
 
         if not isinstance(X, pd.DataFrame):
-            raise TypeError(f"X must be a pandas DataFrame, got {type(X)} instead.")
+            raise TypeError(
+                f"X must be a pandas DataFrame, got {type(X)} instead.")
         if not isinstance(y, pd.Series):
-            raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
+            raise TypeError(
+                f"y must be a pandas Series, got {type(y)} instead.")
         if len(X) != len(y):
             raise ValueError(f"X and y must contain the same number of samples: "
                              f"{len(X)} != {len(y)}.")
-        
+
         self.feature_names_in_ = list(X.columns)
         self.target_name_ = y.name
 
@@ -411,12 +418,14 @@ class CartMethod(base_synth.BaseSynthMethod):
         check_is_fitted(self, ["method_", "feature_names_in_", "target_name_"])
 
         if not isinstance(X, pd.DataFrame):
-            raise TypeError(f"X must be a pandas DataFrame, got {type(X)} instead.")
-        
-        missing_cols = [col for col in self.feature_names_in_ if col not in X.columns]
+            raise TypeError(
+                f"X must be a pandas DataFrame, got {type(X)} instead.")
+
+        missing_cols = [
+            col for col in self.feature_names_in_ if col not in X.columns]
         if missing_cols:
             raise ValueError(f"X is missing required columns: {missing_cols}.")
-        
+
         # preserve original feature ordering used during fit
         X_dict = utils.to_standardised_array_dict(X[self.feature_names_in_])
 
@@ -431,9 +440,9 @@ class CartMethod(base_synth.BaseSynthMethod):
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
         check_is_fitted(self, ["method_"])
         return self.method_.get_feature_names_out(input_features)
-        
-        
-def tune_cart(n_leaves:int = 5, n_components: int | float | None=None)-> CartMethod:
+
+
+def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> CartMethod:
     """
     shortcut to set parameters of the CartMethod.
 
@@ -444,24 +453,21 @@ def tune_cart(n_leaves:int = 5, n_components: int | float | None=None)-> CartMet
     For integers =>1, it is the number of principle components.
 
     :return: a CartMethod object with the parameters consistently applied.
-
-
-
     """
     return CartMethod(
         regressor=TreeRegressorMethod(
-            tree = DecisionTreeRegressor(
+            tree=DecisionTreeRegressor(
                 min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
             ),
             missing_handler=MissingValuePredictor(
-                tree = DecisionTreeClassifier(min_samples_leaf=n_leaves)
+                tree=DecisionTreeClassifier(min_samples_leaf=n_leaves)
             )
         ),
         classifier=TreeClassifierMethod(
-            tree = DecisionTreeClassifier(
+            tree=DecisionTreeClassifier(
                 min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
             ),
             encoder=PCAEncoder(
                 pca_transform=PCA(n_components=n_components)
