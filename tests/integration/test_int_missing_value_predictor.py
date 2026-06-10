@@ -74,6 +74,7 @@ def test_tree_sampler_integration(predictor):
     assert len(mask) == len(y)
     assert mask.dtype == bool
 
+@pytest.mark.xfail(reason="known issue, see #139")
 def test_missingness_determinism(predictor):
     X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
 

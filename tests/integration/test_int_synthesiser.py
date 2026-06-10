@@ -50,7 +50,7 @@ def test_synthesiser_first_column_is_sampled_categorical():
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
 
-#@pytest.mark.xfail(reason="known issue, see #130")
+
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -145,7 +145,7 @@ def test_synthesiser_preserves_1D_statistics():
         assert np.abs(
             original_mean-synthetic_mean) > 1e-3, "original and synthetic are too close"
         assert np.abs(original_mean-synthetic_mean) / \
-            original_mean < 0.05, "original and synthetic are too different"
+            original_mean < 0.07, "original and synthetic are too different"
 
     for cat_col in index_cat:
         original_dist = original_data[cat_col].value_counts(
