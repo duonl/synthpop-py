@@ -22,7 +22,7 @@ def plot_univariate_distributions(obs_df: pd.DataFrame, syn_df: pd.DataFrame, ta
     return None
 
 
-def _make_matrix(df: pd.DataFrame, value_string = "S_pMSE") -> pd.DataFrame:
+def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     """
     Makes a Matrix of the 3xN S_pMSE array.
 
@@ -46,14 +46,14 @@ def _get_colorscale() -> list:
     """
 
     colors = ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
-    
+
     n = len(colors)
     colorscale = []
 
     for i, color in enumerate(colors):
-    
-        colorscale.append([i/n, color])
-        colorscale.append([(i+1)/n, color])
+
+        colorscale.append([i / n, color])
+        colorscale.append([(i + 1) / n, color])
 
     return colorscale
 
@@ -66,12 +66,12 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> go
     Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
     :param save_path: File name and path to save the image of the plot
     :param show_plot: Boolean index on whether the plot pops up in an interactive window
-    
+
     :return: plotly.Figure
     """
 
     if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
-        
+
         raise ValueError(
             "The dataframe should be of shape 3xN.",
             "With index 0 and 1 named column1 and column2 and index 2 S_pMSE")
@@ -130,7 +130,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> go
         fig.write_image(save_path)
 
     if show_plot:
-        
+
         fig.show()
 
     return fig
