@@ -20,8 +20,8 @@ from synthpop.plotting.plot import (
 # ----- _make_histograms tests -----
 
 def test_make_histograms_returns_histograms():
-    orig = pd.Series([1, 2, 3])
-    syn = pd.Series([10, 11, 12])
+    orig = pd.Series([1, 2, 3, pd.NA])
+    syn = pd.Series([10, 11, 12, pd.NA])
 
     orig_hist, syn_hist = _make_histograms(orig, syn)
 
@@ -46,24 +46,38 @@ def test_make_histograms_corrects_bins_for_integer_data():
         assert histogram.xbins.size == 1
         assert histogram.histnorm == "probability density"
 
-def test_make_histograms_float_bin_logic():
+def test_make_histograms_float_bin_logic(monkeypatch):
     orig = pd.Series([1.1, 2.2, 3.3])
     syn = pd.Series([4.4, 5.5, 6.6])
 
+    fake_bins = np.array([0.0, 10.0, 20.0])
+
+    called = {"args": None}
+
+    def fake_histogram_bin_edges(arr, bins):
+        called["args"] = (arr, bins)
+        return fake_bins
+    
+    monkeypatch.setattr(
+        np,
+        "histogram_bin_edges",
+        fake_histogram_bin_edges,
+    )
+
     orig_hist, syn_hist = _make_histograms(orig, syn)
 
-    assert isinstance(orig_hist, go.Histogram)
-    assert isinstance(syn_hist, go.Histogram)
+    assert called["args"][1] == "auto"
+
+    expected_bin_size = float(fake_bins[1] - fake_bins[0])
 
     for histogram in [orig_hist, syn_hist]:
-        assert histogram.xbins.size != 1
-        assert histogram.xbins.size > 0
-        assert histogram.xbins.start < histogram.xbins.end
+        assert isinstance(histogram, go.Histogram)
+        assert histogram.xbins.start == fake_bins[0]
+        assert histogram.xbins.end == fake_bins[-1]
+        assert histogram.xbins.size == expected_bin_size
         assert histogram.histnorm == "probability density"
     
-    assert syn_hist.xbins.start == orig_hist.xbins.start
-    assert syn_hist.xbins.end == orig_hist.xbins.end
-    assert syn_hist.xbins.size == orig_hist.xbins.size
+    assert syn_hist.xbins == orig_hist.xbins
 
 @pytest.mark.parametrize(
     "orig, syn",
@@ -106,6 +120,23 @@ def test_make_bars_handles_missing_values():
     assert sum(orig_bar.customdata) == 3
     assert sum(syn_bar.customdata) == 3
 
+def test_make_bars_does_not_fail_with_categorical_dtype_and_missing_values():
+    """
+    Regression test for:
+    TypeError: Cannot setitem on a Categorical with a new category (<MISSING>)
+    """
+
+    orig = pd.Series(["A", "B", None, "A"], dtype="category")
+    syn = pd.Series(["A", None, "B", "B"], dtype="category")
+
+    # Should NOT raise
+    orig_bar, syn_bar = _make_bars(orig, syn)
+
+    for bar in [orig_bar, syn_bar]:
+        assert isinstance(bar, go.Bar)  # basic sanity check: output must be go.Bar
+        assert '<MISSING>' in bar.x # ensure missing handling worked
+        assert pytest.approx(sum(bar.y)) == 1.0 # basic sanity check: densities should sum to 1
+        assert sum(bar.customdata) == 4 # should match row count including missing
 
 # ----- _plot_single_distribution tests -----
 
@@ -455,31 +486,50 @@ def test_browser_opens_when_interactive_without_save_location(mocked_environment
     )
 
 def test_plot_univariate_distributions_flow(monkeypatch):
+    orig = pd.DataFrame({"a": [1, 2], "b": ["1", "2"]})
+    syn = pd.DataFrame({"a": [3, 4], "b": ["1", "2"]})
 
-    orig = pd.DataFrame({"a": [1, 2]})
-    syn = pd.DataFrame({"a": [3, 4]})
+    fake_fig = go.Figure()
+    fake_html = "<html>HTML</html>"
+    fake_path = Path("/tmp/final.html")
 
-    calls = {"plot": 0, "html": 0, "write": 0, "browser": 0}
+    captured = {
+        "plots_input": None,
+        "html_input": None,
+        "write_input": None,
+        "browser_input": None,
+    }
 
     def fake_plot(orig, syn, name):
-        calls["plot"] += 1
-        return go.Figure()
+        return fake_fig
 
-    def fake_html(figs):
-        calls["html"] += 1
-        return "<html></html>"
+    def fake_build_html(figs):
+        captured["plots_input"] = figs
+        return fake_html
 
     def fake_write(html, saving_location):
-        calls["write"] += 1
-        return Path("/tmp/x.html")
+        captured["html_input"] = html
+        return fake_path
 
     def fake_browser(url):
-        calls["browser"] += 1
+        captured["browser_input"] = url
 
-    monkeypatch.setattr("synthpop.plotting.plot._plot_single_distribution", fake_plot)
-    monkeypatch.setattr("synthpop.plotting.plot._build_html", fake_html)
-    monkeypatch.setattr("synthpop.plotting.plot._write_html", fake_write)
-    monkeypatch.setattr("synthpop.plotting.plot.webbrowser.open", fake_browser)
+    monkeypatch.setattr(
+        "synthpop.plotting.plot._plot_single_distribution",
+        fake_plot,
+    )
+    monkeypatch.setattr(
+        "synthpop.plotting.plot._build_html",
+        fake_build_html,
+    )
+    monkeypatch.setattr(
+        "synthpop.plotting.plot._write_html",
+        fake_write,
+    )
+    monkeypatch.setattr(
+        "synthpop.plotting.plot.webbrowser.open",
+        fake_browser,
+    )
 
     result = plot_univariate_distributions(
         orig,
@@ -488,7 +538,14 @@ def test_plot_univariate_distributions_flow(monkeypatch):
         interactive=True,
     )
 
-    assert calls["plot"] == 1
-    assert calls["html"] == 1
-    assert calls["write"] == 1
-    assert calls["browser"] == 1
+    # 1. plot → html
+    assert captured["plots_input"] == [fake_fig, fake_fig]
+
+    # 2. html passed correctly
+    assert captured["html_input"] == fake_html
+
+    # 3. write output passed to browser
+    assert captured["browser_input"] == fake_path.resolve().as_uri()
+
+    # 4. return value still correct
+    assert result == [fake_fig, fake_fig]

@@ -1,7 +1,6 @@
 """
 This module contains functions to visually inspect synthetic data and evaluate its quality. 
 """
-from __future__ import annotations
 from pathlib import Path
 import tempfile
 import webbrowser
@@ -74,15 +73,14 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
 
 def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
 
-    orig_counts = (
-        orig.fillna("<MISSING>")
-        .value_counts(normalize=True, dropna=False)
-    )
+    # set input Series to 'string' to avoid 
+    # "TypeError: Cannot setitem on a Categorical with a new category (<MISSING>)"
+    # when the input is category dtype
+    orig_str = orig.astype("string").fillna("<MISSING>")
+    syn_str = syn.astype("string").fillna("<MISSING>")
 
-    syn_counts = (
-        syn.fillna("<MISSING>")
-        .value_counts(normalize=True, dropna=False)
-    )
+    orig_counts = orig_str.value_counts(normalize=True, dropna=False)
+    syn_counts = syn_str.value_counts(normalize=True, dropna=False)
 
     levels = sorted(
         set(orig_counts.index.astype(str))
@@ -105,7 +103,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
         name="Original",
         customdata=[
             int(
-                (orig.fillna("<MISSING>") == level).sum()
+                (orig_str.fillna("<MISSING>") == level).sum()
             )
             for level in levels
         ],
@@ -123,7 +121,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
         name="Synthetic",
         customdata=[
             int(
-                (syn.fillna("<MISSING>") == level).sum()
+                (syn_str.fillna("<MISSING>") == level).sum()
             )
             for level in levels
         ],
