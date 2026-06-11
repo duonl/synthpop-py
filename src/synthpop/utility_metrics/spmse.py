@@ -1,12 +1,12 @@
 """
 This module contains metrics to evaluate the utility of synthetic data.
 """
-import pandas as pd
 from itertools import combinations_with_replacement
-import numpy as np
-import warnings
 from typing import Sequence
+import warnings
 
+import numpy as np
+import pandas as pd
 __all__ = ["pairwise_spmse"]
 
 
@@ -77,29 +77,28 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> floa
         fill_value=0
     )
 
-    expected_frequency = jf_syn.add(
-        jf_or,
-        fill_value=0
-    )\
+    expected_frequency = (
+        jf_syn.add(jf_or, fill_value=0)
         * n_s / (n_o + n_s)
-
+    )
     num_independent_combinations = len(expected_frequency.index)
 
     if num_independent_combinations > 1:
 
-        S_pMSE = 1 / (num_independent_combinations - 1)\
+        spmse = (
+            1 / (num_independent_combinations - 1)
             * np.sum(
-            np.power(rescaled_differences, 2)
-            / expected_frequency
+                np.power(rescaled_differences, 2) / expected_frequency
+            )
         )
-
     else:  # number_independent_combinations=1
 
-        S_pMSE = 0.
+        spmse = 0.
         warnings.warn(
-            f'both variables are constant and equal, so the statistic is undefined. Return 0 for variable pair: {jf_syn.name}')
+            f"Both variables are constant and equal; "
+            f"so the statistic is undefined. Return 0 for variable pair: {jf_syn.name}")
 
-    return S_pMSE
+    return spmse
 
 
 def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 25) -> pd.DataFrame:
@@ -191,5 +190,5 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
         jf_syn = _joint_frequencies(s_df, col1, col2)
         rows.append([col1, col2, _calc_spmse(jf_orig, jf_syn, n_o, n_s)])
 
-    S_pMSEdf = pd.DataFrame(rows, columns=["column1", "column2", "S_pMSE"])
-    return S_pMSEdf
+    spmse_df = pd.DataFrame(rows, columns=["column1", "column2", "S_pMSE"])
+    return spmse_df
