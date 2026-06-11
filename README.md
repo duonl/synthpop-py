@@ -57,6 +57,23 @@ You can close the terminal.
 
 You can close the terminal.
 
+### Install from GitHub source
+
+Use one of the following workflows when you want to test the package directly from GitHub instead of PyPI.
+
+#### Test the latest `main` branch without cloning
+
+```bash
+python -m pip install "git+https://github.com/duonl/synthpop-py.git@main"
+```
+
+#### Develop from a local clone
+
+1. Clone the repository: ```git clone https://github.com/duonl/synthpop-py.git```
+2. Enter the project directory: ```cd synthpop-py```
+3. Install the project and documentation dependencies: ```poetry install --with=docs```
+4. Run project commands through Poetry, for example: ```poetry run pytest```
+
 ### Updating the documentation
 
 After making changes to the documentation, rebuild the HTML output by running the following commands:

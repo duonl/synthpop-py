@@ -74,7 +74,7 @@ class Synthesiser:
         self.column_order = column_order
         self.special_syn_method = special_syn_method
 
-    def _get_model(self, y):
+    def _get_model(self, column_name: str) -> BaseSynthMethod:
 
         if self.default_syn_method is None:
             effective_default_method = CartMethod()
@@ -83,14 +83,14 @@ class Synthesiser:
 
         if self.special_syn_method is None:
             model = effective_default_method
-        elif y in self.special_syn_method:
-            model = clone(self.special_syn_method[y])
+        elif column_name in self.special_syn_method:
+            model = clone(self.special_syn_method[column_name])
         else:
             model = effective_default_method
 
         return model
 
-    def _validate_column_order_unique(self, column_order):
+    def _validate_column_order_unique(self, column_order: list[str] | list[int]):
         unique_column_order = np.unique_counts(column_order)
 
         if (unique_column_order.counts > 1).any():
@@ -98,7 +98,7 @@ class Synthesiser:
             raise ValueError(
                 f"The following columns occur multiple times in Synthesiser.column_order: {duplicate_list}")
 
-    def fit(self, X: pd.DataFrame, y=None) -> Self:
+    def fit(self, X: pd.DataFrame) -> Self:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
 
@@ -106,7 +106,6 @@ class Synthesiser:
         Otherwise, we use the object defined in ``default_syn_method``.
 
         :param X: An original dataset on which to fit the synthesiser.
-        :param y: Ignored. This parameter exists only for compatibility with sklearn estimators.
 
         :return: Fitted synthesiser.
         """
@@ -130,9 +129,9 @@ class Synthesiser:
                 raise ValueError(
                     f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
             
-            negative_indices = array_columns <0
+            negative_indices = array_columns < 0
             if negative_indices.any():
-                raise ValueError(f"negative indices not allowed.")
+                raise ValueError(f"The following indices of Synthesiser.column_order are negative: {array_columns[negative_indices]}")
 
             self.column_order_ = X.columns[self.column_order].to_list()
         elif not all(isinstance(item, str) for item in self.column_order):
@@ -168,7 +167,7 @@ class Synthesiser:
         This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in `fit`.
 
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
-        :param random_state: Random seed generator. Default is 42. 
+        :param random_seed: Random seed generator. Default is 42. 
 
         :return: Synthetic dataset
         """
@@ -180,6 +179,8 @@ class Synthesiser:
 
         if n is None:
             n_syn_rows = self.n_samples_
+        elif n < 0:
+            raise ValueError(f"number of rows of the synthetic data must be positive, got {n}")
         else:
             n_syn_rows = n
 

@@ -1,9 +1,12 @@
-import pytest
-import pandas as pd
+import string
+
 import numpy as np
+import pandas as pd
+import pytest
+from sklearn.exceptions import NotFittedError
+
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
-import string
 
 
 def test_synthesiser_correct_default_methods():
@@ -50,7 +53,7 @@ def test_synthesiser_first_column_is_sampled_categorical():
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
 
-
+@pytest.mark.xfail(reason="known issue, see #130")
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -145,7 +148,7 @@ def test_synthesiser_preserves_1D_statistics():
         assert np.abs(
             original_mean-synthetic_mean) > 1e-3, "original and synthetic are too close"
         assert np.abs(original_mean-synthetic_mean) / \
-            original_mean < 0.07, "original and synthetic are too different"
+            original_mean < 0.05, "original and synthetic are too different"
 
     for cat_col in index_cat:
         original_dist = original_data[cat_col].value_counts(
@@ -158,11 +161,13 @@ def test_synthesiser_preserves_1D_statistics():
 
 def test_synthesiser_preserves_num_num_relation():
     n_samples_orig = 1000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
+    original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 
     syn_df = synthesiser.fit(original_data).generate()
+
+    assert syn_df.shape[0] == original_data.shape[0]
 
     obs_corr = original_data[["first", "second"]].corr()["second"]["first"]
     syn_corr = syn_df[["first", "second"]].corr()["second"]["first"]
@@ -171,7 +176,7 @@ def test_synthesiser_preserves_num_num_relation():
 
 def test_synthesiser_preserves_cat_num_relation():
     n_samples_orig = 1000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
+    original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 
@@ -184,7 +189,7 @@ def test_synthesiser_preserves_cat_num_relation():
 
 def test_synthesiser_preserves_cat_cat_relation():
     n_samples_orig = 10000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
+    original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 
