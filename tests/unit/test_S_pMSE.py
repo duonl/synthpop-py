@@ -409,6 +409,7 @@ def test_pairwise_spmse_scaling_invariance():
 
     output1 = pairwise_spmse(orig_df1, syn_df1, max_bins=3)
     output2 = pairwise_spmse(orig_df2, syn_df2, max_bins=3)
+    
     pd.testing.assert_frame_equal(
         output1, output2, check_exact=False, rtol=1e-9)
     
