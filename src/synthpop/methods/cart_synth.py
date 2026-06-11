@@ -443,13 +443,13 @@ class CartMethod(base_synth.BaseSynthMethod):
 
 def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> CartMethod:
     """
-    shortcut to set parameters of the CartMethod.
+    Shortcut to set parameters of the CartMethod.
 
     :param n_leaves: minimum number of samples in the leaf nodes. 
     This parameter is applied to the decision trees used for classification, regression, and predicting missing values.
-    :param n_components: sets the number of principle components used in encoding in the classifier.
-    for float values between 0 and 1, it is the percentage of variance that should be explained by the principle components. 
-    For integers =>1, it is the number of principle components.
+    :param n_components: sets the number of principal components used in encoding in the classifier.
+    for float values between 0 and 1, it is the percentage of variance that should be explained by the principal components. 
+    For integers => 1, it is the number of principal components.
 
     :return: a CartMethod object with the parameters consistently applied.
     """
