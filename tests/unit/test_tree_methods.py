@@ -7,7 +7,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
-from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod,to_fixed_length_string_array
+from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod, _to_fixed_length_string_array
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
 import copy
@@ -380,7 +380,7 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
     
     str_y = np.array(["x","y"])
-    mocked_to_str= mocker.patch('synthpop.methods.cart_synth.to_fixed_length_string_array',return_value=str_y)
+    mocked_to_str= mocker.patch('synthpop.methods.cart_synth._to_fixed_length_string_array',return_value=str_y)
 
     tree_method = TreeClassifierMethod(encoder=encoder,missing_handler=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree())
     
@@ -578,13 +578,13 @@ def test_TreeMethod_is_sklearn_compatible(estimator, check):
 
 def test_to_fixed_lenght_string_array():
     x = np.array(["a","b"],dtype=str_dtype)
-    result = to_fixed_length_string_array(x)
+    result = _to_fixed_length_string_array(x)
 
     assert result.dtype == "U1"
     assert np.array_equal(result,["a","b"])
 
     x = np.array(["aa","bb","c"],dtype=str_dtype)
-    result = to_fixed_length_string_array(x)
+    result = _to_fixed_length_string_array(x)
 
     assert result.dtype == "U2"
     assert np.array_equal(result,["aa","bb","c"])
