@@ -1,16 +1,18 @@
 """
 This module contains functions to visually inspect synthetic data and evaluate its quality. 
 """
-import pandas as pd
+import os
+
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-import os
+
 
 def plot_univariate_distributions(obs_df: pd.DataFrame, syn_df: pd.DataFrame, target_folder: str | None) -> None:
     """
     Plot comparisons of the univariate distribution between the observed and synthetic data
-    
+
     :param obs_df: The observed data
     :param syn_df: The synthetic data
     :param target_folder: Folder where images need to be saved
@@ -19,66 +21,81 @@ def plot_univariate_distributions(obs_df: pd.DataFrame, syn_df: pd.DataFrame, ta
     """
     return None
 
-def _make_matrix(df,value_string = "S_pMSE"):
+
+def _make_matrix(df: pd.DataFrame, value_string = "S_pMSE") -> pd.DataFrame:
     """
-    Makes a Matrix of the 3xN S_pMSE array
-    
+    Makes a Matrix of the 3xN S_pMSE array.
+
     :param df: Pandas DataFrame, should be 3xN
-    
+    :param value_string: either S_pMSE (matrix for text in figure) 
+    or category (matrix for color in figure)
+
     return: NxN matrix
     """
 
     matrix = df.pivot(index="column1", columns="column2", values=value_string)
     matrix = matrix.combine_first(matrix.T)
+
+    # invert s.t. the diagonal goes from upper-left to lower-right
+    return matrix.iloc[::-1]
+
+
+def _get_colorscale() -> list:
+    """"
+    Helper function to obtain the colorscale given the predetermined bins
+    """
+
+    colors = ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
     
-    return matrix.iloc[::-1] #invert s.t. the diagonal goes from upper-left to lower-right
-
-def _get_colorscale():
-    """"Helper function to obtain the colorscale given the predetermined bins"""
-    colors = ['rgb(255,255,255)']+ px.colors.sequential.YlOrBr[:5]
-
-    colorscale = []
     n = len(colors)
+    colorscale = []
+
     for i, color in enumerate(colors):
+    
         colorscale.append([i/n, color])
         colorscale.append([(i+1)/n, color])
 
     return colorscale
 
-def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> Figure:
+
+def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> go.Figure:
     """
     Plot the standardised propensity mean squared error.
-    
+
     :param spmse: The standardised propensity mean squared error values. 
     Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
-    :type: Pandas DataFrame
     :param save_path: File name and path to save the image of the plot
-    :type: str
     :param show_plot: Boolean index on whether the plot pops up in an interactive window
-    :type: Boolean
+    
     :return: plotly.Figure
     """
 
     if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
-        raise ValueError("The dataframe should be of shape 3xN. With index 0 and 1 named column1 and column2 and index 2 S_pMSE") 
-    
-    bins = [0, 3, 10, 30, 100, np.inf]
-    bin_labels = ["MISSING", "(0,3]", "(3,10]", "(10,30]", "(30,100]", '(100,+)']
+        
+        raise ValueError(
+            "The dataframe should be of shape 3xN.",
+            "With index 0 and 1 named column1 and column2 and index 2 S_pMSE")
 
-    spmse["category"] = np.digitize(spmse.iloc[:,2], bins=bins, right=True)
+    bins = [0, 3, 10, 30, 100, np.inf]
+    bin_labels = [
+        "MISSING", "(0,3]", "(3,10]",
+        "(10,30]", "(30,100]", '(100,+)'
+    ]
+
+    spmse["category"] = np.digitize(spmse.iloc[:, 2], bins=bins, right=True)
 
     matrix = _make_matrix(spmse, "category")
     matrix_orig = _make_matrix(spmse, "S_pMSE")
 
-    #Preprocessing for Plotting
+    # Preprocessing for Plotting
     text_matrix = matrix_orig.round(2).astype(str)
     text_matrix = text_matrix.mask(matrix_orig == 0, "MISSING")
 
     colorscale = _get_colorscale()
 
-    #plotting
+    # plotting
     fig = go.Figure(
-        data = go.Heatmap(
+        data=go.Heatmap(
             z=matrix.values,
             x=matrix.columns,
             y=matrix.index,
@@ -96,22 +113,24 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> Fi
                 outlinewidth=2,
             )
         ),
-        
+
         layout=dict(
             title="S_pMSE Heatmap",
             title_x=0.5,
             font=dict(family="Arial", size=15),
             width=900,
             height=845,
-            yaxis=dict(scaleanchor="x", scaleratio=1) #Make it a Cube
+            yaxis=dict(scaleanchor="x", scaleratio=1)  # Make it a Cube
         )
     )
-    
+
     if save_path:
+
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         fig.write_image(save_path)
 
     if show_plot:
+        
         fig.show()
-    
+
     return fig
