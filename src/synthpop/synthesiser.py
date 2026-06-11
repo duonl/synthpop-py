@@ -179,7 +179,7 @@ class Synthesiser:
 
         if n is None:
             n_syn_rows = self.n_samples_
-        elif n <0:
+        elif n < 0:
             raise ValueError(f"number of rows of the synthetic data must be positive, got {n}")
         else:
             n_syn_rows = n
