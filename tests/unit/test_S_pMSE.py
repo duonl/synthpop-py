@@ -388,20 +388,31 @@ def test_pairwise_spmse_symmetry():
 
     assert output1['S_pMSE'].iloc[0] == (output2['S_pMSE'].iloc[2])
     assert output1['S_pMSE'].iloc[1] == (output2['S_pMSE'].iloc[1])
-    assert output1['S_pMSE'].iloc[2] == (output2['S_pMSE'].iloc[0]) 
+    assert output1['S_pMSE'].iloc[2] == (output2['S_pMSE'].iloc[0])
     # Tests symmetry s.t. spmse(X,Y) == spmse(Y,X)
 
-# def test_pairwise_spmse_scaling_invariance():
-#     orig_df1 = pd.DataFrame({"c1": ["a", "a", "b"], "c2": [0, 2, 1]})
-#     syn_df1 = pd.DataFrame({"c1": ["a", "b", "b"], "c2": [1, 0, 2]})
 
-#     orig_df2 = orig_df1.loc[orig_df1.index.repeat(100)].reset_index(drop=True)
-#     syn_df2 = syn_df1.copy()
+def test_pairwise_spmse_scaling_invariance():
+    orig_df1 = pd.DataFrame({"c1": [1, 3], "c2": ['a', 'b']})
+    syn_df1 = pd.DataFrame({"c1": [1, 3], "c2": ['a', 'b']})
 
-#     output1 = pairwise_spmse(orig_df1, syn_df1, max_bins=3)
-#     output2 = pairwise_spmse(orig_df2, syn_df2, max_bins=3)
-#     pd.testing.assert_frame_equal(
-#         output1, output2, check_exact=False, rtol=1e-9)
+    expected = pd.DataFrame(
+        {
+            "column1": ["c1", "c1", "c2"],
+            "column2": ["c1", "c2", "c2"],
+            "S_pMSE": [0.0, 0.0, 0.0]
+        }
+    )
+
+    orig_df2 = orig_df1.loc[orig_df1.index.repeat(100)].reset_index(drop=True)
+    syn_df2 = syn_df1.copy()
+
+    output1 = pairwise_spmse(orig_df1, syn_df1, max_bins=3)
+    output2 = pairwise_spmse(orig_df2, syn_df2, max_bins=3)
+    pd.testing.assert_frame_equal(
+        output1, output2, check_exact=False, rtol=1e-9)
+    
+    assert output1.equals(expected)
 
 def test_pairwise_spmse_no_division_by_zero():
     orig_df = pd.DataFrame({"c1": ["a"]*1000001+['b']})
@@ -416,7 +427,7 @@ def test_pairwise_spmse_no_division_by_zero():
     )
 
     output = pairwise_spmse(orig_df, syn_df, max_bins=3)
-    
-    assert np.isfinite(output['S_pMSE']).all()    
+
+    assert np.isfinite(output['S_pMSE']).all()
     pd.testing.assert_frame_equal(
         output, expected, check_exact=False, rtol=1e-9)
