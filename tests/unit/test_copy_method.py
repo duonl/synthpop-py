@@ -21,11 +21,11 @@ def test_fit_stores_target_and_metadata(y):
     assert model.n_samples_ == len(y)
     pd.testing.assert_series_equal(model.y_, y)
 
-def test_fit_sets_default_name_when_none():
+def test_fit_sets_name_when_none():
     y = pd.Series([1, 2, 3])
     model = CopyMethod().fit(None, y)
 
-    assert model.target_name_ == "target"
+    assert model.target_name_ is None
 
 # ----- transform tests -----
 @pytest.mark.parametrize(

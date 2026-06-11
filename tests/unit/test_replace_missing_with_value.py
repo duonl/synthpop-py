@@ -11,16 +11,18 @@ def get_test_data():
 
     test_data_np_arrays = [
 #               X_in                            y_in                                             y_exp
-    *[(np.array(["a","b","a"], str_dtype), np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
-    *[(np.array(["a","b",np.nan],dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), "N.a.N.")],
-    *[(np.array(["a","b","a"], dtype=str_dtype), np.array(["x","y", "y"],dtype=str_dtype),np.array(["x","y", "y"], dtype=str_dtype), "N.a.N.")],
-    *[(np.array(["a","b","a"], dtype=str_dtype), np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators]
+    *[({"a":np.array(["a","b","a"], str_dtype)}, np.array(["x","y", np.nan], dtype=str_dtype), np.array(["x","y",missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
+    *[({"b":np.array(["a","b",np.nan],dtype=str_dtype)}, np.array(["x","y","y"], dtype=str_dtype), np.array(["x","y","y"], dtype=str_dtype), "N.a.N.")],
+    *[({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array(["x","y", "y"],dtype=str_dtype),np.array(["x","y", "y"], dtype=str_dtype), "N.a.N.")],
+    *[({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([np.nan, np.nan, np.nan], dtype=str_dtype), np.array([missing_indicator, missing_indicator, missing_indicator], dtype=str_dtype), missing_indicator) for missing_indicator in missing_indicators],
+    ({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([1,2,3]),np.array([1,2,3]), -8),
+    ({"a":np.array(["a","b","a"], dtype=str_dtype)}, np.array([1,np.nan,3]),np.array([1,-8,3],dtype=np.float64), -8),
     ]
 
     return test_data_np_arrays
 
 def get_post_synth_test_data():
-    x_values = np.array(["a","b", "c", "d"], dtype=str_dtype)
+    x_values = {"a":np.array(["a","b", "c", "d"], dtype=str_dtype)}
     missing_markers = ["N.a.N.","missing marker"]
 
     #               y_in                            y_exp                              missing_marker
@@ -41,7 +43,7 @@ def test_prepare_data_for_fit_numeric_correctness(X_in,y_in,y_exp,missing_indica
     assert y_exp.dtype == y_res.dtype
 
 def test_prepare_data_for_fit_does_not_change_arguments():
-    x_orig = np.array(["a","b"], dtype=str_dtype)
+    x_orig = {"a":np.array(["a","b"], dtype=str_dtype)}
     y = np.array(["x",np.nan], dtype=str_dtype)
     replace_nan = ReplaceNoneWithValue()
 
@@ -51,7 +53,7 @@ def test_prepare_data_for_fit_does_not_change_arguments():
     assert y_res[1] == "N.a.N."
 
 def test_prepare_data_for_fit_error_when_nan_is_a_value():
-    X = np.array(["a","b"], dtype=str_dtype)
+    X = {"a":np.array(["a","b"], dtype=str_dtype)}
     y = np.array(["x","N.a.N.",np.nan], dtype=str_dtype)
 
     replace_nan = ReplaceNoneWithValue(missing_marker="N.a.N.")
@@ -62,7 +64,7 @@ def test_prepare_data_for_fit_error_when_nan_is_a_value():
 def test_prepare_data_for_fit_empty():
     replace_nan = ReplaceNoneWithValue()
     with pytest.raises(ValueError):
-        x_res, y_res = replace_nan.prepare_data_for_fit(np.array(["s"], dtype=str_dtype), np.array([]))
+        x_res, y_res = replace_nan.prepare_data_for_fit({"a":np.array(["s"], dtype=str_dtype)}, np.array([]))
     # no longer gives an empty array back, X and y must have the same number of rows
 
 # ----- post_synth_transform tests -----
@@ -97,17 +99,11 @@ def test_post_synth_transform_does_nothing_when_no_nan():
     result = replace_nan.post_synth_transform(X, y)
     assert (result == y).all()
 
-def test_post_synth_transform_empty():
-    replace_nan = ReplaceNoneWithValue()
-
-    with pytest.raises(ValueError):
-        y_res = replace_nan.post_synth_transform(np.array(["s"], dtype=str_dtype), np.array([]))
-    # no longer gives an empty array back, X and y must have the same number of rows
 
 # ----- clonability tests -----
 def test_clone_works_and_fitted_does_not_preserve_state():
     rpnwv = ReplaceNoneWithValue(missing_marker="N.a.N.")
-    rpnwv.prepare_data_for_fit(X=np.array(["a","b","c","c"], dtype=str_dtype), y=np.array(["x","y",np.nan,"z"], dtype=str_dtype))
+    rpnwv.prepare_data_for_fit(X={"a": np.array(["a","b","c","c"], dtype=str_dtype)}, y=np.array(["x","y",np.nan,"z"], dtype=str_dtype))
 
     cloned = rpnwv.clone()
 

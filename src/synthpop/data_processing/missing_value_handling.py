@@ -1,19 +1,19 @@
 """
-This module contains classes for different strategies for handling missing values (None) in the target during synthesis. 
+This module contains classes for different strategies for handling missing values (`np.nan`) in the target during synthesis.
 """
-from abc import abstractmethod,ABCMeta
+from abc import ABCMeta, abstractmethod
+from typing import Dict, Self
+
+import pandas as pd
+import numpy as np
+import numpy.typing as npt
 from sklearn.base import TransformerMixin, clone
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.exceptions import NotFittedError
-from synthpop.data_processing.encoders import MeanEncoder
-from synthpop.methods.tree_utils import LeafNodeSampler
-import numpy.typing as npt
-import numpy as np
-import pandas as pd
-from typing import Dict
 
+from synthpop.data_processing.encoders import MeanEncoder
+from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
 from synthpop.utils import validate_2d_dict, validate_1d_target
-from synthpop.methods.tree_utils import build_feature_matrix
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
     """
@@ -29,7 +29,7 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         :param y: the target column. May contain missing values. Implementers do not need to accept both categorical and numeric targets, but should accept one of them.
         :return: a tuple (X,y) of data ready to be further processed and used for fitting a model. the second item of the tuple (y) may not contain missing values.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def post_synth_transform(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> npt.NDArray:
@@ -41,10 +41,10 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
 
         :return:  The synthesised target with missing values.
         """ 
-        pass
+        raise NotImplementedError
 
     @abstractmethod
-    def clone(self):
+    def clone(self) -> Self:
         """
         Create a new instance of the  with the same configuration.
 
@@ -55,7 +55,8 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         :return: A new, unfitted instance with the same __init__ parameters
 
         """
-        pass
+        raise NotImplementedError
+
 
 class MissingValuePredictor(BaseMissingValueHandler):
     """
@@ -90,7 +91,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
     >>> y_clean
     array([1., 3.])
     >>>
-    >>> #simulate synthetic generation step
+    >>> # simulate synthetic generation step
     >>> y_synth = np.array([10, 20, 30, 40])
     >>> y_final = mvp.post_synth_transform(X, y_synth)
     >>> y_final
@@ -100,13 +101,13 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     def __init__(self, encoder: TransformerMixin | None = None, 
                  tree: DecisionTreeClassifier | None = None,
-                 tree_sampler: LeafNodeSampler | None = None):
+                 tree_sampler: LeafNodeSampler | None = None) -> None:
         super().__init__()
         self.encoder = encoder
         self.tree = tree
         self.tree_sampler = tree_sampler
     
-    def prepare_data_for_fit(self, X: Dict[str, npt.ArrayLike], y: npt.ArrayLike) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
+    def prepare_data_for_fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Trains a decision tree to predict when y is missing. Removes rows from both `X` and `y` when `y` is missing.
 
@@ -139,14 +140,14 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         self.feature_order_ = list(X_val.keys())
 
-        self.tree_ = clone(self.tree) if self.tree else DecisionTreeClassifier(min_samples_leaf= 5)
+        self.tree_ = clone(self.tree) if self.tree else DecisionTreeClassifier(min_samples_leaf=5)
         self.tree_sampler_ = self.tree_sampler.clone() if self.tree_sampler else LeafNodeSampler()
         
         # implementation
         z = pd.isna(y_val)
 
         self._all_missing = np.all(z)
-        self._no_missing = not np.any(z)
+        self._none_missing = not np.any(z)
 
         self.encoders_ = {}
         X_encoded = {}
@@ -165,11 +166,11 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         X_matrix = build_feature_matrix(X_encoded, feature_order=self.feature_order_)    
 
-        if not self._all_missing and not self._no_missing:
+        if not self._all_missing and not self._none_missing:
             self.tree_.fit(X_matrix, z)
             leaf_ids = self.tree_.apply(X_matrix)
             self.tree_sampler_.fit_sampler(leaf_ids, z)
-        else: #leave tree_ and tree_sampler_ unfitted
+        else:   #leave tree_ and tree_sampler_ unfitted
             pass
         
         # remove the missing value rows for return
@@ -207,19 +208,19 @@ class MissingValuePredictor(BaseMissingValueHandler):
         array([10., nan, nan, 40.])
 
         """ 
-
-        # implementation
-        if self._all_missing:
-            return np.full(len(y), np.nan)
-        if self._no_missing:
-            return y
-        
         # input validation
         if (not hasattr(self, "tree_")
             or not hasattr(self, "tree_sampler_")
             or not hasattr(self, "encoders_")
             or not hasattr(self, "feature_order_")):
             raise NotFittedError("MissingValuePredictor is not fitted. Call `prepare_data_for_fit` first.")
+
+        # implementation
+        if self._all_missing:
+            return np.full(len(y), np.nan)
+        if self._none_missing:
+            return y
+    
 
         X_val, n_samples = validate_2d_dict(X)
         y_val = validate_1d_target(y, n_samples)
@@ -247,7 +248,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         return y_out
     
-    def clone(self):
+    def clone(self) -> Self:
         """
         Create a new instance of the missing value predictor with the same configuration.
 
@@ -285,11 +286,11 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
     array(['x', 'y', nan, 'z'], dtype=StringDType(na_object=nan))
     """
 
-    def __init__(self, missing_marker: str = "N.a.N."):
+    def __init__(self, missing_marker: str = "N.a.N.") -> None:
         super().__init__()
         self.missing_marker = missing_marker
     
-    def prepare_data_for_fit(self, X: npt.NDArray, y: npt.NDArray)-> tuple[npt.NDArray, npt.NDArray]:
+    def prepare_data_for_fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Replaces missing values in the target with "N.a.N."
 
@@ -298,7 +299,9 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return: a tuple `(X,y)`. Leaves `X` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of `y`. 
         """
-        y_val = validate_1d_target(y.copy(), len(X))
+
+        n_samples = X[next(iter(X))].shape[0]
+        y_val = validate_1d_target(y.copy(), n_samples)
 
         missing_mask = pd.isna(y_val)
 
@@ -307,9 +310,9 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         y_val[missing_mask] = self.missing_marker
 
-        return(X, y_val)
+        return X, y_val
 
-    def post_synth_transform(self, X: npt.NDArray, y: npt.NDArray) -> npt.NDArray:
+    def post_synth_transform(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> npt.NDArray:
         """
         Replaces "N.a.N." with missing values.
 
@@ -318,13 +321,14 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
         :return:  The synthesised target with missing values.
         """ 
-        y_val = validate_1d_target(y.copy(), len(X))
+
+        y_val = validate_1d_target(y.copy(), None)
 
         y_val[y_val == self.missing_marker] = np.nan
 
         return y_val
     
-    def clone(self):
+    def clone(self) -> Self:
         """
         Create a new instance of ReplaceNoneWithValue with the same configuration.
 
@@ -340,4 +344,4 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
         --------
         >>> ReplaceNoneWithValue().clone()
         """
-        return self.__class__(missing_marker = self.missing_marker)
+        return self.__class__(missing_marker=self.missing_marker)

@@ -49,7 +49,9 @@ The method requires a dataset in which each record describes a pair of variables
 Based on the input data, a square matrix is constructed in which each cell corresponds to a specific pair of variables. Since the relationship between Variable A and B is identical to that between B and A, the matrix is populated symmetrically. For variable pairs for which no S_pMSE value is available, the corresponding matrix cells remain empty. No imputation or estimation is applied, ensuring that only original relationships are represented.
 
 #### 3.2 Categorisation of S_pMSE values
-Continuous S_pMSE values are mapped to discrete intervals that represent meaningful divergence levels. Each interval is associated with a fixed colour, enabling immediate visual differentiation between low, moderate and high values. An S_pMSE range [0-3] gets dark green, [3-10] light green, [10-30] yellow, [30-100] orange, [100+] red, and grey when there is no S_pMSE.
+Continuous S_pMSE values are mapped to discrete intervals that represent meaningful divergence levels. Each interval is associated with a fixed colour, enabling immediate visual differentiation between low, moderate and high values. The S_pMSE values are visualised in five bins: ${\text(0,3]}$, ${\text(3,10]}$, ${\text(10,30]}$, ${\text(30,100]}$, ${\text(100,\infty)}$. Undefined S_pMSE values, including cases where the S_pMSE equals 0, are assigned to a separate, visually distinct bin.
+
+The colour scheme shall be sequential, colour-blind friendly, print-friendly, and retain sufficient contrast when reproduced in greyscale. Suitable palettes include the discretised versions of the  `plotly` colour scales *YlOrBr* and *Reds*, or the *iridescent* and *YlOrBr* palettes from the `tol_colors` python package.
 
 #### 3.3 Visual encoding and rendering
 The matrix is converted into a heatmap where the cells show the S_pSME values and are coloured according to our predefined groups. Both axes are labelled with variable names and a legend (colour bar) provides a clear mapping between colours and S_pMSE ranges. To improve readability with a large number of variables, tooltips should be added to see which cell represents which variable pair relationship. Optionally, the heatmap can be saved as a static image file. If interactive rendering is enabled, the heatmap is displayed to the active graphical output device. Rendering is optional and context-dependent, and does not affect the saved image output.
@@ -59,7 +61,7 @@ The resulting matrix is always square and symmetric. Diagonal elements do not ca
 
 ### 5. Edge cases and special situations
 #### 5.1 Missing values
-If S_pMSE values are missing for certain variable pairs, the cells in the heatmap for these corresponding pairs have no value written down and will be grey.
+Missing S_pMSE values for variable pairs are considered undefined. The corresponding heatmap cells shall not display a numeric value and shall be assigned to a separate visual category that is be clearly distinguishable from all bins in the consequential colour scheme defined in Section 3.2, including when reproduced in greyscale.
 
 #### 5.2 Execution in headless or non-interactive environments
 When the method is executed in a headless environment, interactive rendering is not available or desirable. In such cases the visualisation should be saved to file only, rendering to a display should be disabled or skipped, and the saved image becomes the primary output artefact. File path and folder creation are handled automatically. This ensures that the method remains robust and usable in automated workflows and production environments.
