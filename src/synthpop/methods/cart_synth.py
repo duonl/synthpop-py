@@ -446,11 +446,22 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
     Shortcut to set parameters of the CartMethod.
 
     :param n_leaves: minimum number of samples in the leaf nodes.\
-    This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
+        This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
         See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
-    :param n_components: sets the number of principal components used in encoding in the classifier. For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components. For integers => 1, it is the number of principal components. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
+    :param n_components: sets the number of principal components used in encoding in the classifier. \
+        For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components. For integers => 1, it is the number of principal components. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
 
     :return: a CartMethod object with the parameters consistently applied.
+
+    Examples
+    --------
+    >>> from synthpop.methods.cart_synth import CartMethod
+    >>> from synthpop.methods.cart_synth import tune_cart
+    >>> from synthpop.synthesiser import Synthesiser
+    >>> import pandas as pd
+    >>> data = pd.DataFrame({"a":[1],"b":[2]})
+    >>> synth = Synthesiser(random_seed=10,default_syn_method = tune_cart(n_leaves=10), special_syn_method= { "b": tune_cart(n_leaves=20)})
+
     """
     return CartMethod(
         regressor=TreeRegressorMethod(
