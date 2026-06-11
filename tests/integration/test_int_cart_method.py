@@ -243,9 +243,9 @@ def test_fit_transform_with_missing_values_in_predictors():
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series(["A", None, "A", "B"], dtype="string", name="target"),
+        pd.Series(["A", None, None, "B"], dtype="string", name="target"),
         pd.Series([1, 2, np.nan, 4], name="target"),
-        pd.Series([True, False, True, pd.NA], name="target"),
+        pd.Series([pd.NA, False, True, pd.NA], name="target"),
         pd.Series([1, None, 2, np.nan], name="target"),
     ],
 )
