@@ -59,10 +59,10 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return clone(self.encoder) if self.encoder is not None else self._get_encoder()
 
     def _new_missing_handling(self):
-        return clone(self.missing_handler) if self.missing_handler is not None else self._get_missing_handling()
+        return self.missing_handler.clone() if self.missing_handler is not None else self._get_missing_handling()
 
     def _new_tree_sampler(self):
-        return clone(self.tree_sampler) if self.tree_sampler is not None else LeafNodeSampler()
+        return self.tree_sampler.clone() if self.tree_sampler is not None else LeafNodeSampler()
 
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
