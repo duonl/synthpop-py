@@ -9,6 +9,7 @@ import numpy.typing as npt
 import pandas as pd
 from sklearn import clone
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
+from sklearn.decomposition import PCA
 from sklearn.tree import BaseDecisionTree, DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop import utils
@@ -67,8 +68,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
 
-    def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
-        # overwritten in TreeClassifierMethod and TreeRegressorMethod
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         # overwritten in TreeClassifierMethod and TreeRegressorMethod
         return y
