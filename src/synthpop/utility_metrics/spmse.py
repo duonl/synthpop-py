@@ -10,7 +10,7 @@ from typing import Sequence
 __all__ = ["pairwise_spmse"]
 
 
-def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None = None):
+def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None = None) -> pd.Series:
     """
     Preprocess a numeric column for S_pMSE computation by discretising it into bins.
 
@@ -28,7 +28,7 @@ def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None = Non
     return column
 
 
-def _preprocessing_non_numeric(column: pd.Series):
+def _preprocessing_non_numeric(column: pd.Series) -> pd.Series:
     """
     Standardise missing values in a non-numeric column.
 
@@ -44,7 +44,7 @@ def _preprocessing_non_numeric(column: pd.Series):
     return column
 
 
-def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str):
+def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str) -> pd.Series:
     """
     Calculate the joint frequency tables for variable pairs.
 
@@ -62,7 +62,7 @@ def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str):
     return jf
 
 
-def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int):
+def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> float:
     """
     Calculates the S_pSME for a combination of two columns from the joint frequency tables
 
@@ -107,7 +107,7 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     Compute the pairwise Standardised propensity Mean Squared Error (S_pMSE) between an original and a synthetic dataset.
 
     The metric compares the preservation of pairwise joint distributions between corresponding variables in both datasets.
-    Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the orignal and synthetic dataset. 
+    Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the original and synthetic dataset. 
     Categorical and string variables are used directly.
     Missing values are treated as a separate category (np.nan).
 
