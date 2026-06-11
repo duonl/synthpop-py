@@ -538,14 +538,7 @@ def test_plot_univariate_distributions_flow(monkeypatch):
         interactive=True,
     )
 
-    # 1. plot → html
     assert captured["plots_input"] == [fake_fig, fake_fig]
-
-    # 2. html passed correctly
     assert captured["html_input"] == fake_html
-
-    # 3. write output passed to browser
     assert captured["browser_input"] == fake_path.resolve().as_uri()
-
-    # 4. return value still correct
     assert result == [fake_fig, fake_fig]
