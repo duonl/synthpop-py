@@ -19,6 +19,20 @@ from synthpop.plotting.plot import (
 
 # ----- _make_histograms tests -----
 
+def test_make_histograms_returns_histograms():
+    orig = pd.Series([1, 2, 3])
+    syn = pd.Series([10, 11, 12])
+
+    orig_hist, syn_hist = _make_histograms(orig, syn)
+
+    assert isinstance(orig_hist, go.Histogram)
+    assert orig_hist.x.tolist() == orig.dropna().tolist()
+    assert orig_hist.name == "Original"
+
+    assert isinstance(syn_hist, go.Histogram)
+    assert syn_hist.x.tolist() == syn.dropna().tolist()
+    assert syn_hist.name == "Synthetic"
+
 def test_make_histograms_corrects_bins_for_integer_data():
     orig = pd.Series([1, 2, 3])
     syn = pd.Series([4, 5, 6])
@@ -26,12 +40,30 @@ def test_make_histograms_corrects_bins_for_integer_data():
     orig_hist, syn_hist = _make_histograms(orig, syn)
 
     # shared binning logic
-    assert orig_hist.xbins.start == 0.5
-    assert orig_hist.xbins.end == 6.5
-    assert orig_hist.xbins.size == 1
+    for histogram in [orig_hist, syn_hist]:
+        assert histogram.xbins.start == 0.5
+        assert histogram.xbins.end == 6.5
+        assert histogram.xbins.size == 1
+        assert histogram.histnorm == "probability density"
 
-    assert orig_hist.histnorm == "probability density"
-    assert syn_hist.histnorm == "probability density"
+def test_make_histograms_float_bin_logic():
+    orig = pd.Series([1.1, 2.2, 3.3])
+    syn = pd.Series([4.4, 5.5, 6.6])
+
+    orig_hist, syn_hist = _make_histograms(orig, syn)
+
+    assert isinstance(orig_hist, go.Histogram)
+    assert isinstance(syn_hist, go.Histogram)
+
+    for histogram in [orig_hist, syn_hist]:
+        assert histogram.xbins.size != 1
+        assert histogram.xbins.size > 0
+        assert histogram.xbins.start < histogram.xbins.end
+        assert histogram.histnorm == "probability density"
+    
+    assert syn_hist.xbins.start == orig_hist.xbins.start
+    assert syn_hist.xbins.end == orig_hist.xbins.end
+    assert syn_hist.xbins.size == orig_hist.xbins.size
 
 @pytest.mark.parametrize(
     "orig, syn",
@@ -43,8 +75,8 @@ def test_make_histograms_corrects_bins_for_integer_data():
 def test_make_histograms_removes_missing_data(orig, syn):
     orig_hist, syn_hist = _make_histograms(orig, syn)
 
-    assert all(~pd.isna(x) for x in orig_hist.x)
-    assert all(~pd.isna(x) for x in syn_hist.x)
+    all(not pd.isna(x) for x in orig_hist.x)
+    all(not pd.isna(x) for x in syn_hist.x)
 
 
 # ----- _make_bars tests -----
@@ -81,13 +113,15 @@ def test_plot_single_distribution_uses_histograms(monkeypatch):
     orig = pd.Series([1, 2, 3])
     syn = pd.Series([4, 5, 6])
 
-    called = {"hist": 0, "bars": 0}
+    called = {"hist": 0, "bars": 0, "hist_args": None, "bar_args": None}
 
     def fake_hist(orig, syn):
+        called["hist_args"] = (orig, syn)
         called["hist"] += 1
         return go.Histogram(), go.Histogram()
 
     def fake_bars(orig, syn):
+        called["bar_args"] = (orig, syn)
         called["bars"] += 1
         return go.Bar(), go.Bar()
 
@@ -100,17 +134,22 @@ def test_plot_single_distribution_uses_histograms(monkeypatch):
     assert called["bars"] == 0
     assert len(fig.data) == 2
 
+    assert called["hist_args"][0].equals(orig)
+    assert called["hist_args"][1].equals(syn)
+
 def test_plot_single_distribution_categorical_path(monkeypatch):
     orig = pd.Series(["A", "B"])
     syn = pd.Series(["A", "A"])
 
-    called = {"hist": 0, "bars": 0}
+    called = {"hist": 0, "bars": 0, "hist_args": None, "bar_args": None}
 
-    def fake_hist(orig, syn, name):
+    def fake_hist(orig, syn):
+        called["hist_args"] = (orig, syn)
         called["hist"] += 1
         return go.Histogram(), go.Histogram()
 
     def fake_bars(orig, syn):
+        called["bar_args"] = (orig, syn)
         called["bars"] += 1
         return go.Bar(), go.Bar()
 
@@ -122,6 +161,9 @@ def test_plot_single_distribution_categorical_path(monkeypatch):
     assert called["bars"] == 1
     assert called["hist"] == 0
     assert len(fig.data) == 2
+
+    assert called["bar_args"][0].equals(orig)
+    assert called["bar_args"][1].equals(syn)
 
 def test_plot_single_distribution_adds_annotation():
     orig = pd.Series([1, None, 2])
@@ -143,26 +185,79 @@ def test_plot_single_distribution_uses_column_name_in_title():
 
     assert fig.layout.title.text == "Distribution comparison: age"
 
+def test_plot_single_distribution_numeric_layout():
+    orig = pd.Series([1, 2, 3])
+    syn = pd.Series([4, 5, 6])
+
+    fig = _plot_single_distribution(orig, syn, "age")
+
+    assert fig.layout.barmode == "overlay"
+    assert fig.layout.xaxis.title.text == "age"
+    assert fig.layout.yaxis.title.text == "Density"
+    assert fig.layout.legend.title.text == "Dataset"
+    assert fig.layout.height == 500
+
+def test_plot_single_distribution_categorical_layout():
+    orig = pd.Series(["A", "B"])
+    syn = pd.Series(["A", "A"])
+
+    fig = _plot_single_distribution(orig, syn, "sex")
+
+    assert fig.layout.barmode == "group"
+    assert fig.layout.xaxis.title.text == "sex"
+    assert fig.layout.yaxis.title.text == "Density"
+    assert fig.layout.legend.title.text == "Dataset"
+    assert fig.layout.height == 500
+
 # ----- _build_html tests -----
 
-def test_build_html_calls_to_html(monkeypatch):
-    fig = go.Figure()
+def test_build_html_uses_correct_to_html_arguments(monkeypatch):
+    figs = [go.Figure(), go.Figure(), go.Figure()]
+
+    calls = []
 
     def fake_to_html(fig, include_plotlyjs, full_html):
+        calls.append(
+            {
+                "include_plotlyjs": include_plotlyjs,
+                "full_html": full_html,
+            }
+        )
         return "<div>FIG</div>"
 
-    monkeypatch.setattr("synthpop.plotting.plot.to_html", fake_to_html)
+    monkeypatch.setattr(
+        "synthpop.plotting.plot.to_html",
+        fake_to_html,
+    )
 
-    html = _build_html([fig])
+    _build_html(figs)
 
-    assert "<div>FIG</div>" in html
+    assert calls == [
+        {
+            "include_plotlyjs": True,
+            "full_html": False,
+        },
+        {
+            "include_plotlyjs": False,
+            "full_html": False,
+        },
+        {
+            "include_plotlyjs": False,
+            "full_html": False,
+        },
+    ]
 
 # ----- _write_html tests -----
 
-def test_write_html_creates_temp_file(monkeypatch):
+def test_write_html_uses_named_tempfile(monkeypatch):
+    captured = {}
 
     class FakeTemp:
-        name = "/tmp/fake.html"
+        def __init__(self, *args, **kwargs):
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            self.name = "/tmp/fake.html"
+            self.written = None
 
         def __enter__(self):
             return self
@@ -171,12 +266,21 @@ def test_write_html_creates_temp_file(monkeypatch):
             return False
 
         def write(self, content):
-            self.content = content
+            self.written = content
 
-    monkeypatch.setattr("synthpop.plotting.plot.tempfile.NamedTemporaryFile", lambda *args, **kwargs: FakeTemp())
+    monkeypatch.setattr(
+        tempfile,
+        "NamedTemporaryFile",
+        lambda *a, **k: FakeTemp(*a, **k),
+    )
 
     html = "<html></html>"
     path = _write_html(html, None)
+
+    assert captured["kwargs"]["mode"] == "w"
+    assert captured["kwargs"]["suffix"] == ".html"
+    assert captured["kwargs"]["delete"] is False
+    assert captured["kwargs"]["encoding"] == "utf-8"
 
     assert str(path).endswith(".html")
 

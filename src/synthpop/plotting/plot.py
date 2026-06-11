@@ -282,8 +282,10 @@ def plot_univariate_distributions(
     
     :param orig_df: Original/observed dataset.
     :param syn_df: Synthetic dataset. Must contain the same columns as `orig_df`.
-    :param saving_location: Directory where the HTML output file should be written.
-        If `None` (default), no permanent output file is created.
+    :param saving_location: Directory where the HTML output file will be written.
+        If a relative path is provided, it is resolved relative to the current working
+        directory. The directory is created if it does not already exist (including)
+        parent directories). If `None` (default), no permanent output file is created.
     :param interactive: Whether to automatically open the generated visualisation
         in the default web browser. Default is `False`. When running headless,
         the parameter should be set to `False`.
