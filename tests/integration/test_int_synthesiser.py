@@ -1,9 +1,12 @@
-import pytest
-import pandas as pd
+import string
+
 import numpy as np
+import pandas as pd
+import pytest
+from sklearn.exceptions import NotFittedError
+
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
-import string
 
 
 def test_synthesiser_correct_default_methods():
@@ -164,6 +167,8 @@ def test_synthesiser_preserves_num_num_relation():
 
     syn_df = synthesiser.fit(original_data).generate()
 
+    assert syn_df.shape[0] == original_data.shape[0]
+
     obs_corr = original_data[["first", "second"]].corr()["second"]["first"]
     syn_corr = syn_df[["first", "second"]].corr()["second"]["first"]
     assert np.abs(obs_corr - syn_corr) < 0.01
@@ -171,7 +176,7 @@ def test_synthesiser_preserves_num_num_relation():
 
 def test_synthesiser_preserves_cat_num_relation():
     n_samples_orig = 1000
-    original_data, _, _= simulate_realistic_dataset_correlations(
+    original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 

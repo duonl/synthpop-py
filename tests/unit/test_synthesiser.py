@@ -1,10 +1,13 @@
+import copy
+import re
+
+import numpy as np
+import pandas as pd
 import pytest
+from sklearn.exceptions import NotFittedError
+
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.base_synth import BaseSynthMethod
-import pandas as pd
-import copy
-from sklearn.exceptions import NotFittedError
-import re
 
 
 class StubSynthMethod(BaseSynthMethod):
@@ -196,7 +199,7 @@ def test_synthesiser_fit_throws_on_empty_dataframe():
                               "The following columns of Synthesiser.column_order are not in the dataframe: ['d', 'x']"),
                              ([0, 3, 2, 4], "The following indices of Synthesiser.column_order are out of bounds: [3 4]"),
                              ([0, "b", 1], "invalid column order: [0, 'b', 1]"),
-                             ([0, 1, -1], "negative indices not allowed."),
+                             ([0, -2, 1, -1], "The following indices of Synthesiser.column_order are negative: [-2 -1]"),
                          ])
 def test_synthesiser_fit_throws_on_invalid_column_order(column_order, expected_message):
 
@@ -252,10 +255,27 @@ def test_generate_different_rowcount():
     synth.column_order_ = ["a"]
     synth.n_samples_ = 3
     synth.models_ = {}
-    synth.models_["a"] = StubSynthMethod(transform_result=pd.Series([],name="a"))
+    synth.models_["a"] = StubSynthMethod(
+        transform_result=pd.Series([], name="a"))
 
     synth.generate(n=expected_row_count)
 
+    assert synth.models_["a"].transform_X[0].equals(expected_initial_data)
+
+
+def test_generate_zero_rows():
+
+    synth = Synthesiser(random_seed=2)
+
+    expected_initial_data = pd.DataFrame({"init": np.array([], dtype=int)})
+
+    synth.column_order_ = ["a"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+    synth.models_["a"] = StubSynthMethod(
+        transform_result=pd.Series([], name="a"))
+
+    synth.generate(n=0)
 
     assert synth.models_["a"].transform_X[0].equals(expected_initial_data)
 
@@ -292,3 +312,13 @@ def test_generate_raises_when_not_fitted():
     synth = Synthesiser(random_seed=0)
     with pytest.raises(NotFittedError):
         synth.generate()
+
+
+def test_generate_raises_on_invalid_n():
+    synth = Synthesiser(random_seed=2)
+    synth.column_order_ = ["c", "a", "b"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+
+    with pytest.raises(ValueError, match=re.escape("number of rows of the synthetic data must be positive, got -3")):
+        synth.generate(-3)

@@ -83,8 +83,8 @@ class Synthesiser:
 
         if self.special_syn_method is None:
             model = effective_default_method
-        elif y in self.special_syn_method:
-            model = clone(self.special_syn_method[y])
+        elif column_name in self.special_syn_method:
+            model = clone(self.special_syn_method[column_name])
         else:
             model = effective_default_method
 
@@ -131,7 +131,7 @@ class Synthesiser:
             
             negative_indices = array_columns < 0
             if negative_indices.any():
-                raise ValueError(f"negative indices not allowed.")
+                raise ValueError(f"The following indices of Synthesiser.column_order are negative: {array_columns[negative_indices]}")
 
             self.column_order_ = X.columns[self.column_order].to_list()
         elif not all(isinstance(item, str) for item in self.column_order):
@@ -179,6 +179,8 @@ class Synthesiser:
 
         if n is None:
             n_syn_rows = self.n_samples_
+        elif n <0:
+            raise ValueError(f"number of rows of the synthetic data must be positive, got {n}")
         else:
             n_syn_rows = n
 
