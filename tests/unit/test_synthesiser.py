@@ -196,7 +196,7 @@ def test_synthesiser_fit_throws_on_empty_dataframe():
                               "The following columns of Synthesiser.column_order are not in the dataframe: ['d', 'x']"),
                              ([0, 3, 2, 4], "The following indices of Synthesiser.column_order are out of bounds: [3 4]"),
                              ([0, "b", 1], "invalid column order: [0, 'b', 1]"),
-                             ([0,1, -1], "negative indices not allowed."),
+                             ([0, 1, -1], "negative indices not allowed."),
                          ])
 def test_synthesiser_fit_throws_on_invalid_column_order(column_order, expected_message):
 
@@ -289,7 +289,6 @@ def test_generate_custom_order():
 
 
 def test_generate_raises_when_not_fitted():
-    X = pd.DataFrame({"a": [0]})
     synth = Synthesiser(random_seed=0)
     with pytest.raises(NotFittedError):
         synth.generate()

@@ -74,7 +74,7 @@ class Synthesiser:
         self.column_order = column_order
         self.special_syn_method = special_syn_method
 
-    def _get_model(self, y):
+    def _get_model(self, column_name: str) -> BaseSynthMethod:
 
         if self.default_syn_method is None:
             effective_default_method = CartMethod()
@@ -90,7 +90,7 @@ class Synthesiser:
 
         return model
 
-    def _validate_column_order_unique(self, column_order):
+    def _validate_column_order_unique(self, column_order: list[str] | list[int]):
         unique_column_order = np.unique_counts(column_order)
 
         if (unique_column_order.counts > 1).any():
@@ -129,7 +129,7 @@ class Synthesiser:
                 raise ValueError(
                     f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
             
-            negative_indices = array_columns <0
+            negative_indices = array_columns < 0
             if negative_indices.any():
                 raise ValueError(f"negative indices not allowed.")
 
@@ -167,7 +167,7 @@ class Synthesiser:
         This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in `fit`.
 
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
-        :param random_state: Random seed generator. Default is 42. 
+        :param random_seed: Random seed generator. Default is 42. 
 
         :return: Synthetic dataset
         """

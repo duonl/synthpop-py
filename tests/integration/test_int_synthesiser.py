@@ -158,7 +158,7 @@ def test_synthesiser_preserves_1D_statistics():
 
 def test_synthesiser_preserves_num_num_relation():
     n_samples_orig = 1000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
+    original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 
@@ -171,7 +171,7 @@ def test_synthesiser_preserves_num_num_relation():
 
 def test_synthesiser_preserves_cat_num_relation():
     n_samples_orig = 1000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
+    original_data, _, _= simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 
@@ -184,7 +184,7 @@ def test_synthesiser_preserves_cat_num_relation():
 
 def test_synthesiser_preserves_cat_cat_relation():
     n_samples_orig = 10000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
+    original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
 
