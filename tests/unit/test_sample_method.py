@@ -44,11 +44,11 @@ def test_fit_stores_distribution_and_metadata(y, expected_values, expected_count
         assert (pd.isna(model_value) and pd.isna(expected_value)) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
 
 
-def test_fit_sets_default_name_when_none():
+def test_fit_sets_name_when_none():
     y = pd.Series([1, 2, 3])
     model = SampleMethod().fit(None, y)
 
-    assert model.target_name_ == "target"
+    assert model.target_name_ is None
 
 # ----- transform tests -----
 
