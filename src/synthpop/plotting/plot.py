@@ -219,9 +219,9 @@ def _build_html(figures: list[go.Figure]) -> str:
 
     return "\n".join(html_parts)
 
-def _write_html(html_content: str, saving_location: str | None) -> Path:
+def _write_html(html_content: str, save_path: str | None) -> Path:
 
-    if saving_location is None:
+    if save_path is None:
         with tempfile.NamedTemporaryFile(
             mode="w",
             suffix=".html",
@@ -232,7 +232,7 @@ def _write_html(html_content: str, saving_location: str | None) -> Path:
 
         return Path(temp_file.name)
 
-    output_dir = Path(saving_location)
+    output_dir = Path(save_path)
     output_dir.mkdir(
         parents=True,
         exist_ok=True,
@@ -254,7 +254,7 @@ def _write_html(html_content: str, saving_location: str | None) -> Path:
 def plot_univariate_distributions(
         orig_df: pd.DataFrame, 
         syn_df: pd.DataFrame, 
-        saving_location: str | None =  None,
+        save_path: str | None =  None,
         interactive: bool = False,
         ) -> list[go.Figure]:
     """
@@ -280,7 +280,7 @@ def plot_univariate_distributions(
     
     :param orig_df: Original/observed dataset.
     :param syn_df: Synthetic dataset. Must contain the same columns as `orig_df`.
-    :param saving_location: Directory where the HTML output file will be written.
+    :param save_path: Directory where the HTML output file will be written.
         If a relative path is provided, it is resolved relative to the current working
         directory. The directory is created if it does not already exist (including)
         parent directories). If `None` (default), no permanent output file is created.
@@ -336,7 +336,7 @@ def plot_univariate_distributions(
         >>> plots = plot_univariate_distributions(
         ...     orig_df=orig_df,
         ...     syn_df=syn_df,
-        ...     saving_location=None,
+        ...     save_path=None,
         ...     interactive=False,
         ... )
         >>> for fig in plots:
@@ -359,12 +359,12 @@ def plot_univariate_distributions(
         for column in orig_df.columns
     ]
 
-    if saving_location is None and not interactive:
+    if save_path is None and not interactive:
         return figures
 
     html_content = _build_html(figures)
 
-    html_file = _write_html(html_content, saving_location)
+    html_file = _write_html(html_content, save_path)
 
     if interactive:
         webbrowser.open(html_file.resolve().as_uri())

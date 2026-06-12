@@ -368,7 +368,7 @@ def test_orig_df_must_be_dataframe():
         plot_univariate_distributions(
             orig_df=[],
             syn_df=pd.DataFrame({"x": [1, 2]}),
-            saving_location=None
+            save_path=None
         )
 
 def test_syn_df_must_be_dataframe():
@@ -376,7 +376,7 @@ def test_syn_df_must_be_dataframe():
         plot_univariate_distributions(
             orig_df=pd.DataFrame({"x": [1, 2]}),
             syn_df=[],
-            saving_location=None
+            save_path=None
         )
 
 def test_column_mismatch_raises():
@@ -403,7 +403,7 @@ def test_no_save_and_no_browser_when_non_interactive(mocked_environment):
     plot_univariate_distributions(
         orig,
         syn,
-        saving_location=None,
+        save_path=None,
         interactive=False
     )
 
@@ -419,7 +419,7 @@ def test_save_and_no_browser_when_non_interactive(mocked_environment):
     plot_univariate_distributions(
         orig,
         syn,
-        saving_location="/some/folder",
+        save_path="/some/folder",
         interactive=False
     )
 
@@ -442,7 +442,7 @@ def test_save_and_browser_when_interactive(mocked_environment):
     plot_univariate_distributions(
         orig,
         syn,
-        saving_location="/some/folder",
+        save_path="/some/folder",
         interactive=True,
     )
 
@@ -468,7 +468,7 @@ def test_browser_opens_when_interactive_without_save_location(mocked_environment
     plot_univariate_distributions(
         orig,
         syn,
-        saving_location=None,
+        save_path=None,
         interactive=True,
     )
 
@@ -507,7 +507,7 @@ def test_plot_univariate_distributions_flow(monkeypatch):
         captured["plots_input"] = figs
         return fake_html
 
-    def fake_write(html, saving_location):
+    def fake_write(html, save_path):
         captured["html_input"] = html
         return fake_path
 
@@ -534,7 +534,7 @@ def test_plot_univariate_distributions_flow(monkeypatch):
     result = plot_univariate_distributions(
         orig,
         syn,
-        saving_location="x",
+        save_path="x",
         interactive=True,
     )
 
