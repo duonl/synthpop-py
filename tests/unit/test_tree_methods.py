@@ -148,8 +148,8 @@ def fitted_tree(tree_method,request):
     X = request.node.callspec.params["X"]
     cat_index = request.node.callspec.params["index_cat"]
     tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
-    tree_method.missing_handler_ = clone(tree_method.missing_handler)
-    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
+    tree_method.missing_handler_ = tree_method.missing_handler.clone()
+    tree_method.tree_sampler_ = tree_method.tree_sampler.clone()
     tree_method.tree_ = clone(tree_method.tree)
     tree_method.n_features_in_ = len(X.keys())
 
