@@ -49,7 +49,7 @@ class StubMissingHandler(BaseMissingValueHandler):
     def __init__(self, prepared_for_fit_result,post_synth_transform_result):
         self.prepared_for_fit_result = prepared_for_fit_result
         self.post_synth_transform_result = post_synth_transform_result
-        self.clone_called =False
+        self.clone_called = False
     
     def prepare_data_for_fit(self, X, y):
         self.prepare_data_for_fit_X = X
@@ -270,8 +270,8 @@ def test_fit_validates_X_and_y(X,y,index_cat,tree_method,mocker):
     X_spy.assert_called_once_with(X)
     y_spy.assert_called_once_with(y,42)#42 is the hardcoded n_samples value of the validate_dict_x stub
 
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_clones_dependencies_correctly(X,y,index_cat,tree_method):
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_clones_dependencies_correctly(X, y, index_cat, tree_method):
 
     tree_method.fit(X,y)
     assert tree_method.missing_handler.clone_called
