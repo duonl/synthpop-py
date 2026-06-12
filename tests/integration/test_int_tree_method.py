@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop.data_processing.encoders import PCAEncoder
+from synthpop.data_processing.missing_value_handling import MissingValuePredictor
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
 from synthpop.utils import str_dtype
 from sklearn.datasets import make_classification, make_regression
@@ -342,3 +343,15 @@ def test_regressor_missing_target(method,X,y):
 
     assert frac_missing_result >(frac_missing_observed-0.1)
     assert frac_missing_result <(frac_missing_observed+0.1)
+
+
+def test_regressor_nondefault_missing_value_predictor():
+    method = TreeRegressorMethod(
+        missing_handler=MissingValuePredictor(tree = DecisionTreeClassifier(min_samples_leaf=10))
+    )
+    X = {"a":np.array([1,2])}
+    y = np.array([4,3])
+
+    result = method.fit_transform(X,y)
+
+    assert result.shape[0] == y.shape[0]

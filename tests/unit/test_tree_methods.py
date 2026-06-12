@@ -49,6 +49,7 @@ class StubMissingHandler(BaseMissingValueHandler):
     def __init__(self, prepared_for_fit_result,post_synth_transform_result):
         self.prepared_for_fit_result = prepared_for_fit_result
         self.post_synth_transform_result = post_synth_transform_result
+        self.clone_called = False
     
     def prepare_data_for_fit(self, X, y):
         self.prepare_data_for_fit_X = X
@@ -61,6 +62,7 @@ class StubMissingHandler(BaseMissingValueHandler):
         return self.post_synth_transform_result
     
     def clone(self):
+        self.clone_called = True
         return copy.copy(self)
     
     def __sklearn_clone__(self):
@@ -82,6 +84,7 @@ def missing_handling(request):
 class StubLeafNodeSampler():
     def __init__(self,sample_from_leaves_return_value):
         self.sample_from_leaves_return_value = sample_from_leaves_return_value
+        self.clone_called = False
     
     def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike):
         self.fit_sampler_leaf_ids = leaf_ids
@@ -92,7 +95,8 @@ class StubLeafNodeSampler():
         self.sample_from_leaves_leaf_ids = leaf_ids
         return self.sample_from_leaves_return_value
     
-    def __sklearn_clone__(self):
+    def clone(self):
+        self.clone_called = True
         return copy.copy(self)
 
 @pytest.fixture
@@ -144,8 +148,8 @@ def fitted_tree(tree_method,request):
     X = request.node.callspec.params["X"]
     cat_index = request.node.callspec.params["index_cat"]
     tree_method.encoders_ =  {k:clone(tree_method.encoder) for k in cat_index}
-    tree_method.missing_handler_ = clone(tree_method.missing_handler)
-    tree_method.tree_sampler_ = clone(tree_method.tree_sampler)
+    tree_method.missing_handler_ = tree_method.missing_handler.clone()
+    tree_method.tree_sampler_ = tree_method.tree_sampler.clone()
     tree_method.tree_ = clone(tree_method.tree)
     tree_method.n_features_in_ = len(X.keys())
 
@@ -265,6 +269,15 @@ def test_fit_validates_X_and_y(X,y,index_cat,tree_method,mocker):
 
     X_spy.assert_called_once_with(X)
     y_spy.assert_called_once_with(y,42)#42 is the hardcoded n_samples value of the validate_dict_x stub
+
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_clones_dependencies_correctly(X, y, index_cat, tree_method):
+
+    tree_method.fit(X,y)
+    assert tree_method.missing_handler.clone_called
+    assert tree_method.tree_sampler.clone_called
+
+
 
 
 @pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
