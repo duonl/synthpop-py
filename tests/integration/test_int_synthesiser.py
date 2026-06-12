@@ -131,8 +131,8 @@ def test_synthesiser_preserves_1D_statistics():
     The goal is to test that the synthetic data is reasonable. Benchmarking for utility should happen in other tests.
     """
 
-    n_samples_orig = 1000
-    n_samples_synthetic = 2000
+    n_samples_orig = 5000
+    n_samples_synthetic = 6000
     original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
@@ -160,7 +160,7 @@ def test_synthesiser_preserves_1D_statistics():
 
 
 def test_synthesiser_preserves_num_num_relation():
-    n_samples_orig = 1000
+    n_samples_orig = 3000
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
@@ -175,7 +175,7 @@ def test_synthesiser_preserves_num_num_relation():
 
 
 def test_synthesiser_preserves_cat_num_relation():
-    n_samples_orig = 1000
+    n_samples_orig = 3000
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     synthesiser = Synthesiser(random_seed=74124)
