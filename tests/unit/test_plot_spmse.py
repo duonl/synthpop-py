@@ -234,11 +234,3 @@ def test_show_not_called(monkeypatch, spmse_df):
 
     plot_spmse(spmse_df, None, False)
     assert not called
-
-
-def test_plot_visual(spmse_df):
-    """
-    Test to visually inspect the plot
-    """
-
-    plot_spmse(spmse_df, None, True)

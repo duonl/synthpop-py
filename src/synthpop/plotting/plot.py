@@ -68,6 +68,34 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> go
     :param show_plot: Boolean index on whether the plot pops up in an interactive window
 
     :return: plotly.Figure
+
+    Example:
+    --------
+    >>> import pandas as pd
+    >>> from synthpop.plotting.plot import plot_spmse
+    >>>
+    >>> spmse = pd.DataFrame(
+    ...     {
+    ...         "column1": ["Age", "Age", "Age", "Income", "Income", "Sex"],
+    ...         "column2": ["Age", "Income", "Sex", "Income", "Sex", "Sex"],
+    ...         "S_pMSE": [12., 2.5, 15.3, 0.0, 45.7, 0.0],
+    ...     }
+    ... )
+    >>>
+    >>> print(spmse)
+      column1 column2  S_pMSE
+    0     Age     Age     12.
+    1     Age  Income     2.5
+    2     Age     Sex    15.3
+    3  Income  Income     0.0
+    4  Income     Sex    45.7
+    5     Sex     Sex     0.0
+    >>>
+    >>> fig = plot_spmse(
+    ...     spmse=spmse,
+    ...     save_path=None,
+    ...     show_plot=True,
+    ... )
     """
 
     if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
