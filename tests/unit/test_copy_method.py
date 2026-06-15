@@ -44,8 +44,8 @@ def test_transform_various_dtypes(y, target_name, n_samples):
     model.n_samples_ = n_samples
 
     result = model.transform(None)
-    expected = pd.DataFrame({target_name: y.values})
-    pd.testing.assert_frame_equal(result, expected)
+    expected = pd.Series(y.values, name=target_name)
+    pd.testing.assert_series_equal(result, expected)
 
 def test_transform_accepts_X():
     model = CopyMethod()
