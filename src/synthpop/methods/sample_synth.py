@@ -74,7 +74,7 @@ class SampleMethod(BaseSynthMethod):
 
         return self
     
-    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         Draws samples with replacement from the empirical distribution.
 
@@ -95,7 +95,7 @@ class SampleMethod(BaseSynthMethod):
         
         sampled = sample_array(self.random_state_, self.counts_, self.values_, n)
 
-        return pd.DataFrame({self.target_name_: sampled})
+        return pd.Series(sampled, name=self.target_name_)
         
     def get_feature_names_out(self, input_features=None) -> list[str]:
         if not hasattr(self, "target_name_"):
