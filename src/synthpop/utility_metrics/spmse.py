@@ -7,6 +7,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+
 __all__ = ["pairwise_spmse"]
 
 
@@ -96,7 +97,9 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> floa
         spmse = 0.
         warnings.warn(
             f"Both variables are constant and equal; "
-            f"so the statistic is undefined. Return 0 for variable pair: {jf_syn.name}")
+            f"the statistic is undefined. Return 0 for variable pair: {jf_syn.name}",
+            UserWarning,
+            )
 
     return spmse
 
@@ -108,11 +111,11 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     The metric compares the preservation of pairwise joint distributions between corresponding variables in both datasets.
     Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the original and synthetic dataset. 
     Categorical and string variables are used directly.
-    Missing values are treated as a separate category (np.nan).
+    Missing values are standardised to np.nan and included in the frequency calculations as a separate level.
 
     :param orig_df: Original dataset.
     :param syn_df: Synthetic dataset. Should have the same columns as the original dataset, in the same order and the same number of rows.
-    :param max_bins: Maximum number categories in which numeric variables can be discretised. Missing values are discretised in bin number=max_bin+1. Default value is 25.
+    :param max_bins: Maximum number of categories in which numeric variables can be discretised. Missing values are discretised in bin number=max_bin+1. Default value is 25.
     :return: Dataset of variable pairs along with their corresponding S_pMSE value.
 
     Example:
@@ -140,16 +143,16 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
 
     if not isinstance(orig_df, pd.DataFrame) or not isinstance(syn_df, pd.DataFrame):
         raise ValueError(
-            "Original and synthetic dataframes should both be a pandas dataframe")
+            "Original and synthetic dataframes should both be a pandas DataFrame.")
 
     n_o = len(orig_df.index)
     n_s = len(syn_df.index)
 
     if n_o == 0 or n_s == 0:
         raise ValueError(
-            'Both the original and synthetic dataframe should consist out of non-zero rows')
+            'Both the original and synthetic dataframe must be non-empty.')
 
-    if set(orig_df.columns) != set(syn_df.columns):
+    if sorted(orig_df.columns) != sorted(syn_df.columns):
         raise ValueError(
             "Original and synthetic dataframes must have the same shape and column names.")
 

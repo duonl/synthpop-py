@@ -28,7 +28,7 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
         # Check for multiple columns having the same name
 
         (
-            [], [], 12, "both be a pandas dataframe"
+            [], [], 12, "both be a pandas DataFrame"
         ),
         # Check for non pandas dataframes
 
@@ -46,7 +46,7 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
 
         (
             pd.DataFrame(), pd.DataFrame(), 35,
-            "dataframe should consist out of non-zero rows"
+            "dataframe must be non-empty"
         ),
         # Check empty DataFrames
 
@@ -301,7 +301,7 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
         ),
     ]  # Full nan bin, checks pd.NA and None
 )
-def test_pairwise_spms_missing_value_handling(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
+def test_pairwise_spmse_missing_value_handling(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
 
     output = pairwise_spmse(orig_df, syn_df, max_bins=25)
     pd.testing.assert_frame_equal(
@@ -392,7 +392,7 @@ def test_pairwise_spmse_symmetry():
     # Tests symmetry s.t. spmse(X,Y) == spmse(Y,X)
 
 
-def test_pairwise_spmse_scaling_invariance():
+def test_pairwise_spmse_scaling_invariance_on_identical_distributions():
     orig_df1 = pd.DataFrame({"c1": [1, 3], "c2": ['a', 'b']})
     syn_df1 = pd.DataFrame({"c1": [1, 3], "c2": ['a', 'b']})
 
