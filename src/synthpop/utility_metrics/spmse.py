@@ -63,7 +63,7 @@ def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str) -> pd.Series:
     return jf
 
 
-def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> float:
+def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.float32:
     """
     Calculates the S_pSME for a combination of two columns from the joint frequency tables
 
@@ -91,15 +91,15 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> floa
             * np.sum(
                 np.power(rescaled_differences, 2) / expected_frequency
             )
-        )
+        ).astype(np.float32)
     else:  # number_independent_combinations=1
 
-        spmse = 0.
+        spmse = np.float32(0.)
         warnings.warn(
             f"Both variables are constant and equal; "
             f"the statistic is undefined. Return 0 for variable pair: {jf_syn.name}",
             UserWarning,
-            )
+        )
 
     return spmse
 
@@ -151,6 +151,10 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     if n_o == 0 or n_s == 0:
         raise ValueError(
             'Both the original and synthetic dataframe must be non-empty.')
+
+    if not orig_df.columns.is_unique or not syn_df.columns.is_unique:
+        raise ValueError(
+            "Original and synthetic dataframes must have unique column names.")
 
     if sorted(orig_df.columns) != sorted(syn_df.columns):
         raise ValueError(
