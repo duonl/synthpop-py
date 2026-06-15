@@ -459,7 +459,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
     >>> from synthpop.methods.cart_synth import tune_cart
     >>> from synthpop.synthesiser import Synthesiser
     >>> import pandas as pd
-    >>> data = pd.DataFrame({"a":[1],"b":[2]})
+    >>> data = pd.DataFrame({"a": [1], "b": [2]})
     >>> synth = Synthesiser(random_seed=10,
     ... default_syn_method=tune_cart(n_leaves=10), 
     ... special_syn_method={"b": tune_cart(n_leaves=20)})
