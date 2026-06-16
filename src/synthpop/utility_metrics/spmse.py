@@ -114,7 +114,7 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     Missing values are standardised to np.nan and included in the frequency calculations as a separate level.
 
     :param orig_df: Original dataset.
-    :param syn_df: Synthetic dataset. Should have the same columns as the original dataset, in the same order and the same number of rows.
+    :param syn_df: Synthetic dataset. Must have the same column names as the original dataset, but the order does not matter.
     :param max_bins: Maximum number of categories in which numeric variables can be discretised. Missing values are discretised in bin number=max_bin+1. Default value is 25.
     :return: Dataset of variable pairs along with their corresponding S_pMSE value.
 
@@ -156,7 +156,7 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
         raise ValueError(
             "Original and synthetic dataframes must have unique column names.")
 
-    if sorted(orig_df.columns) != sorted(syn_df.columns):
+    if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError(
             "Original and synthetic dataframes must have the same shape and column names.")
 

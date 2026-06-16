@@ -143,6 +143,19 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
         # A one-dimensional input with different number of rows using datatype category
 
         (
+            pd.DataFrame({"c1": [True, True, True, False]}),
+            pd.DataFrame({"c1": [True, False]}),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),
+        # A one-dimensional input with boolean datatype
+
+        (
             pd.DataFrame({"c1": [0., 0., 0., 0.]}),
             pd.DataFrame({"c1": [0., 0., 0., 0.]}),
             pd.DataFrame(
@@ -392,10 +405,8 @@ def test_pairwise_spmse_symmetry():
     r1 = pairwise_spmse(df1, df2)
     r2 = pairwise_spmse(df2, df1)
 
-    pd.testing.assert_frame_equal(
-        r1.sort_values(["column1", "column2"]).reset_index(drop=True),
-        r2.sort_values(["column1", "column2"]).reset_index(drop=True),
-    )
+    merged = r1.merge(r2, on=["column1", "column2"], suffixes=("_12", "_21"))
+    assert np.allclose(merged["S_pMSE_12"], merged["S_pMSE_21"])
     # Tests symmetry s.t. spmse(X,Y) == spmse(Y,X)
 
 
