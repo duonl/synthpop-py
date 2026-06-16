@@ -1,5 +1,3 @@
-# Functional descriptions
-This documentation is used by developers to implement this package. It can be very detailed. 
 ```{toctree}
 :maxdepth: 1
 

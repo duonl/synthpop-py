@@ -6,6 +6,8 @@
 Synthpop documentation
 ======================
 
+Introduction on Synthpop
+
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
 documentation for details.
@@ -15,12 +17,14 @@ documentation for details.
    :maxdepth: 1
    :caption: Contents:
 
-   intro
+   installing/installing.md
+   examples/examples
+   user_guides/user_guides
    synthpop
-   user guides/examples
-   functional descriptions/fd_index
    developer/developer_index.md
-   documentation.md
+   about_us/about.md
+
+   
 
 Indices and tables
 ==================

@@ -1,17 +1,5 @@
-Synthpop package
+API reference
 ================
-
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   api reference/data processing/synthpop.data_processing
-   api reference/synthesis methods/synthpop.methods
-   api reference/utility metrics/utility_metrics
-   api reference/plotting/synthpop.plotting
-
 
 
 synthpop.synthesiser module
@@ -29,3 +17,14 @@ synthpop.reproducibility module
    :members:
    :show-inheritance:
    :undoc-members:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   api_reference/data processing/synthpop.data_processing
+   api_reference/synthesis methods/synthpop.methods
+   api_reference/utility metrics/utility_metrics
+   api_reference/plotting/synthpop.plotting

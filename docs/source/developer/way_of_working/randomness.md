@@ -1,6 +1,6 @@
 # Using randomness in this package
 
-This package enforces strict requirements on randomness to ensure both reproducibility (deterministic outputs given a seed) and statistical validaty (high-quality, reproducible random streams). These requirements are defined in the [functional descriptions](../functional%20descriptions/reproducibility.md) and are consistent with guidance from the
+This package enforces strict requirements on randomness to ensure both reproducibility (deterministic outputs given a seed) and statistical validaty (high-quality, reproducible random streams). These requirements are defined in the [functional descriptions](../functional_descriptions/reproducibility.md) and are consistent with guidance from the
 [scikit-learn's](https://scikit-learn.org/stable/developers/develop.html#random-numbers) standards for random numbers and aligned with [NumPy's](https://numpy.org/doc/stable/reference/random/generator.html) Generator API and [seeding recommendations](https://numpy.org/doc/stable/reference/random/bit_generators/index.html#seeding-and-entropy), with a focus on deterministic reproducibility.
 
 ## Background: NumPy vs. scikitlearn

@@ -1,10 +1,10 @@
 # About this documentation
 
 We document for both users and developers:
-- The [api docs](./api%20reference/api%20docs%20index.rst) is for users quickly wanting to read the documentation of a specific method.
-- Users new to this package should look at the [examples](./user%20guides/examples.md).
-- The [developer documentation](./developer/developer_index.md) is for developers that want to understand this package or know more about how we develop.
-- The [functional descriptions](./functional%20descriptions/fd_index.md) aim to describe what this package is designed to do, independent of programming language. These documents act as the blue print when developing features. The standards and norms described in the developer documentation and the functional descriptions should be enough to implement a feature. 
+- The [api docs](../api_reference/api_docs_index.rst) is for users quickly wanting to read the documentation of a specific method.
+- Users new to this package should look at the [examples](../examples/examples.md).
+- The [developer documentation](developer_index.md) is for developers that want to understand this package or know more about how we develop.
+- The [functional descriptions](functional_descriptions/fd.md) aim to describe what this package is designed to do, independent of programming language. These documents act as the blue print when developing features. The standards and norms described in the developer documentation and the functional descriptions should be enough to implement a feature. 
 
 ## The documentation required for new features
 The first documentation that should exist is a functional description. Ideally, this should be written before any code, as that ensures that the code is tailored to the requirements and not the other way around.
