@@ -24,7 +24,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   api_reference/data processing/synthpop.data_processing
-   api_reference/synthesis methods/synthpop.methods
-   api_reference/utility metrics/utility_metrics
-   api_reference/plotting/synthpop.plotting
+   data_processing/synthpop.data_processing
+   synthesis_methods/synthpop.methods
+   utility_metrics/utility_metrics
+   plotting/synthpop.plotting

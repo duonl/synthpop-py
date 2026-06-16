@@ -19,8 +19,8 @@ documentation for details.
 
    installing/installing.md
    examples/examples_index
-   user_guides/user_guides
-   synthpop
+   user_guides/user_guides_index
+   api_reference/synthpop
    developer/developer_index.md
    about_us/about.md
 
