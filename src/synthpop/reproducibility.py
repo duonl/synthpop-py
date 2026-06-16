@@ -1,7 +1,10 @@
 import numpy as np
 from numpy.random import SeedSequence
+import secrets
 
 
+def _create_seed_from_sequence(seed_sequence)->int:
+    return seed_sequence.spawn(1)[0].generate_state(1)
 
 class RandomStateManager():
     """
@@ -38,17 +41,22 @@ class RandomStateManager():
     The seed sequence is used to provide proper initialisation for all RNGs used in this package, even if the user provided seed is suboptimal.
     """
 
+
     @classmethod
-    def set_root_seed(cls,seed:int,seed_sequence = None):
+    def set_root_seed(cls,seed:int | None,seed_sequence = None):
         """
         Set the root seed.
         The intended usage is within the Synthesiser class.
         """
-        cls._root_seed = seed
-        if seed_sequence is None:
-            cls._seed_sequence = SeedSequence(seed)
+
+        if seed is None:
+            cls._root_seed = secrets.randbits(128)
         else:
-            cls._seed_sequence = seed_sequence
+            cls._root_seed=seed
+
+        cls._seed_sequence = SeedSequence(cls._root_seed)
+
+        return
 
 
     @classmethod
@@ -68,7 +76,9 @@ class RandomStateManager():
         ...     def fit(self,X,y):
         ...             self.random_state_ = RandomStateManager.create_new_seed()
         """
-        return cls._seed_sequence.spawn(1)[0].generate_state(1)
+        if cls._seed_sequence is None:
+            cls.set_root_seed(None)
+        return _create_seed_from_sequence(cls._seed_sequence)#cls._seed_sequence.spawn(1)[0].generate_state(1)
 
 
     @classmethod
@@ -81,18 +91,21 @@ class RandomStateManager():
         The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
         """
 
+        if cls._root_seed is None:
+            cls.set_root_seed(seed=None)
+
         # default_rng uses seed sequences internally, so the easiest and safest way to combine is to pass a list of seeds.
         return np.random.default_rng([cls._root_seed,seed])
 
 
-    def __init__(self,seed):
-        self.new_seed = seed
-        self.old_seed = None
+    # def __init__(self,seed):
+    #     self.new_seed = seed
+    #     self.old_seed = None
 
-    def __enter__(self):
-        self.old_seed = RandomStateManager._root_seed
-        self.old_seed_sequence = RandomStateManager._seed_sequence
-        RandomStateManager.set_root_seed(self.new_seed)
+    # def __enter__(self):
+    #     self.old_seed = RandomStateManager._root_seed
+    #     self.old_seed_sequence = RandomStateManager._seed_sequence
+    #     RandomStateManager.set_root_seed(self.new_seed)
 
-    def __exit__(self, type, value, traceback):
-        RandomStateManager.set_root_seed(self.old_seed ,self.old_seed_sequence)
+    # def __exit__(self, type, value, traceback):
+    #     RandomStateManager.set_root_seed(self.old_seed ,self.old_seed_sequence)
