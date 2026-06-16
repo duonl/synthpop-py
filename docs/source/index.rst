@@ -18,7 +18,7 @@ documentation for details.
    :caption: Contents:
 
    installing/installing.md
-   examples/examples
+   examples/examples_index
    user_guides/user_guides
    synthpop
    developer/developer_index.md
