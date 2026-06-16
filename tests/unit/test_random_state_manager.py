@@ -30,18 +30,20 @@ def overwritten_from_uninitialized_random_state_manager():
     pass
 
 
-def test_random_state_manager_given_no_rootseed_when_creating_rng():
+def test_random_state_manager_given_uninitialized_when_creating_rng():
     """
-    Given: the user has not specified a root seed.
+    Given: The random state manager is not initialized.
     When: an RNG is created (create_rng)
     Then: 
-        - A randomly generated seed is used to create an RNG,
+        - The random state manager gets initialized with a random seed.
+        - This seed is used to create an RNG.
     """
 
-def test_random_state_manager_given_no_rootseed_when_creating_new_seed():
+def test_random_state_manager_given_uninitialized_when_creating_new_seed():
     """
     Given: the user has not specified a root seed.
     When: an RNG is created (create_rng)
     Then: 
-        - A randomly generated seed is used to create an RNG,
+        - The random state manager gets initialized with a random seed.
+        - A seed is created using the seed sequence
     """
