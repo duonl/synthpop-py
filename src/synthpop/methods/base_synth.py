@@ -48,7 +48,7 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         pass
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         The `transform` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
 
@@ -57,9 +57,9 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         Calling `transform` before `fit` raises an error.
 
         :param X: Input dataset, may be heterogeneous
-        :return: Input dataset with predicted column.
+        :return: Synthetic column.
         """
-        return pd.DataFrame()
+        return pd.Series()
     
     def score(self, X: pd.DataFrame, y: pd.Series) -> float:
         return 0.0
