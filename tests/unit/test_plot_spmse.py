@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import pandas as pd
 
-from synthpop.plotting.plot import plot_spmse
+from synthpop.plotting.plot_spmse import plot_spmse
 
 
 @pytest.fixture
@@ -234,3 +234,11 @@ def test_show_not_called(monkeypatch, spmse_df):
 
     plot_spmse(spmse_df, None, False)
     assert not called
+
+def test_no_input_change(spmse_df):
+    """Test if function does not change the input"""
+
+    original_df = spmse_df.copy(deep=True)
+    plot_spmse(spmse_df, None, False)
+
+    pd.testing.assert_frame_equal(spmse_df, original_df)

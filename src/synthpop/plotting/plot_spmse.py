@@ -45,16 +45,17 @@ def _get_colorscale() -> list:
     return colorscale
 
 
-def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> go.Figure:
+def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot=True) -> go.Figure:
     """
     Plot the standardised propensity mean squared error.
 
     :param spmse: The standardised propensity mean squared error values. 
     Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
-    :param save_path: File name and path to save the image of the plot
-    :param show_plot: Boolean index on whether the plot pops up in an interactive window
+    :param save_path: File name and path to save the image of the plot. Does not save if None
+    :param show_plot: Boolean on whether the plot pops up in an interactive window
 
-    :return: plotly.Figure
+    :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
+    bin-based coloring and S_PMSE values in the bins.
 
     Example:
     --------
@@ -90,6 +91,8 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None, show_plot=True) -> go
         raise ValueError(
             "The dataframe should be of shape 3xN.",
             "With index 0 and 1 named column1 and column2 and index 2 S_pMSE")
+
+    spmse = spmse.copy(deep=False)
 
     bins = [0, 3, 10, 30, 100, np.inf]
     bin_labels = [
