@@ -1,5 +1,5 @@
 """
-This module contains functions to visually inspect synthetic data and evaluate its quality. 
+This module contains a function to visually inspect the univariate distributions. 
 """
 from pathlib import Path
 import tempfile
