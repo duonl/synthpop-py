@@ -8,6 +8,17 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 from synthpop.reproducibility import RandomStateManager
 
+@pytest.fixture(autouse=True)
+def control_random_state_manager():
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
+
+    yield
+
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
+
+
 
 class StandardTransformer(TransformerMixin, BaseEstimator):
     """

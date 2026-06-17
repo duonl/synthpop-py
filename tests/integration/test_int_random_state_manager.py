@@ -10,6 +10,15 @@ import pytest
 
 from synthpop.reproducibility import RandomStateManager
 
+@pytest.fixture(autouse=True)
+def control_random_state_manager():
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
+
+    yield
+
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
 
 def get_sample(instance_seed=30):
     return RandomStateManager.create_rng(instance_seed).integers(low=0, high=1000, size=100).tolist()
@@ -127,7 +136,6 @@ def test_random_state_manager_initialised_context_manager():
 
 def test_random_state_manager_uninitialised_context_manager():
 
-    assert RandomStateManager._root_seed is None, "test is invalid"
     with RandomStateManager(200):
         sample1 = get_sample()
 
