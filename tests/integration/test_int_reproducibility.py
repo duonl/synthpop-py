@@ -1,11 +1,12 @@
 """
 These test aim to show that the synthesis process is reproducible and deals correctly with randomness
 """
-
 import pytest
-from synthpop.reproducibility import RandomStateManager
-from sklearn.base import TransformerMixin, BaseEstimator
+
 import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+
+from synthpop.reproducibility import RandomStateManager
 
 
 class StandardTransformer(TransformerMixin, BaseEstimator):

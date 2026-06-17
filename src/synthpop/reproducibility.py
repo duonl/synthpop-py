@@ -1,6 +1,8 @@
+import secrets
+
 import numpy as np
 from numpy.random import SeedSequence
-import secrets
+
 
 
 def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:

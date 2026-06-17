@@ -1,9 +1,3 @@
-import pytest
-import numpy as np
-from synthpop.reproducibility import RandomStateManager
-
-import secrets
-
 """
 The random state manager itself has 3 main states:
 1. uninitialized
@@ -14,6 +8,13 @@ The behaviour of the methods can be dependent on this state.
 The methods can cause transitions in this state. 
 
 """
+
+import secrets
+
+import numpy as np
+import pytest
+
+from synthpop.reproducibility import RandomStateManager
 
 
 def set_random_state_manager_state(root_seed, seed_sequence, monkeypatch):
