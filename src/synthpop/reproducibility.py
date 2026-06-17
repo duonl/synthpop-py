@@ -3,11 +3,11 @@ from numpy.random import SeedSequence
 import secrets
 
 
-def _create_seed_from_sequence(seed_sequence) -> int:
+def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:
     return seed_sequence.spawn(1)[0].generate_state(1)
 
 
-class RandomStateManager():
+class RandomStateManager:
     """
     Manages random numbers and reproducibility in this package.
 
@@ -39,7 +39,8 @@ class RandomStateManager():
     """
     _seed_sequence = None
     """
-    The seed sequence is used to provide proper initialisation for all RNGs used in this package, even if the user provided seed is suboptimal.
+    The seed sequence is used to provide proper initialisation for all RNGs
+    used in this package, even if the user provided seed is suboptimal.
     """
 
     @classmethod
@@ -63,8 +64,10 @@ class RandomStateManager():
         """
         Returns a seed that can be used to make a RNG.
         The seed is based on the root seed.
-        It is used to make instance seeds and seeds for external dependencies (legacy).
-        The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
+        It is used to make instance seeds and seeds for
+        external dependencies (legacy).
+        The instance seeds are integers is to facilitate
+        combining the root seed and instance seed.
 
         :returns: an integer that can be used as a seed.
 
@@ -72,12 +75,11 @@ class RandomStateManager():
     --------
         >>> from reproducibility import RandomStateManager
         >>> class UsesRandom:
-        ...     def fit(self,X,y):
+        ...     def fit(self, X, y):
         ...             self.random_state_ = RandomStateManager.create_new_seed()
         """
         if cls._seed_sequence is None:
             cls.set_root_seed(None)
-        # cls._seed_sequence.spawn(1)[0].generate_state(1)
         return _create_seed_from_sequence(cls._seed_sequence)
 
     @classmethod
@@ -93,7 +95,8 @@ class RandomStateManager():
         if cls._root_seed is None:
             cls.set_root_seed(seed=None)
 
-        # default_rng uses seed sequences internally, so the easiest and safest way to combine is to pass a list of seeds.
+        # default_rng uses seed sequences internally
+        # so the easiest and safest way to combine is to pass a list of seeds.
         return np.random.default_rng([cls._root_seed, seed])
 
     def __init__(self, seed):

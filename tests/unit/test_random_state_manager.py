@@ -75,7 +75,8 @@ def test_random_state_manager_when_no_seed_provided_set_root_seed_initializes_us
     # Given: The random state manager is not initialized.
     set_random_state_manager_state(None, None, monkeypatch)
 
-    # We patch secrets.randbits so that we can control the returned value and assert that it has been called correctly.
+    # We patch secrets.randbits so that we can control the return value
+    # and assert that it has been called correctly.
     def mock_random_bits(n):
         assert n == 128, "generated seeds should be 128 bits"
         return 123

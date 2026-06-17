@@ -5,6 +5,7 @@ The aim is to test if RandomStateManager behaves as intended.
 Testing if the intended behaviour of RandomStateManager leads to reproducible synthetic data 
 is done in test_int_reproducibility.py
 """
+
 import pytest
 
 from synthpop.reproducibility import RandomStateManager
