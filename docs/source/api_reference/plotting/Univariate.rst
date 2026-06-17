@@ -1,7 +1,7 @@
-Utility metrics
+Univariate Distribution
 ---------------------------------------
 
-.. automodule:: synthpop.utility_metrics.spmse
+.. automodule:: synthpop.plotting.plot
    :members:
    :show-inheritance:
    :undoc-members:

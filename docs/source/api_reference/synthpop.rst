@@ -2,29 +2,41 @@ API reference
 ================
 
 
-synthpop.synthesiser module
--------------------------------
+.. toctree::
+   :maxdepth: 4
+   :caption: Synthesiser class
 
-.. automodule:: synthpop.synthesiser
-   :members:
-   :show-inheritance:
-   :undoc-members:
+   synthesiser_class/synthesiser
+   synthesiser_class/reproducibility
 
-synthpop.reproducibility module
--------------------------------
-
-.. automodule:: synthpop.reproducibility
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Subpackages
------------
 
 .. toctree::
    :maxdepth: 4
+   :caption: Data Processing
 
-   data_processing/synthpop.data_processing
-   synthesis_methods/synthpop.methods
-   utility_metrics/utility_metrics
-   plotting/synthpop.plotting
+   data_processing/Encoder
+   data_processing/Missing_value
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Methods
+
+   synthesis_methods/Base_Synth
+   synthesis_methods/CART
+   synthesis_methods/Copy
+   synthesis_methods/Sample
+   synthesis_methods/XGB
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Utility Metrics
+
+   utility_metrics/S_pMSE
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Plotting
+
+   plotting/Univariate
+   plotting/S_pMSE

@@ -1,7 +1,7 @@
-Plotting utilities
+Multivariate S_pMSE
 ---------------------------------------
 
-.. automodule:: synthpop.plotting.plot
+.. automodule:: synthpop.utility_metrics.spmse
    :members:
    :show-inheritance:
    :undoc-members:
