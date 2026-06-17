@@ -1,16 +1,19 @@
 """
-Synthesis method that samples from the target column. 
+Synthesis method that samples from the target column.
 """
 from typing import Self
+
 import pandas as pd
 import numpy as np
 from sklearn.exceptions import NotFittedError
+
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.tree_utils import sample_array
 
+
 class SampleMethod(BaseSynthMethod):
     """
-    Synthesis method that samples from the target column. 
+    Synthesis method that samples from the target column.
 
     Examples
     --------
@@ -42,7 +45,7 @@ class SampleMethod(BaseSynthMethod):
         2                 1
     """
 
-    def __init__(self, random_state: int | None = None):
+    def __init__(self, random_state: int | None = None) -> None:
         super().__init__()
         self.random_state = random_state
 
@@ -54,8 +57,9 @@ class SampleMethod(BaseSynthMethod):
         :param X: Feature dataset. Can be None. Is not used for learning.
         :param y: Target column.
         """
-
-        self.target_name_ = y.name if y.name is not None else "target"
+        if not isinstance(y, pd.Series):
+            raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
+        self.target_name_ = y.name
         self.n_samples_ = len(y)
 
         value_counts = y.value_counts(dropna=False)
@@ -70,27 +74,33 @@ class SampleMethod(BaseSynthMethod):
 
         return self
     
-    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         Draws samples with replacement from the empirical distribution.
 
-        :param X: DataFrame of already synthesised features. Determines output size. Can also be `None`. In that case the output size is the same as the size of the fitted `y`.
+        :param X: DataFrame of already synthesised features. Determines output size. Can also be `None`. 
+            In that case the output size is the same as the size of the fitted `y`.
         :return: Synthetic column sampled from original distribution.
         """
-        if (not hasattr(self, "values_")
+        if (
+            not hasattr(self, "values_")
             or not hasattr(self, "counts_")
             or not hasattr(self, "target_name_")
             or not hasattr(self, "n_samples_")
-            or not hasattr(self, "random_state_")):
+            or not hasattr(self, "random_state_")
+        ):
             raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
         
         n = len(X) if X is not None else self.n_samples_
         
-        sampled = sample_array(self.random_state_, self.counts_, self.values_, n) 
+        sampled = sample_array(self.random_state_, self.counts_, self.values_, n)
 
-        return pd.DataFrame({self.target_name_: sampled})
-    
-    def get_feature_names_out(self, input_features = None):
+        return pd.Series(sampled, name=self.target_name_)
+        
+    def get_feature_names_out(self, input_features=None) -> list[str]:
+        if not hasattr(self, "target_name_"):
+            raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
+        
         if input_features is None:
             input_features = getattr(self, "feature_names_in_", [])
 

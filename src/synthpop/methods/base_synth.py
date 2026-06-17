@@ -1,16 +1,17 @@
 """
-This module contains the base class for all synthesis methods. 
+This module contains the base class for all synthesis methods.
 """ 
+from abc import abstractmethod, ABCMeta
 from typing import Self
-from abc import abstractmethod,ABCMeta
-from sklearn.base import TransformerMixin,BaseEstimator
 
+from sklearn.base import TransformerMixin, BaseEstimator
 import pandas as pd
 
 
-class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
+class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
-    Base class for all synthesis methods in synthpop. It ensures all child classes implement a fit and a transform method.
+    Base class for all synthesis methods in synthpop. 
+    It ensures all child classes implement a fit and a transform method.
 
     A synthesis method in synthpop is an algorithm to synthesise a column of a dataset, based on already synthesised columns. 
     Specifically, such method learns a conditional distribution of a target column given one or multiple columns. 
@@ -23,11 +24,11 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
 
     def __init__(self) -> None:
         super().__init__()
-        #If an estimator is given as a parameter, it should be cloned using the clone() method.
+        # If an estimator is given as a parameter, it should be cloned using the clone() method.
     
     @abstractmethod
-    def fit(self,X:pd.DataFrame | None, y: pd.Series) -> Self:
-        '''
+    def fit(self, X: pd.DataFrame | None, y: pd.Series) -> Self:
+        """
         The `fit` method must learn all parameters required to synthesise the target variable from the provided features.
         It does not modify the input data and does not produce any output.
 
@@ -37,7 +38,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         :param X: Dataset of features, may be heterogeneous
         :param y: Target variable
         :return: A fitted model
-        '''
+        """
         # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
         # That method sets the attribute. 
         # For example:
@@ -47,7 +48,7 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         pass
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         The `transform` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
 
@@ -56,11 +57,11 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
         Calling `transform` before `fit` raises an error.
 
         :param X: Input dataset, may be heterogeneous
-        :return: Input dataset with predicted column.
+        :return: Synthetic column.
         """
-        return pd.DataFrame()
+        return pd.Series()
     
-    def score(self,X,y):
+    def score(self, X: pd.DataFrame, y: pd.Series) -> float:
         return 0.0
     
     # def get_params(self, deep: bool = True) -> dict:
@@ -69,9 +70,8 @@ class BaseSynthMethod(TransformerMixin,BaseEstimator,metaclass=ABCMeta):
     # def set_params(self, **params) -> Self:
     #     return super().set_params(**params)
     
-    
     @abstractmethod
-    def get_feature_names_out(self,input_features = None):
+    def get_feature_names_out(self, input_features=None):
         """
         Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.
         

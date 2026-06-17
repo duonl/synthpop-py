@@ -2,9 +2,12 @@
 Synthesis method that copies the original data.
 """
 from typing import Self
+
 import pandas as pd
 from sklearn.exceptions import NotFittedError
+
 from synthpop.methods import base_synth
+
 
 class CopyMethod(base_synth.BaseSynthMethod):
     """
@@ -43,18 +46,21 @@ class CopyMethod(base_synth.BaseSynthMethod):
         2             <NA>
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def fit(self, X: pd.DataFrame | None, y: pd.Series) -> Self:
         """
-        Stores the entire column in this object
+        Stores the entire column in this object.
 
         :param X: Features dataset. Can be `None`. Not used for learning.
         :param y: The column to be copied.
         """
+        if not isinstance(y, pd.Series):
+            raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
+        
         self.y_ = y.copy()
-        self.target_name_ = y.name if y.name is not None else "target"
+        self.target_name_ = y.name
         self.n_samples_ = len(y)
 
         # for sklearn compatibility
@@ -63,26 +69,31 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
         return self
     
-    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         Returns an exact copy of the fitted target column.
 
         :param X: DataFrame of already synthesised columns. Can also be `None`. Is used only to validate the number of rows.
-        :return: One column of synthetic data that is identical to the target variable (Original `y`).
+        :return: Synthetical column that is copied from the target variable (Original `y`).
         """
 
-        if (not hasattr(self, "y_")
+        if (
+            not hasattr(self, "y_")
             or not hasattr(self, "target_name_")
-            or not hasattr(self, "n_samples_")):
+            or not hasattr(self, "n_samples_")
+        ):
             raise NotFittedError("CopyMethod is not fitted. Call `fit` first.")
         
         if X is not None:
             if len(X) != self.n_samples_:
                 raise ValueError(f"Row mismatch: expected {self.n_samples_}, got {len(X)}.")
         
-        return pd.DataFrame({self.target_name_: self.y_.values})
+        return pd.Series(self.y_.values, name=self.target_name_)
     
-    def get_feature_names_out(self, input_features = None):
+    def get_feature_names_out(self, input_features=None) -> list[str]:
+        if not hasattr(self, "target_name_"):
+            raise NotFittedError("CopyMethod is not fitted. Call `fit` first.")
+
         if input_features is None:
             input_features = getattr(self, "feature_names_in_", [])
 

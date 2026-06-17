@@ -243,16 +243,16 @@ def test_fit_transform_with_missing_values_in_predictors():
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series(["A", None, "A", "B"], dtype="string", name="target"),
-        pd.Series([1, 2, np.nan, 4], name="target"),
-        pd.Series([True, False, True, pd.NA], name="target"),
-        pd.Series([1, None, 2, np.nan], name="target"),
+        pd.Series(["A", None, "A", "B"]*100, dtype="string", name="target"),
+        pd.Series([1, 2, np.nan, 4]*100, name="target"),
+        pd.Series([True, False, True, pd.NA]*100, name="target"),
+        pd.Series([1, None, 2, np.nan]*100, name="target"),
     ],
 )
 def test_fit_transform_with_missing_values_in_target(y):
     X = pd.DataFrame(
-        {"x1": [1, 2, 3, 4],
-         "x2": ["a", "b", "y", "z"]}
+        {"x1": [1, 2, 3, 4]*100,
+         "x2": ["a", "b", "y", "z"]*100}
     )
 
     cart = CartMethod()

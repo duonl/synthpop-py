@@ -1,18 +1,20 @@
-import numpy as np
-import pandas as pd
 from typing import Self
-import numpy.typing as npt
 import warnings
+
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
 from sklearn.exceptions import NotFittedError
 
-def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarray, n_samples: int):
+
+def sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
     """
     Helper function that draws samples with replacement from the empirical distribution of an array.
 
     :param rng: A random number generator.
-    :param counts: Array of the counts for each values.
+    :param counts: Counts corresponding to each value.
     :param values: Array of the distinct values corresponding to `counts`.
-    :n_samples: Number of samples to be drawn.
+    :param n_samples: Number of samples to draw.
     :return: Sampled values.
     """
     cum_counts = np.cumsum(counts)
@@ -21,7 +23,8 @@ def sample_array(rng: np.random.Generator, counts: np.ndarray, values: np.ndarra
     sampled = values[idx]
     return sampled
 
-class LeafNodeSampler():
+
+class LeafNodeSampler:
     """
     Leaf-based synthetic target sampler driven by explicit leaf IDs.
 
@@ -61,7 +64,7 @@ class LeafNodeSampler():
             leaf_ids = self.apply(X_syn)
             return self.tree_sampler_.sample_from_leaves(leaf_ids)
     """
-    def __init__(self, random_state: int | np.random.Generator | None = None):
+    def __init__(self, random_state: int | np.random.Generator | None = None) -> None:
         """
         Initialise the sampler.
         :param random_state: Controls the random number generation used for sampling.
@@ -73,7 +76,6 @@ class LeafNodeSampler():
             - If `None`, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
-        pass
 
     def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike) -> Self:
         """
@@ -114,23 +116,25 @@ class LeafNodeSampler():
             leaf_hist[target] = leaf_hist.get(target, 0) + 1
 
             if pd.isna(target):
-                warnings.warn(f"LeafNodeSampler sees missing values ({target}) in target `y` during fitting. "
-                              "NaN values will be included in the leaf distributions and may be "
-                              "sampled. Review your input data if this is unintended.")
+                warnings.warn(
+                    f"LeafNodeSampler sees missing values ({target}) in target `y` "
+                    "during fitting. NaN values will be included in the leaf "
+                    "distributions and may be sampled. Review your input data "
+                    "if this is unintended.")
 
         if isinstance(self.random_state, np.random.Generator):
-        # Extract seed is not possible → treat as non-resettable (repeated calls do not give the same output)
+            # Extract seed is not possible → treat as non-resettable (repeated calls do not give the same output)
             self._seed = None
             self.random_state_ = self.random_state
         else:
-            self._seed = 42 if self.random_state is None else self.random_state
+            self._seed = np.random.default_rng() if self.random_state is None else self.random_state
             self.random_state_ = np.random.default_rng(self._seed)
         
         self._y_dtype = np.asarray(y).dtype
 
         return self
 
-    def sample_from_leaves(self, leaf_ids: npt.ArrayLike) -> np.ndarray:
+    def sample_from_leaves(self, leaf_ids: npt.ArrayLike) -> npt.NDArray:
         """
         Generate synthetic target values for new samples.
 
@@ -148,7 +152,11 @@ class LeafNodeSampler():
             the same as the input dtype.
         """
 
-        if not hasattr(self, "_leaf_map") or not hasattr(self, "random_state_") or not hasattr(self, "_y_dtype"):
+        if (
+            not hasattr(self, "_leaf_map") 
+            or not hasattr(self, "random_state_") 
+            or not hasattr(self, "_y_dtype")
+        ):
             raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
         
         seed = getattr(self, "_seed", None)
@@ -162,7 +170,8 @@ class LeafNodeSampler():
         n_samples = len(leaf_ids)
 
         if leaf_ids.ndim != 1:
-            raise ValueError(f"leaf_ids must be 1-dimensional with shape (n_samples,), got shape {leaf_ids.shape} instead.")
+            raise ValueError(f"leaf_ids must be 1-dimensional with shape "
+                             f"(n_samples,), got shape {leaf_ids.shape} instead.")
         if n_samples == 0:
             raise ValueError(f"leaf_ids must be non-empty.")
 
@@ -186,7 +195,8 @@ class LeafNodeSampler():
 
             total = counts.sum()
             if total == 0:
-                raise ValueError(f"Leaf {leaf} has an empty leaf map. This indicates a corrupted or inconsistent LeafNodeSampler state.")
+                raise ValueError(f"Leaf {leaf} has an empty leaf map. "
+                                 "This indicates a corrupted or inconsistent LeafNodeSampler state.")
 
             sampled = sample_array(
                 rng=rng,
@@ -199,7 +209,7 @@ class LeafNodeSampler():
 
         return y_syn
 
-    def clone(self):
+    def clone(self) -> Self:
         """
         Create a new instance of the sampler with the same configuration.
 
@@ -224,7 +234,7 @@ def build_feature_matrix(X: dict[str, npt.NDArray], feature_order:list[str]) -> 
     if len(set(feature_order) - set(X.keys())) > 0:
         raise ValueError("cannot build feature matrix: received less columns than expected")
     if len(X.keys()) == 0:
-        return np.empty(shape=(0,0), dtype=np.float32)
+        return np.empty(shape=(0, 0), dtype=np.float32)
     
     cols = []
 

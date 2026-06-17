@@ -44,11 +44,11 @@ def test_fit_stores_distribution_and_metadata(y, expected_values, expected_count
         assert (pd.isna(model_value) and pd.isna(expected_value)) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
 
 
-def test_fit_sets_default_name_when_none():
+def test_fit_sets_name_when_none():
     y = pd.Series([1, 2, 3])
     model = SampleMethod().fit(None, y)
 
-    assert model.target_name_ == "target"
+    assert model.target_name_ is None
 
 # ----- transform tests -----
 
@@ -62,7 +62,7 @@ def test_transform_output_shape_matches_X():
     result = model.transform(X)
 
     assert len(result) == len(X)
-    assert list(result.columns) == ["target"]
+    assert result.name == "target"
 
 
 def test_transform_without_X_uses_training_size():
@@ -82,7 +82,7 @@ def test_transform_values_within_observed_support():
     model = make_fitted_model(values = values, counts=[1, 1, 1, 1], n_samples=4)
     result = model.transform(pd.DataFrame(index=range(100)))
 
-    generated = set(result["target"].unique())
+    generated = set(result.unique())
 
     observed_no_nan = {v for v in values if not pd.isna(v)}
     generated_no_nan = {v for v in generated if not pd.isna(v)}
@@ -90,7 +90,7 @@ def test_transform_values_within_observed_support():
     assert generated_no_nan.issubset(observed_no_nan)
 
     if any(pd.isna(v) for v in values):
-        assert result["target"].isna().any()
+        assert result.isna().any()
 
 
 def test_transform_reproducibility_with_fixed_seed():
@@ -105,7 +105,7 @@ def test_transform_reproducibility_with_fixed_seed():
     result1 = model1.transform(X)
     result2 = model2.transform(X)
 
-    pd.testing.assert_frame_equal(result1, result2)
+    pd.testing.assert_series_equal(result1, result2)
 
 
 def test_transform_different_seeds_produce_different_results():
@@ -138,7 +138,7 @@ def test_transform_approximate_distribution(values, counts):
     model = make_fitted_model(values, counts, n_samples=sum(counts))
     X = pd.DataFrame(index=range(10000))
 
-    result = model.transform(X)["target"].value_counts(normalize=True)
+    result = model.transform(X).value_counts(normalize=True)
 
     total = sum(counts)
     expected = {v: c / total for v, c in zip(values, counts)}
@@ -167,10 +167,10 @@ def test_missing_values_all_types_are_sampled():
     model = make_fitted_model(values, counts, n_samples=4)
     result = model.transform(pd.DataFrame(index=range(500)))
 
-    assert result["target"].isna().any(), "transform must preserve missingness"
+    assert result.isna().any(), "transform must preserve missingness"
 
     non_missing_original = [v for v in values if not pd.isna(v)]
-    non_missing_generated = result["target"].dropna().unique()
+    non_missing_generated = result.dropna().unique()
 
     assert set(non_missing_generated).issubset(set(non_missing_original))
 
