@@ -101,9 +101,9 @@ def test_random_state_manager_provided_seed():
           "seeds produced by create_new_seed are not reproduced when using the same seed."
 
 
-def test_random_state_manager_initialized_context_manager():
+def test_random_state_manager_initialised_context_manager():
 
-    # initialize RandomStateManager
+    # initialise RandomStateManager
     RandomStateManager.set_root_seed(42)
     sample1 = get_sample()
 
@@ -125,16 +125,16 @@ def test_random_state_manager_initialized_context_manager():
         "Entering the context block did not change the seed"
 
 
-def test_random_state_manager_uninitialized_context_manager():
+def test_random_state_manager_uninitialised_context_manager():
 
     assert RandomStateManager._root_seed is None, "test is invalid"
     with RandomStateManager(200):
         sample1 = get_sample()
 
     assert RandomStateManager._root_seed is None,\
-          "exiting context block does not return RandomStateManager._root_seed to uninitialized"
+          "exiting context block does not return RandomStateManager._root_seed to uninitialised"
     assert RandomStateManager._seed_sequence is None,\
-          "exiting context block does not return RandomStateManager._seed_sequence to uninitialized"
+          "exiting context block does not return RandomStateManager._seed_sequence to uninitialised"
 
     RandomStateManager.set_root_seed(200)
 

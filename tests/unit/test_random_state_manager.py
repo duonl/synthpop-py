@@ -1,7 +1,7 @@
 """
 The random state manager itself has 3 main states:
-1. uninitialized
-2. initialized
+1. uninitialised
+2. initialised
 3. overwritten. (temporary seed using __enter__ and __exit__)
 
 The behaviour of the methods can be dependent on this state.
@@ -26,7 +26,7 @@ def set_random_state_manager_state(root_seed, seed_sequence, monkeypatch):
 
 
 @pytest.fixture
-def uninitialized_random_state_manager():
+def uninitialised_random_state_manager():
     set_random_state_manager_state(None, None)
 
 
@@ -49,14 +49,14 @@ def assert_seed_state(expected_seed):
 
 # ------------------ test cases ---------------------------------
 
-def test_random_state_manager_set_root_seed_initializes(monkeypatch):
+def test_random_state_manager_set_root_seed_initialises(monkeypatch):
     """
-    Given: The random state manager is not initialized.
+    Given: The random state manager is not initialised.
     When: a root seed is provided (set_root_seed), seed is not None, 
     Then: The root seed is set with the provided value, and a seedsequence is stored from that seed.
     """
 
-    # Given: The random state manager is not initialized.
+    # Given: The random state manager is not initialised.
     set_random_state_manager_state(None, None, monkeypatch)
 
     # When: a root seed is provided (set_root_seed), seed is not None
@@ -66,14 +66,14 @@ def test_random_state_manager_set_root_seed_initializes(monkeypatch):
     assert_seed_state(42)
 
 
-def test_random_state_manager_when_no_seed_provided_set_root_seed_initializes_using_secure_random(monkeypatch):
+def test_random_state_manager_when_no_seed_provided_set_root_seed_initialises_using_secure_random(monkeypatch):
     """
-    Given: The random state manager is not initialized.
+    Given: The random state manager is not initialised.
     When: no root seed is provided (set_root_seed), seed is None, 
     Then: The root seed is set with the value from secrets.randbits.
     """
 
-    # Given: The random state manager is not initialized.
+    # Given: The random state manager is not initialised.
     set_random_state_manager_state(None, None, monkeypatch)
 
     # We patch secrets.randbits so that we can control the return value
@@ -90,16 +90,16 @@ def test_random_state_manager_when_no_seed_provided_set_root_seed_initializes_us
     assert_seed_state(123)
 
 
-def test_random_state_manager_given_uninitialized_when_creating_rng(monkeypatch, patch_default_rng):
+def test_random_state_manager_given_uninitialised_when_creating_rng(monkeypatch, patch_default_rng):
     """
-    Given: The random state manager is not initialized.
+    Given: The random state manager is not initialised.
     When: an RNG is created (create_rng)
     Then: 
-        - The random state manager gets initialized with a random seed.
+        - The random state manager gets initialised with a random seed.
         - This seed is used to create an RNG.
     """
 
-    # Given: The random state manager is not initialized.
+    # Given: The random state manager is not initialised.
     set_random_state_manager_state(None, None, monkeypatch)
 
     # We patch secrets.randbits so that we can control the returned value and assert that the correct seed is used to create the RNG.
@@ -112,21 +112,21 @@ def test_random_state_manager_given_uninitialized_when_creating_rng(monkeypatch,
     result = RandomStateManager.create_rng(seed=3)
 
     # Then:
-    # The random state manager gets initialized with a random seed.
+    # The random state manager gets initialised with a random seed.
     assert_seed_state(1234)
     assert result is patch_default_rng["expected_rng"], "the returned RNG should be from np.random.default_rng"
     patch_default_rng["mock"].assert_called_with([1234, 3])
 
 
-def test_random_state_manager_given_initialized_when_creating_rng(monkeypatch, patch_default_rng):
+def test_random_state_manager_given_initialised_when_creating_rng(monkeypatch, patch_default_rng):
     """
-    Given: The random state manager is initialized.
+    Given: The random state manager is initialised.
     When: an RNG is created (create_rng)
     Then: 
         - The root seed is used to create an RNG
     """
 
-    # Given: The random state manager is initialized.
+    # Given: The random state manager is initialised.
     set_random_state_manager_state(3, np.random.SeedSequence(3), monkeypatch)
 
     # When: an RNG is created (create_rng)
@@ -138,16 +138,16 @@ def test_random_state_manager_given_initialized_when_creating_rng(monkeypatch, p
     assert_seed_state(3)
 
 
-def test_random_state_manager_given_uninitialized_when_creating_new_seed(monkeypatch, mocker):
+def test_random_state_manager_given_uninitialised_when_creating_new_seed(monkeypatch, mocker):
     """
-    Given: The random state manager is not initialized.
+    Given: The random state manager is not initialised.
     When: an seed is created (create_new_seed)
     Then: 
-        - The random state manager gets initialized with a random seed.
+        - The random state manager gets initialised with a random seed.
         - A seed is created using the seed sequence
     """
 
-    # Given: The random state manager is not initialized.
+    # Given: The random state manager is not initialised.
     set_random_state_manager_state(None, None, monkeypatch)
 
     # Instead of patching secrets.randbits, we patch RandomStateManager.set_root_seed.
@@ -172,7 +172,7 @@ def test_random_state_manager_given_uninitialized_when_creating_new_seed(monkeyp
     # When: an seed is created (create_new_seed)
     result = RandomStateManager.create_new_seed()
 
-    # Then: The random state manager gets initialized with a random seed.
+    # Then: The random state manager gets initialised with a random seed.
     # This asserts that set_root_seed has been called with seed=None.
     assert_seed_state(expected_seed)
 
@@ -181,15 +181,15 @@ def test_random_state_manager_given_uninitialized_when_creating_new_seed(monkeyp
     assert result == expected_returned_seed
 
 
-def test_random_state_manager_given_initialized_when_creating_new_seed(monkeypatch, mocker):
+def test_random_state_manager_given_initialised_when_creating_new_seed(monkeypatch, mocker):
     """
-    Given: The random state manager is initialized.
+    Given: The random state manager is initialised.
     When: an seed is created (create_new_seed)
     Then: 
         - A seed is created using the seed sequence
     """
 
-    # Given: The random state manager is initialized.
+    # Given: The random state manager is initialised.
     root_seed = 852
     expected_seed_sequence = np.random.SeedSequence(root_seed)
     set_random_state_manager_state(
@@ -209,16 +209,16 @@ def test_random_state_manager_given_initialized_when_creating_new_seed(monkeypat
     assert_seed_state(root_seed)
 
 
-def test_random_state_manager_uninitialized_enter(monkeypatch):
+def test_random_state_manager_uninitialised_enter(monkeypatch):
     """
-    Given: The random state manager is not initialized.
+    Given: The random state manager is not initialised.
     When: an instance of RandomStateManager is created and __enter__ is called
     Then:
         - The instance properties old_seed and old_seed_sequence are None
         - The root seed is set to the seed provided when creating an instance of RandomStateManager
     """
 
-    # Given: The random state manager is not initialized.
+    # Given: The random state manager is not initialised.
     set_random_state_manager_state(None, None, monkeypatch)
 
     # When:
@@ -235,16 +235,16 @@ def test_random_state_manager_uninitialized_enter(monkeypatch):
     assert_seed_state(5)
 
 
-def test_random_state_manager_initialized_enter(monkeypatch):
+def test_random_state_manager_initialised_enter(monkeypatch):
     """
-    Given: The random state manager is initialized.
+    Given: The random state manager is initialised.
     When: an instance of RandomStateManager is created and __enter__ is called
     Then:
         - The instance properties old_seed and old_seed_sequence are set to the initial root_seed and seed_sequence.
         - The root seed is set to the seed provided when creating an instance of RandomStateManager
     """
 
-    # Given: The random state manager is not initialized.
+    # Given: The random state manager is not initialised.
     initial_seed = 300
     initial_seed_sequence = np.random.SeedSequence(initial_seed)
     set_random_state_manager_state(
@@ -264,10 +264,10 @@ def test_random_state_manager_initialized_enter(monkeypatch):
     assert_seed_state(6)
 
 
-def test_random_state_manager_initialized_exit(monkeypatch):
+def test_random_state_manager_initialised_exit(monkeypatch):
     """
     Given: 
-        - The random state manager is initialized.
+        - The random state manager is initialised.
         - a context block with an RandomStateManager instance has been entered (__enter__ has been called)
     When: the context block is exited (__exit__ has been called)
     Then:
@@ -276,10 +276,10 @@ def test_random_state_manager_initialized_exit(monkeypatch):
     """
 
     # Given:
-    # - The random state manager is initialized.
+    # - The random state manager is initialised.
     # - a context block with an RandomStateManager instance has been entered (__enter__ has been called)
 
-    # The random state manager has been initialized, so there is an initial seed and seed sequence.
+    # The random state manager has been initialised, so there is an initial seed and seed sequence.
 
     # The context block has been entered.
     # That means that the old_seed is set to the initial seed, and old_seed_sequence is set to the initial seed sequence.
