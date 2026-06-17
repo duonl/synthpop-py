@@ -59,7 +59,6 @@ class RandomStateManager:
 
         cls._seed_sequence = SeedSequence(cls._root_seed)
 
-        return
 
     @classmethod
     def create_new_seed(cls) -> int:

@@ -20,8 +20,12 @@ class StandardTransformer(TransformerMixin, BaseEstimator):
         self.random_state = random_state
 
     def fit(self, X, y):
-        self.random_state_ = RandomStateManager.create_new_seed(
-        ) if self.random_state is None else self.random_state
+        if self.random_state is None:
+            self.random_state_ = RandomStateManager.create_new_seed()
+        else:
+            self.random_state_ = self.random_state
+        
+        return self
 
     def transform(self, X):
         rng = RandomStateManager.create_rng(self.random_state_)

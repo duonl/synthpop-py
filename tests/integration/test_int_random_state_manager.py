@@ -29,14 +29,16 @@ def assert_rngs_reproducible():
     rng3 = RandomStateManager.create_rng(seed=2)
     sample3 = rng3.integers(low=0, high=1000, size=100).tolist()
 
-    assert sample3 != sample1 and sample3 != sample2, "create_rng does not produce independent RNGs"
+    assert sample3 != sample1 and sample3 != sample2, \
+        "create_rng does not produce independent RNGs"
 
 
 def assert_create_new_seed_independence():
     first_seed = RandomStateManager.create_new_seed()
     second_seed = RandomStateManager.create_new_seed()
 
-    assert first_seed != second_seed, "create_new_seed does not produce independent seeds"
+    assert first_seed != second_seed,\
+          "create_new_seed does not produce independent seeds"
 
 
 def test_random_state_manager_default_random_seed():
@@ -63,7 +65,8 @@ def test_random_state_manager_default_random_seed():
     sample2 = rng2.integers(low=0, high=1000, size=100).tolist()
     assert sample1 != sample2, "no independent seed is used to create RNGs"
 
-    assert first_seed1 != first_seed2, "no independent seeds are produced by create_new_seed"
+    assert first_seed1 != first_seed2, \
+        "no independent seeds are produced by create_new_seed"
 
 
 def test_random_state_manager_provided_seed():
@@ -92,8 +95,10 @@ def test_random_state_manager_provided_seed():
     first_seed3 = RandomStateManager.create_new_seed()
     assert_rngs_reproducible()
     assert_create_new_seed_independence()
-    assert sample4 == sample2, "samples of RNGs are not reproduced when using the same seed"
-    assert first_seed1 == first_seed3, "seeds produced by create_new_seed are not reproduced when using the same seed."
+    assert sample4 == sample2, \
+        "samples of RNGs are not reproduced when using the same seed"
+    assert first_seed1 == first_seed3,\
+          "seeds produced by create_new_seed are not reproduced when using the same seed."
 
 
 def test_random_state_manager_initialized_context_manager():
@@ -112,24 +117,31 @@ def test_random_state_manager_initialized_context_manager():
     sample4 = get_sample()
     sample5 = get_sample()
 
-    assert sample1 == sample4, "RandomStateManager did not reset when setting the seed"
-    assert sample3 == sample5, "Exiting the context manager did not restore RandomStateManager"
-    assert sample2 != sample5, "Entering the context block did not change the seed"
+    assert sample1 == sample4,\
+          "RandomStateManager did not reset when setting the seed"
+    assert sample3 == sample5,\
+          "Exiting the context manager did not restore RandomStateManager"
+    assert sample2 != sample5, \
+        "Entering the context block did not change the seed"
 
 
 def test_random_state_manager_uninitialized_context_manager():
 
+    assert RandomStateManager._root_seed is None, "test is invalid"
     with RandomStateManager(200):
         sample1 = get_sample()
 
-    assert RandomStateManager._root_seed is None, "exiting context block does not return RandomStateManager._root_seed to uninitialized"
-    assert RandomStateManager._seed_sequence is None, "exiting context block does not return RandomStateManager._seed_sequence to uninitialized"
+    assert RandomStateManager._root_seed is None,\
+          "exiting context block does not return RandomStateManager._root_seed to uninitialized"
+    assert RandomStateManager._seed_sequence is None,\
+          "exiting context block does not return RandomStateManager._seed_sequence to uninitialized"
 
     RandomStateManager.set_root_seed(200)
 
     sample3 = get_sample()
 
-    assert sample1 == sample3, "using the context block does not have a similar effect as setting the root seed."
+    assert sample1 == sample3,\
+          "using the context block does not have a similar effect as setting the root seed."
 
 
 def test_random_state_preserves_exceptions():
