@@ -1,4 +1,5 @@
 import secrets
+import warnings
 
 import numpy as np
 from numpy.random import SeedSequence
@@ -50,6 +51,11 @@ class RandomStateManager:
         Set the root seed.
         The intended usage is within the Synthesiser class.
         """
+
+        # The error messages of SeedSequence when seed is invalid are clear enough.
+
+        if len(seed) == 0:
+            warnings.warn("empty list as no entropy for seed. Use None for system entropy.",UserWarning)
 
         if seed is None:
             cls._root_seed = secrets.randbits(128)

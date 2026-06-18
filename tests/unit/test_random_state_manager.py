@@ -9,6 +9,7 @@ The methods can cause transitions in this state.
 
 """
 
+import re
 import secrets
 
 import numpy as np
@@ -307,3 +308,26 @@ def test_random_state_manager_create_new_seed_returns_int():
 
     result = RandomStateManager.create_new_seed()
     assert isinstance(result, int)
+
+
+def test_random_state_manager_raises_on_invalid_type():
+
+    with pytest.raises(TypeError,match = ".* expects int or sequence of ints .*"):
+        RandomStateManager.set_root_seed("not an integer")
+
+    with pytest.raises(TypeError,match = ".* expects int or sequence of ints .*"):
+        RandomStateManager.set_root_seed(1.2)
+
+    with pytest.raises(ValueError,match = re.escape("expected non-negative integer")):
+        RandomStateManager.set_root_seed(-1)
+
+    with pytest.raises(TypeError,match = ".* expects int or sequence of ints .*"):
+        RandomStateManager.set_root_seed(np.nan)
+
+def test_random_state_manager_warns_on_empty_list():
+
+    with pytest.warns(UserWarning) as record:
+        RandomStateManager.set_root_seed([])
+
+    assert len(record) == 1
+    assert str(record[0].message) =="empty list as no entropy for seed. Use None for system entropy."
