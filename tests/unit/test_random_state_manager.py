@@ -25,9 +25,6 @@ def set_random_state_manager_state(root_seed, seed_sequence, monkeypatch):
     monkeypatch.setattr(RandomStateManager, "_seed_sequence", seed_sequence)
 
 
-@pytest.fixture
-def uninitialised_random_state_manager():
-    set_random_state_manager_state(None, None)
 
 
 @pytest.fixture

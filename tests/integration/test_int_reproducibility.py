@@ -8,6 +8,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 from synthpop.reproducibility import RandomStateManager
 
+
 @pytest.fixture(autouse=True)
 def control_random_state_manager():
     RandomStateManager._root_seed = None
@@ -17,7 +18,6 @@ def control_random_state_manager():
 
     RandomStateManager._root_seed = None
     RandomStateManager._seed_sequence = None
-
 
 
 class StandardTransformer(TransformerMixin, BaseEstimator):
@@ -35,7 +35,7 @@ class StandardTransformer(TransformerMixin, BaseEstimator):
             self.random_state_ = RandomStateManager.create_new_seed()
         else:
             self.random_state_ = self.random_state
-        
+
         return self
 
     def transform(self, X):
@@ -79,3 +79,18 @@ def test_standard_transformer_independent_instances():
 
     assert np.array_equal(result1, transformer1.transform(X=0))
     assert np.array_equal(result2, transformer2.transform(X=0))
+
+
+def test_standard_transformer_reproduces_when_setting_seed():
+    RandomStateManager.set_root_seed(456)
+
+    transformer1 = StandardTransformer()
+    transformer1.fit(X=0, y=0)
+    result1 = transformer1.transform(X=2)
+
+    RandomStateManager.set_root_seed(456)
+    transformer2 = StandardTransformer()
+    transformer2.fit(X=0, y=0)
+    result2 = transformer1.transform(X=2)
+
+    assert np.array_equal(result1, result2)
