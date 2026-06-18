@@ -25,8 +25,6 @@ def set_random_state_manager_state(root_seed, seed_sequence, monkeypatch):
     monkeypatch.setattr(RandomStateManager, "_seed_sequence", seed_sequence)
 
 
-
-
 @pytest.fixture
 def patch_default_rng(mocker):
     expected_rng = np.random.default_rng(4)
@@ -303,3 +301,9 @@ def test_random_state_manager_initialised_exit(monkeypatch):
 
     # - The seed sequence is set to the same object as the old_seed_sequence property of the instance
     assert RandomStateManager._seed_sequence is initial_seed_sequence, "initial seed is not restored"
+
+
+def test_random_state_manager_create_new_seed_returns_int():
+
+    result = RandomStateManager.create_new_seed()
+    assert isinstance(result, int)

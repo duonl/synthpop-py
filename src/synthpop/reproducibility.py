@@ -4,9 +4,8 @@ import numpy as np
 from numpy.random import SeedSequence
 
 
-
 def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:
-    return seed_sequence.spawn(1)[0].generate_state(1)
+    return int(seed_sequence.spawn(1)[0].generate_state(1)[0])
 
 
 class RandomStateManager:
@@ -58,7 +57,6 @@ class RandomStateManager:
             cls._root_seed = seed
 
         cls._seed_sequence = SeedSequence(cls._root_seed)
-
 
     @classmethod
     def create_new_seed(cls) -> int:
