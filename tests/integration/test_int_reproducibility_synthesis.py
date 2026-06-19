@@ -8,6 +8,10 @@ from sklearn.exceptions import NotFittedError
 from synthpop.synthesiser import Synthesiser
 from synthpop.reproducibility import RandomStateManager
 
+from sklearn.datasets import make_classification, make_regression
+
+from synthpop.utils import str_dtype
+
 def simulate_realistic_dataset_correlations(n_samples=100):
     rng = np.random.default_rng(seed=852456)
 
@@ -48,10 +52,62 @@ def simulate_realistic_dataset_correlations(n_samples=100):
 
     return (dataset, ["first", "second", "fourth"], ["third", "fifth"])
 
+def make_data_missing(X):
+
+    #We need a pattern of missingness that is different for each column
+    # The missingness pattern should not be too predictable.
+
+    for ik, k in enumerate(X.keys()):
+
+        # The missingness is periodic. ever p-th element is missing.
+        # The value of p decreases for each column.
+        p = (len(X.keys())-ik) 
+
+        values = [v if i % p !=1 else np.nan for i,v in enumerate(X[k])]
+        if pd.api.types.is_numeric_dtype(X[k].dtype):
+            X[k]=np.array(values)
+        else:
+            X[k] = np.array(values,dtype=str_dtype)
+
+    return X
+def get_test_data_regressor(seed = 10,with_cats=False,with_missing_features=False,with_missing_target=False):
+    X,y = make_regression(random_state=seed)
+    X = {i:X[:,i] for i in range(X.shape[1])}
+
+    idx_cats = [3,4,6]
+    if with_cats:
+        for idx in idx_cats:
+            x = (X[idx]*10).astype(int)
+            x_i = [f %26 for f in x]
+            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype = str_dtype)
+
+    if with_missing_features:
+        X = make_data_missing(X)
+
+    if with_missing_target:
+        y = np.array([v if i%5 !=0 else np.nan for i,v in enumerate(y)])
+
+    return (X,y)
+
+
+@pytest.mark.parametrize("seed",[(i) for i in range(50)])
+def test_error_unseen_node(seed):
+    X,y = get_test_data_regressor(seed=seed,with_cats=True,with_missing_features= True,with_missing_target=True)
+
+    RandomStateManager.set_root_seed([seed])
+    obs = pd.DataFrame(X)
+    obs["target"] = y
+
+    synth = Synthesiser(random_seed=0)
+
+    synth.fit(obs)
+
+    synth.generate(100)
+
 
 def test_reproducibilty_synthesis():
 
-    RandomStateManager.set_root_seed(1)
+    RandomStateManager.set_root_seed([1])
     obs = simulate_realistic_dataset_correlations(n_samples=1000)[0][["first","second","third"]]
 
     synth = Synthesiser(random_seed=0)
@@ -62,7 +118,7 @@ def test_reproducibilty_synthesis():
 
     assert syn1.equals(syn2)
 
-    RandomStateManager.set_root_seed(1)
+    RandomStateManager.set_root_seed([1])
     synth2 = Synthesiser(random_seed=0)
     synth2.fit(obs)
 

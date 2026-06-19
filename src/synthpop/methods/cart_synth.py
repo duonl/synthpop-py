@@ -22,6 +22,7 @@ from synthpop.data_processing.missing_value_handling import (
 )
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.reproducibility import RandomStateManager
 
 
 def _to_fixed_length_string_array(a: npt.NDArray) -> npt.NDArray:
@@ -71,6 +72,46 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         # overwritten in TreeClassifierMethod and TreeRegressorMethod
         return y
+    
+    def print_decision_path(self,X_test,sample_id = 0):
+        clf = self.tree_
+        node_indicator = clf.decision_path(X_test)
+        leaf_id = clf.apply(X_test)
+
+        
+        feature= feature = clf.tree_.feature
+        threshold = clf.tree_.threshold
+        values = clf.tree_.value
+        # obtain ids of the nodes `sample_id` goes through, i.e., row `sample_id`
+        node_index = node_indicator.indices[
+            node_indicator.indptr[sample_id] : node_indicator.indptr[sample_id + 1]
+        ]
+
+        print("Rules used to predict sample {id}:\n".format(id=sample_id))
+        for node_id in node_index:
+            # continue to the next node if it is a leaf node
+            if leaf_id[sample_id] == node_id:
+                continue
+
+            # check if value of the split feature for sample 0 is below threshold
+            if X_test[sample_id, feature[node_id]] <= threshold[node_id]:
+                threshold_sign = "<="
+            else:
+                threshold_sign = ">"
+
+            print(
+                "decision node {node} : (X_test[{sample}, {feature}] = {value}) "
+                "{inequality} {threshold}), missing go left: {missing_go_left}".format(
+                    node=node_id,
+                    sample=sample_id,
+                    feature=feature[node_id],
+                    value=X_test[sample_id, feature[node_id]],
+                    inequality=threshold_sign,
+                    threshold=threshold[node_id],
+                    missing_go_left=clf.tree_.missing_go_to_left[node_id]
+                )
+            )
+
 
     def fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> Self:
         """
@@ -104,6 +145,9 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         leaf_ids = self.tree_.apply(all_features)
 
+        if(self.n_features_in_ == 100):
+            print(self.n_features_in_)
+
         self.tree_sampler_ = self._new_tree_sampler().fit_sampler(leaf_ids, prepared_y)
 
         return self
@@ -133,6 +177,9 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         X_val, _ = utils.validate_2d_dict(X)
 
         n_features_given = len(X.keys())
+
+        if(n_features_given == 100):
+            print(n_features_given)
         if n_features_given != self.n_features_in_:
             raise ValueError(
                 f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
@@ -232,7 +279,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     def _get_tree(self):
         return DecisionTreeClassifier(min_samples_leaf=5,   # equivalent to minbucket in synthpop-r
-                                      min_impurity_decrease=1e-08  # equivalent to cp in synthpop-r
+                                      min_impurity_decrease=1e-08,  # equivalent to cp in synthpop-r
+                                      random_state=RandomStateManager.create_new_seed()
                                       ,)
 
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
@@ -292,6 +340,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def _get_tree(self):
         return DecisionTreeRegressor(min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
                                     min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
+                                    random_state=RandomStateManager.create_new_seed()
                                     )
     
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
