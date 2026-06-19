@@ -54,8 +54,8 @@ class RandomStateManager:
 
         # The error messages of SeedSequence when seed is invalid are clear enough.
 
-        if len(seed) == 0:
-            warnings.warn("empty list as no entropy for seed. Use None for system entropy.",UserWarning)
+        if isinstance(seed, (list, tuple, np.ndarray)) and len(seed) == 0:
+            warnings.warn("empty list as no entropy for seed. Use None for system entropy.", UserWarning)
 
         if seed is None:
             cls._root_seed = secrets.randbits(128)
@@ -71,7 +71,7 @@ class RandomStateManager:
         The seed is based on the root seed.
         It is used to make instance seeds and seeds for
         external dependencies (legacy).
-        The instance seeds are integers is to facilitate
+        The instance seeds are integers to facilitate
         combining the root seed and instance seed.
 
         :returns: an integer that can be used as a seed.
@@ -105,7 +105,7 @@ class RandomStateManager:
         # so the easiest and safest way to combine is to pass a list of seeds.
         return np.random.default_rng([cls._root_seed, seed])
 
-    def __init__(self, seed):
+    def __init__(self, seed: int) -> None:
         self.new_seed = seed
 
     def __enter__(self):
