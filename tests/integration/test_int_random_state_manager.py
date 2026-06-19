@@ -7,7 +7,7 @@ is done in test_int_reproducibility.py
 """
 
 import pytest
-
+import numpy as np
 from synthpop.reproducibility import RandomStateManager
 
 
@@ -37,13 +37,23 @@ def get_sample_from_rng(rng):
     return rng.integers(low=0, high=1000, size=100).tolist()
 
 
-def test_random_state_manager_same_seed_same_output():
+def test_random_state_manager_same_instance_seed_same_output():
     RandomStateManager.set_root_seed(42)
 
     rng1 = RandomStateManager.create_rng(5)
     rng2 = RandomStateManager.create_rng(5)
 
+    assert isinstance(rng1,np.random.Generator)
+
     assert get_sample_from_rng(rng1) == get_sample_from_rng(rng2)
+
+def test_random_state_manager_same_root_seed_same_output():
+    RandomStateManager.set_root_seed(10)
+    rng_a = RandomStateManager.create_rng(5)
+    RandomStateManager.set_root_seed(10)
+    rng_b = RandomStateManager.create_rng(5)
+
+    assert get_sample_from_rng(rng_a) == get_sample_from_rng(rng_b)
 
 
 def test_random_state_manager_different_instance_seed_different_output():
@@ -118,9 +128,13 @@ def test_random_state_manager_creates_random_root_seed_when_not_initialised():
 
 def test_random_state_preserves_exceptions():
 
+    RandomStateManager.set_root_seed(100)
+
     with pytest.raises(ValueError, match="Some error"):
         with RandomStateManager(10):
             raise ValueError("Some error")
+        
+    assert RandomStateManager._root_seed == 100
 
 
 def recurse_context(n):

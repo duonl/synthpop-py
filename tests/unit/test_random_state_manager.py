@@ -33,6 +33,20 @@ def patch_default_rng(mocker):
         "numpy.random.default_rng", return_value=expected_rng)
     return {"mock": mock_default_rng, "expected_rng": expected_rng}
 
+@pytest.fixture(autouse=True)
+def control_random_state_manager():
+    """
+    These test have the assumption that they start with an uninitialised RandomStateManager.
+    When running the test, this is not guaranteed.
+    This fixture is to give that guarantee. 
+    """
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
+
+    yield
+
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
 # ------------------ Assertion helpers -------------------------
 
 

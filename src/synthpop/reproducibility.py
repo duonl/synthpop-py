@@ -41,8 +41,8 @@ class RandomStateManager:
     """
     _seed_sequence = None
     """
-    The seed sequence is used to provide proper initialisation for all RNGs
-    used in this package, even if the user provided seed is suboptimal.
+    The seed sequence is used to provide proper seeds for the classes that need an RNG
+    in this package, even if the user provided seed is suboptimal.
     """
 
     @classmethod
@@ -113,6 +113,6 @@ class RandomStateManager:
         self.old_seed_sequence = RandomStateManager._seed_sequence
         RandomStateManager.set_root_seed(self.new_seed)
 
-    def __exit__(self, type=None, value=None, traceback=None):
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
         RandomStateManager._root_seed = self.old_seed
         RandomStateManager._seed_sequence = self.old_seed_sequence
