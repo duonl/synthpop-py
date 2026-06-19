@@ -52,8 +52,6 @@ def test_synthesiser_first_column_is_sampled_categorical():
     assert np.abs(
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
-
-#@pytest.mark.xfail(reason="known issue, see #130")
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,

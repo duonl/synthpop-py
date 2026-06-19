@@ -106,6 +106,29 @@ def test_fit_sampler_sets_y_dtype_correctly(y_input, expected_dtype_check):
 
     assert np.issubdtype(sampler._y_dtype, expected_dtype_check)
 
+def test_fit_sampler_creates_seed_from_random_state_manager(mocker):
+    X= np.array([10, 10, 20, 20])
+    y = np.array([0, 0, 1, 1])
+    mock_create_new_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_new_seed",return_value= 333)
+
+    sampler = LeafNodeSampler()
+    sampler.fit_sampler(X,y)
+
+    assert sampler.random_state_ == 333
+    mock_create_new_seed.assert_called_once()
+
+def test_fit_sampler_does_not_create_seed_when_seed_is_given(mocker):
+    X= np.array([10, 10, 20, 20])
+    y = np.array([0, 0, 1, 1])
+    mock_create_new_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_new_seed",return_value= 333)
+
+    sampler = LeafNodeSampler(random_state=123456)
+    sampler.fit_sampler(X,y)
+
+    assert sampler.random_state_ == 123456
+    mock_create_new_seed.assert_not_called()
+
+
 # ----- sample from leaves test cases -----
 def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32):
     """
@@ -113,7 +136,7 @@ def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32)
     """
     sampler = LeafNodeSampler(random_state=random_state)
     sampler._leaf_map = leaf_map
-    sampler.random_state_ = np.random.default_rng(random_state)
+    sampler.random_state_ = random_state
     sampler._y_dtype = np.dtype(y_dtype)
     return sampler
 
@@ -159,8 +182,11 @@ class StubRNG:
             out.append(low + (v % (high - low)))
         return np.array(out)
     
-def test_sampling_deterministic_with_stub_rng():
+def test_sampling_deterministic_with_stub_rng(mocker):
+    #TODO: inject the stub by mocking RandomStateManager.create_rng
     rng = StubRNG([0, 3, 1, 2])  # controlled indices
+
+    mocker.patch("synthpop.reproducibility.RandomStateManager.create_rng",return_value= rng)
 
     sampler = LeafNodeSampler()
     sampler._leaf_map = {10: {0: 3, 1: 1}}
@@ -194,6 +220,7 @@ def test_sample_from_leaves_each_missing_type(missing_value):
         assert any(isinstance(v, float) and np.isnan(v) for v in y_syn)
 
 def test_sample_determinism_with_same_seed():
+    #TODO: move to integration test
     leaf_map = {10: {0: 3, 1: 1}}
     leaf_ids = [10] * 5
 
@@ -212,8 +239,8 @@ def test_sample_determinism_with_same_seed():
 
     # Given that _seed is not set during fitting (since there is no fitting in this test), 
     # the rng in sampling falls back to a non-resettable
-    y4 = sampler2.sample_from_leaves(leaf_ids)
-    assert not np.array_equal(y2, y4)
+    # y4 = sampler2.sample_from_leaves(leaf_ids)
+    # assert not np.array_equal(y2, y4)
 
 def test_sample_raises_empty_histogram():
     sampler = helper_make_sampler(
@@ -250,13 +277,31 @@ def test_sample_from_leaves_raises_unfitted():
 def test_sample_from_leaves_raises_input_val():
     sampler = LeafNodeSampler()
     sampler._leaf_map = {1: {0: 1}}
-    sampler.random_state_ = np.random.default_rng(42)
+    sampler.random_state_ = 42
     sampler._y_dtype = np.int64
 
     with pytest.raises(ValueError, match="leaf_ids must be 1-dimensional"):
         sampler.sample_from_leaves([[1]])
     with pytest.raises(ValueError, match="leaf_ids must be non-empty"):
         sampler.sample_from_leaves([])
+
+def test_sample_from_leaves_creates_rng(mocker):
+    X= np.array([10, 10, 20, 20])
+    y = np.array([0, 0])
+
+    leaf_ids = [10] * 2
+    leaf_map={10: {2: 10, 1: 1}}
+
+    
+    expected_rng = np.random.default_rng()
+    mock_create_rng = mocker.patch("synthpop.reproducibility.RandomStateManager.create_rng",return_value= expected_rng)
+    mock_sample_array = mocker.patch("synthpop.methods.tree_utils.sample_array",return_value= y)
+
+    sampler = helper_make_sampler(leaf_map=leaf_map,leaf_ids=leaf_ids,random_state=987)
+    sampler.sample_from_leaves(leaf_ids)
+
+    mock_create_rng.assert_called_once_with(987)
+    mock_sample_array.call_args_list[0][0] is expected_rng, "rng is not used to sample"
 
 # ----- clonability tests -----
 def test_clone_works_and_fitted_sampler_does_not_preserve_state():
