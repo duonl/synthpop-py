@@ -1,12 +1,12 @@
 import secrets
+import warnings
 
 import numpy as np
 from numpy.random import SeedSequence
 
 
-
 def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:
-    return seed_sequence.spawn(1)[0].generate_state(1)
+    return int(seed_sequence.spawn(1)[0].generate_state(1)[0])
 
 
 class RandomStateManager:
@@ -52,13 +52,17 @@ class RandomStateManager:
         The intended usage is within the Synthesiser class.
         """
 
+        # The error messages of SeedSequence when seed is invalid are clear enough.
+
+        if len(seed) == 0:
+            warnings.warn("empty list as no entropy for seed. Use None for system entropy.",UserWarning)
+
         if seed is None:
             cls._root_seed = secrets.randbits(128)
         else:
             cls._root_seed = seed
 
         cls._seed_sequence = SeedSequence(cls._root_seed)
-
 
     @classmethod
     def create_new_seed(cls) -> int:
@@ -86,9 +90,10 @@ class RandomStateManager:
     @classmethod
     def create_rng(cls, seed: int) -> np.random.Generator:
         """
-        Creates an RNG.
+        Creates a new instance of an RNG with a fixed initial state.
         Same root seed + same seed => same RNG.
         This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
+        However, `RandomStateManager.create_rng(seed=3) is RandomStateManager.create_rng(seed=3) ` would evaluate to `False`
 
         The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
         """
