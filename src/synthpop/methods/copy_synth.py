@@ -69,12 +69,12 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
         return self
     
-    def transform(self, X: pd.DataFrame | None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         Returns an exact copy of the fitted target column.
 
         :param X: DataFrame of already synthesised columns. Can also be `None`. Is used only to validate the number of rows.
-        :return: One column of synthetic data that is identical to the target variable (Original `y`).
+        :return: Synthetical column that is copied from the target variable (Original `y`).
         """
 
         if (
@@ -88,7 +88,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
             if len(X) != self.n_samples_:
                 raise ValueError(f"Row mismatch: expected {self.n_samples_}, got {len(X)}.")
         
-        return pd.DataFrame({self.target_name_: self.y_.values})
+        return pd.Series(self.y_.values, name=self.target_name_)
     
     def get_feature_names_out(self, input_features=None) -> list[str]:
         if not hasattr(self, "target_name_"):
