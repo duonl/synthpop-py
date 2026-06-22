@@ -3,7 +3,7 @@
 This package enforces strict requirements on randomness to ensure both reproducibility (deterministic outputs given a seed) and statistical validaty (high-quality, reproducible random streams). These requirements are defined in the [functional descriptions](../functional_descriptions/reproducibility.md) and are consistent with guidance from the
 [scikit-learn's](https://scikit-learn.org/stable/developers/develop.html#random-numbers) standards for random numbers and aligned with [NumPy's](https://numpy.org/doc/stable/reference/random/generator.html) Generator API and [seeding recommendations](https://numpy.org/doc/stable/reference/random/bit_generators/index.html#seeding-and-entropy), with a focus on deterministic reproducibility.
 
-## Background: NumPy vs. scikitlearn
+## Background: NumPy vs. scikit-learn
 There is a mismatch between ecosystem conventions:
 - Scikit-learn APIs historically rely on `numpy.random.RandomState`.
 - NumPy [discourages](https://numpy.org/doc/stable/reference/random/legacy.html#numpy.random.RandomState) `RandomState` for new code and recommends [`numpy.random.Generator`](https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator).
