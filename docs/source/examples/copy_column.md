@@ -1,4 +1,6 @@
-# Copy the first column
+# Copy columns
+
+## Copy the first column
 
 If you want to copy the first column instead of sampling, it would look like this:
 ```python
@@ -11,7 +13,7 @@ synth = Synthesiser(special_syn_method={
 syn_data = synth.fit(data).generate()
 ```
 
-# Copy the first column in combination with other column order
+## Copy the first column in combination with other column order
 If you do not want to sample the first column and copy it instead, you need to specify the `CopyMethod` for the column that is first in the given order of columns.
 ```python
 from synthpop import Synthesiser
@@ -28,7 +30,7 @@ synthetic_data = Synthesiser(
 print(synthetic_data)
 ```
 
-# Copy an other column than the first
+## Copy an other column than the first
 
 If you want to copy the any other column than the first, it would look like this:
 ```python

@@ -1,4 +1,4 @@
-# alternative encoder
+# Alternative encoder
 
 ```python
 from Synthpop.Synthesiser import Synthesiser
