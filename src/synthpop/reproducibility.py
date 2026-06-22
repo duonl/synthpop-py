@@ -6,7 +6,13 @@ from numpy.random import SeedSequence
 
 
 def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:
-    return int(seed_sequence.spawn(1)[0].generate_state(1)[0])
+
+    # SeedSequence.generate_state returns the same value if you call it multiple times.
+    # To guarantee independent RNGS, we need independent seeds.
+    # That is why we need to generate a new seed sequence for each seed.
+    new_seed_sequence = seed_sequence.spawn(1)[0]
+    new_seed = new_seed_sequence.generate_state(1)[0] # generate_state generates a list of seeds, we need only one
+    return int(new_seed)
 
 
 class RandomStateManager:
@@ -67,7 +73,7 @@ class RandomStateManager:
     @classmethod
     def create_new_seed(cls) -> int:
         """
-        Returns a seed that can be used to make a RNG.
+        Returns a seed that can be used to make an RNG.
         The seed is based on the root seed.
         It is used to make instance seeds and seeds for
         external dependencies (legacy).
