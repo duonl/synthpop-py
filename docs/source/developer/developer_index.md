@@ -14,21 +14,38 @@ Finally, the [Dataflow Diagrams](way_of_working/dataflowdiagram.md) provide a vi
 
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Way of Working
 
-way_of_working/way_of_working
+way_of_working/developing.md
+way_of_working/Defining_a_new_feature.md
+way_of_working/checklist_for_developer.md
+way_of_working/checklist_for_review.md
+way_of_working/code_standards_and_norms.md
+way_of_working/dataflowdiagram.md
+way_of_working/randomness.md
+
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Functional Descriptions
 
-functional_descriptions/fd
+functional_descriptions/SynthpopSynthesis
+functional_descriptions/CART
+functional_descriptions/Copy-method
+functional_descriptions/Sample-method
+functional_descriptions/Mean-encoding
+functional_descriptions/PCA-encoding
+functional_descriptions/MissingValuePredictor
+functional_descriptions/S_pMSE
+functional_descriptions/plotting
+functional_descriptions/reproducibility
+
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Documentation
 documentation
 ```
