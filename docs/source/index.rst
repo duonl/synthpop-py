@@ -13,6 +13,12 @@ Add your content using ``reStructuredText`` syntax. See the
 documentation for details.
 
 
+README
+======================
+
+.. include:: ../../README.md 
+   :parser: myst
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents:

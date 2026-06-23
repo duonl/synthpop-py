@@ -7,7 +7,13 @@ API reference
    :caption: Synthesiser class
 
    synthesiser_class/synthesiser
-   synthesiser_class/reproducibility
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Reproducibility
+
+   reproducibility/reproducibility
 
 
 .. toctree::

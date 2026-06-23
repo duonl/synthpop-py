@@ -46,11 +46,11 @@ html_theme_options = {
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'myst_parser',
-    "sphinxcontrib.mermaid",
+    'sphinxcontrib.mermaid',
 ]
 myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
-autodoc_typehints = "both"
 autodoc_member_order = "bysource"
 
 autodoc_mock_imports = ['plotly', 'typing_extensions',]
@@ -59,4 +59,3 @@ source_suffix = {
     '.txt': 'markdown',
     '.md': 'markdown',
 }
-
