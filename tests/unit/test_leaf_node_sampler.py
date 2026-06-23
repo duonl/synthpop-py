@@ -109,24 +109,24 @@ def test_fit_sampler_sets_y_dtype_correctly(y_input, expected_dtype_check):
 def test_fit_sampler_creates_seed_from_random_state_manager(mocker):
     X= np.array([10, 10, 20, 20])
     y = np.array([0, 0, 1, 1])
-    mock_create_new_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_new_seed",return_value= 333)
+    mock_create_instance_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_instance_seed",return_value= 333)
 
     sampler = LeafNodeSampler()
     sampler.fit_sampler(X,y)
 
     assert sampler.random_state_ == 333
-    mock_create_new_seed.assert_called_once()
+    mock_create_instance_seed.assert_called_once()
 
 def test_fit_sampler_does_not_create_seed_when_seed_is_given(mocker):
     X= np.array([10, 10, 20, 20])
     y = np.array([0, 0, 1, 1])
-    mock_create_new_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_new_seed",return_value= 333)
+    mock_create_instance_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_instance_seed",return_value= 333)
 
     sampler = LeafNodeSampler(random_state=123456)
     sampler.fit_sampler(X,y)
 
     assert sampler.random_state_ == 123456
-    mock_create_new_seed.assert_not_called()
+    mock_create_instance_seed.assert_not_called()
 
 
 # ----- sample from leaves test cases -----

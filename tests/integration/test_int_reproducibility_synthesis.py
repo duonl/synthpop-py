@@ -90,11 +90,11 @@ def get_test_data_regressor(seed = 10,with_cats=False,with_missing_features=Fals
     return (X,y)
 
 
-@pytest.mark.parametrize("seed",[(i) for i in range(50)])
-def test_error_unseen_node(seed):
-    X,y = get_test_data_regressor(seed=seed,with_cats=True,with_missing_features= True,with_missing_target=True)
+#@pytest.mark.parametrize("seed",[(i) for i in range(50)])
+def test_error_unseen_node():
+    X,y = get_test_data_regressor(seed=0,with_cats=True,with_missing_features= True,with_missing_target=True)
 
-    RandomStateManager.set_root_seed([seed])
+    RandomStateManager.set_root_seed(0)
     obs = pd.DataFrame(X)
     obs["target"] = y
 

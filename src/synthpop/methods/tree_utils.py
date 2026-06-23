@@ -131,7 +131,7 @@ class LeafNodeSampler:
         # else:
         #     self._seed = np.random.default_rng() if self.random_state is None else self.random_state
         if self.random_state is None:
-            self.random_state_ = RandomStateManager.create_new_seed()#np.random.default_rng(self._seed)
+            self.random_state_ = RandomStateManager.create_instance_seed()#np.random.default_rng(self._seed)
         else:
             self.random_state_ = self.random_state
         
