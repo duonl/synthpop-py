@@ -32,7 +32,7 @@ class StandardTransformer(TransformerMixin, BaseEstimator):
 
     def fit(self, X, y):
         if self.random_state is None:
-            self.random_state_ = RandomStateManager.create_new_seed()
+            self.random_state_ = RandomStateManager.create_instance_seed()
         else:
             self.random_state_ = self.random_state
 

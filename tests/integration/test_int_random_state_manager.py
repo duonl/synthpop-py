@@ -67,13 +67,13 @@ def test_random_state_manager_different_instance_seed_different_output():
 def test_random_state_manager_setting_root_seed_reproduces():
     RandomStateManager.set_root_seed(10)
 
-    a = RandomStateManager.create_new_seed()
-    b = RandomStateManager.create_new_seed()
+    a = RandomStateManager.create_instance_seed()
+    b = RandomStateManager.create_instance_seed()
 
     RandomStateManager.set_root_seed(10)
 
-    a2 = RandomStateManager.create_new_seed()
-    b2 = RandomStateManager.create_new_seed()
+    a2 = RandomStateManager.create_instance_seed()
+    b2 = RandomStateManager.create_instance_seed()
 
     assert a == a2, "instance seeds are not reproduced"
     assert b == b2, "instance seeds are not reproduced for the second seed"

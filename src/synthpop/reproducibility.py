@@ -71,7 +71,7 @@ class RandomStateManager:
         cls._seed_sequence = SeedSequence(cls._root_seed)
 
     @classmethod
-    def create_new_seed(cls) -> int:
+    def create_instance_seed(cls) -> int:
         """
         Returns a seed that can be used to make an RNG.
         The seed is based on the root seed.
@@ -87,7 +87,7 @@ class RandomStateManager:
         >>> from reproducibility import RandomStateManager
         >>> class UsesRandom:
         ...     def fit(self, X, y):
-        ...             self.random_state_ = RandomStateManager.create_new_seed()
+        ...             self.random_state_ = RandomStateManager.create_instance_seed()
         """
         if cls._seed_sequence is None:
             cls.set_root_seed(None)
