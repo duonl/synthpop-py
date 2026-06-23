@@ -12,6 +12,7 @@ from synthpop.utils import str_dtype
 class StubRegressor(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
         self.transform_result = transform_result
+        self._all_missing = False
 
     def fit(self, X, y):
         self.fit_x = X
@@ -29,6 +30,7 @@ class StubRegressor(TransformerMixin, BaseEstimator):
 class StubClassifier(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
         self.transform_result = transform_result
+        self._all_missing = False
 
     def fit(self, X, y):
         self.fit_x = X

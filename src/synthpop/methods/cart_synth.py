@@ -419,7 +419,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         :return: Synthesised target variable.
         """
 
-        if self.method_._all_missing:
+        if hasattr(self, "method_") and getattr(self.method_, "_all_missing", False):
             return pd.Series(
             np.nan,
             index=X.index,
