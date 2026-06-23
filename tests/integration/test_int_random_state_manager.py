@@ -63,6 +63,15 @@ def test_random_state_manager_different_instance_seed_different_output():
 
     assert get_sample_from_rng(rng1) != get_sample_from_rng(rng2)
 
+def test_random_state_manager_different_root_seed_different_output():
+
+    RandomStateManager.set_root_seed(1)
+    a = RandomStateManager.create_rng(5).integers(0,100,100)
+
+    RandomStateManager.set_root_seed(2)
+    b = RandomStateManager.create_rng(5).integers(0,100,100)
+
+    assert not np.array_equal(a,b)
 
 def test_random_state_manager_setting_root_seed_reproduces():
     RandomStateManager.set_root_seed(10)
@@ -83,7 +92,7 @@ def test_random_state_manager_setting_root_seed_reproduces():
 
 
 def test_random_state_manager_contextblock_exits_cleanly():
-    RandomStateManager.set_root_seed(10)
+    RandomStateManager.set_root_seed(0)
 
     rng_before = RandomStateManager.create_rng(1)
     with RandomStateManager(444):
