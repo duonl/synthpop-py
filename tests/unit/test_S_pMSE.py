@@ -54,7 +54,7 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
             pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='category'),
             pd.DataFrame({"c1": ['0', '1']}, dtype='string'),
             25,
-            "must have the same datatypes."
+            f"['c1']."
         ),  # Check for different datatypes
 
     ]

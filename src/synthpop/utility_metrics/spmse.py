@@ -159,10 +159,13 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError(
             "Original and synthetic dataframes must have the same shape and column names.")
-    
-    if not syn_df[orig_df.columns].dtypes.equals(orig_df.dtypes): #Requires ordering
+
+    # Requires ordering
+    datatype_check = (orig_df.dtypes == syn_df[orig_df.columns].dtypes)
+    if not datatype_check.all():
         raise ValueError(
-            "Original and synthetic dataframes must have the same datatypes.")
+            f"Original and synthetic dataframes must have the same datatypes. " +
+            f"Error is in columns {(orig_df.columns[~datatype_check]).tolist()}.")
 
     if max_bins < 1 or not isinstance(max_bins, int):
         raise ValueError(
