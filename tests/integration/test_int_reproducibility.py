@@ -82,13 +82,15 @@ def test_standard_transformer_independent_instances():
 
 
 def test_standard_transformer_reproduces_when_setting_seed():
-    RandomStateManager.set_root_seed(456)
+
+    seed = [1,2,3]
+    RandomStateManager.set_root_seed(seed)
 
     transformer1 = StandardTransformer()
     transformer1.fit(X=0, y=0)
     result1 = transformer1.transform(X=2)
 
-    RandomStateManager.set_root_seed(456)
+    RandomStateManager.set_root_seed(seed)
     transformer2 = StandardTransformer()
     transformer2.fit(X=0, y=0)
     result2 = transformer1.transform(X=2)

@@ -1,8 +1,10 @@
 import secrets
+from typing import List
 import warnings
 
 import numpy as np
 from numpy.random import SeedSequence
+import numpy.typing as npt
 
 
 def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:
@@ -47,12 +49,13 @@ class RandomStateManager:
     """
     _seed_sequence = None
     """
-    The seed sequence is used to derive independent integer seeds for components that require their own RNG.
-    in this package, even if the user provided seed is suboptimal.
+    The seed sequence is used to derive independent integer seeds for
+    components that require their own RNG, even if the user provided
+    seed has poor statistical properties.
     """
 
     @classmethod
-    def set_root_seed(cls, seed: int | None):
+    def set_root_seed(cls, seed: int | List[int]|np.ndarray | None):
         """
         Set the root seed.
         The intended usage is within the Synthesiser class.
