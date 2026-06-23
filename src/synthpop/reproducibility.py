@@ -47,7 +47,7 @@ class RandomStateManager:
     """
     _seed_sequence = None
     """
-    The seed sequence is used to provide proper seeds for the classes that need an RNG
+    The seed sequence is used to derive independent integer seeds for components that require their own RNG.
     in this package, even if the user provided seed is suboptimal.
     """
 
@@ -97,7 +97,7 @@ class RandomStateManager:
     def create_rng(cls, seed: int) -> np.random.Generator:
         """
         Creates a new instance of an RNG with a fixed initial state.
-        Same root seed + same seed => same RNG.
+        Same root seed + same seed => RNGs with identical random streams.
         This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
         However, `RandomStateManager.create_rng(seed=3) is RandomStateManager.create_rng(seed=3) ` would evaluate to `False`
 
@@ -119,6 +119,6 @@ class RandomStateManager:
         self.old_seed_sequence = RandomStateManager._seed_sequence
         RandomStateManager.set_root_seed(self.new_seed)
 
-    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
+    def __exit__(self, exc_type=None, exc_value=None, exc_traceback=None):
         RandomStateManager._root_seed = self.old_seed
         RandomStateManager._seed_sequence = self.old_seed_sequence
