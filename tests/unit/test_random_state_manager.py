@@ -33,6 +33,20 @@ def patch_default_rng(mocker):
         "numpy.random.default_rng", return_value=expected_rng)
     return {"mock": mock_default_rng, "expected_rng": expected_rng}
 
+@pytest.fixture(autouse=True)
+def control_random_state_manager():
+    """
+    These test have the assumption that they start with an uninitialised RandomStateManager.
+    When running the test, this is not guaranteed.
+    This fixture is to give that guarantee. 
+    """
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
+
+    yield
+
+    RandomStateManager._root_seed = None
+    RandomStateManager._seed_sequence = None
 # ------------------ Assertion helpers -------------------------
 
 
@@ -166,7 +180,7 @@ def test_random_state_manager_given_uninitialised_when_creating_new_seed(monkeyp
         "synthpop.reproducibility._create_seed_from_sequence", return_value=expected_returned_seed)
 
     # When: an seed is created (create_new_seed)
-    result = RandomStateManager.create_new_seed()
+    result = RandomStateManager.create_instance_seed()
 
     # Then: The random state manager gets initialised with a random seed.
     # This asserts that set_root_seed has been called with seed=None.
@@ -196,7 +210,7 @@ def test_random_state_manager_given_initialised_when_creating_new_seed(monkeypat
         "synthpop.reproducibility._create_seed_from_sequence", return_value=expected_returned_seed)
 
     # When: an seed is created (create_new_seed)
-    result = RandomStateManager.create_new_seed()
+    result = RandomStateManager.create_instance_seed()
 
     # Then: A seed is created using the seed sequence
     mock_create_seed_from_sequence.assert_called_with(expected_seed_sequence)
@@ -306,22 +320,22 @@ def test_random_state_manager_initialised_exit(monkeypatch):
 
 def test_random_state_manager_create_new_seed_returns_int():
 
-    result = RandomStateManager.create_new_seed()
+    result = RandomStateManager.create_instance_seed()
     assert isinstance(result, int)
 
 
 def test_random_state_manager_raises_on_invalid_type():
 
-    with pytest.raises(TypeError,match = ".* expects int or sequence of ints .*"):
+    with pytest.raises(TypeError, match = ".* expects int or sequence of ints .*"):
         RandomStateManager.set_root_seed("not an integer")
 
-    with pytest.raises(TypeError,match = ".* expects int or sequence of ints .*"):
+    with pytest.raises(TypeError, match = ".* expects int or sequence of ints .*"):
         RandomStateManager.set_root_seed(1.2)
 
     with pytest.raises(ValueError,match = re.escape("expected non-negative integer")):
         RandomStateManager.set_root_seed(-1)
 
-    with pytest.raises(TypeError,match = ".* expects int or sequence of ints .*"):
+    with pytest.raises(TypeError, match = ".* expects int or sequence of ints .*"):
         RandomStateManager.set_root_seed(np.nan)
 
 def test_random_state_manager_warns_on_empty_list():
@@ -330,4 +344,4 @@ def test_random_state_manager_warns_on_empty_list():
         RandomStateManager.set_root_seed([])
 
     assert len(record) == 1
-    assert str(record[0].message) =="empty list as no entropy for seed. Use None for system entropy."
+    assert str(record[0].message) == "empty list as no entropy for seed. Use None for system entropy."
