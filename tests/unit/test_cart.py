@@ -21,10 +21,10 @@ class StubRegressor(TransformerMixin, BaseEstimator):
     def transform(self, X):
         self.transform_x = X
         return self.transform_result
-    
+
     def get_feature_names_out(self, input_features=None):
         return ["fake_output"]
-    
+
 
 class StubClassifier(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
@@ -38,7 +38,7 @@ class StubClassifier(TransformerMixin, BaseEstimator):
     def transform(self, X):
         self.transform_x = X
         return self.transform_result
-    
+
     def get_feature_names_out(self, input_features=None):
         return ["fake_output"]
 
@@ -48,8 +48,10 @@ class StubClassifier(TransformerMixin, BaseEstimator):
     ("X", "y", "expected", "message"),
     [
         ({}, pd.Series([1]), TypeError, "X must be a pandas DataFrame"),
-        (pd.DataFrame({"a": [1]}), [1], TypeError, "y must be a pandas Series"),
-        (pd.DataFrame({"a": [1, 2]}), pd.Series([1]), ValueError, "X and y must contain the same number of samples"),
+        (pd.DataFrame({"a": [1]}), [1],
+         TypeError, "y must be a pandas Series"),
+        (pd.DataFrame({"a": [1, 2]}), pd.Series(
+            [1]), ValueError, "X and y must contain the same number of samples"),
     ],
 )
 def test_fit_validates_inputs(X, y, expected, message):
@@ -57,6 +59,7 @@ def test_fit_validates_inputs(X, y, expected, message):
 
     with pytest.raises(expected, match=message):
         cart.fit(X, y)
+
 
 @pytest.mark.parametrize(
     ("y_array", "expected_type"),
@@ -88,6 +91,7 @@ def test_fit_selects_correct_method(mocker, y_array, expected_type):
     assert isinstance(cart.method_, expected_type)
     assert np.array_equal(cart.method_.fit_y, y_array)
 
+
 def test_fit_passes_standardised_data_to_tree(mocker):
     clean_X = {"a": np.array([1, 2, 3], dtype=np.float32)}
     clean_y = np.array([4, 5, 6], dtype=np.float32)
@@ -115,6 +119,29 @@ def test_fit_passes_standardised_data_to_tree(mocker):
     assert cart.method_.fit_x is clean_X
     assert cart.method_.fit_y is clean_y
 
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        (pd.Series([None, None], name='c')),
+        (pd.Series([np.nan, np.nan], name='c')),
+        (pd.Series([pd.NA, pd.NA], name='c'))
+    ]
+)
+def test_fitting_handles_entire_nan_array(y):
+    cart = CartMethod()
+
+    X = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+    })
+
+    res = cart.fit(X, y)
+    assert res.method_._all_missing == True
+    assert hasattr(res, 'target_name_')
+    assert not hasattr(cart, "__sklearn_is_fitted__")
+
+
 @pytest.mark.parametrize(
     ("y", "expected_type"),
     [
@@ -132,11 +159,12 @@ def test_fit_clones_methods(y, expected_type):
     cart.fit(X, y)
 
     assert isinstance(cart.method_, expected_type)
-    
+
     if expected_type is StubRegressor:
         assert cart.method_ is not regressor
     else:
         assert cart.method_ is not classifier
+
 
 @pytest.mark.parametrize(
     "y",
@@ -179,15 +207,20 @@ def test_fit_sets_fitted_attributes(mocker, y):
     assert cart.method_.fit_y is clean_y
 
 # ----- transform tests -----
+
+
 @pytest.mark.parametrize(
     ("result", "method"),
     [
-        (pd.Series([10, 20]), StubRegressor(transform_result=np.array([10, 20]))),
-        (pd.Series(["a", "b"]), StubClassifier(transform_result=np.array(["a", "b"]))),
+        (pd.Series([10, 20]), StubRegressor(
+            transform_result=np.array([10, 20]))),
+        (pd.Series(["a", "b"]), StubClassifier(
+            transform_result=np.array(["a", "b"]))),
     ]
 )
 def test_transform_returns_series(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result), classifier=StubClassifier(result))
+    cart = CartMethod(regressor=StubRegressor(result),
+                      classifier=StubClassifier(result))
 
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
@@ -216,15 +249,19 @@ def test_transform_returns_series(mocker, result, method):
 
     np.testing.assert_array_equal(out.to_numpy(), result)
 
+
 @pytest.mark.parametrize(
     ("result", "method"),
     [
-        (pd.Series([10, 20]), StubRegressor(transform_result=np.array([10, 20]))),
-        (pd.Series(["a", "b"]), StubClassifier(transform_result=np.array(["a", "b"]))),
+        (pd.Series([10, 20]), StubRegressor(
+            transform_result=np.array([10, 20]))),
+        (pd.Series(["a", "b"]), StubClassifier(
+            transform_result=np.array(["a", "b"]))),
     ]
 )
 def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result), classifier=StubClassifier(result))
+    cart = CartMethod(regressor=StubRegressor(result),
+                      classifier=StubClassifier(result))
 
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
@@ -262,6 +299,7 @@ def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
         result,
     )
 
+
 def test_transform_rejects_missing_columns():
     cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
 
@@ -277,15 +315,19 @@ def test_transform_rejects_missing_columns():
     ):
         cart.transform(X)
 
+
 @pytest.mark.parametrize(
     ("result", "method"),
     [
-        (pd.Series([10, 20]), StubRegressor(transform_result=np.array([10, 20]))),
-        (pd.Series(["a", "b"]), StubClassifier(transform_result=np.array(["a", "b"]))),
+        (pd.Series([10, 20]), StubRegressor(
+            transform_result=np.array([10, 20]))),
+        (pd.Series(["a", "b"]), StubClassifier(
+            transform_result=np.array(["a", "b"]))),
     ]
 )
 def test_transform_ignores_extra_columns(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result), classifier=StubClassifier(result))
+    cart = CartMethod(regressor=StubRegressor(result),
+                      classifier=StubClassifier(result))
 
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
@@ -314,17 +356,45 @@ def test_transform_ignores_extra_columns(mocker, result, method):
         X[["b", "a"]],
     )
 
+
 def test_transform_requires_fit():
     cart = CartMethod()
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        (pd.Series([None, None, None])),
+        (pd.Series([np.nan, np.nan, np.nan])),
+        (pd.Series([pd.NA, pd.NA, pd.NA]))
+
+    ]
+)
+def test_bypass_entire_nan_array(y):
+    cart = CartMethod()
+
+    X = pd.DataFrame({
+        "a": [1, 2, 3],
+        "b": [4, 5, 6],
+    })
+
+    cart.fit(X, y)
+    result = cart.transform(X)
+
+    assert pd.isna(result).all()
+    assert len(result) == 3
 # ----- get_feature_names_out test -----
+
+
 def test_get_feature_names_out_delegates():
     cart = CartMethod()
     cart.method_ = StubRegressor()
 
     assert cart.get_feature_names_out() == ["fake_output"]
+
 
 def test_get_feature_names_out_raises_unfitted():
     cart = CartMethod()
@@ -333,6 +403,8 @@ def test_get_feature_names_out_raises_unfitted():
         cart.get_feature_names_out()
 
 # ----- clonability test -----
+
+
 def test_clone_works_and_fitted_cart_does_not_preserve_state():
     X = pd.DataFrame({"a": [1]})
     y = pd.Series([1])

@@ -84,6 +84,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         self.target_name_ = getattr(y, "name", None)
         X_val, n_samples = utils.validate_2d_dict(X)
         y = utils.validate_1d_target(y, n_samples)
+        self._all_missing = False
+
+        if pd.isna(y).all():
+            self._all_missing = True
+            return self
 
         self.n_features_in_ = len(X.keys())
         self.feature_order_ = list(X.keys())
@@ -413,6 +418,13 @@ class CartMethod(base_synth.BaseSynthMethod):
         :param X: Feature dataset.
         :return: Synthesised target variable.
         """
+
+        if self.method_._all_missing:
+            return pd.Series(
+            np.nan,
+            index=X.index,
+            name=self.target_name_,
+        )
 
         check_is_fitted(self, ["method_", "feature_names_in_", "target_name_"])
 
