@@ -39,8 +39,8 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
         # Check if max_bins is not an integer
 
         (
-            pd.DataFrame([0]), pd.DataFrame([0]), -
-            12, "with value of at least 1."
+            pd.DataFrame([0]), pd.DataFrame([0]),
+            -12, "with value of at least 1."
         ),
         # Check for negative bins
 
@@ -49,6 +49,13 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
             "dataframe must be non-empty"
         ),
         # Check empty DataFrames
+
+        (
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='category'),
+            pd.DataFrame({"c1": ['0', '1']}, dtype='string'),
+            25,
+            "must have the same datatypes."
+        ),  # Check for different datatypes
 
     ]
 )
@@ -167,6 +174,8 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
             ),
         ),
         # Data where every value will fall into the same bin
+
+
     ]
 )
 def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
@@ -378,7 +387,7 @@ def test_pairwise_spmse_extensive_output():
 
     syn_df = pd.DataFrame(
         {
-            "c2": [pd.NA, pd.NA, pd.NA],
+            "c2": pd.Series([pd.NA, pd.NA, pd.NA], dtype='str'),
             "c3": [6, 3, 6],
             "c1": [np.nan, np.nan, 0]
         }
