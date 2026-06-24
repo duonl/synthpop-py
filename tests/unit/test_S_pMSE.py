@@ -49,14 +49,6 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
             "dataframe must be non-empty"
         ),
         # Check empty DataFrames
-
-        (
-            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='category'),
-            pd.DataFrame({"c1": ['0', '1']}, dtype='string'),
-            25,
-            f"['c1']."
-        ),  # Check for different datatypes
-
     ]
 )
 def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
@@ -124,8 +116,8 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
         # Check spmse if not every value of the original dataset is represented in the synthetic dataset
 
         (
-            pd.DataFrame({"c1": [0, 0, 0, 1]}),
-            pd.DataFrame({"c1": [0, 1]}),
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='object'),
+            pd.DataFrame({"c1": [0, 1]}, dtype='object'),
             pd.DataFrame(
                 {
                     "column1": ["c1"],
@@ -175,7 +167,54 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
         ),
         # Data where every value will fall into the same bin
 
+        (
+            pd.DataFrame({"c1": ['a', 'a', 'a', 'b']}, dtype='object'),
+            pd.DataFrame({"c1": ['a', 'b']}, dtype='string'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
 
+        (
+            pd.DataFrame({"c1": ['a', 'b', 'c']}, dtype='category'),
+            pd.DataFrame({"c1": ['b', 'c']}, dtype='string'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [50/72]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+
+        (
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='int'),
+            pd.DataFrame({"c1": [0, 1]}, dtype='float'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+
+        (
+            pd.DataFrame({"c1": pd.Categorical(
+                [0, 0, 0, 1], categories=[0, 1])}),
+            pd.DataFrame({"c1": pd.Categorical([0, 1], categories=[0, 1, 2])}),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
     ]
 )
 def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):

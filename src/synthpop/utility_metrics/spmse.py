@@ -7,6 +7,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from synthpop.utils import standardise_array_dtypes
 
 __all__ = ["pairwise_spmse"]
 
@@ -160,13 +161,6 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
         raise ValueError(
             "Original and synthetic dataframes must have the same shape and column names.")
 
-    # Requires ordering
-    datatype_check = (orig_df.dtypes == syn_df[orig_df.columns].dtypes)
-    if not datatype_check.all():
-        raise ValueError(
-            f"Original and synthetic dataframes must have the same datatypes. " +
-            f"Error is in columns {(orig_df.columns[~datatype_check]).tolist()}.")
-
     if max_bins < 1 or not isinstance(max_bins, int):
         raise ValueError(
             "The number of bins should be an integer with value of at least 1.")
@@ -176,8 +170,11 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
     s_df = syn_df.copy(deep=False)
 
     # Start calculations for preprocessing here
-    for column_name in orig_df:
+    for column_name in o_df:
 
+        o_df[column_name] = standardise_array_dtypes(o_df[column_name])
+        s_df[column_name] = standardise_array_dtypes(s_df[column_name])
+        
         if pd.api.types.is_numeric_dtype(o_df[column_name]):
             combined = pd.concat([o_df[column_name], s_df[column_name]])
             _, bins = pd.cut(
@@ -202,6 +199,11 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
 
         jf_orig = _joint_frequencies(o_df, col1, col2)
         jf_syn = _joint_frequencies(s_df, col1, col2)
+
+        full_index = jf_orig.index.union(jf_syn.index, sort=False)
+        jf_orig = jf_orig.reindex(full_index, fill_value=0)
+        jf_syn  = jf_syn.reindex(full_index, fill_value=0)
+
         rows.append([col1, col2, _calc_spmse(jf_orig, jf_syn, n_o, n_s)])
 
     spmse_df = pd.DataFrame(rows, columns=["column1", "column2", "S_pMSE"])
