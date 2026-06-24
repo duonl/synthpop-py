@@ -11,6 +11,7 @@ from sklearn import clone
 from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
 from sklearn.decomposition import PCA
 from sklearn.tree import BaseDecisionTree, DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.exceptions import NotFittedError
 
 from synthpop import utils
 import synthpop.methods.tree_utils as tree_utils
@@ -86,12 +87,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         y = utils.validate_1d_target(y, n_samples)
         self._all_missing = False
 
+        self.n_features_in_ = len(X.keys())
+        self.feature_order_ = list(X.keys())
+
         if pd.isna(y).all():
             self._all_missing = True
             return self
-
-        self.n_features_in_ = len(X.keys())
-        self.feature_order_ = list(X.keys())
 
         self.encoders_ = {name: self._new_encoder().fit(value, y) for (
             name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
@@ -123,6 +124,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         """
 
+        if not hasattr(self, '_all_missing'):
+            raise NotFittedError
+        elif self._all_missing:
+            return np.array([np.nan]*len(X[next(iter(X))]))
+
+        
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
             self, 
@@ -418,13 +425,6 @@ class CartMethod(base_synth.BaseSynthMethod):
         :param X: Feature dataset.
         :return: Synthesised target variable.
         """
-
-        if hasattr(self, "method_") and getattr(self.method_, "_all_missing", False):
-            return pd.Series(
-            np.nan,
-            index=X.index,
-            name=self.target_name_,
-        )
 
         check_is_fitted(self, ["method_", "feature_names_in_", "target_name_"])
 

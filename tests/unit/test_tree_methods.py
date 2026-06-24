@@ -152,6 +152,7 @@ def fitted_tree(tree_method,request):
     tree_method.tree_sampler_ = tree_method.tree_sampler.clone()
     tree_method.tree_ = clone(tree_method.tree)
     tree_method.n_features_in_ = len(X.keys())
+    tree_method._all_missing = False
 
     tree_method.feature_order_ = list(X.keys())
 
@@ -503,6 +504,7 @@ def test_regressor_transform_returns_float32(leafnode_sampler):
     tree_method.tree_ = StubTree()
     tree_method.n_features_in_ = len(X.keys())
     tree_method.feature_order_ = list(X.keys())
+    tree_method._all_missing = False
     
 
     result = tree_method.transform(X)
@@ -532,13 +534,41 @@ def test_classifier_transform_returns_str_dtype(leafnode_sampler):
     tree_method.tree_ = StubTree()
     tree_method.n_features_in_ = len(X.keys())
     tree_method.feature_order_ = list(X.keys())
-    
+    tree_method._all_missing = False
 
     result = tree_method.transform(X)
 
     assert np.array_equal(result,tree_method.missing_handler_.post_synth_transform_result)
     assert result.dtype == str_dtype
 
+def test_transform_raises_not_fitted_when_missing_flag_absent():
+    X = {
+        "a": np.array([1, 2, 3]),
+        "b": np.array([4, 5, 6]),
+    }
+
+    regressor = TreeRegressorMethod()
+
+    with pytest.raises(NotFittedError):
+        regressor.transform(X)
+
+
+def test_transform_returns_nan_array_when_all_missing_true():
+    X = {
+        "a": np.array([1, 2, 3]),
+        "b": np.array([4, 5, 6]),
+    }
+
+    regressor = TreeRegressorMethod()
+
+    regressor._all_missing = True
+
+    result = regressor.transform(X)
+
+    expected = np.array([np.nan, np.nan, np.nan])
+
+    assert np.array_equal(result, expected, equal_nan=True)
+    assert result.shape == (len(X["a"]),)
 
 #general tests ------------------------------------------------------------------------------------
 
@@ -601,3 +631,4 @@ def test_to_fixed_lenght_string_array():
 
     assert result.dtype == "U2"
     assert np.array_equal(result,["aa","bb","c"])
+

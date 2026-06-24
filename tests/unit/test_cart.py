@@ -140,7 +140,9 @@ def test_fitting_handles_entire_nan_array(y):
 
     res = cart.fit(X, y)
     assert res.method_._all_missing == True
-    assert hasattr(res, 'target_name_')
+    assert res.target_name_ == 'c'
+    assert hasattr(res.method_, 'n_features_in_')
+    assert hasattr(res.method_, 'feature_order_')
     assert not hasattr(cart, "__sklearn_is_fitted__")
 
 
@@ -364,8 +366,6 @@ def test_transform_requires_fit():
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
-
-
 @pytest.mark.parametrize(
     "y",
     [
@@ -375,15 +375,19 @@ def test_transform_requires_fit():
 
     ]
 )
-def test_bypass_entire_nan_array(y):
-    cart = CartMethod()
+def test_transform_when_fitted_on_all_missing_outputs_all_missing(y):
+    cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
+
+    cart.method_ = StubRegressor()
+    cart.feature_names_in_ = ["a", "b"]
+    cart.target_name_ = "target"
 
     X = pd.DataFrame({
         "a": [1, 2, 3],
         "b": [4, 5, 6],
     })
 
-    cart.fit(X, y)
+    cart.method_._all_missing = True
     result = cart.transform(X)
 
     assert pd.isna(result).all()
