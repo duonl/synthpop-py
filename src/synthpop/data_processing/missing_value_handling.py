@@ -13,6 +13,7 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
+from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import validate_2d_dict, validate_1d_target
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
@@ -140,7 +141,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         self.feature_order_ = list(X_val.keys())
 
-        self.tree_ = clone(self.tree) if self.tree else DecisionTreeClassifier(min_samples_leaf=5)
+        self.tree_ = clone(self.tree) if self.tree else DecisionTreeClassifier(min_samples_leaf=5,random_state=RandomStateManager.create_instance_seed())
         self.tree_sampler_ = self.tree_sampler.clone() if self.tree_sampler else LeafNodeSampler()
         
         # implementation
