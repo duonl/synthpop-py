@@ -7,6 +7,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+
 from synthpop.utils import standardise_array_dtypes
 
 __all__ = ["pairwise_spmse"]
