@@ -55,7 +55,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     :param show_plot: Boolean on whether the plot pops up in an interactive window
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
-    bin-based coloring and S_PMSE values in the bins.
+    bin-based colouring and S_PMSE values in the bins.
 
     Example:
     --------

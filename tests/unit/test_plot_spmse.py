@@ -44,7 +44,7 @@ def spmse_df():
                 "column2": ["c1"],
                 "spmse": [1.0]
             }
-        )  # Wrong capitalization
+        )  # Wrong capitalisation
     ],
 )
 def test_input_errors(df):
