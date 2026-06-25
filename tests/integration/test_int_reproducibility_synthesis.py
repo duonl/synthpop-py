@@ -100,21 +100,32 @@ def test_error_unseen_node(seed):
     obs = pd.DataFrame(X)
     obs["target"] = y
 
+    # 7 -> 4
+    # 9 -> 100
+    #14 -> 100
+    #17 -> 6
+    #28 -> 4
+
+    d_bad_cols = {
+        7:4,
+        9:100,
+        14:100,
+        17:6,
+        28:4
+    }
+
+    bad_col = d_bad_cols[seed]
     
-    cols = []
-    for i,col in enumerate(obs.columns):
 
-        cols = cols + [col]
+    part_obs = obs[1:bad_col]
+    synth = Synthesiser(random_seed=0)
+    synth.fit(part_obs)
 
-        part_obs = obs[cols]
-        synth = Synthesiser(random_seed=0)
-        synth.fit(part_obs)
-
-        try:
-            synth.generate(100)
-        except:
-            tree.plot_tree(synth.models_[col].method_.tree_)#TODO pinpoint the columns that go wrong
-            plt.savefig(f"tree_plots/tree_seed_{seed}_col{i}.svg")
+    try:
+        synth.generate(100)
+    except:
+        tree.plot_tree(synth.models_[bad_col].method_.tree_)#TODO pinpoint the columns that go wrong
+        plt.savefig(f"tree_plots/tree_seed_{seed}_col{bad_col}.svg")
 
 
 
