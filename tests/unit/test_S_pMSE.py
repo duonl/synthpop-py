@@ -49,6 +49,11 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
             "dataframe must be non-empty"
         ),
         # Check empty DataFrames
+
+        (
+            pd.DataFrame({"c1":[0,0,0,0]}), pd.DataFrame({"c1":['0', '0', '0', '0']}), 35,
+            "c1 must be either numeric or non-numeric"
+        ), #This can create problem in cases one tries to use pandas.cut on non numeric columns
     ]
 )
 def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
@@ -167,6 +172,9 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
         ),
         # Data where every value will fall into the same bin
 
+        # Below came to light at bugfix 153, where it was shown that different
+        # datatypes can cause the S_pMSE to break.
+        # This is fixed using a standardisation. Splitting numeric and non-numeric
         (
             pd.DataFrame({"c1": ['a', 'a', 'a', 'b']}, dtype='object'),
             pd.DataFrame({"c1": ['a', 'b']}, dtype='string'),

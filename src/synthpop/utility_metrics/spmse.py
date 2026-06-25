@@ -1,6 +1,7 @@
 """
 This module contains metrics to evaluate the utility of synthetic data.
 """
+
 from itertools import combinations_with_replacement
 from typing import Sequence
 import warnings
@@ -13,7 +14,9 @@ from synthpop.utils import standardise_array_dtypes
 __all__ = ["pairwise_spmse"]
 
 
-def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None = None) -> pd.Series:
+def _preprocessing_numeric(
+    column: pd.Series, bins: Sequence[float] | None = None
+) -> pd.Series:
     """
     Preprocess a numeric column for S_pMSE computation by discretising it into bins.
 
@@ -30,21 +33,44 @@ def _preprocessing_numeric(column: pd.Series, bins: Sequence[float] | None = Non
 
     return column
 
-
-def _preprocessing_non_numeric(column: pd.Series) -> pd.Series:
+def _preprocess_columns(o_df, s_df, max_bins):
     """
-    Standardise missing values in a non-numeric column.
+    Preprocess the original and synthetic dataframes prior to S_pMSE calculation.
 
-    Missing entries are converted to np.nan to ensure consistent 
-    handling across categorical and string variables during S_pMSE computation.
+    Missing values are standardised to ``np.nan`` across all columns. 
+    Numeric columns are discretised into bins
 
-    :param column: the specific column. 
+    :param o_df: Original dataframe
+    :param s_df: Synthetic dataframe
+    :param max_bins: Maximum number of bins to use when discretising numeric columns
     """
 
-    mask = pd.isna(column)
-    column.loc[mask] = np.nan
+    for col in o_df.columns:
+        o_col = pd.Series(standardise_array_dtypes(o_df[col]), index=o_df.index)
+        s_col = pd.Series(standardise_array_dtypes(s_df[col]), index=s_df.index)
 
-    return column
+        o_is_numeric = pd.api.types.is_numeric_dtype(o_col)
+        s_is_numeric = pd.api.types.is_numeric_dtype(s_col)
+
+        if o_is_numeric != s_is_numeric:
+            raise ValueError(
+                f"Both synthetic and original column {col} must be "
+                "either numeric or non-numeric"
+            )
+
+        if o_is_numeric:
+            combined = pd.concat([o_col, s_col])
+            _, bins = pd.cut(
+                combined,
+                bins=max_bins,
+                retbins=True,
+                duplicates="drop",
+            )
+
+            o_df[col] = _preprocessing_numeric(o_col, bins=bins)
+            s_df[col] = _preprocessing_numeric(s_col, bins=bins)
+
+    return o_df, s_df
 
 
 def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str) -> pd.Series:
@@ -59,11 +85,13 @@ def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str) -> pd.Series:
     if col1 == col2:
         jf = df.groupby(col1, dropna=False, observed=True).size().rename(col1)
     else:
-        jf = df.groupby([col1, col2], dropna=False,
-                        observed=True).size().rename(col1+','+col2)
+        jf = (
+            df.groupby([col1, col2], dropna=False, observed=True)
+            .size()
+            .rename(col1 + "," + col2)
+        )
 
     return jf
-
 
 def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.float32:
     """
@@ -75,28 +103,21 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
     :param n_s: number of rows in synthetic dataset
     """
 
-    rescaled_differences = jf_syn.sub(
-        (n_s / n_o) * jf_or,
-        fill_value=0
-    )
+    rescaled_differences = jf_syn.sub((n_s / n_o) * jf_or, fill_value=0)
 
-    expected_frequency = (
-        jf_syn.add(jf_or, fill_value=0)
-        * n_s / (n_o + n_s)
-    )
+    expected_frequency = jf_syn.add(jf_or, fill_value=0) * n_s / (n_o + n_s)
     num_independent_combinations = len(expected_frequency.index)
 
     if num_independent_combinations > 1:
 
         spmse = (
-            1 / (num_independent_combinations - 1)
-            * np.sum(
-                np.power(rescaled_differences, 2) / expected_frequency
-            )
+            1
+            / (num_independent_combinations - 1)
+            * np.sum(np.power(rescaled_differences, 2) / expected_frequency)
         ).astype(np.float32)
     else:  # number_independent_combinations=1
 
-        spmse = np.float32(0.)
+        spmse = np.float32(0.0)
         warnings.warn(
             f"Both variables are constant and equal; "
             f"the statistic is undefined. Return 0 for variable pair: {jf_syn.name}",
@@ -106,12 +127,14 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
     return spmse
 
 
-def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 25) -> pd.DataFrame:
+def pairwise_spmse(
+    orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 25
+) -> pd.DataFrame:
     """
     Compute the pairwise Standardised propensity Mean Squared Error (S_pMSE) between an original and a synthetic dataset.
 
     The metric compares the preservation of pairwise joint distributions between corresponding variables in both datasets.
-    Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the original and synthetic dataset. 
+    Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the original and synthetic dataset.
     Categorical and string variables are used directly.
     Missing values are standardised to np.nan and included in the frequency calculations as a separate level.
 
@@ -145,53 +168,36 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
 
     if not isinstance(orig_df, pd.DataFrame) or not isinstance(syn_df, pd.DataFrame):
         raise ValueError(
-            "Original and synthetic dataframes should both be a pandas DataFrame.")
+            "Original and synthetic dataframes should both be a pandas DataFrame."
+        )
 
     n_o = len(orig_df.index)
     n_s = len(syn_df.index)
 
     if n_o == 0 or n_s == 0:
-        raise ValueError(
-            'Both the original and synthetic dataframe must be non-empty.')
+        raise ValueError("Both the original and synthetic dataframe must be non-empty.")
 
     if not orig_df.columns.is_unique or not syn_df.columns.is_unique:
         raise ValueError(
-            "Original and synthetic dataframes must have unique column names.")
+            "Original and synthetic dataframes must have unique column names."
+        )
 
     if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError(
-            "Original and synthetic dataframes must have the same shape and column names.")
+            "Original and synthetic dataframes must have the same shape and column names."
+        )
 
     if max_bins < 1 or not isinstance(max_bins, int):
         raise ValueError(
-            "The number of bins should be an integer with value of at least 1.")
+            "The number of bins should be an integer with value of at least 1."
+        )
 
     # Make sure the original DataFrames are not modified
     o_df = orig_df.copy(deep=False)
     s_df = syn_df.copy(deep=False)
 
     # Start calculations for preprocessing here
-    for column_name in o_df:
-
-        o_df[column_name] = standardise_array_dtypes(o_df[column_name])
-        s_df[column_name] = standardise_array_dtypes(s_df[column_name])
-        
-        if pd.api.types.is_numeric_dtype(o_df[column_name]):
-            combined = pd.concat([o_df[column_name], s_df[column_name]])
-            _, bins = pd.cut(
-                combined,
-                bins=max_bins,
-                retbins=True,
-                duplicates='drop'
-            )
-            o_df[column_name] = _preprocessing_numeric(
-                o_df[column_name], bins=bins)
-            s_df[column_name] = _preprocessing_numeric(
-                s_df[column_name], bins=bins)
-
-        else:
-            o_df[column_name] = _preprocessing_non_numeric(o_df[column_name])
-            s_df[column_name] = _preprocessing_non_numeric(s_df[column_name])
+    o_df, s_df = _preprocess_columns(o_df, s_df, max_bins)
 
     # Calculate joint frequency tables and s_pmse calculations below
     rows = []
@@ -203,7 +209,7 @@ def pairwise_spmse(orig_df: pd.DataFrame, syn_df: pd.DataFrame, max_bins: int = 
 
         full_index = jf_orig.index.union(jf_syn.index, sort=False)
         jf_orig = jf_orig.reindex(full_index, fill_value=0)
-        jf_syn  = jf_syn.reindex(full_index, fill_value=0)
+        jf_syn = jf_syn.reindex(full_index, fill_value=0)
 
         rows.append([col1, col2, _calc_spmse(jf_orig, jf_syn, n_o, n_s)])
 
