@@ -45,7 +45,7 @@ def _get_colorscale() -> list:
     return colorscale
 
 
-def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot=True) -> go.Figure:
+def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = True) -> go.Figure:
     """
     Plot the standardised propensity mean squared error.
 
