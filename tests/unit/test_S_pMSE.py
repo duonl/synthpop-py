@@ -51,9 +51,10 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
         # Check empty DataFrames
 
         (
-            pd.DataFrame({"c1":[0,0,0,0]}), pd.DataFrame({"c1":['0', '0', '0', '0']}), 35,
+            pd.DataFrame({"c1": [0, 0, 0, 0]}), pd.DataFrame(
+                {"c1": ['0', '0', '0', '0']}), 35,
             "c1 must be either numeric or non-numeric"
-        ), #This can create problem in cases one tries to use pandas.cut on non numeric columns
+        ),  # This can create problem in cases one tries to use pandas.cut on non numeric columns
     ]
 )
 def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
