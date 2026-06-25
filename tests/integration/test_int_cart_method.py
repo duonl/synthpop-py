@@ -262,3 +262,24 @@ def test_fit_transform_with_missing_values_in_target(y):
 
     assert len(out) == len(y)
     assert out.isna().sum() > 0
+
+    
+@pytest.mark.parametrize(
+    "y",
+    [
+        (pd.Series([None, None], name='c')),
+        (pd.Series([np.nan, np.nan], name='c')),
+        (pd.Series([pd.NA, pd.NA], name='c'))
+    ]
+)
+def test_fitting_handles_entire_nan_array(y):
+    cart = CartMethod()
+
+    X = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+    })
+
+    res = cart.fit(X, y)
+    assert res.method_._all_missing == True
+    assert res.target_name_ == 'c'
