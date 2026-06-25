@@ -152,6 +152,13 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         return self
 
+    def check_leaf_mismatchs(self,leaf_ids):
+
+        seen_leaf_ids = set(self.tree_sampler_._leaf_map.keys())
+        if len(set(leaf_ids)-seen_leaf_ids) > 0:
+            return True
+        
+        return False
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         """
         Synthesise new column
@@ -189,6 +196,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         all_features = tree_utils.build_feature_matrix(all_features_dict, self.feature_order_)
         leaf_ids = self.tree_.apply(all_features)
+
+        self.check_leaf_mismatchs(leaf_ids)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
         result = self.missing_handler_.post_synth_transform(X_val, sample)
@@ -280,7 +289,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     def _get_tree(self):
         return DecisionTreeClassifier(min_samples_leaf=5,   # equivalent to minbucket in synthpop-r
                                       min_impurity_decrease=1e-08,  # equivalent to cp in synthpop-r
-                                      random_state=RandomStateManager.create_new_seed()
+                                      random_state=RandomStateManager.create_instance_seed()
                                       ,)
 
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
@@ -340,7 +349,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def _get_tree(self):
         return DecisionTreeRegressor(min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
                                     min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
-                                    random_state=RandomStateManager.create_new_seed()
+                                    random_state=RandomStateManager.create_instance_seed()
                                     )
     
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:

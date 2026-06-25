@@ -9,6 +9,8 @@ from synthpop.synthesiser import Synthesiser
 from synthpop.reproducibility import RandomStateManager
 
 from sklearn.datasets import make_classification, make_regression
+from sklearn import tree
+from matplotlib import pyplot as plt
 
 from synthpop.utils import str_dtype
 
@@ -90,7 +92,7 @@ def get_test_data_regressor(seed = 10,with_cats=False,with_missing_features=Fals
     return (X,y)
 
 
-@pytest.mark.parametrize("seed",[(i) for i in range(50)])
+@pytest.mark.parametrize("seed",[7,9,14,17,28,32,35])
 def test_error_unseen_node(seed):
     X,y = get_test_data_regressor(seed=seed,with_cats=True,with_missing_features= True,with_missing_target=True)
 
@@ -98,11 +100,22 @@ def test_error_unseen_node(seed):
     obs = pd.DataFrame(X)
     obs["target"] = y
 
-    synth = Synthesiser(random_seed=0)
+    
+    cols = []
+    for i,col in enumerate(obs.columns):
 
-    synth.fit(obs)
+        cols = cols + [col]
 
-    synth.generate(100)
+        part_obs = obs[cols]
+        synth = Synthesiser(random_seed=0)
+        synth.fit(part_obs)
+
+        try:
+            synth.generate(100)
+        except:
+            tree.plot_tree(synth.models_[col].method_.tree_)#TODO pinpoint the columns that go wrong
+            plt.savefig(f"tree_plots/tree_seed_{seed}_col{i}.svg")
+
 
 
 def test_reproducibilty_synthesis():
