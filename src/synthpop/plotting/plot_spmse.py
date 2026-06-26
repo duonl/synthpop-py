@@ -9,6 +9,18 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
+def _categorise_spmse(spmse, bins):
+    """
+    Categorise the spmse. This assume that the pairwise spmse does not return nan
+
+    :param spmse: 3xN pandas DataFrame
+    :param bins: list of bin edges
+
+    :return: 4xN pandas DataFrame with new categorized column
+    
+    """
+    spmse["category"] = np.digitize(spmse['S_pMSE'], bins=bins, right=True)
+    return spmse
 
 def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     """
@@ -106,7 +118,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     ]
 
     # pairwise_spmse does not return nan
-    spmse["category"] = np.digitize(spmse['S_pMSE'], bins=bins, right=True)
+    spmse = _categorise_spmse(spmse, bins)
 
     matrix = _make_matrix(spmse, "category")
     matrix_orig = _make_matrix(spmse, "S_pMSE")

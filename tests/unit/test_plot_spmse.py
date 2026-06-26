@@ -4,12 +4,47 @@ import pandas as pd
 import re
 
 from synthpop.plotting.plot_spmse import (
+    _categorise_spmse,
     _make_matrix,
     _get_colourscale,
     plot_spmse
 )
 
-# ----- _test_matrix test -----
+
+@pytest.fixture
+def spmse_df():
+    return pd.DataFrame(
+        {
+            "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
+            "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
+            "S_pMSE":
+            [
+                0,
+                473842.48534952759345,
+                12.4598375983543,
+                4.0,
+                46.485343962786234,
+                0.0001,
+            ],
+        }
+    )
+
+
+# ----- _categorise_spmse test -----
+
+def test_categorise_spmse_correct_output(spmse_df):
+    bins = [0, 3, 10, 30, 100, np.inf]
+
+    spmse_df.loc[1, "S_pMSE"] = 3 # specifically make a boundary condition
+
+    spmse = _categorise_spmse(spmse_df, bins)
+
+    expected = pd.Series([0, 1, 3, 2, 4, 1], name="category")
+        
+    pd.testing.assert_series_equal(
+        spmse["category"], expected
+    )
+# ----- _make_matrix test -----
 
 
 def test_make_matrix_creates_symmetric_matrix():
@@ -34,7 +69,7 @@ def test_make_matrix_creates_symmetric_matrix():
     pd.testing.assert_frame_equal(result, expected)
 
 
-# ----- get_colourscale tests -----
+# ----- _get_colourscale tests -----
 
 def test_get_colourscale_structure():
     colourscale = _get_colourscale()
@@ -58,25 +93,6 @@ def test_get_colourscale_structure():
         assert colourscale[2 * i + 1] == [(i + 1) / len(colours), colour]
 
 # ----- plot_spmse tests -----
-
-
-@pytest.fixture
-def spmse_df():
-    return pd.DataFrame(
-        {
-            "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
-            "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
-            "S_pMSE":
-            [
-                0,
-                473842.48534952759345,
-                12.4598375983543,
-                4.0,
-                46.485343962786234,
-                0.0001,
-            ],
-        }
-    )
 
 
 @pytest.mark.parametrize(

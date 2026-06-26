@@ -9,3 +9,4 @@
 classes.dot
 pyproject.toml
 tests/unit/__pycache__/
+.vscode/settings.json
