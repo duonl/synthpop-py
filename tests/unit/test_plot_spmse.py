@@ -1,8 +1,63 @@
 import numpy as np
 import pytest
 import pandas as pd
+import re
 
-from synthpop.plotting.plot_spmse import plot_spmse
+from synthpop.plotting.plot_spmse import (
+    _make_matrix,
+    _get_colourscale,
+    plot_spmse
+)
+
+# ----- _test_matrix test -----
+
+
+def test_make_matrix_creates_symmetric_matrix():
+    df = pd.DataFrame(
+        {
+            "column1": ["A", "A", "A", "B", "B", "C"],
+            "column2": ["A", "B", "C", "B", "C", "C"],
+            "S_pMSE": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+        }
+    )
+
+    result = _make_matrix(df)
+
+    expected = pd.DataFrame(
+        [[3.0, 5.0, 6.0],
+         [2.0, 4.0, 5.0],
+         [1.0, 2.0, 3.0]],
+        index=["C", "B", "A"],
+        columns=["A", "B", "C"],
+    )
+
+    pd.testing.assert_frame_equal(result, expected)
+
+
+# ----- get_colourscale tests -----
+
+def test_get_colourscale_structure():
+    colourscale = _get_colourscale()
+
+    colours = [
+        'rgb(255,255,255)',
+        'rgb(255,255,229)',
+        'rgb(255,247,188)',
+        'rgb(254,227,145)',
+        'rgb(254,196,79)',
+        'rgb(254,153,41)'
+    ]
+
+    assert len(colourscale) == 2 * len(colours)
+
+    assert colourscale[0] == [0.0, colours[0]]
+    assert colourscale[-1] == [1.0, colours[-1]]
+
+    for i, colour in enumerate(colours):
+        assert colourscale[2 * i] == [i / len(colours), colour]
+        assert colourscale[2 * i + 1] == [(i + 1) / len(colours), colour]
+
+# ----- plot_spmse tests -----
 
 
 @pytest.fixture
@@ -25,7 +80,7 @@ def spmse_df():
 
 
 @pytest.mark.parametrize(
-    "df",
+    "df, match",
     [
         (
             pd.DataFrame(
@@ -35,24 +90,39 @@ def spmse_df():
                     "column3": ["c3"],
                     "column4": [2]
                 }
-            )
+            ),
+            "the columns ['column1', 'column2', 'S_pMSE']"
         ),  # Can only be exactly 3 columns
 
-        pd.DataFrame(
-            {
-                "column1": ["c1"],
-                "column2": ["c1"],
-                "spmse": [1.0]
-            }
-        )  # Wrong capitalisation
+        (
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "spmse": [1.0]
+                }
+            ),
+            "the columns ['column1', 'column2', 'S_pMSE']"
+        ),  # Wrong capitalisation
+
+        (
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [np.nan]
+                },
+            ),
+            "The S_pMSE dataframe must not contain missing value"
+        ),  # contains nan
     ],
 )
-def test_input_errors(df):
+def test_input_errors(df, match):
     """
     Test that invalid column names raise a ValueError.
     """
 
-    with pytest.raises(ValueError, match="should be of shape 3xN"):
+    with pytest.raises(ValueError, match=re.escape(match)):
         plot_spmse(df, None, False)
 
 
@@ -123,7 +193,7 @@ def test_axis(spmse_df):
 
 def test_text(spmse_df):
     """
-    Test that cells with 0 S_pMSE are shown as 'MISSING'.
+    Test that cells with 0 S_pMSE are shown as 'CONSTANT VARIABLE'.
     """
 
     fig = plot_spmse(spmse_df, None, False)
@@ -133,14 +203,14 @@ def test_text(spmse_df):
         [
             ['12.46', '46.49', '0.0'],
             ['473842.49', '4.0', '46.49'],
-            ['MISSING', '473842.49', '12.46']
+            ['CONSTANT VARIABLE', '473842.49', '12.46']
         ]
     )
 
     assert (output == text).all()
 
 
-def test_colorbar_labels(spmse_df):
+def test_colourbar_labels(spmse_df):
     """
     Test that colorbar labels match the bin_labels.
     """
@@ -149,7 +219,7 @@ def test_colorbar_labels(spmse_df):
     colorbar = fig.data[0].colorbar
 
     output = [
-        "MISSING",
+        "CONSTANT VARIABLE",
         "(0,3]",
         "(3,10]",
         "(10,30]",
@@ -160,7 +230,7 @@ def test_colorbar_labels(spmse_df):
     assert list(colorbar.ticktext) == output
 
 
-def test_colorscale(spmse_df):
+def test_colourscale(spmse_df):
     """
     Test that colorbar labels match the bin_labels.
     """
@@ -194,8 +264,23 @@ def test_layout_properties(spmse_df):
     fig = plot_spmse(spmse_df, None, False)
 
     assert fig.layout.title.text == "S_pMSE Heatmap"
-    assert fig.layout.width == 900
-    assert fig.layout.height == 845
+    assert fig.layout.width == 986
+    assert fig.layout.height == 850
+
+
+def test_hover_template(spmse_df):
+    """
+    Test that checks whether the correct hovertemplate is used
+    """
+
+    fig = plot_spmse(spmse_df, None, False)
+
+    assert fig.data[0].hovertemplate == (
+        "x: %{x}<br>"
+        "y: %{y}<br>"
+        "value: %{text}"
+        "<extra></extra>"
+    )
 
 
 def test_save_image(monkeypatch, tmp_path, spmse_df):
@@ -212,7 +297,7 @@ def test_save_image(monkeypatch, tmp_path, spmse_df):
     from plotly.graph_objects import Figure
     monkeypatch.setattr(Figure, "write_image", fake_write_image)
 
-    outfile = tmp_path / "plot.png"
+    outfile = tmp_path / "spmse.pdf"
     plot_spmse(spmse_df, str(outfile), False)
 
     assert called
@@ -234,6 +319,25 @@ def test_show_not_called(monkeypatch, spmse_df):
 
     plot_spmse(spmse_df, None, False)
     assert not called
+
+
+def test_show_called(monkeypatch, spmse_df):
+    """
+    Test that show() is called when show_plot=True.
+    """
+
+    called = False
+
+    def fake_show(*args, **kwargs):
+        nonlocal called
+        called = True
+
+    from plotly.graph_objects import Figure
+    monkeypatch.setattr(Figure, "show", fake_show)
+
+    plot_spmse(spmse_df, None, True)
+    assert called
+
 
 def test_no_input_change(spmse_df):
     """Test if function does not change the input"""
