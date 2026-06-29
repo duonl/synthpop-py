@@ -146,7 +146,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     Example:
     --------
     >>> import pandas as pd
-    >>> from synthpop.plotting.plot import plot_spmse
+    >>> from synthpop.plotting import plot_spmse
     >>>
     >>> spmse = pd.DataFrame(
     ...     {

@@ -1,7 +1,8 @@
-import numpy as np
-import pytest
-import pandas as pd
 import re
+
+import numpy as np
+import pandas as pd
+import pytest
 
 from synthpop.plotting.plot_spmse import (
     _categorise_spmse,
