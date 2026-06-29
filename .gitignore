@@ -1,4 +1,5 @@
 *.pyc
+*.pyc.*
 /docs/api reference/
 /docs/build/
 /dist/

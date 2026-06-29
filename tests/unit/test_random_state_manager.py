@@ -148,7 +148,7 @@ def test_random_state_manager_given_initialised_when_creating_rng(monkeypatch, p
     assert_seed_state(3)
 
 
-def test_random_state_manager_given_uninitialised_when_creating_new_seed(monkeypatch, mocker):
+def test_random_state_manager_given_uninitialised_when_creating_instance_seed(monkeypatch, mocker):
     """
     Given: The random state manager is not initialised.
     When: an seed is created (create_new_seed)
@@ -179,7 +179,7 @@ def test_random_state_manager_given_uninitialised_when_creating_new_seed(monkeyp
     mock_create_seed_from_sequence = mocker.patch(
         "synthpop.reproducibility._create_seed_from_sequence", return_value=expected_returned_seed)
 
-    # When: an seed is created (create_new_seed)
+    # When: a seed is created (create_new_seed)
     result = RandomStateManager.create_instance_seed()
 
     # Then: The random state manager gets initialised with a random seed.
@@ -191,7 +191,7 @@ def test_random_state_manager_given_uninitialised_when_creating_new_seed(monkeyp
     assert result == expected_returned_seed
 
 
-def test_random_state_manager_given_initialised_when_creating_new_seed(monkeypatch, mocker):
+def test_random_state_manager_given_initialised_when_creating_instance_seed(monkeypatch, mocker):
     """
     Given: The random state manager is initialised.
     When: an seed is created (create_new_seed)
