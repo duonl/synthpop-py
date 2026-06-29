@@ -142,6 +142,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             all_features_dict, self.feature_order_)
 
         self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
+        self.all_features = all_features
+        self.target_data = self._convert_y(prepared_y)
 
         leaf_ids = self.tree_.apply(all_features)
 

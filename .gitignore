@@ -12,3 +12,5 @@ tests/unit/__pycache__/
 *.png
 *.svg
 tests/integration/__pycache__/
+*.xlsx
+*.csv
