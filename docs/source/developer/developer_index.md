@@ -12,18 +12,7 @@ For questions about what constitutes acceptable code, consult [Code Standards, N
 
 Finally, the [Dataflow Diagrams](way_of_working/dataflowdiagram.md) provide a visual and conceptual overview of how Synthpop operates internally. Use this as a reference when you need to understand the system's architecture or the flow of data through different components.
 
-```{toctree}
-:maxdepth: 1
-:caption: Governance
-
-../../../GOVERNANCE.md
-```
-
-```{toctree}
-:maxdepth: 1
-:caption: Contributing
-
-../../../CONTRIBUTING.md
+```{include} ../../../GOVERNANCE.md
 ```
 
 ```{toctree}
@@ -61,4 +50,16 @@ functional_descriptions/reproducibility
 :maxdepth: 1
 :caption: Documentation
 documentation
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: Governance
+governance_placeholder
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: Contributing
+contributing_placeholder
 ```

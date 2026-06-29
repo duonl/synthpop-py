@@ -53,6 +53,8 @@ extensions = [
 myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
 autodoc_member_order = "bysource"
 
+autodoc_typehints = "none"
+
 autodoc_mock_imports = ['plotly', 'typing_extensions',]
 source_suffix = {
     '.rst': 'restructuredtext',
