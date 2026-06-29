@@ -146,6 +146,7 @@ def test_error_unseen_node(seed):
 
         common_nodes = node_indicator.toarray()[sample_ids].sum(axis=0) !=0
         common_node_id = np.arange(n_nodes)[common_nodes]
+        n_nans_in_threshold = pd.isna(tree.tree_.threshold).sum()
 
         diag_data = {
             "seed":seed,
@@ -155,7 +156,8 @@ def test_error_unseen_node(seed):
             "is_regressor": isinstance(tree,DecisionTreeRegressor),
             "unused_nodes":n_nodes-len(common_node_id),
             "percentage": 100*((n_nodes-len(common_node_id))/n_nodes),
-            "accuracy": tree.score(X_test,y_test)
+            "accuracy": tree.score(X_test,y_test),
+            "n_nan_in_threshold":n_nans_in_threshold
         }
         cols_data.append(diag_data)
 
