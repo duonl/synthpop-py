@@ -6,7 +6,9 @@ import re
 from synthpop.plotting.plot_spmse import (
     _categorise_spmse,
     _make_matrix,
+    _make_text_matrix,
     _get_colourscale,
+    _make_heatmap,
     plot_spmse
 )
 
@@ -32,22 +34,31 @@ def spmse_df():
 
 # ----- _categorise_spmse test -----
 
+
 def test_categorise_spmse_correct_output(spmse_df):
+    """
+    Test that checks if the S_pMSE is correctly binned
+    """
     bins = [0, 3, 10, 30, 100, np.inf]
 
-    spmse_df.loc[1, "S_pMSE"] = 3 # specifically make a boundary condition
+    spmse_df.loc[1, "S_pMSE"] = 3  # specifically make a boundary condition
 
     spmse = _categorise_spmse(spmse_df, bins)
 
     expected = pd.Series([0, 1, 3, 2, 4, 1], name="category")
-        
+
     pd.testing.assert_series_equal(
         spmse["category"], expected
     )
+
+
 # ----- _make_matrix test -----
 
 
 def test_make_matrix_creates_symmetric_matrix():
+    """
+    Test that checks if the 3xN dataframe correctly makes a matrix
+    """
     df = pd.DataFrame(
         {
             "column1": ["A", "A", "A", "B", "B", "C"],
@@ -69,9 +80,38 @@ def test_make_matrix_creates_symmetric_matrix():
     pd.testing.assert_frame_equal(result, expected)
 
 
+# ----- _make_text_matrix tests -----
+
+
+def test_make_text_matrix_test():
+    """
+    Test that checks the text matrix
+    """
+    matrix = pd.DataFrame([
+        [12.4598375983543, 46.485343962786234, 0.0001],
+        [473842.48534952759345, 4.0, 46.485343962786234],
+        [0., 473842.48534952759345,  12.4598375983543]
+    ])
+
+    matrix = _make_text_matrix(matrix)
+
+    output = pd.DataFrame(
+        [
+            ['12.46', '46.49', '0.0'],
+            ['473842.49', '4.0', '46.49'],
+            ['CONSTANT VARIABLE', '473842.49', '12.46']
+        ]
+    )
+
+    pd.testing.assert_frame_equal(output, matrix)
+
+
 # ----- _get_colourscale tests -----
 
 def test_get_colourscale_structure():
+    """
+    Test that checks the colourscale
+    """
     colourscale = _get_colourscale()
 
     colours = [
@@ -91,6 +131,194 @@ def test_get_colourscale_structure():
     for i, colour in enumerate(colours):
         assert colourscale[2 * i] == [i / len(colours), colour]
         assert colourscale[2 * i + 1] == [(i + 1) / len(colours), colour]
+
+
+# ----- _make_heatmap tests -----
+
+@pytest.fixture
+def heatmap_inputs():
+    matrix = pd.DataFrame(
+        [
+            [3., 4., 1.],
+            [5., 2., 4.],
+            [0., 5., 3.]
+        ],
+        index=["c3", "c2", "c1"],
+        columns=["c1", "c2", "c3"],
+    )
+
+    text_matrix = pd.DataFrame(
+        [
+            ["12.46", "46.49", "0.0"],
+            ["473842.49", "4.0", "46.49"],
+            ["CONSTANT VARIABLE", "473842.49", "12.46"],
+        ],
+        index=matrix.index,
+        columns=matrix.columns,
+    )
+
+    bins = [0, 3, 10, 30, 100, np.inf]
+
+    bin_labels = [
+        "CONSTANT VARIABLE",
+        "(0,3]",
+        "(3,10]",
+        "(10,30]",
+        "(30,100]",
+        "(100,+)",
+    ]
+
+    colourscale = [
+        [0.0, 'rgb(255,255,255)'],
+        [0.16666666666666666, 'rgb(255,255,255)'],
+        [0.16666666666666666, 'rgb(255,255,229)'],
+        [0.3333333333333333, 'rgb(255,255,229)'],
+        [0.3333333333333333, 'rgb(255,247,188)'],
+        [0.5, 'rgb(255,247,188)'],
+        [0.5, 'rgb(254,227,145)'],
+        [0.6666666666666666, 'rgb(254,227,145)'],
+        [0.6666666666666666, 'rgb(254,196,79)'],
+        [0.8333333333333334, 'rgb(254,196,79)'],
+        [0.8333333333333334, 'rgb(254,153,41)'],
+        [1.0, 'rgb(254,153,41)']
+    ]
+
+    return matrix, text_matrix, colourscale, bins, bin_labels
+
+
+def test_make_heatmap_returns_figure(heatmap_inputs):
+    """
+    Test if a plotly figure is returned
+    """
+    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+
+    fig = _make_heatmap(
+        matrix,
+        text_matrix,
+        colourscale,
+        bins,
+        bin_labels,
+    )
+
+    assert fig.data[0].type == "heatmap"
+
+
+def test_make_heatmap_data(heatmap_inputs):
+    """
+    Test that the heatmap contains the expected data.
+    """
+
+    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+
+    fig = _make_heatmap(
+        matrix,
+        text_matrix,
+        colourscale,
+        bins,
+        bin_labels,
+    )
+
+    heatmap = fig.data[0]
+
+    assert heatmap.type == "heatmap"
+    assert np.shape(heatmap.z) == (3, 3)
+
+    np.testing.assert_array_equal(heatmap.z, matrix.values)
+    np.testing.assert_array_equal(heatmap.x, matrix.columns)
+    np.testing.assert_array_equal(heatmap.y, matrix.index)
+    np.testing.assert_array_equal(heatmap.text, text_matrix.values)
+
+
+def test_make_heatmap_layout(heatmap_inputs):
+    """
+    Test that the layout is configured correctly.
+    """
+
+    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+
+    fig = _make_heatmap(
+        matrix,
+        text_matrix,
+        colourscale,
+        bins,
+        bin_labels,
+    )
+
+    assert fig.layout.title.text == "S_pMSE Heatmap"
+    assert fig.layout.title.x == 0.5
+    assert fig.layout.width == 986
+    assert fig.layout.height == 850
+    assert fig.layout.xaxis.side == "top"
+    assert fig.layout.yaxis.scaleanchor == "x"
+    assert fig.layout.yaxis.scaleratio == 1
+
+
+def test_make_heatmap_colourbar(heatmap_inputs):
+    """
+    Test that the colourbar is configured correctly.
+    """
+
+    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+
+    fig = _make_heatmap(
+        matrix,
+        text_matrix,
+        colourscale,
+        bins,
+        bin_labels,
+    )
+
+    colorbar = fig.data[0].colorbar
+
+    assert list(colorbar.ticktext) == bin_labels
+
+    np.testing.assert_array_equal(
+        colorbar.tickvals,
+        np.arange(len(bins)) + 0.5,
+    )
+
+    assert colorbar.title.text == "S_pMSE bins"
+
+
+def test_make_heatmap_colourscale(heatmap_inputs):
+    """
+    Test that the expected colourscale is used.
+    """
+
+    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+
+    fig = _make_heatmap(
+        matrix,
+        text_matrix,
+        colourscale,
+        bins,
+        bin_labels,
+    )
+
+    assert fig.data[0].colorscale == tuple(map(tuple, colourscale))
+
+
+def test_make_heatmap_hovertemplate(heatmap_inputs):
+    """
+    Test that the expected hover template is used.
+    """
+
+    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+
+    fig = _make_heatmap(
+        matrix,
+        text_matrix,
+        colourscale,
+        bins,
+        bin_labels,
+    )
+
+    assert fig.data[0].hovertemplate == (
+        "x: %{x}<br>"
+        "y: %{y}<br>"
+        "value: %{text}"
+        "<extra></extra>"
+    )
 
 # ----- plot_spmse tests -----
 
@@ -140,163 +368,6 @@ def test_input_errors(df, match):
 
     with pytest.raises(ValueError, match=re.escape(match)):
         plot_spmse(df, None, False)
-
-
-def test_returns_figure(spmse_df):
-    """
-    Test that function returns a Figure.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-
-    assert fig is not None
-    assert len(fig.data) == 1
-
-
-def test_heatmap_trace(spmse_df):
-    """
-    Test that the trace is a heatmap.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    heatmap = fig.data[0]
-
-    assert heatmap.type == "heatmap"
-
-
-def test_heatmap_shape(spmse_df):
-    """
-    Test that the heatmap z matrix has correct shape.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    z = fig.data[0].z
-
-    assert np.shape(z) == (3, 3)
-
-
-def test_binning(spmse_df):
-    """
-    Test that binned categories are correct (0-5).
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    z = np.array(fig.data[0].z)
-
-    output = np.array(
-        [
-            [3., 4., 1.],
-            [5., 2., 4.],
-            [0., 5., 3.]
-        ]
-    )
-
-    assert (output == z).all()
-
-
-def test_axis(spmse_df):
-    """
-    Test the x and y axis of the data.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    x = np.array(fig.data[0].x)
-    y = np.array(fig.data[0].y)
-
-    assert (x == np.array(['c1', 'c2', 'c3'])).all()
-    assert (y == np.array(['c3', 'c2', 'c1'])).all()
-
-
-def test_text(spmse_df):
-    """
-    Test that cells with 0 S_pMSE are shown as 'CONSTANT VARIABLE'.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    text = np.array(fig.data[0].text)
-
-    output = np.array(
-        [
-            ['12.46', '46.49', '0.0'],
-            ['473842.49', '4.0', '46.49'],
-            ['CONSTANT VARIABLE', '473842.49', '12.46']
-        ]
-    )
-
-    assert (output == text).all()
-
-
-def test_colourbar_labels(spmse_df):
-    """
-    Test that colorbar labels match the bin_labels.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    colorbar = fig.data[0].colorbar
-
-    output = [
-        "CONSTANT VARIABLE",
-        "(0,3]",
-        "(3,10]",
-        "(10,30]",
-        "(30,100]",
-        "(100,+)",
-    ]
-
-    assert list(colorbar.ticktext) == output
-
-
-def test_colourscale(spmse_df):
-    """
-    Test that colorbar labels match the bin_labels.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-    colorscale = fig.data[0].colorscale
-
-    output = (
-        (0.0, 'rgb(255,255,255)'),
-        (1/6, 'rgb(255,255,255)'),
-        (1/6, 'rgb(255,255,229)'),
-        (2/6, 'rgb(255,255,229)'),
-        (2/6, 'rgb(255,247,188)'),
-        (0.5, 'rgb(255,247,188)'),
-        (0.5, 'rgb(254,227,145)'),
-        (4/6, 'rgb(254,227,145)'),
-        (4/6, 'rgb(254,196,79)'),
-        (5/6, 'rgb(254,196,79)'),
-        (5/6, 'rgb(254,153,41)'),
-        (1.0, 'rgb(254,153,41)')
-    )
-
-    assert (output == colorscale)
-
-
-def test_layout_properties(spmse_df):
-    """
-    Test that figure layout has correct title, width, height.
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-
-    assert fig.layout.title.text == "S_pMSE Heatmap"
-    assert fig.layout.width == 986
-    assert fig.layout.height == 850
-
-
-def test_hover_template(spmse_df):
-    """
-    Test that checks whether the correct hovertemplate is used
-    """
-
-    fig = plot_spmse(spmse_df, None, False)
-
-    assert fig.data[0].hovertemplate == (
-        "x: %{x}<br>"
-        "y: %{y}<br>"
-        "value: %{text}"
-        "<extra></extra>"
-    )
 
 
 def test_save_image(monkeypatch, tmp_path, spmse_df):
@@ -356,7 +427,9 @@ def test_show_called(monkeypatch, spmse_df):
 
 
 def test_no_input_change(spmse_df):
-    """Test if function does not change the input"""
+    """
+    Test if function does not change the input
+    """
 
     original_df = spmse_df.copy(deep=True)
     plot_spmse(spmse_df, None, False)
