@@ -121,6 +121,7 @@ def test_fit_passes_standardised_data_to_tree(mocker):
     assert cart.method_.fit_x is clean_X
     assert cart.method_.fit_y is clean_y
 
+
 @pytest.mark.parametrize(
     ("y", "expected_type"),
     [
@@ -341,6 +342,7 @@ def test_transform_requires_fit():
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
+
 @pytest.mark.parametrize(
     "y",
     [
@@ -350,26 +352,7 @@ def test_transform_requires_fit():
 
     ]
 )
-def test_transform_when_fitted_on_all_missing_outputs_all_missing(y):
-    cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
-
-    cart.method_ = StubRegressor()
-    cart.feature_names_in_ = ["a", "b"]
-    cart.target_name_ = "target"
-
-    X = pd.DataFrame({
-        "a": [1, 2, 3],
-        "b": [4, 5, 6],
-    })
-
-    cart.method_._all_missing = True
-    result = cart.transform(X)
-
-    assert pd.isna(result).all()
-    assert len(result) == 3
 # ----- get_feature_names_out test -----
-
-
 def test_get_feature_names_out_delegates():
     cart = CartMethod()
     cart.method_ = StubRegressor()

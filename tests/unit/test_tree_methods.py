@@ -663,19 +663,27 @@ def test_transform_raises_not_fitted_when_missing_flag_absent():
     }
 
     regressor = TreeRegressorMethod()
+    classifier = TreeClassifierMethod()
 
     with pytest.raises(NotFittedError):
         regressor.transform(X)
+        classifier.transform(X)
 
 
 @pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])
 def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_tree):
 
-    fitted_tree._all_missing = True
+    expected = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
 
+    fitted_tree._all_missing = True
+    
     result = fitted_tree.transform(X)
 
-    expected = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+    tree_method.encoders_ = None
+    tree_method.missing_handler_ = None
+    tree_method.tree_sampler_ = None
+    tree_method.tree_ = None
+    tree_method.n_features_in_ = None
 
     assert np.array_equal(result, expected, equal_nan=True)
 

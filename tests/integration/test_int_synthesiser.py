@@ -7,6 +7,8 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
+from synthpop.methods.sample_synth import SampleMethod
+from synthpop.methods.copy_synth import CopyMethod
 
 
 def test_synthesiser_correct_default_methods():
@@ -202,3 +204,30 @@ def test_synthesiser_preserves_cat_cat_relation():
     for col in obs_ct.columns:
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
+
+def test_int_bugfix_152():
+    df = pd.DataFrame({
+    "a": [1, None],
+    "b": [0, 0],
+    "c": [np.nan, np.nan]
+    })
+
+    special_syn_method = {
+    "a": SampleMethod(),
+    "b": CopyMethod(),
+    "c": CartMethod()
+    }
+
+    synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
+    fit = synth.fit(df)
+
+    assert isinstance(fit.models_['a'], SampleMethod)
+    assert isinstance(fit.models_['b'], CopyMethod)
+    assert isinstance(fit.models_['c'], CartMethod)
+
+    generated = fit.generate()
+
+    assert df['b'].equals(generated['b'])
+
+    for col in df.columns:
+        assert df[col].isin(generated[col]).all()
