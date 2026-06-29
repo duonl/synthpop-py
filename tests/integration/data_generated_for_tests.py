@@ -29,7 +29,7 @@ def make_data_missing(X):
 
 
 def get_test_data_classifier(seed = 10,n_samples=100,with_cats = False,with_missing_features=False,with_missing_target=False):
-    X,y = make_classification(n_samples=n_samples,n_classes=10,n_informative=11)
+    X,y = make_classification(random_state=seed,n_samples=n_samples,n_classes=10,n_informative=11)
     
     X = {i:X[:,i] for i in range(X.shape[1])}
 
@@ -52,7 +52,7 @@ def get_test_data_classifier(seed = 10,n_samples=100,with_cats = False,with_miss
 
 
 def get_test_data_regressor(seed = 10,n_samples=100,with_cats=False,with_missing_features=False,with_missing_target=False):
-    X,y = make_regression(n_samples=n_samples)
+    X,y = make_regression(random_state=seed,n_samples=n_samples)
     X = {i:X[:,i] for i in range(X.shape[1])}
 
     idx_cats = [3,4,6]

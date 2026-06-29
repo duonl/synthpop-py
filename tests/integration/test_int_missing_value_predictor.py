@@ -8,6 +8,9 @@ from synthpop.data_processing.missing_value_handling import MissingValuePredicto
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
 
+# This imports an auto-use fixture to set the seed, in order to make the test reproducible
+from tests.integration.make_int_test_reproducible import control_random_state_manager
+
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
 @pytest.fixture

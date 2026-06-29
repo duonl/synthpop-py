@@ -13,6 +13,9 @@ from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMetho
 from synthpop.utils import str_dtype
 from sklearn.datasets import make_classification, make_regression
 
+# This imports an auto-use fixture to set the seed, in order to make the test reproducible
+from tests.integration.make_int_test_reproducible import control_random_state_manager
+
 def test_treemethod_classifier_fit_and_transform():
     tree_method = TreeClassifierMethod()
 
