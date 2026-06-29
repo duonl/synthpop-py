@@ -179,7 +179,7 @@ def test_random_state_manager_given_uninitialised_when_creating_instance_seed(mo
     mock_create_seed_from_sequence = mocker.patch(
         "synthpop.reproducibility._create_seed_from_sequence", return_value=expected_returned_seed)
 
-    # When: an seed is created (create_new_seed)
+    # When: a seed is created (create_new_seed)
     result = RandomStateManager.create_instance_seed()
 
     # Then: The random state manager gets initialised with a random seed.
