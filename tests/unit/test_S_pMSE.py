@@ -39,8 +39,8 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
         # Check if max_bins is not an integer
 
         (
-            pd.DataFrame([0]), pd.DataFrame([0]), -
-            12, "with value of at least 1."
+            pd.DataFrame([0]), pd.DataFrame([0]),
+            -12, "with value of at least 1."
         ),
         # Check for negative bins
 
@@ -50,6 +50,11 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
         ),
         # Check empty DataFrames
 
+        (
+            pd.DataFrame({"c1": [0, 0, 0, 0]}), pd.DataFrame(
+                {"c1": ['0', '0', '0', '0']}), 35,
+            "c1 must be either numeric or non-numeric"
+        ),  # This can create problem in cases one tries to use pandas.cut on non numeric columns
     ]
 )
 def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
@@ -117,8 +122,8 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
         # Check spmse if not every value of the original dataset is represented in the synthetic dataset
 
         (
-            pd.DataFrame({"c1": [0, 0, 0, 1]}),
-            pd.DataFrame({"c1": [0, 1]}),
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='object'),
+            pd.DataFrame({"c1": [0, 1]}, dtype='object'),
             pd.DataFrame(
                 {
                     "column1": ["c1"],
@@ -167,6 +172,58 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
             ),
         ),
         # Data where every value will fall into the same bin
+
+        # Below came to light at bugfix 153, where it was shown that different
+        # datatypes can cause the S_pMSE to break.
+        # This is fixed using a standardisation. Splitting numeric and non-numeric
+        (
+            pd.DataFrame({"c1": ['a', 'a', 'a', 'b']}, dtype='object'),
+            pd.DataFrame({"c1": ['a', 'b']}, dtype='string'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+
+        (
+            pd.DataFrame({"c1": ['a', 'b', 'c']}, dtype='category'),
+            pd.DataFrame({"c1": ['b', 'c']}, dtype='string'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [50/72]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+
+        (
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='int'),
+            pd.DataFrame({"c1": [0, 1]}, dtype='float'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+
+        (
+            pd.DataFrame({"c1": pd.Categorical(
+                [0, 0, 0, 1], categories=[0, 1])}),
+            pd.DataFrame({"c1": pd.Categorical([0, 1], categories=[0, 1, 2])}),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9/16]
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
     ]
 )
 def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
@@ -378,7 +435,7 @@ def test_pairwise_spmse_extensive_output():
 
     syn_df = pd.DataFrame(
         {
-            "c2": [pd.NA, pd.NA, pd.NA],
+            "c2": pd.Series([pd.NA, pd.NA, pd.NA], dtype='str'),
             "c3": [6, 3, 6],
             "c1": [np.nan, np.nan, 0]
         }
