@@ -8,7 +8,7 @@ from synthpop.plotting.plot_spmse import (
     _categorise_spmse,
     _make_matrix,
     _make_text_matrix,
-    _get_colourscale,
+    _get_colour_scale,
     _make_heatmap,
     plot_spmse
 )
@@ -107,13 +107,13 @@ def test_make_text_matrix_test():
     pd.testing.assert_frame_equal(output, matrix)
 
 
-# ----- _get_colourscale tests -----
+# ----- _get_colour_scale tests -----
 
-def test_get_colourscale_structure():
+def test_get_colour_scale_structure():
     """
-    Test that checks the colourscale
+    Test that checks the colour scale
     """
-    colourscale = _get_colourscale()
+    colour_scale = _get_colour_scale()
 
     colours = [
         'rgb(255,255,255)',
@@ -124,14 +124,14 @@ def test_get_colourscale_structure():
         'rgb(254,153,41)'
     ]
 
-    assert len(colourscale) == 2 * len(colours)
+    assert len(colour_scale) == 2 * len(colours)
 
-    assert colourscale[0] == [0.0, colours[0]]
-    assert colourscale[-1] == [1.0, colours[-1]]
+    assert colour_scale[0] == [0.0, colours[0]]
+    assert colour_scale[-1] == [1.0, colours[-1]]
 
     for i, colour in enumerate(colours):
-        assert colourscale[2 * i] == [i / len(colours), colour]
-        assert colourscale[2 * i + 1] == [(i + 1) / len(colours), colour]
+        assert colour_scale[2 * i] == [i / len(colours), colour]
+        assert colour_scale[2 * i + 1] == [(i + 1) / len(colours), colour]
 
 
 # ----- _make_heatmap tests -----
@@ -169,7 +169,7 @@ def heatmap_inputs():
         "(100,+)",
     ]
 
-    colourscale = [
+    colour_scale = [
         [0.0, 'rgb(255,255,255)'],
         [0.16666666666666666, 'rgb(255,255,255)'],
         [0.16666666666666666, 'rgb(255,255,229)'],
@@ -184,19 +184,19 @@ def heatmap_inputs():
         [1.0, 'rgb(254,153,41)']
     ]
 
-    return matrix, text_matrix, colourscale, bins, bin_labels
+    return matrix, text_matrix, colour_scale, bins, bin_labels
 
 
 def test_make_heatmap_returns_figure(heatmap_inputs):
     """
     Test if a plotly figure is returned
     """
-    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
-        colourscale,
+        colour_scale,
         bins,
         bin_labels,
     )
@@ -209,12 +209,12 @@ def test_make_heatmap_data(heatmap_inputs):
     Test that the heatmap contains the expected data.
     """
 
-    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
-        colourscale,
+        colour_scale,
         bins,
         bin_labels,
     )
@@ -235,12 +235,12 @@ def test_make_heatmap_layout(heatmap_inputs):
     Test that the layout is configured correctly.
     """
 
-    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
-        colourscale,
+        colour_scale,
         bins,
         bin_labels,
     )
@@ -259,12 +259,12 @@ def test_make_heatmap_colourbar(heatmap_inputs):
     Test that the colourbar is configured correctly.
     """
 
-    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
-        colourscale,
+        colour_scale,
         bins,
         bin_labels,
     )
@@ -281,22 +281,22 @@ def test_make_heatmap_colourbar(heatmap_inputs):
     assert colorbar.title.text == "S_pMSE bins"
 
 
-def test_make_heatmap_colourscale(heatmap_inputs):
+def test_make_heatmap_colour_scale(heatmap_inputs):
     """
-    Test that the expected colourscale is used.
+    Test that the expected colour scale is used.
     """
 
-    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
-        colourscale,
+        colour_scale,
         bins,
         bin_labels,
     )
 
-    assert fig.data[0].colorscale == tuple(map(tuple, colourscale))
+    assert fig.data[0].colorscale == tuple(map(tuple, colour_scale))
 
 
 def test_make_heatmap_hovertemplate(heatmap_inputs):
@@ -304,12 +304,12 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
     Test that the expected hover template is used.
     """
 
-    matrix, text_matrix, colourscale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
-        colourscale,
+        colour_scale,
         bins,
         bin_labels,
     )

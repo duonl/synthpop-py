@@ -58,24 +58,24 @@ def _make_text_matrix(matrix):
 
     return text_matrix
 
-def _get_colourscale() -> list:
+def _get_colour_scale() -> list:
     """"
-    Helper function to obtain the colourscale given the predetermined bins
+    Helper function to obtain the colour scale given the predetermined bins
     """
 
     colours = ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
 
     n = len(colours)
-    colourscale = []
+    colour_scale = []
 
     for i, colour in enumerate(colours):
 
-        colourscale.append([i / n, colour])
-        colourscale.append([(i + 1) / n, colour])
+        colour_scale.append([i / n, colour])
+        colour_scale.append([(i + 1) / n, colour])
 
-    return colourscale
+    return colour_scale
 
-def _make_heatmap(matrix, text_matrix, colourscale, bins, bin_labels):
+def _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels):
     """
     Generate an interactive Plotly heatmap of the categorised S_pMSE matrix.
 
@@ -83,7 +83,7 @@ def _make_heatmap(matrix, text_matrix, colourscale, bins, bin_labels):
     :param text_matrix: pandas DataFrame of the same shape as ``matrix``
         containing the text displayed in each heatmap cell (e.g. rounded
         values or "CONSTANT VARIABLE").
-    :param colourscale: Plotly-compatible colourscale applied to the heatmap.
+    :param colour_scale: Plotly-compatible colour scale applied to the heatmap.
     :param bins: Sequence of bin edges used to categorise the S_pMSE values.
     :param bin_labels: Labels corresponding to the bins, displayed on the
         colour bar.
@@ -105,7 +105,7 @@ def _make_heatmap(matrix, text_matrix, colourscale, bins, bin_labels):
                 "value: %{text}"
                 "<extra></extra>"
             ),
-            colorscale=colourscale,
+            colorscale=colour_scale,
             zmin=0,
             zmax=len(bins),
             colorbar=dict(
@@ -200,10 +200,10 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     # Preprocessing for Plotting
     text_matrix = _make_text_matrix(matrix_orig)
 
-    colourscale = _get_colourscale()
+    colour_scale = _get_colour_scale()
 
     # plotting
-    fig = _make_heatmap(matrix, text_matrix, colourscale, bins, bin_labels)
+    fig = _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels)
 
     if save_path:
 
