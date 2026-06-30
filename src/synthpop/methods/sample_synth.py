@@ -8,7 +8,8 @@ import numpy as np
 from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod
-from synthpop.methods.tree_utils import sample_array
+import synthpop.methods.tree_utils 
+from synthpop.reproducibility import RandomStateManager
 
 
 class SampleMethod(BaseSynthMethod):
@@ -66,8 +67,10 @@ class SampleMethod(BaseSynthMethod):
         self.values_ = value_counts.index.to_numpy()
         self.counts_ = value_counts.to_numpy()
 
-        self._seed = 42 if self.random_state is None else self.random_state
-        self.random_state_ = np.random.default_rng(self._seed)
+        if self.random_state is None:
+            self.random_state_ = RandomStateManager.create_instance_seed()
+        else:
+            self.random_state_ = self.random_state
 
         if X is not None:
             self.feature_names_in_ = getattr(X, "columns", None)
@@ -92,8 +95,9 @@ class SampleMethod(BaseSynthMethod):
             raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
         
         n = len(X) if X is not None else self.n_samples_
+        rng = RandomStateManager.create_rng(seed=self.random_state_)
         
-        sampled = sample_array(self.random_state_, self.counts_, self.values_, n)
+        sampled = synthpop.methods.tree_utils.sample_array(rng, self.counts_, self.values_, n)
 
         return pd.Series(sampled, name=self.target_name_)
         

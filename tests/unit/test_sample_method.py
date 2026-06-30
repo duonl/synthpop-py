@@ -13,7 +13,7 @@ def make_fitted_model(values: list, counts: list, target_name="target", n_sample
     model.counts_ = np.asarray(counts)
     model.target_name_ = target_name
     model.n_samples_ = n_samples
-    model.random_state_ = np.random.default_rng(seed)
+    model.random_state_ = seed
 
     return model
 
@@ -31,7 +31,8 @@ def make_fitted_model(values: list, counts: list, target_name="target", n_sample
         (pd.Series([np.nan, np.nan, np.nan, np.nan, 0], name="my_target"), [np.nan, 0], [4, 1],),
     ],
 )
-def test_fit_stores_distribution_and_metadata(y, expected_values, expected_counts):
+def test_fit_stores_distribution_and_metadata(y, expected_values, expected_counts,mocker):
+    mock_create_instance_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_instance_seed",return_value= 333)
     model = SampleMethod().fit(None, y)
 
     assert model.target_name_ == "my_target"
@@ -39,9 +40,17 @@ def test_fit_stores_distribution_and_metadata(y, expected_values, expected_count
     assert model.counts_.sum() == len(y), "Counts must sum to total number of samples"
 
     assert list(model.counts_) == expected_counts
+    assert model.random_state_ == 333
 
     for model_value, expected_value in zip(model.values_, expected_values):
         assert (pd.isna(model_value) and pd.isna(expected_value)) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
+
+
+def test_fit_stores_provided_seed():
+    y = pd.Series([1, 2, 3])
+    model = SampleMethod(random_state=1001).fit(None, y)
+
+    assert model.random_state_ == 1001
 
 
 def test_fit_sets_name_when_none():
@@ -91,6 +100,24 @@ def test_transform_values_within_observed_support():
 
     if any(pd.isna(v) for v in values):
         assert result.isna().any()
+
+def test_transform_uses_random_state_manager(mocker):
+
+    expected_rng = np.random.default_rng()
+    expected_result = [6,7,67,76]
+    mock_create_rng= mocker.patch("synthpop.reproducibility.RandomStateManager.create_rng",return_value= expected_rng)
+    mock_sample_array = mocker.patch("synthpop.methods.tree_utils.sample_array",return_value=expected_result )
+    values = [1, 2, 3, np.nan]
+    model = make_fitted_model(values = values, counts=[1, 1, 1, 1], n_samples=4)
+
+    model.random_state_= 123456
+
+    result = model.transform(pd.DataFrame(index=range(100)))
+
+    mock_create_rng.assert_called_with(seed=123456)
+    mock_sample_array.assert_called_with(expected_rng,model.counts_,model.values_,100)
+    assert (result==expected_result).all()
+
 
 
 def test_transform_reproducibility_with_fixed_seed():
