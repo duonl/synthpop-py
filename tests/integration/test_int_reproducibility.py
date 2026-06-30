@@ -124,7 +124,7 @@ def combined_regressor_and_classifier_test_data(seed = 10):
 
 def test_reproducibility_synthesis():
 
-    obs = combined_regressor_and_classifier_test_data()#simulate_realistic_dataset_correlations(n_samples=1000)[0]
+    obs = combined_regressor_and_classifier_test_data()
 
     synth = Synthesiser(random_seed=1)
     synth.fit(obs)
@@ -157,3 +157,7 @@ def test_generate_independent_syn_datasets():
     syn2 = synth.generate(n=100,random_seed=1234)
 
     assert not syn1.equals(syn2)
+
+    synth2 = Synthesiser(random_seed=1234)
+    syn3 = synth2.fit(obs).generate(n=100)
+    assert not syn1.equals(syn3)
