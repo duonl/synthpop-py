@@ -95,8 +95,9 @@ def get_test_data_regressor(seed = 10,with_cats=False,with_missing_features=Fals
     return (X,y)
 
 nodes_diag_data = pd.DataFrame()
+#[i for i in range(200)]
 [7,9,14,17,28,32,35]
-@pytest.mark.parametrize("seed",[i for i in range(200)])
+@pytest.mark.parametrize("seed",[7,9,14,17,28,32,35])
 def test_error_unseen_node(seed):
     X,y = get_test_data_regressor(seed=seed,with_cats=True,with_missing_features= True,with_missing_target=True)
 
@@ -124,48 +125,48 @@ def test_error_unseen_node(seed):
     part_obs = obs#[[1:bad_col]]
     synth = Synthesiser(random_seed=0)
     synth.fit(part_obs)
-    try:
-        synth.generate(100)
-    except:
-        pass
+    # try:
+    synth.generate(100)
+    # except:
+    #     pass
         # tree_method = synth.models_[d_bad_cols[seed]].method_
         # df = pd.DataFrame(tree_method.all_features)
         # df["target"] = tree_method.target_data
         # df.to_csv(f"problematicData/data_seed{seed}_col{d_bad_cols[seed]}.csv")
         # df.to_excel(f"problematicData/data_seed{seed}_col{d_bad_cols[seed]}.xlsx")
 
-    cols_data = []
-    for col in synth.models_:
-        tree = synth.models_[col].method_.tree_
-        X_test = synth.models_[col].method_.all_features
-        y_test = synth.models_[col].method_.target_data
-        n_nodes = tree.tree_.node_count
-        sample_ids = [i for i in range(X_test.shape[0])]
+    # cols_data = []
+    # for col in synth.models_:
+    #     tree = synth.models_[col].method_.tree_
+    #     X_test = synth.models_[col].method_.all_features
+    #     y_test = synth.models_[col].method_.target_data
+    #     n_nodes = tree.tree_.node_count
+    #     sample_ids = [i for i in range(X_test.shape[0])]
 
-        node_indicator = tree.decision_path(X_test)
+    #     node_indicator = tree.decision_path(X_test)
 
-        common_nodes = node_indicator.toarray()[sample_ids].sum(axis=0) !=0
-        common_node_id = np.arange(n_nodes)[common_nodes]
-        n_nans_in_threshold = pd.isna(tree.tree_.threshold).sum()
+    #     common_nodes = node_indicator.toarray()[sample_ids].sum(axis=0) !=0
+    #     common_node_id = np.arange(n_nodes)[common_nodes]
+    #     n_nans_in_threshold = pd.isna(tree.tree_.threshold).sum()
 
-        diag_data = {
-            "seed":seed,
-            "col":col,
-            "n_nodes":n_nodes,
-            "n_nodes_used": len(common_node_id),
-            "is_regressor": isinstance(tree,DecisionTreeRegressor),
-            "unused_nodes":n_nodes-len(common_node_id),
-            "percentage": 100*((n_nodes-len(common_node_id))/n_nodes),
-            "accuracy": tree.score(X_test,y_test),
-            "n_nan_in_threshold":n_nans_in_threshold
-        }
-        cols_data.append(diag_data)
+    #     diag_data = {
+    #         "seed":seed,
+    #         "col":col,
+    #         "n_nodes":n_nodes,
+    #         "n_nodes_used": len(common_node_id),
+    #         "is_regressor": isinstance(tree,DecisionTreeRegressor),
+    #         "unused_nodes":n_nodes-len(common_node_id),
+    #         "percentage": 100*((n_nodes-len(common_node_id))/n_nodes),
+    #         "accuracy": tree.score(X_test,y_test),
+    #         "n_nan_in_threshold":n_nans_in_threshold
+    #     }
+    #     cols_data.append(diag_data)
 
-        #assert len(common_node_id)==n_nodes, f"trainings data does not hit all nodes for seed { seed} column {col}"
+    #     #assert len(common_node_id)==n_nodes, f"trainings data does not hit all nodes for seed { seed} column {col}"
 
-    nodes_diag_data = pd.DataFrame.from_records(cols_data)
-    nodes_diag_data.reset_index()
-    nodes_diag_data.to_excel(f"problematicData/diag_data{seed}.xlsx")
+    # nodes_diag_data = pd.DataFrame.from_records(cols_data)
+    # nodes_diag_data.reset_index()
+    # nodes_diag_data.to_excel(f"problematicData/diag_data{seed}.xlsx")
 
 
 

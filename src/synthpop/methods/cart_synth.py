@@ -3,6 +3,7 @@ This module contains the CART method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
 from typing import Self, Dict, Any
+import warnings
 
 import numpy as np
 import numpy.typing as npt
@@ -112,6 +113,25 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
                 )
             )
 
+    def fit_and_apply_tree(self,all_features,y):
+
+        fitted_correctly = False
+
+        while (not fitted_correctly):
+            tree_candidate = self._new_tree().fit(all_features, y)
+            sample_ids = [i for i in range(all_features.shape[0])]
+            node_indicator = tree_candidate.decision_path(all_features)
+            n_nodes = tree_candidate.tree_.node_count
+
+            used_nodes = node_indicator.toarray()[sample_ids].sum(axis=0) !=0
+            used_node_ids = np.arange(n_nodes)[used_nodes]
+
+            fitted_correctly = len(used_node_ids) == n_nodes
+            if not fitted_correctly:
+                warnings.warn(f"retry fitting column {self.target_name_ }: trainings data did not reach all nodes, ")
+
+        self.tree_ = tree_candidate
+
 
     def fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> Self:
         """
@@ -141,7 +161,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
-        self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
+        #self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
+        self.fit_and_apply_tree(all_features,self._convert_y(prepared_y))
         self.all_features = all_features
         self.target_data = self._convert_y(prepared_y)
 
