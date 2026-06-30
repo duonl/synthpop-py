@@ -11,14 +11,14 @@ import plotly.express as px
 
 def _categorise_spmse(spmse, bins):
     """
-    Categorise the spmse. 
+    Categorise S_pMSE values into predefined bins.
     
     This function assumes that the pairwise spmse does not return nan.
 
     :param spmse: 3xN pandas DataFrame
     :param bins: list of bin edges
 
-    :return: 4xN pandas DataFrame with new categorized column
+    :return: 4xN pandas DataFrame with new categorised column
     
     """
     spmse["category"] = np.digitize(spmse['S_pMSE'], bins=bins, right=True)
@@ -135,10 +135,10 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     """
     Plot the standardised propensity mean squared error.
 
-    :param spmse: The standardised propensity mean squared error values.
+    :param spmse: DataFrame containing the pairwise standardised propensity mean squared error values. The dataframe must contain exactly the columns `['column1', 'column2', 'S_pMSE']` where `column1` and `column2` identify the variable pair and `S_pMSE` contains the corresponding pairwise S_pMSE value. You can obtain this dataframe by running :func:`~synthpop.utility_metrics.spmse.pairwise_spmse`.
     Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
     :param save_path: File directory to save the image of the plot. Does not save if None
-    :param show_plot: Boolean on whether the plot pops up in an interactive window
+    :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. Default is `True`. In headless environments this parameter should be set to `False`.
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
     bin-based colouring and S_PMSE values in the bins.
