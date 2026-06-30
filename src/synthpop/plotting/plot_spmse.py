@@ -3,6 +3,7 @@ This module contains a function to visually inspect the quality of the multivari
 """
 
 from pathlib import Path
+from typing import Sequence
 
 import numpy as np
 import pandas as pd
