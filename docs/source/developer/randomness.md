@@ -17,7 +17,7 @@ Most of the recommendations of NumPy and the requirements from the functional de
 If you are developing an estimator in this package, the guidelines by scikit-learn apply mostly. The points where we deviate are:
 
 - use **`numpy.random.Generator`** instead of `numpy.random.RandomState`.
-- if no seed is provided in the initialiser, use `RandomStateManager.create_new_seed()` to obtain a deterministic instance seed.
+- if no seed is provided in the initialiser, use `RandomStateManager.create_instance_seed()` to obtain a deterministic instance seed.
 - use **`RandomStateManager.create_rng(self.random_state_ )`** instead of `check_random_state` to obtain an RNG.
 - do **not** store the RNG in the object. 
 Using one RNG for the entire object breaks the requirement that methods in this package should yield the same output when called multiple times.
@@ -41,7 +41,7 @@ def __init__(self, random_state: int | None = None):
 ```python
 from reproducibility import RandomStateManager
 def fit(self, X, y):
-    self.random_state_ = RandomStateManager.create_new_seed() if self.random_state is None else self.random_state
+    self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
 ```
 This root seed is set at the beginning of the synthesis pipeline when creating a `Synthesiser` object. `RandomStateManager` actually derives the instance seed from the root seed.
 
@@ -75,7 +75,7 @@ class GaussianNoise(BaseEstimator, TransformerMixin):
 
     # the arguments are ignored anyway, so we make them optional
     def fit(self, X=None, y=None):
-        self.random_state_ = RandomStateManager.create_new_seed() if self.random_state is None else self.random_state
+        self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
         rng = RandomStateManager.create_rng(self._seed)
         # use the RNG when fitting if needed.
 
@@ -86,7 +86,7 @@ class GaussianNoise(BaseEstimator, TransformerMixin):
 ```
 
 ## Interoperability with External Libraries
-Some libraries (including scikit-learn) expect a "random state" argument. In those cases, use `RandomStateManager.create_new_seed()` to provide a random state that stills follows the requirements of this package. Note that passing randomness into external libraries may break this package's guarantee that repeated method calls produce identical outputs. This is unavoidable when delegating randomness outside the package. However, try to find an alternative that supports our package's guarantee.
+Some libraries (including scikit-learn) expect a "random state" argument. In those cases, use `RandomStateManager.create_instance_seed()` to provide a random state that stills follows the requirements of this package. Note that passing randomness into external libraries may break this package's guarantee that repeated method calls produce identical outputs. This is unavoidable when delegating randomness outside the package. However, try to find an alternative that supports our package's guarantee.
 
 ## Anti-patterns (do not do this)
 **Storing RNGS**
