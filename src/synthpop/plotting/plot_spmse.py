@@ -26,7 +26,7 @@ def _categorise_spmse(spmse, bins):
 
 def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     """
-    Makes a Matrix of the 3xN S_pMSE array.
+    Construct a symmetric matrix of the 3xN S_pMSE array.
 
     :param df: Pandas DataFrame, should be 3xN
     :param value_string: either S_pMSE (matrix for text in figure)
