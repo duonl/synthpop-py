@@ -36,6 +36,11 @@ html_theme_options = {
             "url": "https://github.com/duonl/synthpop-py",
             "icon": "fa-brands fa-github",
         },
+        {
+            "name": "Email",
+            "url": "mailto:synthetische.data@duo.nl",
+            "icon": "fa-solid fa-envelope",
+        },
     ],
     "logo": {
         "text": "Synthpop-py",
