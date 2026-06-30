@@ -157,13 +157,15 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
         The dataframe must contain exactly the columns `['column1', 'column2', 'S_pMSE']` 
         where `column1` and `column2` identify the variable pair and `S_pMSE` contains the corresponding pairwise S_pMSE value. 
         You can obtain this dataframe by running :func:`~synthpop.utility_metrics.spmse.pairwise_spmse`.
-        Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
-    :param save_path: File directory to save the image of the plot. Does not save if None
+    :param save_path: Directory where the output PDF is written.
+        If a relative path is provided, it is resolved relative to the current working
+        directory. The directory is created if it does not already exist (including)
+        parent directories). If `None` (default), no permanent output file is created.
     :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. 
         Default is `True`. In headless environments this parameter should be set to `False`.
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
-    bin-based colouring and S_PMSE values in the bins.
+    bin-based colouring and S_pMSE values in the bins.
 
     Example:
     --------
