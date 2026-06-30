@@ -202,3 +202,119 @@ def test_synthesiser_preserves_cat_cat_relation():
     for col in obs_ct.columns:
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
+
+
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, pd.NA, None]
+)
+def test_missingness_predicts_value(missing_value):
+    """A missing should always imply B == 3."""
+
+    test_data = pd.DataFrame({
+        "a": [missing_value, 1, missing_value, 2, 3, missing_value] * 20,
+        "b": [3, 0, 3, 1, 2, 3] * 20,
+    })
+
+    synth = Synthesiser(random_seed=2)
+    generated = synth.fit(test_data).generate(n=200)
+
+    rows = generated["a"].isna()
+
+    assert (generated.loc[rows, "b"] == 3).all()
+
+
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, pd.NA, None]
+)
+def test_value_predicts_missingness(missing_value):
+    """a == 'x' should always imply b is missing."""
+
+    test_data = pd.DataFrame({
+        "a": ["x", "y", "z", "x", "y", "x"] * 20,
+        "b": [missing_value, 1, 2, missing_value, 3, missing_value] * 20,
+    })
+
+    synth = Synthesiser(random_seed=2)
+    generated = synth.fit(test_data).generate(n=200)
+
+    assert generated.loc[generated["a"] == "x", "b"].isna().all()
+
+
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, pd.NA, None]
+)
+def test_joint_missingness_pattern(missing_value):
+    """Missing values should occur together."""
+
+    test_data = pd.DataFrame({
+        "a": [missing_value, 1, missing_value, 2] * 30,
+        "b": [missing_value, 10, missing_value, 20] * 30,
+        "c": [5, 6, 7, 8] * 30,
+    })
+
+    synth = Synthesiser(random_seed=2)
+    generated = synth.fit(test_data).generate(n=200)
+
+    assert (generated["a"].isna() == generated["b"].isna()).all()
+
+
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, pd.NA, None]
+)
+def test_conditional_missingness_multiple_columns(missing_value):
+    """
+    c is missing only when b == 'x' and a == 1.
+    """
+
+    test_data = pd.DataFrame({
+        "a": ["x", "x", "y", "y"] * 30,
+        "b": [1, 0, 1, 0] * 30,
+        "c": [missing_value, 2, 3, 4] * 30,
+    })
+
+    synth = Synthesiser(random_seed=2)
+    generated = synth.fit(test_data).generate(n=200)
+
+    mask = (generated["a"] == "x") & (generated["b"] == 1)
+
+    assert generated.loc[mask, "c"].isna().all()
+
+def test_mixed_missing_representations():
+    """Different missing-value should be handled similarly"""
+
+    test_data = pd.DataFrame({
+        "a": [np.nan, pd.NA, None, 1, 2, 3,] * 20,
+        "b": ["x","x", "x", "one", "two", "three",] * 20,
+    })
+
+    synth = Synthesiser(random_seed=2)
+    generated = synth.fit(test_data).generate(n=200)
+
+    missing = generated["a"].isna()
+
+    assert (generated.loc[missing, "b"] == "x").all()
+
+def test_object_dtype_numeric_strings():
+    """Object columns with mixed numeric/string values. Should transform to string dtype"""
+
+    test_data = pd.DataFrame({
+        "a": pd.Series(
+            [1, "1", 2, "2", np.nan, None] * 20,
+            dtype="object",
+        ),
+        "b": [0, 0, 1, 1, 2, 2] * 20,
+    })
+
+    synth = Synthesiser(random_seed=2)
+
+    generated = synth.fit(test_data).generate()
+
+    rows_na = generated["a"].isna()
+
+    assert (generated.loc[rows_na, "b"] == 2).all()
+
+    assert len(generated) == len(test_data)

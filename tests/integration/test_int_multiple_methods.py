@@ -89,7 +89,7 @@ def test_multiple_synthesis_methods(test_data):
     generated = fit.generate()
 
     assert test_data['b'].equals(generated['b'])
-    test_data['c'][test_data['c'].isna()] = np.nan 
+    test_data['c'] = test_data['c'].replace({pd.NA: np.nan})
     # CART-method always outputs np.nan, but accepts pd.NA
 
     for col in test_data.columns:
@@ -115,59 +115,3 @@ def test_copy_break():
 
     with pytest.raises(ValueError, match="Row mismatch"):
         fit.generate(n=10)
-
-
-@pytest.mark.parametrize(
-    "missing_value",
-    [np.nan, pd.NA, None]
-)
-def test_missingness_predicts_value(missing_value):
-    """A missing should always imply B == 3."""
-
-    test_data = pd.DataFrame({
-        "a": [missing_value, 1, missing_value, 2, 3, missing_value] * 20,
-        "b": [3, 0, 3, 1, 2, 3] * 20,
-    })
-
-    synth = Synthesiser(random_seed=2)
-    generated = synth.fit(test_data).generate(n=200)
-
-    rows = generated["a"].isna()
-
-    assert (generated.loc[rows, "b"] == 3).all()
-
-
-@pytest.mark.parametrize(
-    "missing_value",
-    [np.nan, pd.NA, None]
-)
-def test_value_predicts_missingness(missing_value):
-    """a == 'x' should always imply b is missing."""
-
-    test_data = pd.DataFrame({
-        "a": ["x", "y", "z", "x", "y", "x"] * 20,
-        "b": [missing_value, 1, 2, missing_value, 3, missing_value] * 20,
-    })
-
-    synth = Synthesiser(random_seed=2)
-    generated = synth.fit(test_data).generate(n=200)
-
-    assert generated.loc[generated["a"] == "x", "b"].isna().all()
-
-@pytest.mark.parametrize(
-    "missing_value",
-    [np.nan, pd.NA, None]
-)
-def test_joint_missingness_pattern(missing_value):
-    """Missing values should occur together."""
-
-    test_data = pd.DataFrame({
-        "a": [missing_value, 1, missing_value, 2] * 30,
-        "b": [missing_value, 10, missing_value, 20] * 30,
-        "c": [5, 6, 7, 8] * 30,
-    })
-
-    synth = Synthesiser(random_seed=2)
-    generated = synth.fit(test_data).generate(n=200)
-
-    assert (generated["a"].isna() == generated["b"].isna()).all()
