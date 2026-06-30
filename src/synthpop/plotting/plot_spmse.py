@@ -65,7 +65,7 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
 
 def _get_colour_scale() -> list:
     """"
-    Helper function to obtain the colour scale given the predetermined bins
+    Helper function to obtain the discrete colour scale used for the S_pMSE bins.
     """
 
     colours = ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
