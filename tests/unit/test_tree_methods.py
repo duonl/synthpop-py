@@ -48,7 +48,8 @@ class TransformStub(TransformerMixin, BaseEstimator):
 def encoder():
     # The result of the transform of encoding is always a 2D np.array of float32, with one or more columns
     return TransformStub(
-        transform_return_value=np.array([[1.1], [2.2], [3.3], [4.4], [5.5], [6.6]])
+        transform_return_value=np.array(
+            [[1.1], [2.2], [3.3], [4.4], [5.5], [6.6]])
     )
 
 
@@ -266,7 +267,8 @@ def stub_build_feature_matrix(request, monkeypatch):
         return get_exp_feature_matrix()
 
     # and use monkey patching to replace the method with the stub.
-    monkeypatch.setattr(tree_utils, "build_feature_matrix", stub_build_feature_matrix)
+    monkeypatch.setattr(tree_utils, "build_feature_matrix",
+                        stub_build_feature_matrix)
 
 
 @pytest.fixture(autouse=True)
@@ -358,7 +360,8 @@ def test_fit_prepare_data_for_fit_is_called(X, y, index_cat, tree_method):
         expected=X, actual=tree_method.missing_handler_.prepare_data_for_fit_X
     )
 
-    assert np.array_equal(tree_method.missing_handler_.prepare_data_for_fit_y, y)
+    assert np.array_equal(
+        tree_method.missing_handler_.prepare_data_for_fit_y, y)
     assert not (tree_method.missing_handler_ is tree_method.missing_handler)
 
 
@@ -378,7 +381,8 @@ def test_fit_build_feature_matrix(X, y, index_cat, tree_method, mocker):
 
     tree_method.fit(X, y)
     X_exp = {
-        k: tree_method.encoders_[k].transform_return_value if k in index_cat else v
+        k: tree_method.encoders_[
+            k].transform_return_value if k in index_cat else v
         for (k, v) in tree_method.missing_handler_.prepared_for_fit_result[0].items()
     }
 
@@ -495,10 +499,10 @@ def test_fit_regressor_converts_to_float32(encoder, leafnode_sampler):
 
 
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
-def test_tree_method_fit_returns_nan_for_nan_array(X, y, index_cat, tree_method):
+def test_tree_method_fit_returns_no_fitting_parameters_for_nan_array(X, y, index_cat, tree_method):
     y = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
 
-    fitted = tree_method.fit(X,y)
+    fitted = tree_method.fit(X, y)
 
     assert fitted._all_missing
     assert not hasattr(fitted, "encoders_")
@@ -531,7 +535,8 @@ def test_transform_build_feature_matrix(X, index_cat, fitted_tree, mocker):
 
     tree_method.transform(X)
     X_exp = {
-        k: tree_method.encoders_[k].transform_return_value if k in index_cat else v
+        k: tree_method.encoders_[
+            k].transform_return_value if k in index_cat else v
         for (k, v) in X.items()
     }
     spy.assert_called_once_with(X_exp, tree_method.feature_order_)
@@ -570,7 +575,8 @@ def test_transform_calls_post_synth_transform(X, index_cat, fitted_tree):
 
     result = tree_method.transform(X)
 
-    assert_dict_array_equal(X, tree_method.missing_handler_.post_synth_transform_X)
+    assert_dict_array_equal(
+        X, tree_method.missing_handler_.post_synth_transform_X)
     assert np.array_equal(
         tree_method.tree_sampler_.sample_from_leaves_return_value,
         tree_method.missing_handler_.post_synth_transform_y,
@@ -656,17 +662,27 @@ def test_classifier_transform_returns_str_dtype(leafnode_sampler):
     assert result.dtype == str_dtype
 
 
-def test_transform_raises_not_fitted_when_missing_flag_absent():
+def test_regressor_transform_raises_not_fitted_when_missing_flag_absent():
     X = {
         "a": np.array([1, 2, 3]),
         "b": np.array([4, 5, 6]),
     }
 
     regressor = TreeRegressorMethod()
-    classifier = TreeClassifierMethod()
 
     with pytest.raises(NotFittedError):
         regressor.transform(X)
+
+
+def test_classifier_transform_raises_not_fitted_when_missing_flag_absent():
+    X = {
+        "a": np.array([1, 2, 3]),
+        "b": np.array([4, 5, 6]),
+    }
+
+    classifier = TreeClassifierMethod()
+
+    with pytest.raises(NotFittedError):
         classifier.transform(X)
 
 
@@ -676,16 +692,20 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
     expected = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
 
     fitted_tree._all_missing = True
-    
+    fitted_tree.encoders_ = None
+    fitted_tree.missing_handler_ = None
+    fitted_tree.tree_sampler_ = None
+    fitted_tree.tree_ = None
+    fitted_tree.n_features_in_ = None
+
     result = fitted_tree.transform(X)
 
-    tree_method.encoders_ = None
-    tree_method.missing_handler_ = None
-    tree_method.tree_sampler_ = None
-    tree_method.tree_ = None
-    tree_method.n_features_in_ = None
-
     assert np.array_equal(result, expected, equal_nan=True)
+    assert fitted_tree.encoders_ == None
+    assert fitted_tree.missing_handler_ == None
+    assert fitted_tree.tree_sampler_ == None
+    assert fitted_tree.tree_ == None
+    assert fitted_tree.n_features_in_ == None
 
 
 # general tests ------------------------------------------------------------------------------------

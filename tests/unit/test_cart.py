@@ -343,15 +343,6 @@ def test_transform_requires_fit():
         cart.transform(pd.DataFrame({"a": [1]}))
 
 
-@pytest.mark.parametrize(
-    "y",
-    [
-        (pd.Series([None, None, None])),
-        (pd.Series([np.nan, np.nan, np.nan])),
-        (pd.Series([pd.NA, pd.NA, pd.NA]))
-
-    ]
-)
 # ----- get_feature_names_out test -----
 def test_get_feature_names_out_delegates():
     cart = CartMethod()
