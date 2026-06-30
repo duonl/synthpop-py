@@ -97,7 +97,7 @@ def test_multiple_synthesis_methods(test_data):
 
 
 def test_copy_break():
-    """Test if CopyMethod still produces an error if n != len(initial)dataset)"""
+    """Test if CopyMethod still produces an error if n != len(initial_dataset)"""
     test_data = pd.DataFrame({
         "a": [1, 2],
         "b": [3, 4],
@@ -118,78 +118,56 @@ def test_copy_break():
 
 
 @pytest.mark.parametrize(
-    "test_data",
-    [
-        (
-            pd.DataFrame({
-                "a": [1, np.nan, 4, np.nan, 2, 3, np.nan]*10,
-                "b": ['x', 'y', 'x', 'y', 'x', 'x', 'y']*10,
-            })
-        ),
-
-        (
-            pd.DataFrame({
-                "a": [1, pd.NA, 4, pd.NA, 2, 3, pd.NA]*10,
-                "b": ['x', 'y', 'x', 'y', 'x', 'x', 'y']*10,
-            })
-        ),
-
-        (
-            pd.DataFrame({
-                "a": [1, None, 4, None, 2, 3, None]*10,
-                "b": ['x', 'y', 'x', 'y', 'x', 'x', 'y']*10,
-            })
-        ),
-    ]
+    "missing_value",
+    [np.nan, pd.NA, None]
 )
-def test_CART_entire_nan_predictions(test_data):
-    """Test the case where nan always implies-->y"""
+def test_missingness_predicts_value(missing_value):
+    """A missing should always imply B == 3."""
+
+    test_data = pd.DataFrame({
+        "a": [missing_value, 1, missing_value, 2, 3, missing_value] * 20,
+        "b": [3, 0, 3, 1, 2, 3] * 20,
+    })
+
     synth = Synthesiser(random_seed=2)
-    fit = synth.fit(test_data).generate(n=100)
+    generated = synth.fit(test_data).generate(n=200)
 
-    valid = (
-        ((fit["b"] == "y") & (fit["a"].isna())) |
-        ((fit["b"] == "x") & (~fit["a"].isna()))
-    )
+    rows = generated["a"].isna()
 
-    assert valid.all()
+    assert (generated.loc[rows, "b"] == 3).all()
 
 
 @pytest.mark.parametrize(
-    "test_data",
-    [
-        (
-            pd.DataFrame({
-                "a": ['x', 'x', 'x', 'y', 'x', 'x', 'y']*10,
-                "b": [np.nan, 2, 4, np.nan, np.nan, 3, np.nan]*10
-
-            })
-        ),
-
-        (
-            pd.DataFrame({
-                "a": ['x', 'x', 'x', 'y', 'x', 'x', 'y']*10,
-                "b": [pd.NA, 2, 4, pd.NA, pd.NA, 3, pd.NA]*10
-
-            })
-        ),
-
-        (
-            pd.DataFrame({
-                "a": ['x', 'x', 'x', 'y', 'x', 'x', 'y']*10,
-                "b": [None, 2, 4, None, None, 3, None]*10
-            })
-        ),
-    ]
+    "missing_value",
+    [np.nan, pd.NA, None]
 )
-def test_CART_one_way_nan(test_data):
-    """Test the case where nan always implies-->y and sometimes x--->nan"""
+def test_value_predicts_missingness(missing_value):
+    """a == 'x' should always imply b is missing."""
+
+    test_data = pd.DataFrame({
+        "a": ["x", "y", "z", "x", "y", "x"] * 20,
+        "b": [missing_value, 1, 2, missing_value, 3, missing_value] * 20,
+    })
+
     synth = Synthesiser(random_seed=2)
-    fit = synth.fit(test_data).generate(n=100)
+    generated = synth.fit(test_data).generate(n=200)
 
-    valid = (
-        ((fit["a"] == "y") & (fit["b"].isna())) |
-        ((fit["a"] == "x") & (fit["b"].isna()+~fit["b"].isna()))
-    )
+    assert generated.loc[generated["a"] == "x", "b"].isna().all()
 
-    assert valid.all()
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, pd.NA, None]
+)
+def test_joint_missingness_pattern(missing_value):
+    """Missing values should occur together."""
+
+    test_data = pd.DataFrame({
+        "a": [missing_value, 1, missing_value, 2] * 30,
+        "b": [missing_value, 10, missing_value, 20] * 30,
+        "c": [5, 6, 7, 8] * 30,
+    })
+
+    synth = Synthesiser(random_seed=2)
+    generated = synth.fit(test_data).generate(n=200)
+
+    assert (generated["a"].isna() == generated["b"].isna()).all()
