@@ -386,7 +386,7 @@ def test_save_image(monkeypatch, tmp_path, spmse_df):
         called = True
 
     from plotly.graph_objects import Figure
-    monkeypatch.setattr(Figure, "write_image", fake_write_image)
+    monkeypatch.setattr(Figure, "plotly.graph_objects.Figure.write_image", fake_write_image)
 
     plot_spmse(spmse_df, str(tmp_path), False)
 
@@ -405,7 +405,7 @@ def test_show_not_called(monkeypatch, spmse_df):
         called = True
 
     from plotly.graph_objects import Figure
-    monkeypatch.setattr(Figure, "show", fake_show)
+    monkeypatch.setattr(Figure, "plotly.graph_objects.Figure.show", fake_show)
 
     plot_spmse(spmse_df, None, False)
     assert not called
@@ -423,7 +423,7 @@ def test_show_called(monkeypatch, spmse_df):
         called = True
 
     from plotly.graph_objects import Figure
-    monkeypatch.setattr(Figure, "show", fake_show)
+    monkeypatch.setattr(Figure, "plotly.graph_objects.Figure.show", fake_show)
 
     plot_spmse(spmse_df, None, True)
     assert called
