@@ -54,12 +54,6 @@ documentation
 
 ```{toctree}
 :maxdepth: 1
-:caption: Governance
-governance_placeholder
-```
-
-```{toctree}
-:maxdepth: 1
 :caption: Contributing
 contributing_placeholder
 ```
