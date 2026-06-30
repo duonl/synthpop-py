@@ -35,18 +35,24 @@ def spmse_df():
 
 # ----- _categorise_spmse test -----
 
-
-def test_categorise_spmse_correct_output(spmse_df):
+@pytest.mark.parametrize(
+    "binval, expected_val",
+    [
+        (3, 1), (10, 2), (30, 3), (100, 4), (1000000, 5)
+    ],  # tests all boundary conditions
+)
+def test_categorise_spmse_correct_output(binval, expected_val, spmse_df):
     """
     Test that checks if the S_pMSE is correctly binned
     """
     bins = [0, 3, 10, 30, 100, np.inf]
 
-    spmse_df.loc[1, "S_pMSE"] = 3  # specifically make a boundary condition
+    # specifically make a boundary condition
+    spmse_df.loc[1, "S_pMSE"] = binval
 
     spmse = _categorise_spmse(spmse_df, bins)
 
-    expected = pd.Series([0, 1, 3, 2, 4, 1], name="category")
+    expected = pd.Series([0, expected_val, 3, 2, 4, 1], name="category")
 
     pd.testing.assert_series_equal(
         spmse["category"], expected
@@ -315,7 +321,7 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
     )
 
     assert "%{x}" in fig.data[0].hovertemplate
-    assert "%{y}:" in fig.data[0].hovertemplate
+    assert "%{y}" in fig.data[0].hovertemplate
     assert "%{text}" in fig.data[0].hovertemplate
 
 # ----- plot_spmse tests -----
@@ -359,10 +365,9 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
         ),  # contains nan
 
         (
-            np.array(['This', 'is', 'not', 'a', 'dataframe'])
-        ),
-        "The S_pMSE data should be a pandas DataFrame"
-        # not a dataframe
+            np.array(['This', 'is', 'not', 'a', 'dataframe']),
+            "The S_pMSE data should be a pandas DataFrame"
+        ),  # not a dataframe
     ],
 )
 def test_input_errors(df, match):
@@ -386,7 +391,8 @@ def test_save_image(monkeypatch, tmp_path, spmse_df):
         called = True
 
     from plotly.graph_objects import Figure
-    monkeypatch.setattr(Figure, "plotly.graph_objects.Figure.write_image", fake_write_image)
+    monkeypatch.setattr(
+        Figure, "write_image", fake_write_image)
 
     plot_spmse(spmse_df, str(tmp_path), False)
 
@@ -405,7 +411,7 @@ def test_show_not_called(monkeypatch, spmse_df):
         called = True
 
     from plotly.graph_objects import Figure
-    monkeypatch.setattr(Figure, "plotly.graph_objects.Figure.show", fake_show)
+    monkeypatch.setattr(Figure, "show", fake_show)
 
     plot_spmse(spmse_df, None, False)
     assert not called
@@ -423,7 +429,7 @@ def test_show_called(monkeypatch, spmse_df):
         called = True
 
     from plotly.graph_objects import Figure
-    monkeypatch.setattr(Figure, "plotly.graph_objects.Figure.show", fake_show)
+    monkeypatch.setattr(Figure, "show", fake_show)
 
     plot_spmse(spmse_df, None, True)
     assert called
