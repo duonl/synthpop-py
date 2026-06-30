@@ -9,20 +9,22 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-def _categorise_spmse(spmse, bins):
+
+def _categorise_spmse(spmse: pd.DataFrame, bins: Sequence[float]) -> pd.DataFrame:
     """
     Categorise S_pMSE values into predefined bins.
-    
+
     This function assumes that the pairwise spmse does not return nan.
 
     :param spmse: 3xN pandas DataFrame
     :param bins: list of bin edges
 
     :return: 4xN pandas DataFrame with new categorised column
-    
+
     """
     spmse["category"] = np.digitize(spmse['S_pMSE'], bins=bins, right=True)
     return spmse
+
 
 def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     """
@@ -41,7 +43,8 @@ def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     # invert s.t. the diagonal goes from upper-left to lower-right
     return matrix.iloc[::-1]
 
-def _make_text_matrix(matrix):
+
+def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
     """
     Convert a numeric matrix into a string matrix for plotting.
 
@@ -57,6 +60,7 @@ def _make_text_matrix(matrix):
     text_matrix = text_matrix.mask(matrix == 0, "CONSTANT VARIABLE")
 
     return text_matrix
+
 
 def _get_colour_scale() -> list:
     """"
@@ -75,7 +79,11 @@ def _get_colour_scale() -> list:
 
     return colour_scale
 
-def _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels):
+
+def _make_heatmap(
+        matrix: pd.DataFrame, text_matrix: pd.DataFrame,
+        colour_scale: list, bins: Sequence[float], bin_labels: Sequence[str]
+)-> go.Figure:
     """
     Generate an interactive Plotly heatmap of the categorised S_pMSE matrix.
 
@@ -90,7 +98,6 @@ def _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels):
 
     :return: A Plotly Figure containing the S_pMSE heatmap.
     """
-
 
     fig = go.Figure(
         data=go.Heatmap(
@@ -131,14 +138,29 @@ def _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels):
 
     return fig
 
+
 def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = True) -> go.Figure:
     """
-    Plot the standardised propensity mean squared error.
+    Create a heatmap visualisation of pairwise S_pMSE values.
 
-    :param spmse: DataFrame containing the pairwise standardised propensity mean squared error values. The dataframe must contain exactly the columns `['column1', 'column2', 'S_pMSE']` where `column1` and `column2` identify the variable pair and `S_pMSE` contains the corresponding pairwise S_pMSE value. You can obtain this dataframe by running :func:`~synthpop.utility_metrics.spmse.pairwise_spmse`.
-    Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
+    The input dataframe is interpreted as a collection of pairwise relationships
+    between variables, where each row contains two variable names and their
+    associated S_pMSE value. A symmetric matrix is constructed from these
+    relationships and visualised as a heatmap, with variables shown on both axes.
+    The displayed S_pMSE values are grouped into predefined bins and
+    represented using a discrete sequential colour scale.
+
+    If a saving location is provided, the generated heatmap is written to `spmse.pdf` in the specified directory. 
+    If interactive rendering is enabled, the figure is displayed using the active Plotly renderer.
+
+    :param spmse: DataFrame containing the pairwise standardised propensity mean squared error values. 
+        The dataframe must contain exactly the columns `['column1', 'column2', 'S_pMSE']` 
+        where `column1` and `column2` identify the variable pair and `S_pMSE` contains the corresponding pairwise S_pMSE value. 
+        You can obtain this dataframe by running :func:`~synthpop.utility_metrics.spmse.pairwise_spmse`.
+        Should be a 3xN dataframe, where indices 0,1 are the column names and index 2 is the S_pMSE
     :param save_path: File directory to save the image of the plot. Does not save if None
-    :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. Default is `True`. In headless environments this parameter should be set to `False`.
+    :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. 
+        Default is `True`. In headless environments this parameter should be set to `False`.
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
     bin-based colouring and S_PMSE values in the bins.
@@ -172,6 +194,9 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     ... )
     """
 
+    if not isinstance(spmse, pd.DataFrame):
+        raise ValueError(f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead.")
+
     if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
 
         raise ValueError(
@@ -193,16 +218,13 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     # pairwise_spmse does not return nan
     spmse = _categorise_spmse(spmse, bins)
 
-    #Make matrix for 2D visualisation
     matrix = _make_matrix(spmse, "category")
     matrix_orig = _make_matrix(spmse, "S_pMSE")
 
-    # Preprocessing for Plotting
     text_matrix = _make_text_matrix(matrix_orig)
 
     colour_scale = _get_colour_scale()
 
-    # plotting
     fig = _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels)
 
     if save_path:

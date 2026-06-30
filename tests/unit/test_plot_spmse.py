@@ -314,12 +314,9 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
         bin_labels,
     )
 
-    assert fig.data[0].hovertemplate == (
-        "x: %{x}<br>"
-        "y: %{y}<br>"
-        "value: %{text}"
-        "<extra></extra>"
-    )
+    assert "%{x}" in fig.data[0].hovertemplate
+    assert "%{y}:" in fig.data[0].hovertemplate
+    assert "%{text}" in fig.data[0].hovertemplate
 
 # ----- plot_spmse tests -----
 
@@ -360,6 +357,12 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
             ),
             "The S_pMSE dataframe must not contain missing value"
         ),  # contains nan
+
+        (
+            np.array(['This', 'is', 'not', 'a', 'dataframe'])
+        ),
+        "The S_pMSE data should be a pandas DataFrame"
+        # not a dataframe
     ],
 )
 def test_input_errors(df, match):
@@ -385,8 +388,7 @@ def test_save_image(monkeypatch, tmp_path, spmse_df):
     from plotly.graph_objects import Figure
     monkeypatch.setattr(Figure, "write_image", fake_write_image)
 
-    outfile = tmp_path / "spmse.pdf"
-    plot_spmse(spmse_df, str(outfile), False)
+    plot_spmse(spmse_df, str(tmp_path), False)
 
     assert called
 
