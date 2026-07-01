@@ -57,7 +57,7 @@ The colour scheme shall be sequential, colour-blind friendly, print-friendly, an
 The matrix is converted into a heatmap where the cells show the S_pSME values and are coloured according to our predefined groups. Both axes are labelled with variable names and a legend (colour bar) provides a clear mapping between colours and S_pMSE ranges. To improve readability with a large number of variables, tooltips should be added to see which cell represents which variable pair relationship. Optionally, the heatmap can be saved as a static image file. If interactive rendering is enabled, the heatmap is displayed to the active graphical output device. Rendering is optional and context-dependent, and does not affect the saved image output.
 
 ### 4. Mathematical properties and constraints
-The resulting matrix is always square and symmetric. Diagonal elements do not carry informative value and are left empty. The visual scale depends on the maximum observed S_pMSE value in the input data.
+The resulting matrix is always square and symmetric. The visual scale is similar in all plots for easy comparison.
 
 ### 5. Edge cases and special situations
 #### 5.1 Missing values
