@@ -10,11 +10,13 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from synthpop.data_processing.encoders import PCAEncoder
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
+from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.utils import str_dtype
 from sklearn.datasets import make_classification, make_regression
 
 # This imports an auto-use fixture to set the seed, in order to make the test reproducible
 from tests.integration.make_int_test_reproducible import control_random_state_manager
+from tests.integration.data_generated_for_tests import get_test_data_classifier,get_test_data_regressor
 
 def test_treemethod_classifier_fit_and_transform():
     tree_method = TreeClassifierMethod()
@@ -73,47 +75,47 @@ def make_data_missing(X):
     return X
 
 
-def get_test_data_classifier(with_cats = False,with_missing_features=False,with_missing_target=False):
-    X,y = make_classification(n_classes=10,n_informative=11)
+# def get_test_data_classifier(with_cats = False,with_missing_features=False,with_missing_target=False):
+#     X,y = make_classification(n_classes=10,n_informative=11)
     
-    X = {i:X[:,i] for i in range(X.shape[1])}
+#     X = {i:X[:,i] for i in range(X.shape[1])}
 
 
-    idx_cats = [3,4,6]
-    if with_cats:
-        for idx in idx_cats:
-            x = (X[idx]*10).astype(int)
-            x_i = [f %5 for f in x]
-            X[idx] = np.array([string.ascii_lowercase[i%26] for i in x_i],dtype=str_dtype)
+#     idx_cats = [3,4,6]
+#     if with_cats:
+#         for idx in idx_cats:
+#             x = (X[idx]*10).astype(int)
+#             x_i = [f %5 for f in x]
+#             X[idx] = np.array([string.ascii_lowercase[i%26] for i in x_i],dtype=str_dtype)
 
-    if with_missing_features:
-        X = make_data_missing(X)
+#     if with_missing_features:
+#         X = make_data_missing(X)
 
-    if with_missing_target:
-        y = np.array([string.ascii_lowercase[i%26] if i%5 !=0 else np.nan for i in y],dtype=str_dtype)
-    else:
-        y = np.array([string.ascii_lowercase[i%26] for i in y],dtype=str_dtype)
-    return (X,y)
+#     if with_missing_target:
+#         y = np.array([string.ascii_lowercase[i%26] if i%5 !=0 else np.nan for i in y],dtype=str_dtype)
+#     else:
+#         y = np.array([string.ascii_lowercase[i%26] for i in y],dtype=str_dtype)
+#     return (X,y)
 
 
-def get_test_data_regressor(with_cats=False,with_missing_features=False,with_missing_target=False):
-    X,y = make_regression()
-    X = {i:X[:,i] for i in range(X.shape[1])}
+# def get_test_data_regressor(with_cats=False,with_missing_features=False,with_missing_target=False):
+#     X,y = make_regression()
+#     X = {i:X[:,i] for i in range(X.shape[1])}
 
-    idx_cats = [3,4,6]
-    if with_cats:
-        for idx in idx_cats:
-            x = (X[idx]*10).astype(int)
-            x_i = [f %26 for f in x]
-            X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype = str_dtype)
+#     idx_cats = [3,4,6]
+#     if with_cats:
+#         for idx in idx_cats:
+#             x = (X[idx]*10).astype(int)
+#             x_i = [f %26 for f in x]
+#             X[idx] = np.array([string.ascii_lowercase[i] for i in x_i],dtype = str_dtype)
 
-    if with_missing_features:
-        X = make_data_missing(X)
+#     if with_missing_features:
+#         X = make_data_missing(X)
 
-    if with_missing_target:
-        y = np.array([v if i%5 !=0 else np.nan for i,v in enumerate(y)])
+#     if with_missing_target:
+#         y = np.array([v if i%5 !=0 else np.nan for i,v in enumerate(y)])
 
-    return (X,y)
+#     return (X,y)
 
     
 class SpyDecisionTreeClassifier(DecisionTreeClassifier):
@@ -138,11 +140,11 @@ class SpyDecisionTreeRegressor(DecisionTreeRegressor):
         
 
 def rigged_tree_classifier_method(pca_components = 1):
-    tree = SpyDecisionTreeClassifier()
+    tree = SpyDecisionTreeClassifier(min_samples_leaf=5)
     return TreeClassifierMethod(tree=tree,encoder=PCAEncoder(pca_transform= PCA(n_components=pca_components)))
 
 def rigged_tree_regressor_method():
-    tree = SpyDecisionTreeRegressor()
+    tree = SpyDecisionTreeRegressor(min_samples_leaf=5)
     return TreeRegressorMethod(tree=tree)
 
 CLASSIFIER_CASES = [
@@ -358,3 +360,129 @@ def test_regressor_nondefault_missing_value_predictor():
     result = method.fit_transform(X,y)
 
     assert result.shape[0] == y.shape[0]
+
+@pytest.mark.parametrize("seed",[i for i in range(50)])
+def test_bug_129_regression_classifier(seed):
+
+    seeds = np.random.SeedSequence(seed).generate_state(5)
+
+    method = TreeClassifierMethod(
+            tree=DecisionTreeClassifier(
+                min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                random_state=seeds[0]
+            ),
+            encoder=PCAEncoder(
+                pca_transform=PCA(random_state=seeds[1])
+            ),
+            tree_sampler=LeafNodeSampler(random_state=seeds[2])
+        )
+    
+    X,y = get_test_data_classifier(seed=seeds[3],with_cats=True,with_missing_features= True,with_missing_target=True)
+
+    method.fit(X,y)
+
+    
+    rng = np.random.default_rng(seeds[4])
+
+    for attempts in range(100):
+        X_pred = {}
+        for col in X.keys():
+            X_pred[col] = rng.choice(X[col],size = len(X[col]),replace=True)
+            make_missing = rng.choice([True,False],size = len(X[col]),replace=True)
+            X_pred[col][make_missing] = np.nan
+            
+
+        result = method.transform(X_pred)
+
+@pytest.mark.noautofixt
+@pytest.mark.parametrize("tree_seed,data_seed",[(i,j) for i in [89,88,52,91]for j in [59,14,51,80]])
+def test_bug_129_regression_regressor(tree_seed,data_seed):
+
+
+    seeds = np.random.SeedSequence(0).generate_state(6)
+
+    # the seed for the tree and the seed for the data make bug 129 fully deterministic, 
+    # including the exact leaf id.
+    # This means that the randomness from the missing value predictor or the leaf node sampler does not affect this bug.
+
+    # A tree regressor method is constructed in this test to make this test stable w.r.t. changes in this package.
+    method = TreeRegressorMethod(
+            tree=DecisionTreeRegressor(
+                min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                random_state=tree_seed#None#bad_tree_seed#seeds[0]
+            ),
+            missing_handler=MissingValuePredictor(
+                tree=DecisionTreeClassifier(min_samples_leaf=5,random_state=seeds[5])
+            )
+            ,
+            tree_sampler=LeafNodeSampler(random_state=seeds[2])
+        )
+
+    X,y = get_test_data_regressor(n_samples=50,seed=data_seed,with_cats=True,with_missing_features= True,with_missing_target=True)
+
+    method.fit(X,y)
+
+    
+    rng = np.random.default_rng(seeds[4])
+
+    for attempts in range(100):
+        X_pred = {}
+        for col in X.keys():
+            X_pred[col] = rng.choice(X[col],size = len(X[col]),replace=True)
+            
+
+        result = method.transform(X_pred)
+
+@pytest.mark.parametrize("tree_seed,data_seed",[(i,j) for i in [89,88,52,91]for j in [59,14,51,80]])
+def test_regressor_trainings_data_reaches_all_nodes(tree_seed,data_seed):
+    method = TreeRegressorMethod(
+            tree=SpyDecisionTreeRegressor(
+                min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                random_state=tree_seed#None#bad_tree_seed#seeds[0]
+            ),
+            missing_handler=MissingValuePredictor(
+                tree=DecisionTreeClassifier(min_samples_leaf=5,random_state=1)
+            )
+            ,
+            tree_sampler=LeafNodeSampler(random_state=0)
+        )
+    
+    X,y = get_test_data_regressor(n_samples=50,seed=data_seed,with_cats=True,with_missing_features= True,with_missing_target=True)
+
+    method.fit(X,y)
+
+    X_train = method.tree_.fit_X
+    reached_nodes = method.tree_.apply(X_train)
+
+    all_leaf_nodes = np.where(method.tree_.tree_.children_left==method.tree_.tree_.children_right)
+
+    assert set(all_leaf_nodes[0]) == set(reached_nodes)
+
+@pytest.mark.parametrize("tree_seed,data_seed",[(i,j) for i in [89,88,52,91]for j in [59,14,51,80]])
+def test_classifier_trainings_data_reaches_all_nodes(tree_seed,data_seed):
+    method = TreeClassifierMethod(
+            tree=SpyDecisionTreeClassifier(
+                min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                random_state=tree_seed#None#bad_tree_seed#seeds[0]
+            ),
+            missing_handler=MissingValuePredictor(
+                tree=DecisionTreeClassifier(min_samples_leaf=5,random_state=1)
+            )
+            ,
+            tree_sampler=LeafNodeSampler(random_state=0)
+        )
+    
+    X,y = get_test_data_classifier(n_samples=50,seed=data_seed,with_cats=True,with_missing_features= True,with_missing_target=True)
+
+    method.fit(X,y)
+
+    X_train = method.tree_.fit_X
+    reached_nodes = method.tree_.apply(X_train)
+
+    all_leaf_nodes = np.where(method.tree_.tree_.children_left==method.tree_.tree_.children_right)
+
+    assert set(all_leaf_nodes[0]) == set(reached_nodes)
