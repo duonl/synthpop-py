@@ -94,6 +94,7 @@ Explain what visual inspection is useful for.
 ```{toctree}
 :maxdepth: 1
 
+1_introduction.md
 user_guide1.md
 user_guide2.md
 user_guide3.md
