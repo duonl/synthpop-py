@@ -5,8 +5,12 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.exceptions import NotFittedError
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop.reproducibility import RandomStateManager
+
+def tree_is_consistent(tree:DecisionTreeClassifier|DecisionTreeRegressor, X_train)->bool:
+    return 
 
 
 def sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
