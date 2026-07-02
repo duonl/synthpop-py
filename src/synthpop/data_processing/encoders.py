@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
 
 from synthpop.utils import to_stringdtype_array
+from synthpop.reproducibility import RandomStateManager
 
 class _BaseEncoder(TransformerMixin, BaseEstimator):
     def to_1d(self, arr: npt.NDArray) -> npt.NDArray:
@@ -202,7 +203,7 @@ class PCAEncoder(_BaseEncoder):
         pca_input = scale(contingency_table, axis=0)
 
         if self.pca_transform is None:
-            self.pca_transform_ = PCA()
+            self.pca_transform_ = PCA(random_state=RandomStateManager.create_instance_seed())
         else:
             self.pca_transform_ = clone(self.pca_transform) # for compatibility with sklearn we need to do this.
 
