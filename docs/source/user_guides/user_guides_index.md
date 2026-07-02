@@ -26,7 +26,13 @@ Central guide. Topics:
 - Important parameters
 - How preprocessing fits in
 - Relationship with LeafNodeSampler
-### 2.3 Synthesis methods
+### 2.3 Advanced generation topics
+Here could things be like:
+- Reproducibility
+- Custom synthesis methods
+- Performance
+
+## 3 Synthesis methods
 One page per method (or a comparison page)
 - CART synthesis
 - Copy method
@@ -42,7 +48,7 @@ Where each shows:
 
 At the end, you'd want to include a comparison table with probably something like Method, Preserves relationships, Speed, Privacy, Typical use.
 
-### 2.4 Preprocessing
+### 4 Preprocessing
 Start with an explanation why preprocessing exists.
 
 Subsections:
@@ -56,18 +62,14 @@ Each page should answer:
 - When should I use it?
 - Example
 
-### 2.5 Advanced generation topics
-Here could things be like:
-- Reproducibility
-- Custom synthesis methods
-- Performance
 
-## 3. Evaluation
-### 3.1 Evaluating synthetic data
+
+## 5. Evaluation
+### 5.1 Evaluating synthetic data
 Explain the difference between utility, privacy and fidelity. Then explain what the current package provides.
 
-### 3.2 Utility metrics
-#### 3.2.1 S_pMSE
+### 5.2 Utility metrics
+#### 5.2.1 S_pMSE
 Topics:
 - Intuition
 - Mathematical definition
@@ -75,17 +77,17 @@ Topics:
 - Example
 - Limitations
 
-### 3.3 Privacy metrics
+### 5.3 Privacy metrics
 Empty for now
 
-## 4. Visualisation
+## 6. Visualisation
 Explain what visual inspection is useful for.
-### 4.1 Distribution plots
+### 6.1 Distribution plots
 - Comparing original vs. synthetic
 - Numerical variables
 - Categorical variables
 - Examples
-### 4.2 S_pMSE heatmap
+### 6.2 S_pMSE heatmap
 - Interpretation
 - Detecting problematic variables
 - Examples
@@ -95,6 +97,7 @@ Explain what visual inspection is useful for.
 :maxdepth: 1
 
 1_introduction.md
+2_synthetic_data_generation.md
 user_guide1.md
 user_guide2.md
 user_guide3.md
