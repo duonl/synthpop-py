@@ -11,7 +11,8 @@ from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 import pandas as pd
 from synthpop.synthesiser import Synthesiser
-from tests.integration.data_generated_for_tests import get_test_data_classifier,get_test_data_regressor,simulate_realistic_dataset_correlations
+from tests.integration.data_generated_for_tests import get_test_data_classifier, get_test_data_regressor, simulate_realistic_dataset_correlations
+
 
 @pytest.fixture(autouse=True)
 def control_random_state_manager():
@@ -92,7 +93,7 @@ def test_standard_transformer_independent_instances():
 
 def test_standard_transformer_reproduces_when_setting_seed():
 
-    seed = [1,2,3]
+    seed = [1, 2, 3]
     RandomStateManager.set_root_seed(seed)
 
     transformer1 = StandardTransformer()
@@ -107,26 +108,27 @@ def test_standard_transformer_reproduces_when_setting_seed():
     assert np.array_equal(result1, result2)
 
 
-def combined_regressor_and_classifier_test_data(seed = 10):
-    X_reg,y_reg = get_test_data_regressor(seed=seed,with_cats=True,with_missing_features=True,with_missing_target=True)
-    X_clas,y_clas = get_test_data_classifier(seed=seed,with_cats=True,with_missing_features=True,with_missing_target=True)
+def combined_regressor_and_classifier_test_data(seed=10):
+    X_reg, y_reg = get_test_data_regressor(
+        seed=seed, with_cats=True, with_missing_features=True, with_missing_target=True)
+    X_clas, y_clas = get_test_data_classifier(
+        seed=seed, with_cats=True, with_missing_features=True, with_missing_target=True)
 
     d_data = {}
 
     available_columns = set(X_reg.keys()).intersection(set(X_clas.keys()))
 
-    for i,k in enumerate(available_columns):
+    for i, k in enumerate(available_columns):
 
-        if i %2 ==0:
+        if i % 2 == 0:
             d_data[k] = X_reg[k]
         else:
             d_data[k] = X_clas[k]
 
     d_data['y1'] = y_reg
-    d_data['y2']= y_clas
+    d_data['y2'] = y_clas
 
     return pd.DataFrame(d_data)
-
 
 
 def test_reproducibility_synthesis():
@@ -139,8 +141,8 @@ def test_reproducibility_synthesis():
     syn1 = synth.generate(2000)
     syn2 = synth.generate(2000)
 
-    assert syn1.equals(syn2), "generating 2 consecutive times did not produce the same synthetic dataset"
-
+    assert syn1.equals(
+        syn2), "generating 2 consecutive times did not produce the same synthetic dataset"
 
     synth2 = Synthesiser(random_seed=1)
     synth2.fit(obs)
@@ -150,8 +152,11 @@ def test_reproducibility_synthesis():
     for col in syn3.columns:
         syn3_is_nan_mask = pd.isna(syn3[col])
         syn2_is_nan_mask = pd.isna(syn2[col])
-        assert syn2_is_nan_mask.equals(syn3_is_nan_mask), f"missingness not reproduced for column {col}"
-        assert (syn3[col][~syn3_is_nan_mask] == syn2[col][~syn2_is_nan_mask]).all(), f"column {col} not reproduced"
+        assert syn2_is_nan_mask.equals(
+            syn3_is_nan_mask), f"missingness not reproduced for column {col}"
+        assert (syn3[col][~syn3_is_nan_mask] == syn2[col]
+                [~syn2_is_nan_mask]).all(), f"column {col} not reproduced"
+
 
 def test_generate_independent_syn_datasets():
 
@@ -161,7 +166,7 @@ def test_generate_independent_syn_datasets():
     synth.fit(obs)
 
     syn1 = synth.generate(n=100)
-    syn2 = synth.generate(n=100,random_seed=1234)
+    syn2 = synth.generate(n=100, random_seed=1234)
 
     assert not syn1.equals(syn2)
 
@@ -169,12 +174,13 @@ def test_generate_independent_syn_datasets():
     syn3 = synth2.fit(obs).generate(n=100)
     assert not syn1.equals(syn3)
 
+
 def test_generate_independent_syn_datasets_reproducible():
     obs = simulate_realistic_dataset_correlations(n_samples=1010)[0]
 
     synth = Synthesiser(random_seed=0)
     synth.fit(obs)
-    
+
     syn1 = synth.generate()
     syn2 = synth.generate(random_seed=100)
     syn3 = synth.generate(random_seed=100)
@@ -188,19 +194,22 @@ def test_sample_method_reproducible():
     y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
     method = SampleMethod()
 
-    method.fit(None,y)
+    method.fit(None, y)
 
     result1 = method.transform(None)
     result2 = method.transform(None)
 
     assert result1.equals(result2)
 
+
 def test_leafnode_sampler_sample_determinism_with_same_seed():
-    y =np.array([0, 0, 1, 1])
+    y = np.array([0, 0, 1, 1])
     leaf_ids = np.array([10, 10, 20, 20])
 
-    sampler1 =LeafNodeSampler(random_state=41).fit_sampler(leaf_ids=leaf_ids,y=y)
-    sampler2 = LeafNodeSampler(random_state=41).fit_sampler(leaf_ids=leaf_ids,y=y)
+    sampler1 = LeafNodeSampler(
+        random_state=41).fit_sampler(leaf_ids=leaf_ids, y=y)
+    sampler2 = LeafNodeSampler(
+        random_state=41).fit_sampler(leaf_ids=leaf_ids, y=y)
 
     y1 = sampler1.sample_from_leaves(leaf_ids)
     y2 = sampler2.sample_from_leaves(leaf_ids)
