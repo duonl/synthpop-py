@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from synthpop.plotting.plot import (
+from synthpop.plotting.plot_univariate import (
     plot_univariate_distributions,
     _make_histograms,
     _make_bars,
@@ -156,8 +156,8 @@ def test_plot_single_distribution_uses_histograms(monkeypatch):
         called["bars"] += 1
         return go.Bar(), go.Bar()
 
-    monkeypatch.setattr("synthpop.plotting.plot._make_histograms", fake_hist)
-    monkeypatch.setattr("synthpop.plotting.plot._make_bars", fake_bars)
+    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_histograms", fake_hist)
+    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_bars", fake_bars)
 
     fig = _plot_single_distribution(orig, syn, "age")
 
@@ -184,8 +184,8 @@ def test_plot_single_distribution_categorical_path(monkeypatch):
         called["bars"] += 1
         return go.Bar(), go.Bar()
 
-    monkeypatch.setattr("synthpop.plotting.plot._make_histograms", fake_hist)
-    monkeypatch.setattr("synthpop.plotting.plot._make_bars", fake_bars)
+    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_histograms", fake_hist)
+    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_bars", fake_bars)
 
     fig = _plot_single_distribution(orig, syn, "sex")
 
@@ -257,7 +257,7 @@ def test_build_html_uses_correct_to_html_arguments(monkeypatch):
         return "<div>FIG</div>"
 
     monkeypatch.setattr(
-        "synthpop.plotting.plot.to_html",
+        "synthpop.plotting.plot_univariate.to_html",
         fake_to_html,
     )
 
@@ -515,19 +515,19 @@ def test_plot_univariate_distributions_flow(monkeypatch):
         captured["browser_input"] = url
 
     monkeypatch.setattr(
-        "synthpop.plotting.plot._plot_single_distribution",
+        "synthpop.plotting.plot_univariate._plot_single_distribution",
         fake_plot,
     )
     monkeypatch.setattr(
-        "synthpop.plotting.plot._build_html",
+        "synthpop.plotting.plot_univariate._build_html",
         fake_build_html,
     )
     monkeypatch.setattr(
-        "synthpop.plotting.plot._write_html",
+        "synthpop.plotting.plot_univariate._write_html",
         fake_write,
     )
     monkeypatch.setattr(
-        "synthpop.plotting.plot.webbrowser.open",
+        "synthpop.plotting.plot_univariate.webbrowser.open",
         fake_browser,
     )
 
