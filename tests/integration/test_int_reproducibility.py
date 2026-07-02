@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from synthpop.methods.sample_synth import SampleMethod
+from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 import pandas as pd
 from synthpop.synthesiser import Synthesiser
@@ -14,6 +15,11 @@ from tests.integration.data_generated_for_tests import get_test_data_classifier,
 
 @pytest.fixture(autouse=True)
 def control_random_state_manager():
+    """
+    Resets RandomStateManager to uninitialised.
+    This is needed to test behaviour when the user does not provide a seed.
+    That is why make_int_test_reproducible is not used here.
+    """
     RandomStateManager._root_seed = None
     RandomStateManager._seed_sequence = None
 
@@ -96,7 +102,7 @@ def test_standard_transformer_reproduces_when_setting_seed():
     RandomStateManager.set_root_seed(seed)
     transformer2 = StandardTransformer()
     transformer2.fit(X=0, y=0)
-    result2 = transformer1.transform(X=2)
+    result2 = transformer2.transform(X=2)
 
     assert np.array_equal(result1, result2)
 
@@ -163,6 +169,20 @@ def test_generate_independent_syn_datasets():
     syn3 = synth2.fit(obs).generate(n=100)
     assert not syn1.equals(syn3)
 
+def test_generate_independent_syn_datasets_reproducible():
+    obs = simulate_realistic_dataset_correlations(n_samples=1010)[0]
+
+    synth = Synthesiser(random_seed=0)
+    synth.fit(obs)
+    
+    syn1 = synth.generate()
+    syn2 = synth.generate(random_seed=100)
+    syn3 = synth.generate(random_seed=100)
+
+    assert syn2.equals(syn3)
+    assert not syn2.equals(syn1)
+
+
 def test_sample_method_reproducible():
 
     y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
@@ -174,3 +194,19 @@ def test_sample_method_reproducible():
     result2 = method.transform(None)
 
     assert result1.equals(result2)
+
+def test_leafnode_sampler_sample_determinism_with_same_seed():
+    y =np.array([0, 0, 1, 1])
+    leaf_ids = np.array([10, 10, 20, 20])
+
+    sampler1 =LeafNodeSampler(random_state=41).fit_sampler(leaf_ids=leaf_ids,y=y)
+    sampler2 = LeafNodeSampler(random_state=41).fit_sampler(leaf_ids=leaf_ids,y=y)
+
+    y1 = sampler1.sample_from_leaves(leaf_ids)
+    y2 = sampler2.sample_from_leaves(leaf_ids)
+
+    assert np.array_equal(y1, y2)
+
+    # repeated calls not advance the random state, unless a generator is input
+    y3 = sampler1.sample_from_leaves(leaf_ids)
+    assert np.array_equal(y1, y3)

@@ -183,7 +183,6 @@ class StubRNG:
         return np.array(out)
     
 def test_sampling_deterministic_with_stub_rng(mocker):
-    #TODO: inject the stub by mocking RandomStateManager.create_rng
     rng = StubRNG([0, 3, 1, 2])  # controlled indices
 
     mocker.patch("synthpop.reproducibility.RandomStateManager.create_rng",return_value= rng)
@@ -219,28 +218,6 @@ def test_sample_from_leaves_each_missing_type(missing_value):
     else:  # np.nan
         assert any(isinstance(v, float) and np.isnan(v) for v in y_syn)
 
-def test_sample_determinism_with_same_seed():
-    #TODO: move to integration test
-    leaf_map = {10: {0: 3, 1: 1}}
-    leaf_ids = [10] * 5
-
-    sampler1 = helper_make_sampler(leaf_map, leaf_ids, random_state=41)
-    sampler2 = helper_make_sampler(leaf_map, leaf_ids, random_state=41)
-    sampler1._seed = 41 #set during fitting, sampler2 seed is not set to test y4
-
-    y1 = sampler1.sample_from_leaves(leaf_ids)
-    y2 = sampler2.sample_from_leaves(leaf_ids)
-
-    assert np.array_equal(y1, y2)
-
-    # repeated calls not advance the random state, unless a generator is input
-    y3 = sampler1.sample_from_leaves(leaf_ids)
-    assert np.array_equal(y1, y3)
-
-    # Given that _seed is not set during fitting (since there is no fitting in this test), 
-    # the rng in sampling falls back to a non-resettable
-    # y4 = sampler2.sample_from_leaves(leaf_ids)
-    # assert not np.array_equal(y2, y4)
 
 def test_sample_raises_empty_histogram():
     sampler = helper_make_sampler(

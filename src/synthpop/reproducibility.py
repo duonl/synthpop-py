@@ -103,6 +103,8 @@ class RandomStateManager:
         This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
         However, `RandomStateManager.create_rng(seed=3) is RandomStateManager.create_rng(seed=3) ` would evaluate to `False`
 
+        In other words, this method creates replay RNGs.
+
         The reason that the instance seeds are integers is to facilitate combining the root seed and instance seed.
         """
 
