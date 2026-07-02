@@ -9,8 +9,12 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop.reproducibility import RandomStateManager
 
-def tree_is_consistent(tree:DecisionTreeClassifier|DecisionTreeRegressor, X_train)->bool:
-    return 
+def tree_is_consistent(tree, X_train)->bool:
+
+    all_leaf_nodes = np.asarray(tree.children_left==tree.children_right).nonzero()[0]
+    reached_leaf_nodes = tree.apply(X_train)
+
+    return set(reached_leaf_nodes) == set(all_leaf_nodes)
 
 
 def sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
