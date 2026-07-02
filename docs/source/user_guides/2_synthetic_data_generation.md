@@ -1,10 +1,10 @@
-# Synthetic Data Generation
+# 2. Synthetic Data Generation
 
 This section describes how synthetic data is generated using **synthpop-py**, including the role of the `Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
 
 ---
 
-## 2.1 Overview of the synthesis workflow
+## 2.1. Overview of the synthesis workflow
 
 Synthetic data generation in synthpop-py follows a **sequential modelling approach**, where variables are generated one after another according to a specified column order.
 
@@ -35,7 +35,7 @@ Each generated variable is conditioned on previously generated variables, making
 
 ---
 
-## 2.2 The Synthesiser class
+## 2.2. The Synthesiser class
 
 The central interface in synthpop-py is the `Synthesiser` class. It provides a unified API for fitting synthesis models and generating synthetic datasets.
 
@@ -48,7 +48,7 @@ Synthesiser(
 )
 ```
 
-### 2.2.1 Key parameters
+### 2.2.1. Key parameters
 
 - **`random_seed`**  
   Controls reproducibility of both fitting and generation.
@@ -65,7 +65,7 @@ Synthesiser(
 
 ---
 
-## 2.3 Fitting the synthesiser
+## 2.3. Fitting the synthesiser
 
 The `fit` method learns a sequence of predictive models from the original dataset.
 
@@ -73,7 +73,7 @@ The `fit` method learns a sequence of predictive models from the original datase
 synth.fit(X)
 ```
 
-### 2.3.1 Behaviour
+### 2.3.1. Behaviour
 
 During fitting:
 
@@ -92,7 +92,7 @@ All preceding variables are used as predictors by default.
 
 ---
 
-## 2.4 Synthesis methods
+## 2.4. Synthesis methods
 
 A **synthesis method** defines how each variable is modelled conditionally.
 
@@ -101,7 +101,7 @@ The default method is **CART-based synthesis**, implemented via `CartMethod`, wh
 - a regression tree (for numeric variables), or  
 - a classification tree (for categorical variables)
 
-### 2.4.1 Available methods
+### 2.4.1. Available methods
 
 - CART method (default)
 - Copy method
@@ -109,7 +109,7 @@ The default method is **CART-based synthesis**, implemented via `CartMethod`, wh
 
 More information about these methods can be found in User Guide: ADD
 
-### 2.4.2 Column-level control
+### 2.4.2. Column-level control
 
 Different variables can use different synthesis methods:
 
@@ -125,7 +125,7 @@ Synthesiser(
 
 ---
 
-## 2.5 Preprocessing
+## 2.5. Preprocessing
 
 Preprocessing is handled internally during `fit()` and is not typically configured by the user.
 
@@ -139,7 +139,7 @@ Missing value handling is integrated into the synthesis methods and is applied a
 
 ---
 
-## 2.6 Leaf node sampling
+## 2.6. Leaf node sampling
 
 A key component of CART-based synthesis is **leaf node sampling**.
 
@@ -156,7 +156,7 @@ Although this mechanism is central to the performance of CART synthesis, it is l
 
 ---
 
-## 2.7 Generating synthetic data
+## 2.7. Generating synthetic data
 
 Once fitted, synthetic data can be generated using:
 
@@ -164,7 +164,7 @@ Once fitted, synthetic data can be generated using:
 synthetic = synth.generate(n=1000)
 ```
 
-### 2.7.1 Behaviour
+### 2.7.1. Behaviour
 
 The `generate` method:
 
@@ -184,7 +184,7 @@ where $(\tilde{X})$ denotes synthetic variables.
 
 ---
 
-## 2.8 Reproducibility
+## 2.8. Reproducibility
 
 Reproducibility is controlled through the `random_seed` parameter.
 
@@ -197,7 +197,7 @@ This allows users to:
 
 ---
 
-## 2.9 Minimal example
+## 2.9. Minimal example
 
 ```python
 from synthpop.synthesiser import Synthesiser
@@ -210,7 +210,7 @@ synthetic_df = synth.generate(n=1000)
 
 ---
 
-## 2.10 Key design principle
+## 2.10. Key design principle
 
 The synthesis procedure is intentionally sequential and autoregressive:
 
