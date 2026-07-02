@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from synthpop.methods.sample_synth import SampleMethod
 from synthpop.reproducibility import RandomStateManager
 import pandas as pd
 from synthpop.synthesiser import Synthesiser
@@ -161,3 +162,15 @@ def test_generate_independent_syn_datasets():
     synth2 = Synthesiser(random_seed=1234)
     syn3 = synth2.fit(obs).generate(n=100)
     assert not syn1.equals(syn3)
+
+def test_sample_method_reproducible():
+
+    y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
+    method = SampleMethod()
+
+    method.fit(None,y)
+
+    result1 = method.transform(None)
+    result2 = method.transform(None)
+
+    assert result1.equals(result2)
