@@ -25,6 +25,8 @@ This preprocessing is performed internally and usually requires no user interven
 
 This section explains how categorical predictors are encoded, how missing values are handled, and how these preprocessing steps fit into the synthesis pipeline.
 
+---
+
 ## 4.1 Encoding categorical predictors
 `Scikit-learn` decision trees only accept numerical input. Therefore, categorical variables such as:
 ```text
@@ -44,8 +46,6 @@ The encoder used depends on the target type:
 | Categorical | PCA Encoder |
 | Numeric | Mean Encoder |
 
----
-
 ### 4.1.1. PCA encoding
 The PCA encoder is used for categorical targets and produces a low-dimensional numerical representation of categorical levels based on their relationship with the target.
 ```python
@@ -62,7 +62,7 @@ array([[-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
 
 Computation works as follows:
 
-**Step 1: Contingency table**
+#### 4.1.1.1. Contingency table
 
 Let:
 - $m$ be the number of feature categories,
@@ -76,7 +76,7 @@ C_{ij} = \text{count}(X = i, Y = j)
 
 Each row corresponds to a feature level and each column corresponds to a target level.
 
-**Step 2: Centring**
+#### 4.1.1.2. Centring
 
 Each column of the contingency table is centred by subtracting its mean:
 ```{math}
@@ -84,7 +84,7 @@ C'_{ij} = C_{ij} - \mu_j
 ```
 where $\mu_j$ is the mean of column $j$.
 
-**Step 3: Scaling**
+#### 4.1.1.3. Scaling
 
 Each column is scaled by its standard deviation:
 ```{math}
@@ -92,7 +92,7 @@ C''_{ij} = \frac{C'_{ij}}{\sigma_j}
 ```
 If $\sigma_j = 0$, no scaling is applied for that column.
 
-**Step 4: PCA projection**
+#### 4.1.1.4. PCA projection
 
 PCA is applied to the scaled matrix $C''$. This produces a rotation matrix defined by the eigenvectors of:
 ```{math}
@@ -116,7 +116,7 @@ Mean encoding is used for numeric targets. Each category is replaced by the aver
 array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
 ```
 
-**Computation**
+#### 4.1.2.1. Computation
 
 Let $G_k$ be the set of indices where feature $X$ equals category $c_k$. The encoded value is:
 ```{math}
@@ -130,15 +130,19 @@ Missing values in $y$ are ignored. Each observation is mapped as:
 
 This method produces a single numeric feature that captures the average relationship between category and target.
 
+---
+
 ## 4.2. Handling missing values
-Missing values are handled explicitly during synthesis because standard decision tree implementations cannot generate missing values in targets and do not support missingness as an output state.
+Missing values are handled explicitly during synthesis because standard decision tree implementations cannot generate missing values in targets as they cannot model missing targets directly. Therefore, the missing values in targets must be handled otherwise trees would implicitly drop or mishandle them.
 
 To preserve realistic missingness patterns in synthetic data, the system separates:
 - Value generation
 - Missingness modelling
 - Missingness reconstruction.
 
-This is implemented via a missing value handling interface, which transforms data before and after synthesis. Synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target. For numeric targets, a predictor for missing values is used. For categorical targets, missing values are treated as their own category.
+This separation ensures structural correctness of training data, faithful reproduction of missingness patterns and compatibility with `scikit-learn` trees.
+
+It implemented via a missing value handling interface, which transforms data before and after synthesis. Synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target. For numeric targets, a predictor for missing values is used. For categorical targets, missing values are treated as their own category.
 
 Missing value handling is integrated into the synthesis methods in synthpop-py.
 
@@ -174,7 +178,7 @@ The system learns:
 P(z = 1 \mid x), \quad P(z = 0 \mid x).
 ```
 
-**Process**
+#### 4.2.1.1. Process
 1. Construct the missingness target vector.
 2. Apply mean encoding to the categorical predictors. Mean encoding is used as the boolean missingness vector is considered numerical.
 3. Fit a classifier for missingness:
@@ -188,9 +192,20 @@ P(z \mid x)
 
 With this predictor, the synthetic data can reproduce missingness structures, not just frequencies as missingness is conditional on the features.
 
-### 4.3.2. Treating missing as category
+### 4.2.2. Treating missing as category
 For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training.
+```python
+>>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
+>>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+>>> replace_missing = ReplaceNoneWithValue()
+>>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+>>> y_res
+array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
+>>> replace_missing.post_synth_transform(x_res, y_res)
+array(['x', 'y', nan, 'z'], dtype=StringDType(na_object=nan))
+```
 
+#### 4.2.2.1. Process
 Let:
 ```{math}
 y \in C \cup \{\mathrm{NaN}\}
@@ -208,6 +223,57 @@ After synthesis, this mapping is inverted:
 \text{"N.a.N."} \to \mathrm{NaN}
 ```
 
+This method ensures that trees never see missing values in targets which they cannot handle, missingness is preserved exactly and missing values are structurally reproducible without imputation.
+
+---
+
+## 4.3. Customising preprocessing components
+The default preprocessing components are suitable for most synthesis tasks. Users can customise individual components by constructing a `CartMethod` manually. For convenience, some common customisations are also available through helper functions such as `tune_cart`.
+
+### 4.3.1. Choosing the number of principal components
+By default, `PCAEncoder` retains all principal components (or the number determined by the configured :py:class:`sklearn.decomposition.PCA` object). The dimensionality of the encoding can be reduced by supplying a custom PCA transformation.
+
+For example, to retain only a single principal component:
+```python
+method = CartMethod(
+    classifier=TreeClassifierMethod(
+        encoder=PCAEncoder(
+            pca_transform=PCA(n_components=1)
+        )
+    )
+)
+```
+The equivalent configuration using `tune_cart` is:
+```python
+tune_cart(n_components=1)
+```
+Or directly in the `Synthesiser`:
+```python
+Synthesiser(default_syn_method=tune_cart(n_components=1))
+```  
+The `n_components` parameter is passed directly to :py:class:`sklearn.decomposition.PCA` and therefore accepts the same values:
+- an integer specifying the exact number of principal components;
+- a float between 0 and 1 specifying the fraction of explained variance to retain;
+- `None` to reduce all components.
+
+Reducing the number of components decreases the dimensionality of the encoded predictors, while increasing it preserves more of the association structure between predictors and targets. While reducing the number of components can decrease the quality of the synthetic data, it is faster to compute.
+
+### 4.3.2. Changing the missing value handling strategy
+The missing value handling strategy is determined by the `missing_handler` argument of the internal tree synthesis methods of `CartMethod`.
+
+By default:
+- `TreeRegressorMethod` uses `MissingValuePredictor`;
+- `TreeClassifierMethod` uses `ReplaceNoneWithValue`.
+
+The default for the `TreeClassifierMethod` can be overridden to use the probabilistic `MissingValuePredictor` instead of `ReplaceNoneWithValue`:
+```python
+CartMethod(
+    classifier=TreeClassifierMethod(
+        missing_handler=MissingValuePredictor()
+    )
+)
+```
+This change is not implemented in `tune_cart` as it is not considered a common customisation.
 
 
 
