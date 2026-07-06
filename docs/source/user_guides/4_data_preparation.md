@@ -70,7 +70,7 @@ Let:
 
 A contingency table $C \in \mathbb{R}^{m \times q}$ is constructed where:
 
-```math
+```{math}
 C_{ij} = \text{count}(X = i, Y = j)
 ```
 
@@ -79,7 +79,7 @@ Each row corresponds to a feature level and each column corresponds to a target 
 **Step 2: Centring**
 
 Each column of the contingency table is centred by subtracting its mean:
-```math
+```{math}
 C'_{ij} = C_{ij} - \mu_j
 ```
 where $\mu_j$ is the mean of column $j$.
@@ -87,7 +87,7 @@ where $\mu_j$ is the mean of column $j$.
 **Step 3: Scaling**
 
 Each column is scaled by its standard deviation:
-```math
+```{math}
 C''_{ij} = \frac{C'_{ij}}{\sigma_j}
 ```
 If $\sigma_j = 0$, no scaling is applied for that column.
@@ -95,12 +95,12 @@ If $\sigma_j = 0$, no scaling is applied for that column.
 **Step 4: PCA projection**
 
 PCA is applied to the scaled matrix $C''$. This produces a rotation matrix defined by the eigenvectors of:
-```math
+```{math}
 (C'')^\top C''
 ```
 
 Each category is then represented by its coordinates in the principal component space. The resulting encoding may be multi-dimensional. To select components, let $\sigma_i$ denote the singular values. The proportion of explain variance for the first $k$ components is:
-```math
+```{math}
 \frac{\sum_{i=1}^{k} \sigma_i}{\sum_{j=1}^{q} \sigma_j}
 ```
 
@@ -119,12 +119,12 @@ array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
 **Computation**
 
 Let $G_k$ be the set of indices where feature $X$ equals category $c_k$. The encoded value is:
-```math
+```{math}
 \mu_k = \frac{1}{|G_k|} \sum_{i \in G_k} y_i
 ```
 
 Missing values in $y$ are ignored. Each observation is mapped as:
-```math
+```{math}
 \tilde{x}_i = \mu{x_i}
 ```
 
@@ -204,8 +204,8 @@ y_i & \text{otherwise}
 \end{cases}
 ```
 After synthesis, this mapping is inverted:
-```math
-\text{"N.a.N." }
+```{math}
+\text{"N.a.N."} \to \mathrm{NaN}
 ```
 
 

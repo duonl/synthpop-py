@@ -85,8 +85,9 @@ During fitting:
 4. Each model is trained using all previously processed variables as predictors.
 
 Formally, for a variable $(X_j)$, the model learns:
-
-$$ P(X_j \mid X_1, \dots, X_{j-1}) $$
+```{math}
+P(X_j \mid X_1, \dots, X_{j-1})
+```
 
 All preceding variables are used as predictors by default.
 
@@ -177,8 +178,9 @@ The `generate` method:
 4. Returns a fully synthetic dataset.
 
 Each variable is generated conditionally:
-
-$$ \tilde{X}_j \sim P(X_j \mid \tilde{X}_1, \dots, \tilde{X}_{j-1}) $$
+```{math}
+\tilde{X}_j \sim P(X_j \mid \tilde{X}_1, \dots, \tilde{X}_{j-1})
+```
 
 where $(\tilde{X})$ denotes synthetic variables.
 

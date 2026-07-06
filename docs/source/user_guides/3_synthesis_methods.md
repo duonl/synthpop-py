@@ -21,8 +21,9 @@ Available synthesis methods are:
 ### 3.1.1. Overview
 
 CART (Classification And Regression Trees) is the default synthesis method. It generates a column by learning a conditional model:
-
-$$ P(Y \mid X_1, \dots, X_k) $$
+```{math}
+P(Y \mid X_1, \dots, X_k)
+```
 
 where $Y$ is the target column and $X_1, \dots, X_k$ are previously synthesised columns.
 
@@ -36,7 +37,9 @@ For each column $Y$, CART performs:
 
 1. **Feature construction**
    - Use all previously synthesised columns as predictors:
-     $$ X = (X_1, \dots, X_{k}) $$
+     ```{math}
+     X = (X_1, \dots, X_{k})
+     ```
 
 2. **Preprocessing**
    - Categorical variables are encoded (defaults: PCA and mean encoding)
@@ -44,15 +47,21 @@ For each column $Y$, CART performs:
 
 3. **Model fitting**
    - Fit a decision tree:
-     $$ T = \text{Tree}(X, Y) $$
+     ```{math}
+     T = \text{Tree}(X, Y)
+     ```
 
 4. **Leaf assignment**
    - For each observation:
-     $$ \ell_i = T(X_i) $$
+     ```{math}
+     \ell_i = T(X_i)
+     ```
 
 5. **Leaf-based sampling (key mechanism)**
    - For each leaf $\ell$, construct empirical distribution:
-     $$ P(Y \mid \ell) = \frac{\text{count}(Y)}{\sum \text{count}(Y)} $$
+     ```{math}
+     P(Y \mid \ell) = \frac{\text{count}(Y)}{\sum \text{count}(Y)}
+     ```
 
 6. **Synthesis**
    - For synthetic rows:
@@ -66,10 +75,14 @@ For each column $Y$, CART performs:
 A key feature of CART synthesis is **explicit sampling from leaf nodes**.
 
 Instead of predicting a single value:
-$$ \hat{y} = f(X) $$
+```{math} 
+\hat{y} = f(X)
+```
 
 the model samples:
-$$ Y \sim P(Y \mid \ell(X)) $$
+```{math}
+Y \sim P(Y \mid \ell(X))
+```
 
 This preserves intra-leaf variability and allows the synthetic data to reproduce realistic local distributions rather than only conditional means or modes.
 
@@ -109,8 +122,9 @@ CART is recommended when:
 The Sample method generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
 
 It approximates:
-
-$$ P(Y) \approx \hat{P}(Y) $$
+```{math}
+P(Y) \approx \hat{P}(Y)
+```
 
 where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
@@ -119,10 +133,14 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 ### 3.2.2. Algorithm
 
 1. Compute empirical frequencies:
-   $$ \hat{P}(Y = y_i) = \frac{n_i}{N} $$
+   ```{math}
+   \hat{P}(Y = y_i) = \frac{n_i}{N}
+   ```
 
 2. Store value–frequency pairs:
-   $$ \{(y_i, n_i)\} $$
+   ```{math}
+   \{(y_i, n_i)\}
+   ```
 
 3. During generation:
    - sample values with replacement according to $\hat{P}(Y)$.
@@ -152,15 +170,18 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 The Copy method deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
 
 It implements:
-
-$$ Y^{syn} = Y^{obs} $$
+```{math}
+Y^{syn} = Y^{obs}
+```
 
 ---
 
 ### 3.3.2. Algorithm
 
 1. Store observed column:
-   $$ Y \leftarrow Y^{obs} $$
+   ```{math}
+   Y \leftarrow Y^{obs}
+   ```
 
 2. During generation:
    - return stored values unchanged
