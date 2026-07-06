@@ -1,4 +1,4 @@
-# User Guides
+# User Guide
 
 This is where we could put our user Guides.
 
@@ -99,6 +99,7 @@ Explain what visual inspection is useful for.
 1_introduction.md
 2_synthetic_data_generation.md
 3_synthesis_methods.md
+4_data_preparation.md
 user_guide1.md
 user_guide2.md
 user_guide3.md
