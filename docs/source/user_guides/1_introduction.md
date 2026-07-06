@@ -87,7 +87,7 @@ In the literature, this concept is also referred to as **analytical utility**, *
 The **target** is the column currently being synthesised. Each synthesis method generates a single target column at a time.
 
 ### 1.4.7. Predictors
-The predictors are the columns that have already been synthesised and are used as input to synthesise the target. By default, synthpop-py uses all previously synthesised columns as predictors. In the machine learning literature, predictors are also commonly referred to as **features**.
+The **predictors** are the columns that have already been synthesised and are used as input to synthesise the target. By default, synthpop-py uses all previously synthesised columns as predictors. In the machine learning literature, predictors are also commonly referred to as **features**.
 
 
 

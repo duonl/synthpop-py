@@ -31,7 +31,12 @@ Synthesiser.generate()
 Synthetic data
 ```
 
-Each generated variable is conditioned on previously generated variables, making the **column order a critical modelling assumption**.
+The synthesis procedure is intentionally sequential and autoregressive:
+- Each generated variable is conditioned on previously generated variables
+- the **column order is a critical modelling assumption** as it defines structure
+- variability is introduced via leaf node sampling
+
+This design closely follows the original **synthpop** methodology while providing a modular and extensible Python implementation.
 
 ---
 
@@ -46,6 +51,11 @@ Synthesiser(
     default_syn_method=None,
     special_syn_method=None
 )
+
+synth = Synthesiser(random_seed=42)
+synth.fit(df)
+
+synthetic_df = synth.generate(n=1000)
 ```
 
 ### 2.2.1. Key parameters
@@ -65,7 +75,54 @@ Synthesiser(
 
 ---
 
-## 2.3. Fitting the synthesiser
+### 2.2.2. Synthesis methods
+
+A **synthesis method** defines how each variable is modelled conditionally.
+
+The default method is **CART-based synthesis**, implemented via `CartMethod`, which automatically selects either:
+
+- a regression tree (for numeric variables), or  
+- a classification tree (for categorical variables)
+
+Other available methods are:
+- Copy method
+- Sample method
+
+More information about these methods can be found in User Guide 3 (ADD LINK)
+
+### 2.2.3. Column-level control
+
+Different variables can use different synthesis methods:
+
+```python
+Synthesiser(
+    default_syn_method=CartMethod(),
+    special_syn_method={
+        "income": SampleMethod(),
+        "age": CartMethod()
+    }
+)
+```
+
+---
+
+## 2.3. Preprocessing
+
+Preprocessing is handled internally during `fit()` and is not typically configured by the user.
+
+It includes:
+
+- encoding of non-numeric variables
+- handling of missing values in numeric variables
+- fitting auxiliary models required by the synthesis methods
+
+Missing value handling is integrated into the synthesis methods and is applied automatically.
+
+Preprocessing is described in more detail in User Guide 4. (ADD LINK)
+
+---
+
+## 2.4. Fitting the synthesiser
 
 The `fit` method learns a sequence of predictive models from the original dataset.
 
@@ -73,7 +130,7 @@ The `fit` method learns a sequence of predictive models from the original datase
 synth.fit(X)
 ```
 
-### 2.3.1. Behaviour
+### 2.4.1. Behaviour
 
 During fitting:
 
@@ -93,71 +150,7 @@ All preceding variables are used as predictors by default.
 
 ---
 
-## 2.4. Synthesis methods
-
-A **synthesis method** defines how each variable is modelled conditionally.
-
-The default method is **CART-based synthesis**, implemented via `CartMethod`, which automatically selects either:
-
-- a regression tree (for numeric variables), or  
-- a classification tree (for categorical variables)
-
-### 2.4.1. Available methods
-
-- CART method (default)
-- Copy method
-- Sample method
-
-More information about these methods can be found in User Guide: ADD
-
-### 2.4.2. Column-level control
-
-Different variables can use different synthesis methods:
-
-```python
-Synthesiser(
-    default_syn_method=CartMethod(),
-    special_syn_method={
-        "income": SampleMethod(),
-        "age": CartMethod()
-    }
-)
-```
-
----
-
-## 2.5. Preprocessing
-
-Preprocessing is handled internally during `fit()` and is not typically configured by the user.
-
-It includes:
-
-- encoding of non-numeric variables
-- handling of missing values in numeric variables
-- fitting auxiliary models required by the synthesis methods
-
-Missing value handling is integrated into the synthesis methods and is applied automatically.
-
----
-
-## 2.6. Leaf node sampling
-
-A key component of CART-based synthesis is **leaf node sampling**.
-
-After a decision tree is fitted for a variable:
-
-1. Each training observation is assigned to a leaf node.
-2. The empirical distribution of the target variable is stored per leaf.
-3. During generation, new observations are routed through the tree.
-4. Values are sampled from the empirical distribution of the corresponding leaf node.
-
-This step ensures that synthetic values are not deterministic tree predictions but are instead **drawn from observed local distributions**, which improves variability and realism.
-
-Although this mechanism is central to the performance of CART synthesis, it is largely internal to the implementation.
-
----
-
-## 2.7. Generating synthetic data
+## 2.5. Generating synthetic data
 
 Once fitted, synthetic data can be generated using:
 
@@ -165,7 +158,7 @@ Once fitted, synthetic data can be generated using:
 synthetic = synth.generate(n=1000)
 ```
 
-### 2.7.1. Behaviour
+### 2.5.1. Behaviour
 
 The `generate` method:
 
@@ -186,7 +179,24 @@ where $(\tilde{X})$ denotes synthetic variables.
 
 ---
 
-## 2.8. Reproducibility
+## 2.6. Leaf node sampling
+
+A key component of CART-based synthesis is **leaf node sampling**.
+
+After a decision tree is fitted for a variable:
+
+1. Each training observation is assigned to a leaf node.
+2. The empirical distribution of the target variable is stored per leaf.
+3. During generation, new observations are routed through the tree.
+4. Values are sampled from the empirical distribution of the corresponding leaf node.
+
+This step ensures that synthetic values are not deterministic tree predictions but are instead **drawn from observed local distributions**, which improves variability and realism.
+
+Although this mechanism is central to the performance of CART synthesis, it is largely internal to the implementation.
+
+---
+
+## 2.7. Reproducibility
 
 Reproducibility is controlled through the `random_seed` parameter.
 
@@ -198,26 +208,3 @@ This allows users to:
 - generate multiple synthetic datasets from the same fitted synthesiser.
 
 ---
-
-## 2.9. Minimal example
-
-```python
-from synthpop.synthesiser import Synthesiser
-
-synth = Synthesiser(random_seed=42)
-synth.fit(df)
-
-synthetic_df = synth.generate(n=1000)
-```
-
----
-
-## 2.10. Key design principle
-
-The synthesis procedure is intentionally sequential and autoregressive:
-
-- each variable depends on previously generated variables
-- structure is defined by `column_order`
-- variability is introduced via leaf node sampling
-
-This design closely follows the original **synthpop** methodology while providing a modular and extensible Python implementation.
