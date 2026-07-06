@@ -201,6 +201,15 @@ def test_sample_method_reproducible():
 
     assert result1.equals(result2)
 
+def test_sample_method_explicit_seed_reproducible():
+
+    y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
+
+    m1 = SampleMethod(random_state=123).fit(None, y)
+    m2 = SampleMethod(random_state=123).fit(None, y)
+
+    assert m1.transform(None).equals(m2.transform(None))
+
 
 def test_leafnode_sampler_sample_determinism_with_same_seed():
     y = np.array([0, 0, 1, 1])
