@@ -155,7 +155,7 @@ Currently `tune_cart` supports the following parameters:
 The Sample method generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
 ```python
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
-model = SampleMethod(random_state=10).fit(None, y)
+>>> model = SampleMethod(random_state=10).fit(None, y)
 >>> model.transform(None)
 new_target_column
 0              <NA>
