@@ -116,7 +116,7 @@ def combined_regressor_and_classifier_test_data(seed=10):
 
     d_data = {}
 
-    available_columns = set(X_reg.keys()).intersection(set(X_clas.keys()))
+    available_columns = sorted(set(X_reg) & set(X_clas))
 
     for i, k in enumerate(available_columns):
 
@@ -175,7 +175,7 @@ def test_generate_independent_syn_datasets():
     assert not syn1.equals(syn3)
 
 
-def test_generate_independent_syn_datasets_reproducible():
+def test_generate_override_seed_is_replayable():
     obs = simulate_realistic_dataset_correlations(n_samples=1010)[0]
 
     synth = Synthesiser(random_seed=0)
