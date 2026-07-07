@@ -161,12 +161,6 @@ class LeafNodeSampler:
         ):
             raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
         
-        # seed = getattr(self, "_seed", None)
-
-        # if seed is not None:
-        #     rng = np.random.default_rng(seed)
-        # else:
-        #     rng = self.random_state_ # fallback, not-resettable
 
         rng = RandomStateManager.create_rng(self.random_state_)
         
