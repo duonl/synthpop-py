@@ -3,7 +3,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin, clone
 import numpy as np
 
-from synthpop.methods.tree_utils import fit_decision_tree_consistently, tree_is_consistent
+from synthpop.methods.tree_utils import _fit_decision_tree_consistently, _tree_is_consistent
 
 class mock_tree:
 
@@ -67,7 +67,7 @@ def test_tree_is_consistent_returns_true_on_consistent_tree():
     tree = base_tree(n_nodes = 10,leaf_node_ids=[2,3,4],apply_return_val=[2,4,4,3,3,3])
     X_train = np.array([1,2,3])
 
-    result = tree_is_consistent(tree=tree,X_train=X_train)
+    result = _tree_is_consistent(tree=tree,X_train=X_train)
 
     assert result
     assert tree.apply_X is X_train
@@ -79,21 +79,21 @@ def test_tree_is_consistent_returns_false_on_inconsistent_tree():
     tree = base_tree(n_nodes = 10,leaf_node_ids=[2,3,4,5],apply_return_val=[2,4,4,3,3,3])
     X_train = np.array([1,2,3])
 
-    result = tree_is_consistent(tree=tree,X_train=X_train)
+    result = _tree_is_consistent(tree=tree,X_train=X_train)
 
     assert not result
     assert tree.apply_X is X_train
 
 def test_fit_decision_tree_consistently_firsttime_consistent(mocker):
 
-    mock_tree_is_consistent = mocker.patch("synthpop.methods.tree_utils.tree_is_consistent",return_value= True)
+    mock_tree_is_consistent = mocker.patch("synthpop.methods.tree_utils._tree_is_consistent",return_value= True)
     decision_tree = mock_tree()
     decision_tree.tree_ = base_tree()
 
     X = np.array([1,2,3])
     y = np.array([4,5,6])
 
-    result = fit_decision_tree_consistently(decision_tree=decision_tree,X=X,y=y)
+    result = _fit_decision_tree_consistently(decision_tree=decision_tree,X=X,y=y)
     
     assert result is decision_tree
     assert np.array_equal(result.fit_X,X)
@@ -103,7 +103,7 @@ def test_fit_decision_tree_consistently_firsttime_consistent(mocker):
 
 def test_fit_decision_tree_consistently_retry_when_inconsistent(mocker):
 
-    mock_tree_is_consistent = mocker.patch("synthpop.methods.tree_utils.tree_is_consistent",side_effect=[False,False,True])
+    mock_tree_is_consistent = mocker.patch("synthpop.methods.tree_utils._tree_is_consistent",side_effect=[False,False,True])
     new_random_states = [222,333]
     mock_create_instance_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_instance_seed", side_effect=new_random_states)
     expected_random_states = [3]+new_random_states
@@ -114,7 +114,7 @@ def test_fit_decision_tree_consistently_retry_when_inconsistent(mocker):
     X = np.array([1,2,3])
     y = np.array([4,5,6])
 
-    result = fit_decision_tree_consistently(decision_tree=decision_tree,X=X,y=y)
+    result = _fit_decision_tree_consistently(decision_tree=decision_tree,X=X,y=y)
 
     # Assert that tree_is_consistent has been called with the correct arguments.
     # In this case, that is a tree with the random_state parameter set to the return values of create_instance_seed

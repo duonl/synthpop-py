@@ -88,7 +88,7 @@ def predictor(stub_encoder, stub_tree, stub_sampler):
 
 @pytest.fixture(autouse=True)
 def mock_fit_decision_tree(mocker,stub_tree):
-    mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = stub_tree)
+    mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value = stub_tree)
 
 # ----- prepare data for fit tests -----
 def test_prepare_data_respects_feature_order_through_flow(predictor):
@@ -120,7 +120,7 @@ def test_prepare_data_missing_data_flow_correct(predictor,mocker):
 
     expected_tree = clone(predictor.tree)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = expected_tree)
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value = expected_tree)
 
     y = np.array([0, np.nan, 0, 1])
 

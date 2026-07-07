@@ -175,7 +175,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         if not self._all_missing and not self._none_missing:
             #self.tree_.fit(X_matrix, z)
-            self.tree_ = tree_utils.fit_decision_tree_consistently(decision_tree=self.tree_,X=X_matrix,y =z)
+            self.tree_ = tree_utils._fit_decision_tree_consistently(decision_tree=self.tree_,X=X_matrix,y =z)
             leaf_ids = self.tree_.apply(X_matrix)
             self.tree_sampler_.fit_sampler(leaf_ids, z)
         else:  # leave tree_ and tree_sampler_ unfitted

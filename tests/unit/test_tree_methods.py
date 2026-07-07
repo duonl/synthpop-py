@@ -159,7 +159,7 @@ def fitted_tree(tree_method,request):
 
 @pytest.fixture(autouse=True)
 def mock_fit_decision_tree(mocker,):
-    mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = StubTree())
+    mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value = StubTree())
 
 #---------------------------------------------------
 
@@ -347,7 +347,7 @@ def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
 
     expected_tree = clone(tree_method.tree)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = expected_tree)
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value = expected_tree)
 
 
     tree_method.fit(X,y)
@@ -406,7 +406,7 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array(["a","b"],dtype=str_dtype)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value =StubTree())
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value =StubTree())
     # the missing handling can return a y of str_dtype.
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
     
@@ -427,7 +427,7 @@ def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array([1,2.0],dtype=np.float64)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value =StubTree())
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value =StubTree())
 
     # the missing handling can return a y of np.float64
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)

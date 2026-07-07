@@ -11,7 +11,7 @@ from sklearn.base import clone
 from synthpop.reproducibility import RandomStateManager
 
 
-def tree_is_consistent(tree, X_train) -> bool:
+def _tree_is_consistent(tree, X_train) -> bool:
 
     all_leaf_nodes = np.asarray(
         tree.children_left == tree.children_right).nonzero()[0]
@@ -20,15 +20,15 @@ def tree_is_consistent(tree, X_train) -> bool:
     return set(reached_leaf_nodes) == set(all_leaf_nodes)
 
 
-def fit_decision_tree_consistently(decision_tree, X, y):
+def _fit_decision_tree_consistently(decision_tree, X, y):
 
     decision_tree.fit(X, y)
-    is_consistent = tree_is_consistent(tree=decision_tree.tree_, X_train=X)
+    is_consistent = _tree_is_consistent(tree=decision_tree.tree_, X_train=X)
     while not is_consistent:
         tree = clone(decision_tree)
         tree.random_state = RandomStateManager.create_instance_seed()
         tree.fit(X, y)
-        is_consistent = tree_is_consistent(tree=tree.tree_, X_train=X)
+        is_consistent = _tree_is_consistent(tree=tree.tree_, X_train=X)
         if is_consistent:
             return tree
 
