@@ -153,14 +153,7 @@ class LeafNodeSampler:
                     "distributions and may be sampled. Review your input data "
                     "if this is unintended.")
 
-        # if isinstance(self.random_state, np.random.Generator):
-        #     # Extract seed is not possible → treat as non-resettable (repeated calls do not give the same output)
-        #     self._seed = None
-        #     self.random_state_ = self.random_state
-        # else:
-        #     self._seed = np.random.default_rng() if self.random_state is None else self.random_state
         if self.random_state is None:
-            # np.random.default_rng(self._seed)
             self.random_state_ = RandomStateManager.create_instance_seed()
         else:
             self.random_state_ = self.random_state
@@ -179,6 +172,9 @@ class LeafNodeSampler:
 
         Sampling is performed proportionally to observed frequencies:
             P(y = v | leaf) = count(v) / sum(counts in leaf)
+
+        Note that calling this function twice gives the same return value.
+        See the docs about reproducibility for more information.
 
         :param leaf_ids: Leaf IDs of synthetic samples for which target values
             should be generated. Array-like of shape (n_samples,)

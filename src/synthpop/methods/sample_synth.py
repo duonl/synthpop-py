@@ -4,7 +4,6 @@ Synthesis method that samples from the target column.
 from typing import Self
 
 import pandas as pd
-import numpy as np
 from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod

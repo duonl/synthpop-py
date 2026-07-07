@@ -6,6 +6,8 @@ from sklearn.exceptions import NotFittedError
 from synthpop.methods.sample_synth import SampleMethod
 
 # ----- helpers -----
+
+
 def make_fitted_model(values: list, counts: list, target_name="target", n_samples=3, seed=42):
     model = SampleMethod()
 
@@ -18,21 +20,31 @@ def make_fitted_model(values: list, counts: list, target_name="target", n_sample
     return model
 
 # ----- fit tests -----
+
+
 @pytest.mark.parametrize(
     "y, expected_values, expected_counts",
     [
-        (pd.Series([1, pd.NA, 3], name="my_target"), [1, pd.NA, 3], [1, 1, 1],),
-        (pd.Series([1.1, 2.2, np.nan], name="my_target"), [1.1, 2.2, np.nan], [1, 1, 1],),
-        (pd.Series(["a", "b", "c"], name="my_target", dtype="category"), ["a", "b", "c"], [1, 1, 1],),
-        (pd.Series([None, False, True], name="my_target"), [None, False, True], [1, 1, 1],),
+        (pd.Series([1, pd.NA, 3], name="my_target"),
+         [1, pd.NA, 3], [1, 1, 1],),
+        (pd.Series([1.1, 2.2, np.nan], name="my_target"),
+         [1.1, 2.2, np.nan], [1, 1, 1],),
+        (pd.Series(["a", "b", "c"], name="my_target",
+         dtype="category"), ["a", "b", "c"], [1, 1, 1],),
+        (pd.Series([None, False, True], name="my_target"),
+         [None, False, True], [1, 1, 1],),
         (pd.Series([0], name="my_target"), [0], [1],),
-        (pd.Series([1, 1, 1, -2, 3], name="my_target"), [1, -2, 3], [3, 1, 1],),
-        (pd.Series(["a", "a", "a", "a", "a", "a", "b"], name="my_target"), ["a", "b"], [6, 1],),
-        (pd.Series([np.nan, np.nan, np.nan, np.nan, 0], name="my_target"), [np.nan, 0], [4, 1],),
+        (pd.Series([1, 1, 1, -2, 3], name="my_target"),
+         [1, -2, 3], [3, 1, 1],),
+        (pd.Series(["a", "a", "a", "a", "a", "a", "b"],
+         name="my_target"), ["a", "b"], [6, 1],),
+        (pd.Series([np.nan, np.nan, np.nan, np.nan, 0],
+         name="my_target"), [np.nan, 0], [4, 1],),
     ],
 )
-def test_fit_stores_distribution_and_metadata(y, expected_values, expected_counts,mocker):
-    mock_create_instance_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_instance_seed",return_value= 333)
+def test_fit_stores_distribution_and_metadata(y, expected_values, expected_counts, mocker):
+    mock_create_instance_seed = mocker.patch(
+        "synthpop.reproducibility.RandomStateManager.create_instance_seed", return_value=333)
     model = SampleMethod().fit(None, y)
 
     assert model.target_name_ == "my_target"
@@ -43,7 +55,8 @@ def test_fit_stores_distribution_and_metadata(y, expected_values, expected_count
     assert model.random_state_ == 333
 
     for model_value, expected_value in zip(model.values_, expected_values):
-        assert (pd.isna(model_value) and pd.isna(expected_value)) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
+        assert (pd.isna(model_value) and pd.isna(expected_value)
+                ) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
 
 
 def test_fit_stores_provided_seed():
@@ -60,6 +73,7 @@ def test_fit_sets_name_when_none():
     assert model.target_name_ is None
 
 # ----- transform tests -----
+
 
 def test_transform_output_shape_matches_X():
     model = make_fitted_model(
@@ -88,7 +102,7 @@ def test_transform_without_X_uses_training_size():
 
 def test_transform_values_within_observed_support():
     values = [1, 2, 3, np.nan]
-    model = make_fitted_model(values = values, counts=[1, 1, 1, 1], n_samples=4)
+    model = make_fitted_model(values=values, counts=[1, 1, 1, 1], n_samples=4)
     result = model.transform(pd.DataFrame(index=range(100)))
 
     generated = set(result.unique())
@@ -101,23 +115,26 @@ def test_transform_values_within_observed_support():
     if any(pd.isna(v) for v in values):
         assert result.isna().any()
 
+
 def test_transform_uses_random_state_manager(mocker):
 
     expected_rng = np.random.default_rng()
-    expected_result = [6,7,67,76]
-    mock_create_rng= mocker.patch("synthpop.reproducibility.RandomStateManager.create_rng",return_value= expected_rng)
-    mock_sample_array = mocker.patch("synthpop.methods.tree_utils.sample_array",return_value=expected_result )
+    expected_result = [6, 7, 67, 76]
+    mock_create_rng = mocker.patch(
+        "synthpop.reproducibility.RandomStateManager.create_rng", return_value=expected_rng)
+    mock_sample_array = mocker.patch(
+        "synthpop.methods.tree_utils.sample_array", return_value=expected_result)
     values = [1, 2, 3, np.nan]
-    model = make_fitted_model(values = values, counts=[1, 1, 1, 1], n_samples=4)
+    model = make_fitted_model(values=values, counts=[1, 1, 1, 1], n_samples=4)
 
-    model.random_state_= 123456
+    model.random_state_ = 123456
 
     result = model.transform(pd.DataFrame(index=range(100)))
 
     mock_create_rng.assert_called_with(seed=123456)
-    mock_sample_array.assert_called_with(expected_rng,model.counts_,model.values_,100)
-    assert (result==expected_result).all()
-
+    mock_sample_array.assert_called_with(
+        expected_rng, model.counts_, model.values_, 100)
+    assert (result == expected_result).all()
 
 
 def test_transform_reproducibility_with_fixed_seed():
@@ -202,6 +219,7 @@ def test_missing_values_all_types_are_sampled():
     assert set(non_missing_generated).issubset(set(non_missing_original))
 
 # ----- feature names out tests -----
+
 
 @pytest.mark.parametrize(
     "target_name, input_features, expected",

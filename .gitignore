@@ -10,6 +10,5 @@
 classes.dot
 pyproject.toml
 tests/unit/__pycache__/
-*.png
 *.svg
-tests/integration/__pycache__/
+*.png
