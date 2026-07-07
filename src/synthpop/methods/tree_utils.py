@@ -25,7 +25,7 @@ def fit_decision_tree_consistently(decision_tree, X, y):
     decision_tree.fit(X, y)
     is_consistent = tree_is_consistent(tree=decision_tree.tree_, X_train=X)
     while not is_consistent:
-        tree = decision_tree
+        tree = clone(decision_tree)
         tree.random_state = RandomStateManager.create_instance_seed()
         tree.fit(X, y)
         is_consistent = tree_is_consistent(tree=tree.tree_, X_train=X)

@@ -157,7 +157,9 @@ def fitted_tree(tree_method,request):
 
     return tree_method
 
-
+@pytest.fixture(autouse=True)
+def mock_fit_decision_tree(mocker,):
+    mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = StubTree())
 
 #---------------------------------------------------
 
@@ -404,6 +406,7 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array(["a","b"],dtype=str_dtype)
 
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value =StubTree())
     # the missing handling can return a y of str_dtype.
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
     
@@ -416,11 +419,15 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     tree_method.fit(X,y)
 
     mocked_to_str.assert_called_with(y)
-    assert np.array_equal(str_y,tree_method.tree_.fit_y_)
+
+    actual_y = mock_fit_decision_tree_consistently.mock_calls[0][2]["y"]
+    assert np.array_equal(str_y,actual_y)
     
-def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler):
+def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array([1,2.0],dtype=np.float64)
+
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value =StubTree())
 
     # the missing handling can return a y of np.float64
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
@@ -432,8 +439,10 @@ def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler):
 
     tree_method.fit(X,y)
 
-    assert np.array_equal(converted_y,tree_method.tree_.fit_y_)
-    assert tree_method.tree_.fit_y_.dtype == np.float32
+    actual_y = mock_fit_decision_tree_consistently.mock_calls[0][2]["y"]
+
+    assert np.array_equal(converted_y,actual_y)
+    assert actual_y.dtype == np.float32
 
     
 

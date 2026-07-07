@@ -3,7 +3,7 @@ import pandas as pd
 import pytest 
 import copy
 from sklearn.tree import BaseDecisionTree
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, clone
 from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
@@ -86,6 +86,9 @@ def predictor(stub_encoder, stub_tree, stub_sampler):
         tree_sampler= stub_sampler
     )
 
+@pytest.fixture(autouse=True)
+def mock_fit_decision_tree(mocker,stub_tree):
+    mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = stub_tree)
 
 # ----- prepare data for fit tests -----
 def test_prepare_data_respects_feature_order_through_flow(predictor):
@@ -111,9 +114,13 @@ def test_prepare_data_for_fit_accepts_1d_inputs(predictor):
 
     assert fit_X.shape == (4, 1)
 
-def test_prepare_data_missing_data_flow_correct(predictor):
+def test_prepare_data_missing_data_flow_correct(predictor,mocker):
     predictor.encoder.transform_return = np.array([2, 2, 2, 2])
     predictor.tree.apply_return = np.array([0, 1, 2, 3])
+
+    expected_tree = clone(predictor.tree)
+
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = expected_tree)
 
     y = np.array([0, np.nan, 0, 1])
 
@@ -133,8 +140,9 @@ def test_prepare_data_missing_data_flow_correct(predictor):
         assert np.array_equal(fit_X, X[col])
         assert np.array_equal(fit_y, expected_mask)
 
-    tree = predictor.tree_
-    tree_X, z = tree.fit_inputs
+    kwargs = mock_fit_decision_tree_consistently.mock_calls[0][2]
+
+    tree_X = kwargs["X"]#tree.fit_inputs
 
     # --- check full matrix composition ---
     encoded_cat1 = predictor.encoders_["cat1"].fit_transform_return.reshape(-1, 1)
@@ -148,6 +156,7 @@ def test_prepare_data_missing_data_flow_correct(predictor):
     ])
 
     assert np.array_equal(tree_X, expected_matrix), "Tree input must combine encoded categorical and raw numeric features in correct order"
+    assert np.array_equal(expected_mask,kwargs["y"]),"incorrect argument for fit_decision_tree_consistently"
 
     sampler = predictor.tree_sampler_
     given_sampler_input_leaf_ids, given_sampler_input_y_values = sampler.fit_inputs

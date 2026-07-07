@@ -12,6 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.encoders import MeanEncoder
+from synthpop.methods import tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
 from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import validate_2d_dict, validate_1d_target
@@ -168,7 +169,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
         X_matrix = build_feature_matrix(X_encoded, feature_order=self.feature_order_)    
 
         if not self._all_missing and not self._none_missing:
-            self.tree_.fit(X_matrix, z)
+            #self.tree_.fit(X_matrix, z)
+            self.tree_ = tree_utils.fit_decision_tree_consistently(decision_tree=self.tree_,X=X_matrix,y =z)
             leaf_ids = self.tree_.apply(X_matrix)
             self.tree_sampler_.fit_sampler(leaf_ids, z)
         else:   #leave tree_ and tree_sampler_ unfitted
