@@ -12,6 +12,9 @@ from synthpop.reproducibility import RandomStateManager
 
 
 def _tree_is_consistent(tree, X_train) -> bool:
+    """
+    Checks if all leafnodes are reached when the decision tree is applied to the same data used for fitting.
+    """
 
     all_leaf_nodes = np.asarray(
         tree.children_left == tree.children_right).nonzero()[0]
@@ -21,6 +24,10 @@ def _tree_is_consistent(tree, X_train) -> bool:
 
 
 def _fit_decision_tree_consistently(decision_tree, X, y):
+    """
+    fits the decision tree, checks if the trainings data reaches all leaf nodes, and retries fitting if not.
+    This prevents difficult to reproduce errors when generating data.
+    """
 
     decision_tree.fit(X, y)
     is_consistent = _tree_is_consistent(tree=decision_tree.tree_, X_train=X)
