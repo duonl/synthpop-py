@@ -341,14 +341,29 @@ def test_fit_build_feature_matrix(X,y,index_cat,tree_method,mocker):
     
 
 @pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_tree_is_fit(X,y,index_cat,tree_method):
+def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
+
+    expected_tree = clone(tree_method.tree)
+
+    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils.fit_decision_tree_consistently",return_value = expected_tree)
 
 
     tree_method.fit(X,y)
 
-    assert np.array_equal(get_exp_feature_matrix(),tree_method.tree_.fit_X_,equal_nan=True)
+    expected_X = get_exp_feature_matrix()
+    expected_y = tree_method.missing_handler_.prepared_for_fit_result[1]
 
-    assert np.array_equal(tree_method.missing_handler_.prepared_for_fit_result[1],tree_method.tree_.fit_y_)
+    assert len(mock_fit_decision_tree_consistently.mock_calls) == 1, "fit_decision_tree_consistently should be called 1 time"
+
+    kwargs = mock_fit_decision_tree_consistently.mock_calls[0][2]
+
+    assert isinstance(kwargs["decision_tree"], StubTree)
+    assert tree_method.tree_ is expected_tree, "fitted decision tree should be stored"
+
+    assert np.array_equal(kwargs["X"],expected_X,equal_nan=True)
+    assert np.array_equal(kwargs["y"],expected_y,equal_nan=True)
+
+    
 
 
 

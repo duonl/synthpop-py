@@ -21,7 +21,7 @@ from synthpop.data_processing.missing_value_handling import (
     ReplaceNoneWithValue
 )
 from synthpop.methods import base_synth
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import LeafNodeSampler, fit_decision_tree_consistently
 from synthpop.reproducibility import RandomStateManager
 
 
@@ -100,8 +100,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             v) if k in self.encoders_ else v for (k, v) in prepared_for_fit_X.items()}
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
+        
+        tree = self._new_tree()
 
-        self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
+        self.tree_ = tree_utils.fit_decision_tree_consistently(decision_tree=tree,
+                                                               X = all_features,
+                                                               y = self._convert_y(prepared_y))#.fit(all_features, self._convert_y(prepared_y))
 
         leaf_ids = self.tree_.apply(all_features)
 
