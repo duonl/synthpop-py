@@ -231,5 +231,4 @@ def test_synthesizer_preserves_datatypes(method):
 
     syn_df = synthesiser.fit(original_data).generate()
 
-
     assert all(syn_df.dtypes == original_data.dtypes)

@@ -417,7 +417,8 @@ class CartMethod(base_synth.BaseSynthMethod):
         :return: Synthesised target variable.
         """
 
-        check_is_fitted(self, ["method_", "feature_names_in_", "target_name_", "output_dtype_"])
+        check_is_fitted(
+            self, ["method_", "feature_names_in_", "target_name_", "output_dtype_"])
 
         if not isinstance(X, pd.DataFrame):
             raise TypeError(
@@ -437,7 +438,7 @@ class CartMethod(base_synth.BaseSynthMethod):
             result,
             index=X.index,
             name=self.target_name_,
-            dtype= self.output_dtype_
+            dtype=self.output_dtype_
         )
 
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
