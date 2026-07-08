@@ -213,6 +213,7 @@ def test_transform_returns_series(mocker, result, method):
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
     cart.method_ = method
+    cart.output_dtype_ = result.dtype
 
     clean_X = {"a": np.array([1, 2])}
 
@@ -250,6 +251,7 @@ def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "synthetic_target"
+    cart.output_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
         "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
@@ -289,6 +291,7 @@ def test_transform_rejects_missing_columns():
     cart.method_ = StubRegressor()
     cart.feature_names_in_ = ["a", "b"]
     cart.target_name_ = "y"
+    cart.output_dtype_ = np.float32 # arbitrary
 
     X = pd.DataFrame({"a": [1]})
 
@@ -311,6 +314,7 @@ def test_transform_ignores_extra_columns(mocker, result, method):
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "target"
+    cart.output_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
         "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
