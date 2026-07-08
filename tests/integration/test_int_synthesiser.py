@@ -6,6 +6,9 @@ import pytest
 from sklearn.exceptions import NotFittedError
 
 from synthpop.synthesiser import Synthesiser
+
+from synthpop.methods.sample_synth import SampleMethod
+from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.cart_synth import CartMethod
 
 
@@ -53,7 +56,7 @@ def test_synthesiser_first_column_is_sampled_categorical():
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
 
-#@pytest.mark.xfail(reason="known issue, see #130")
+# @pytest.mark.xfail(reason="known issue, see #130")
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -202,3 +205,31 @@ def test_synthesiser_preserves_cat_cat_relation():
     for col in obs_ct.columns:
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        CopyMethod(),
+        SampleMethod(),
+        CartMethod()
+    ]
+)
+def test_synthesizer_preserves_datatypes(method):
+    """
+    Reproduces bug 162, where synthesizer class returns object dtype in the synthetic data
+    while the original data is string datatype.
+
+    All numeric columns should become float32 dtype.
+    String dtype should stay string dtype.
+    """
+
+    n_samples_orig = 1000
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+        n_samples=n_samples_orig)
+    synthesiser = Synthesiser(default_syn_method=method, random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+
+    assert all(syn_df.dtypes == original_data.dtypes)

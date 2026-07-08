@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
+import numpy.typing as npt
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.exceptions import NotFittedError
 
@@ -178,6 +179,26 @@ def test_fit_sets_fitted_attributes(mocker, y):
     assert cart.method_.fit_x is clean_X
     assert cart.method_.fit_y is clean_y
 
+
+@pytest.mark.parametrize(
+    ("y"),
+    [
+        (pd.Series([1.0, 2.0], dtype=np.int64)),
+        (pd.Series([1.0, 2.0], dtype=np.float64)),
+        (pd.Series([1.0, 2.0], dtype=np.float32)),
+        (pd.Series(["a", "b"], dtype='str')),
+        (pd.Series(["a", "b"], dtype='object'))
+    ]
+)
+def test_fit_save_input_dtypes(y):
+    cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
+
+    X = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+
+    cart.fit(X, y)
+    assert y.dtype == cart.output_dtype_
+
+
 # ----- transform tests -----
 @pytest.mark.parametrize(
     ("result", "method"),
@@ -314,6 +335,36 @@ def test_transform_ignores_extra_columns(mocker, result, method):
         X[["b", "a"]],
     )
 
+
+@pytest.mark.parametrize(
+    ("y", "method"),
+    [
+        (pd.Series([10, 20], dtype=np.int64), StubRegressor(transform_result= np.array([10, 20], dtype=np.float32))),
+        (pd.Series([10, 20], dtype=np.float64), StubRegressor(transform_result= np.array([10, 20], dtype=np.float32))),
+        (pd.Series([10, 20], dtype=np.float32), StubRegressor(transform_result= np.array([10, 20], dtype=np.float32))),
+        (pd.Series(["a", "b"], dtype='str'), StubClassifier(transform_result= np.array(["a", "b"], dtype=str_dtype))),
+        (pd.Series(["a", "b"], dtype='object'), StubClassifier(transform_result= np.array(["a", "b"], dtype=str_dtype)))
+    ]
+)
+def test_transform_outputs_same_dtype(y, method):
+    cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
+
+    cart.method_ = method
+    cart.feature_names_in_ = ["b", "a"]
+    cart.target_name_ = "target"
+    cart.output_dtype_ = y.dtype
+
+    X = pd.DataFrame(
+        {
+            "a": [1, 2],
+            "b": [3, 4],
+        }
+    )
+
+    out = cart.transform(X)
+    assert y.dtype == out.dtype
+
+
 def test_transform_requires_fit():
     cart = CartMethod()
     with pytest.raises(NotFittedError):
@@ -342,7 +393,7 @@ def test_clone_works_and_fitted_cart_does_not_preserve_state():
     cloned = clone(cart)
 
     # Fitted attributes should NOT be copied, original remains intact
-    for attr in ["method_", "feature_names_in_", "target_name_"]:
+    for attr in ["method_", "feature_names_in_", "target_name_", "output_dtype_"]:
         assert not hasattr(cloned, attr)
         assert hasattr(cart, attr)
     assert hasattr(cloned, "regressor")
