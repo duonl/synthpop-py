@@ -336,7 +336,7 @@ def test_regressor_nondefault_missing_value_predictor():
     assert result.shape[0] == y.shape[0]
 
 @pytest.mark.parametrize("seed",[i for i in range(50)])
-def test_bug_129_regression_classifier(seed):
+def test_regression_bug_129_classifier_no_empty_leaf_failure(seed):
 
     seeds = np.random.SeedSequence(seed).generate_state(5)
 
@@ -371,7 +371,7 @@ def test_bug_129_regression_classifier(seed):
 
 @pytest.mark.noautofixt
 @pytest.mark.parametrize("tree_seed,data_seed",[(i,j) for i in [89,88,52,91]for j in [59,14,51,80]])
-def test_bug_129_regression_regressor(tree_seed,data_seed):
+def test_regression_bug_129_regressor_no_empty_leaf_failure(tree_seed,data_seed):
 
 
     seeds = np.random.SeedSequence(0).generate_state(6)

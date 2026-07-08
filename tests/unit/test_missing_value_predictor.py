@@ -142,7 +142,7 @@ def test_prepare_data_missing_data_flow_correct(predictor,mocker):
 
     kwargs = mock_fit_decision_tree_consistently.mock_calls[0][2]
 
-    tree_X = kwargs["X"]#tree.fit_inputs
+    tree_X = kwargs["X"]  # tree.fit_inputs
 
     # --- check full matrix composition ---
     encoded_cat1 = predictor.encoders_["cat1"].fit_transform_return.reshape(-1, 1)
@@ -284,7 +284,7 @@ def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_
     assert np.array_equal(np.isnan(out), predictor.tree_sampler_.sample_return)
     
 
-def post_synth_transform_raises_unfitted():
+def test_post_synth_transform_raises_unfitted():
     model = MissingValuePredictor()
     with pytest.raises(NotFittedError):
         model.post_synth_transform({"a": np.array([1])}, np.array([1]))

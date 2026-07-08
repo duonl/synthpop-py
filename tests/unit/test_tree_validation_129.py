@@ -1,5 +1,4 @@
 import pytest
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.base import TransformerMixin, clone
 import numpy as np
 
