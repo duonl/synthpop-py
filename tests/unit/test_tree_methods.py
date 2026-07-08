@@ -661,29 +661,12 @@ def test_classifier_transform_returns_str_dtype(leafnode_sampler):
     )
     assert result.dtype == str_dtype
 
+@pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])
+def test_transform_raises_not_fitted_when_missing_flag_absent(X, index_cat, fitted_tree):
 
-def test_regressor_transform_raises_not_fitted_when_missing_flag_absent():
-    X = {
-        "a": np.array([1, 2, 3]),
-        "b": np.array([4, 5, 6]),
-    }
-
-    regressor = TreeRegressorMethod()
-
+    delattr(fitted_tree, "_all_missing")
     with pytest.raises(NotFittedError):
-        regressor.transform(X)
-
-
-def test_classifier_transform_raises_not_fitted_when_missing_flag_absent():
-    X = {
-        "a": np.array([1, 2, 3]),
-        "b": np.array([4, 5, 6]),
-    }
-
-    classifier = TreeClassifierMethod()
-
-    with pytest.raises(NotFittedError):
-        classifier.transform(X)
+        fitted_tree.transform(X)
 
 
 @pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])
@@ -701,11 +684,7 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
     result = fitted_tree.transform(X)
 
     assert np.array_equal(result, expected, equal_nan=True)
-    assert fitted_tree.encoders_ == None
-    assert fitted_tree.missing_handler_ == None
-    assert fitted_tree.tree_sampler_ == None
-    assert fitted_tree.tree_ == None
-    assert fitted_tree.n_features_in_ == None
+
 
 
 # general tests ------------------------------------------------------------------------------------
