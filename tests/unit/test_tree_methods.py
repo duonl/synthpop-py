@@ -509,6 +509,18 @@ def test_tree_method_fit_returns_no_fitting_parameters_for_nan_array(X, y, index
     assert not hasattr(fitted, "missing_handler_")
     assert not hasattr(fitted, "tree_")
     assert not hasattr(fitted, "tree_sampler_")
+
+@pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
+def test_tree_method_fit_returns_fitting_parameters_for_not_full_nan_array(X, y, index_cat, tree_method):
+    y = np.array([0, np.nan, np.nan, np.nan, np.nan, np.nan])
+
+    fitted = tree_method.fit(X, y)
+
+    assert not fitted._all_missing
+    assert hasattr(fitted, "encoders_")
+    assert hasattr(fitted, "missing_handler_")
+    assert hasattr(fitted, "tree_")
+    assert hasattr(fitted, "tree_sampler_")
 # test transform ----------------------------------------------------------------------------------
 
 
@@ -662,11 +674,17 @@ def test_classifier_transform_returns_str_dtype(leafnode_sampler):
     assert result.dtype == str_dtype
 
 @pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])
-def test_transform_raises_not_fitted_when_missing_flag_absent(X, index_cat, fitted_tree):
+def test_transform_raises_not_fitted_when_missing_flag_absent(X, index_cat, tree_method):
 
-    delattr(fitted_tree, "_all_missing")
+    tree_method.encoders_ = {}
+    tree_method.missing_handler_ = missing_handling
+    tree_method.tree_sampler_ = leafnode_sampler
+    tree_method.tree_ = StubTree()
+    tree_method.n_features_in_ = len(X.keys())
+    tree_method.feature_order_ = list(X.keys())
+
     with pytest.raises(NotFittedError):
-        fitted_tree.transform(X)
+        tree_method.transform(X)
 
 
 @pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])

@@ -55,7 +55,7 @@ def test_synthesiser_first_column_is_sampled_categorical():
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
 
-#@pytest.mark.xfail(reason="known issue, see #130")
+# @pytest.mark.xfail(reason="known issue, see #130")
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -205,17 +205,27 @@ def test_synthesiser_preserves_cat_cat_relation():
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
 
-def test_int_bugfix_152():
-    df = pd.DataFrame({
-    "a": [1, None],
-    "b": [0, 0],
-    "c": [np.nan, np.nan]
-    })
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, None, pd.NA],
+)
+def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
+    """This test resulted in bugfix 152. The CartMethod failed for a numerical entire np.nan array, 
+    as columns with nan are masked. As such, fitting on an entire np.nan array is the same as fitting to an empty array.
+    Which failed. A work-around wass implemented"""
+
+    df = pd.DataFrame(
+        {
+            "a": [1, None],
+            "b": [0, 0],
+            "c": [missing_value, missing_value]
+        }
+    )
 
     special_syn_method = {
-    "a": SampleMethod(),
-    "b": CopyMethod(),
-    "c": CartMethod()
+        "a": SampleMethod(),
+        "b": CopyMethod(),
+        "c": CartMethod()
     }
 
     synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
@@ -227,7 +237,8 @@ def test_int_bugfix_152():
 
     generated = fit.generate()
 
+    assert len(generated) == len(df)
+
     assert df['b'].equals(generated['b'])
 
-    for col in df.columns:
-        assert df[col].isin(generated[col]).all()
+    assert generated['c'].isna().all()

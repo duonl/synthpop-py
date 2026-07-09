@@ -116,7 +116,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         """
-        Synthesise new column
+        Synthesise new column.
+
+        If the target consists entirely of missing values, 
+        the estimator records this state and returns without fitting a tree. 
+        Subsequent calls to transform() produce an all-missing output
 
         :param X: features used to predict the target variable.
 
@@ -127,7 +131,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         if not hasattr(self, '_all_missing'):
             raise NotFittedError
         elif self._all_missing:
-            return np.array([np.nan]*len(X[next(iter(X))]))
+            n = len(next(iter(X.values()))) if X else 0
+            return np.full(n, np.nan) # __super__() in specific method transforms will do correct dtype conversion
 
         
         # Apply encoding, sample, apply (inverse) handling of missing values.

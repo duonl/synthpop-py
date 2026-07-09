@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from synthpop.methods.cart_synth import CartMethod, TreeRegressorMethod, TreeClassifierMethod
-
+from synthpop.utils import str_dtype
 
 def test_numeric_target_uses_regressor():
     X = pd.DataFrame(
@@ -285,14 +285,14 @@ def test_fitting_handles_entire_nan_array(y):
     assert res.target_name_ == 'c'
 
 @pytest.mark.parametrize(
-    "y",
+    "y, dtype",
     [
-        (pd.Series([None, None], name='c')),
-        (pd.Series([np.nan, np.nan], name='c')),
-        (pd.Series([pd.NA, pd.NA], name='c'))
+        (pd.Series([None, None], name='c'), 'object'), # This should be changed after pull request 171
+        (pd.Series([np.nan, np.nan], name='c'), np.float32),
+        (pd.Series([pd.NA, pd.NA], name='c'), 'object')
     ]
 )
-def test_transform_handles_entire_nan_array(y):
+def test_transform_handles_entire_nan_array(y, dtype):
     cart = CartMethod()
 
     X = pd.DataFrame({
@@ -305,3 +305,5 @@ def test_transform_handles_entire_nan_array(y):
     
     assert len(out) == len(y)
     assert pd.isna(out).all()
+    assert out.name == "c"
+    assert out.dtype == dtype
