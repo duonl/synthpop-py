@@ -11,9 +11,10 @@ str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
 class TransformStub(TransformerMixin, BaseEstimator):
 
-    def __init__(self, fit_return_value=None, transform_return_value=None):
+    def __init__(self, fit_return_value=None, transform_return_value=None,random_state=None):
         self.transform_return_value = transform_return_value
         self.fit_return_value = fit_return_value
+        self.random_state= random_state
 
     def fit(self, X, y):
         self.fit_X_ = X
@@ -158,6 +159,7 @@ def test_pca_fit_numeric_correctness(X, y, expected_input_for_PCA, pca_result, e
     # Given features and targets that are nowhere missing and an unfitted pcaEncoder
     # X = np.array(["a", "a","b","b"])
     # y = np.array(["x", "x","y","z"])
+    
 
     stub_pca_transform = TransformStub(transform_return_value=pca_result)
     encoder = PCAEncoder(pca_transform=stub_pca_transform)
@@ -172,6 +174,16 @@ def test_pca_fit_numeric_correctness(X, y, expected_input_for_PCA, pca_result, e
     assert_dict(expected_dict, result.mapping_)
 
     validate_set_inout_count(result, expected_n_feat=len(expected_dict["a"]))
+
+def test_pca_fit_creates_instance_seed_for_pca_transform(mocker):
+    mock_create_instance_seed = mocker.patch("synthpop.reproducibility.RandomStateManager.create_instance_seed",return_value= 333)
+    X = np.array(["a", "b", "c", "a"])
+    y = np.array(["x", "x", "y", "z"])
+
+    encoder = PCAEncoder(pca_transform=None)
+
+    encoder.fit(X,y)
+    assert encoder.pca_transform_.random_state == 333
 
 def test_pca_fit_constant_feature():
     X = np.array(["a", "a", "a", "a"])

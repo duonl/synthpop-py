@@ -23,6 +23,7 @@ from synthpop.data_processing.missing_value_handling import (
 )
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.reproducibility import RandomStateManager
 
 
 def _to_fixed_length_string_array(a: npt.NDArray) -> npt.NDArray:
@@ -102,7 +103,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             X_val, y)
 
         all_features_dict = {k: self.encoders_[k].transform(
-            v) if k in self.encoders_ else v for (k, v) in prepared_for_fit_X.items()}
+all_features_dict = {
+    k: self.encoders_[k].transform(v)
+    if k in self.encoders_
+    else v
+    for (k, v) in X_val.items()
+}
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
@@ -134,7 +140,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             n = len(next(iter(X.values()))) if X else 0
             return np.full(n, np.nan) # __super__() in specific method transforms will do correct dtype conversion
 
-        
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
             self, 
@@ -249,8 +254,9 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     def _get_tree(self):
         return DecisionTreeClassifier(min_samples_leaf=5,   # equivalent to minbucket in synthpop-r
-                                      min_impurity_decrease=1e-08  # equivalent to cp in synthpop-r
-                                      ,)
+                                      min_impurity_decrease=1e-08,  # equivalent to cp in synthpop-r
+                                      random_state=RandomStateManager.create_instance_seed(),
+                                      )
 
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return _to_fixed_length_string_array(y)
@@ -309,6 +315,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def _get_tree(self):
         return DecisionTreeRegressor(min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
                                     min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
+                                    random_state=RandomStateManager.create_instance_seed()
                                     )
     
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:

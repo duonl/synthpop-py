@@ -3,6 +3,10 @@ import pandas as pd
 import numpy as np
 
 from synthpop.methods.cart_synth import CartMethod, TreeRegressorMethod, TreeClassifierMethod
+
+# This imports an auto-use fixture to set the seed, in order to make the test reproducible
+from tests.integration.make_int_test_reproducible import control_random_state_manager
+
 from synthpop.utils import str_dtype
 
 def test_numeric_target_uses_regressor():
@@ -272,7 +276,7 @@ def test_fit_transform_with_missing_values_in_target(y):
         (pd.Series([pd.NA, pd.NA], name='c'))
     ]
 )
-def test_fitting_handles_entire_nan_array(y):
+def test_fitting_handles_all_missing_target(y):
     cart = CartMethod()
 
     X = pd.DataFrame({
@@ -281,7 +285,7 @@ def test_fitting_handles_entire_nan_array(y):
     })
 
     res = cart.fit(X, y)
-    assert res.method_._all_missing == True
+    assert res.method_._all_missing is True
     assert res.target_name_ == 'c'
 
 @pytest.mark.parametrize(
@@ -292,7 +296,7 @@ def test_fitting_handles_entire_nan_array(y):
         (pd.Series([pd.NA, pd.NA], name='c'), 'object')
     ]
 )
-def test_transform_handles_entire_nan_array(y, dtype):
+def test_transform_handles_entire_nan_array(y):
     cart = CartMethod()
 
     X = pd.DataFrame({

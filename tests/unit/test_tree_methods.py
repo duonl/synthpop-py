@@ -499,7 +499,7 @@ def test_fit_regressor_converts_to_float32(encoder, leafnode_sampler):
 
 
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
-def test_tree_method_fit_returns_no_fitting_parameters_for_nan_array(X, y, index_cat, tree_method):
+def test_tree_method_fit_returns_no_fitted_parameters_for_nan_array(X, y, index_cat, tree_method):
     y = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
 
     fitted = tree_method.fit(X, y)
@@ -701,7 +701,8 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
 
     result = fitted_tree.transform(X)
 
-    assert np.array_equal(result, expected, equal_nan=True)
+    assert np.isnan(result).all()
+    assert len(result) == 6
 
 
 
