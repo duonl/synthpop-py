@@ -4,30 +4,35 @@ import warnings
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from sklearn import tree
 from sklearn.exceptions import NotFittedError
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.tree import BaseDecisionTree
 from sklearn.base import clone
 
 from synthpop.reproducibility import RandomStateManager
 
 
-def _check_all_leaf_nodes_are_reached(tree, X_train) -> bool:
+def _check_all_leaf_nodes_are_reached(tree:tree._tree.Tree, X_train:npt.NDArray) -> bool:
     """
     Check if all leaf nodes are reached when the decision tree is applied to the same data used for fitting.
     Returns `True` if every leaf node in the fitted tree is reached by at least one training sample.
     """
 
-    all_leaf_nodes = np.asarray(
-        tree.children_left == tree.children_right).nonzero()[0]
+    is_leaf = tree.children_left == tree.children_right
+    all_leaf_nodes = np.flatnonzero(is_leaf)
     reached_leaf_nodes = tree.apply(X_train)
 
     return set(reached_leaf_nodes) == set(all_leaf_nodes)
 
 
-def _fit_decision_tree_with_reachable_leaves(decision_tree, X, y):
+def _fit_decision_tree_with_reachable_leaves(decision_tree:BaseDecisionTree, X:npt.NDArray, y:npt.NDArray):
     """
     Fits the decision tree. Retry fitting with a new random seed if some leaf nodes are not reached by the training data. This prevents difficult-to-reproduce failures during data generation.
     This prevents difficult to reproduce errors when generating data.
+
+    In order to sample from leaf nodes, we assume that applying the decision tree to the trainings data reaches all leaf nodes.
+    This assumption does not seem to always hold, see issue #129.
+
     """
 
     decision_tree.fit(X, y)
