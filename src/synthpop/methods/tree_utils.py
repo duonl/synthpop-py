@@ -6,6 +6,8 @@ import numpy.typing as npt
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
+from synthpop.reproducibility import RandomStateManager
+
 
 def sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
     """
@@ -122,13 +124,10 @@ class LeafNodeSampler:
                     "distributions and may be sampled. Review your input data "
                     "if this is unintended.")
 
-        if isinstance(self.random_state, np.random.Generator):
-            # Extract seed is not possible → treat as non-resettable (repeated calls do not give the same output)
-            self._seed = None
-            self.random_state_ = self.random_state
+        if self.random_state is None:
+            self.random_state_ = RandomStateManager.create_instance_seed()
         else:
-            self._seed = np.random.default_rng() if self.random_state is None else self.random_state
-            self.random_state_ = np.random.default_rng(self._seed)
+            self.random_state_ = self.random_state
         
         self._y_dtype = np.asarray(y).dtype
 
@@ -145,6 +144,9 @@ class LeafNodeSampler:
         Sampling is performed proportionally to observed frequencies:
             P(y = v | leaf) = count(v) / sum(counts in leaf)
 
+        Note that calling this function twice gives the same return value.
+        See the docs about reproducibility for more information.
+
         :param leaf_ids: Leaf IDs of synthetic samples for which target values
             should be generated. Array-like of shape (n_samples,)
         :return: Synthetic target values sampled from the leaf-wise empirical
@@ -159,12 +161,8 @@ class LeafNodeSampler:
         ):
             raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
         
-        seed = getattr(self, "_seed", None)
 
-        if seed is not None:
-            rng = np.random.default_rng(seed)
-        else:
-            rng = self.random_state_ # fallback, not-resettable
+        rng = RandomStateManager.create_rng(self.random_state_)
         
         leaf_ids = np.asarray(leaf_ids)
         n_samples = len(leaf_ids)

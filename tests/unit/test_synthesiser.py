@@ -8,6 +8,7 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.base_synth import BaseSynthMethod
+from sklearn import clone
 
 
 class StubSynthMethod(BaseSynthMethod):
@@ -175,6 +176,85 @@ def test_synthesiser_fit_custom_order_by_column_index():
     assert_distinct_instances(synth.models_, origin=synth_method)
 
 
+@pytest.fixture
+def mock_random_state_manager_and_method(mocker):
+
+    # There is no elegant way to assert that method.fit is called within that contextblock (and not before/after).
+
+    # Testing if create_instance_seed is called within the context block is not so difficult either, but
+    # that would make this not a unit test anymore: the test could fail for any problem in the synthesis process.
+
+    # The test about the interaction with RandomStateManager work by replacing RandomStateManger with MockRandomStateManager,
+    # which only keeps track of the contextblock.
+    # We then modify StubSynthMethod to assert that it has been called
+    # in the contextblock (using a class variable of MockRandomStateManager)
+
+    class MockRandomStateManager:
+        is_in_contextblock = False
+
+        def __enter__(self):
+            MockRandomStateManager.is_in_contextblock = True
+            pass
+
+        def __exit__(self, exc_type, exc, tb):
+            MockRandomStateManager.is_in_contextblock = False
+            pass
+
+        def __init__(self):
+            pass
+
+    class MockSynthMethod(StubSynthMethod):
+
+        def fit(self, X, y):
+            assert MockRandomStateManager.is_in_contextblock, "fit called outside context block"
+            return super().fit(X, y)
+
+        def transform(self, X):
+            assert MockRandomStateManager.is_in_contextblock, "transform called outside context block"
+            return super().transform(X)
+
+    return mocker.patch(
+        "synthpop.reproducibility.RandomStateManager", return_value=MockRandomStateManager()), MockSynthMethod()
+
+
+def test_synthesiser_fit_sets_seed_given_in_init(mock_random_state_manager_and_method):
+    # The aim of this test is to assert that fit is called within the context block with the correct seed.
+
+    expected_seed = 1234
+
+    mocked_rsm = mock_random_state_manager_and_method[0]
+    synth = Synthesiser(random_seed=expected_seed,
+                        default_syn_method=mock_random_state_manager_and_method[1])
+
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6]
+    })
+
+    synth.fit(test_data)
+
+    # Entering the context block resets the seed sequence.
+    # This would cause all the instance seeds to be not independent.
+    # That is why we need to assert that exactly one context block has been created in the call to synthesiser.fit.
+
+    mocked_rsm.assert_called_once_with(seed=expected_seed)
+
+
+def test_synthesiser_fit_pass_no_seed(mock_random_state_manager_and_method):
+    mocked_rsm = mock_random_state_manager_and_method[0]
+
+    synth = Synthesiser(
+        default_syn_method=mock_random_state_manager_and_method[1])
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6]
+    })
+    synth.fit(test_data)
+    mocked_rsm.assert_called_once_with(seed=None)
+
+
 def test_synthesiser_fit_throws_on_non_dataframe():
     not_a_df = {}
     synth = Synthesiser(random_seed=3)
@@ -306,6 +386,57 @@ def test_generate_custom_order():
     assert synth.models_["a"].transform_X[0].equals(expected_result[["c"]])
     assert synth.models_["b"].transform_X[0].equals(
         expected_result[["c", "a"]])
+
+
+def test_synthesiser_generate_passes_seed_given_in_init(mock_random_state_manager_and_method):
+
+    expected_seed = 753
+    mocked_rsm = mock_random_state_manager_and_method[0]
+    synth_method = mock_random_state_manager_and_method[1]
+    expected_result = pd.DataFrame({
+        "c": ["q", "w", "e"],
+        "a": ["x", "y", "z"],
+        "b": [1, 2, 3]
+    })
+
+    synth = Synthesiser(random_seed=expected_seed,
+                        default_syn_method=synth_method)
+
+    synth.column_order_ = ["a", "b", "c"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+
+    for col in expected_result.columns:
+        synth.models_[col] = clone(synth_method)
+        synth.models_[col].transform_result = expected_result[col]
+
+    synth.generate(100)
+    mocked_rsm.assert_called_once_with(seed=expected_seed)
+
+
+def test_synthesiser_generate_passes_seed_given_in_argument(mock_random_state_manager_and_method):
+
+    expected_seed = 753123
+    mocked_rsm = mock_random_state_manager_and_method[0]
+    synth_method = mock_random_state_manager_and_method[1]
+    expected_result = pd.DataFrame({
+        "c": ["q", "w", "e"],
+        "a": ["x", "y", "z"],
+        "b": [1, 2, 3]
+    })
+
+    synth = Synthesiser(random_seed=1456, default_syn_method=synth_method)
+
+    synth.column_order_ = ["a", "b", "c"]
+    synth.n_samples_ = 3
+    synth.models_ = {}
+
+    for col in expected_result.columns:
+        synth.models_[col] = clone(synth_method)
+        synth.models_[col].transform_result = expected_result[col]
+
+    synth.generate(100, random_seed=expected_seed)
+    mocked_rsm.assert_called_once_with(seed=expected_seed)
 
 
 def test_generate_raises_when_not_fitted():
