@@ -87,7 +87,9 @@ def predictor(stub_encoder, stub_tree, stub_sampler):
     )
 
 @pytest.fixture(autouse=True)
-def mock_fit_decision_tree(mocker,stub_tree):
+def mock_fit_decision_tree(request,mocker,stub_tree):
+    if 'noautofixt' in request.keywords:
+        return
     mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value = stub_tree)
 
 # ----- prepare data for fit tests -----
@@ -114,6 +116,7 @@ def test_prepare_data_for_fit_accepts_1d_inputs(predictor):
 
     assert fit_X.shape == (4, 1)
 
+@pytest.mark.noautofixt
 def test_prepare_data_missing_data_flow_correct(predictor,mocker):
     predictor.encoder.transform_return = np.array([2, 2, 2, 2])
     predictor.tree.apply_return = np.array([0, 1, 2, 3])
