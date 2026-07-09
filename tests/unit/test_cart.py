@@ -184,6 +184,8 @@ def test_fit_sets_fitted_attributes(mocker, y):
     assert cart.method_.fit_x is clean_X
     assert cart.method_.fit_y is clean_y
 
+    assert cart.target_dtype_ == y.dtype
+
 
 @pytest.mark.parametrize(
     ("y"),
@@ -192,7 +194,14 @@ def test_fit_sets_fitted_attributes(mocker, y):
         (pd.Series([1.0, 2.0], dtype=np.float64)),
         (pd.Series([1.0, 2.0], dtype=np.float32)),
         (pd.Series(["a", "b"], dtype='str')),
-        (pd.Series(["a", "b"], dtype='object'))
+        (pd.Series(["a", "b"], dtype='object')),
+        (pd.Series(["a", "b"], dtype="string")),
+        (pd.Series([1, None], dtype="Int64")),
+        (pd.Series([1.0, 2.0], dtype="Float32")),
+        (pd.Series([True, None], dtype="boolean")),
+        (pd.Series(["a", "b"], dtype="category")),
+        (pd.Series(["a", "b"], dtype=str_dtype)),
+        (pd.Series([True, None], dtype=np.bool)),
     ]
 )
 def test_fit_saves_input_dtypes(y):
@@ -201,7 +210,7 @@ def test_fit_saves_input_dtypes(y):
     X = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
     cart.fit(X, y)
-    assert y.dtype == cart.output_dtype_
+    assert y.dtype == cart.target_dtype_
 
 
 # ----- transform tests -----
@@ -221,7 +230,7 @@ def test_transform_returns_series(mocker, result, method):
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
     cart.method_ = method
-    cart.output_dtype_ = result.dtype
+    cart.target_dtype_ = result.dtype
 
     clean_X = {"a": np.array([1, 2])}
 
@@ -263,7 +272,7 @@ def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "synthetic_target"
-    cart.output_dtype_ = result.dtype
+    cart.target_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
         "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
@@ -304,7 +313,7 @@ def test_transform_rejects_missing_columns():
     cart.method_ = StubRegressor()
     cart.feature_names_in_ = ["a", "b"]
     cart.target_name_ = "y"
-    cart.output_dtype_ = np.float32  # arbitrary
+    cart.target_dtype_ = np.float32  # arbitrary
 
     X = pd.DataFrame({"a": [1]})
 
@@ -331,7 +340,7 @@ def test_transform_ignores_extra_columns(mocker, result, method):
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "target"
-    cart.output_dtype_ = result.dtype
+    cart.target_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
         "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
@@ -378,7 +387,7 @@ def test_transform_outputs_same_dtype_as_target(y, method):
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "target"
-    cart.output_dtype_ = y.dtype
+    cart.target_dtype_ = y.dtype
 
     X = pd.DataFrame(
         {
@@ -391,8 +400,27 @@ def test_transform_outputs_same_dtype_as_target(y, method):
     assert y.dtype == out.dtype
 
 
-def test_transform_requires_fit():
+@pytest.mark.parametrize(
+    "missing_attr",
+    [
+        "method_",
+        "feature_names_in_",
+        "target_name_",
+        "target_dtype_",
+    ],
+)
+def test_transform_requires_fit_missing_attribute(missing_attr):
     cart = CartMethod()
+
+    # Set all required fitted attributes
+    cart.method_ = StubClassifier()
+    cart.feature_names_in_ = ["a"]
+    cart.target_name_ = "target"
+    cart.target_dtype_ = "str"
+
+    # Remove one attribute
+    delattr(cart, missing_attr)
+
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
@@ -424,7 +452,7 @@ def test_clone_works_and_fitted_cart_does_not_preserve_state():
     cloned = clone(cart)
 
     # Fitted attributes should NOT be copied, original remains intact
-    for attr in ["method_", "feature_names_in_", "target_name_", "output_dtype_"]:
+    for attr in ["method_", "feature_names_in_", "target_name_", "target_dtype_"]:
         assert not hasattr(cloned, attr)
         assert hasattr(cart, attr)
     assert hasattr(cloned, "regressor")

@@ -565,7 +565,7 @@ def ndarray_to_dict(a):
 @parametrize_with_checks([TreeClassifierMethod(),TreeRegressorMethod()], legacy=False, expected_failed_checks=lambda x: {
     "check_fit_score_takes_y":"tests with a score component"
 })
-@pytest.mark.noautofixt
+@pytest.mark.noautofix
 def test_TreeMethod_is_sklearn_compatible(estimator, check):
     # sklearn provides valuable tests.
     # Those test assume that the input is a numpy array.

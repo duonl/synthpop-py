@@ -169,9 +169,9 @@ def test_synthesiser_preserves_cat_cat_relation():
 @pytest.mark.parametrize(
     "method",
     [
-        CopyMethod(),
-        SampleMethod(),
-        CartMethod()
+        CopyMethod,
+        SampleMethod,
+        CartMethod
     ]
 )
 def test_synthesiser_preserves_datatypes(method):
@@ -185,7 +185,14 @@ def test_synthesiser_preserves_datatypes(method):
     n_samples_orig = 1000
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
-    synthesiser = Synthesiser(default_syn_method=method, random_seed=74124)
+    
+    original_data = original_data.astype({
+    "second": "float32",
+    "fourth": "int64",
+    "fifth": "object"
+})
+
+    synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
 
     syn_df = synthesiser.fit(original_data).generate()
 

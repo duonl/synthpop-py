@@ -323,9 +323,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     - dict[str, np.ndarray] for X
     - np.ndarray for y
 
-    Arrays are standardised to:
-    - np.float32 for numeric data
-    - StringDType(na_object=np.nan) for non-numeric data
+    Arrays are returned with the same data type as the input.
 
     :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 
@@ -355,7 +353,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     0     A                                                                                                                                                                                                                     
     1    AB                                                                                                                                                                                                                     
     2     B                                                                                                                                                                                                                     
-    Name: blood type, dtype: object         
+    Name: blood type, dtype: str         
     """
 
     def __init__(self,
@@ -398,7 +396,7 @@ class CartMethod(base_synth.BaseSynthMethod):
 
         self.feature_names_in_ = list(X.columns)
         self.target_name_ = y.name
-        self.output_dtype_ = y.dtype
+        self.target_dtype_ = y.dtype
 
         X_dict = utils.to_standardised_array_dict(X)
         y_array = utils.standardise_array_dtypes(y)
@@ -421,7 +419,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         """
 
         check_is_fitted(
-            self, ["method_", "feature_names_in_", "target_name_", "output_dtype_"])
+            self, ["method_", "feature_names_in_", "target_name_", "target_dtype_"])
 
         if not isinstance(X, pd.DataFrame):
             raise TypeError(
@@ -441,7 +439,7 @@ class CartMethod(base_synth.BaseSynthMethod):
             result,
             index=X.index,
             name=self.target_name_,
-            dtype=self.output_dtype_
+            dtype=self.target_dtype_
         )
 
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
