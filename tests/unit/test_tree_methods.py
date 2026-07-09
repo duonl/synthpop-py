@@ -171,7 +171,7 @@ def fitted_tree(tree_method,request):
 
 @pytest.fixture(autouse=True)
 def mock_fit_decision_tree(mocker,):
-    mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value = StubTree())
+    mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value = StubTree())
 
 #---------------------------------------------------
 
@@ -359,7 +359,7 @@ def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
 
     expected_tree = clone(tree_method.tree)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value = expected_tree)
+    mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value = expected_tree)
 
 
     tree_method.fit(X,y)
@@ -367,9 +367,9 @@ def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
     expected_X = get_exp_feature_matrix()
     expected_y = tree_method.missing_handler_.prepared_for_fit_result[1]
 
-    assert len(mock_fit_decision_tree_consistently.mock_calls) == 1, "fit_decision_tree_consistently should be called 1 time"
+    assert len(mock_fit_decision_tree_with_reachable_leaves.mock_calls) == 1, "fit_decision_tree_consistently should be called 1 time"
 
-    kwargs = mock_fit_decision_tree_consistently.mock_calls[0][2]
+    kwargs = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]
 
     assert isinstance(kwargs["decision_tree"], StubTree)
     assert tree_method.tree_ is expected_tree, "fitted decision tree should be stored"
@@ -418,7 +418,7 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array(["a","b"],dtype=str_dtype)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value =StubTree())
+    mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value =StubTree())
     # the missing handling can return a y of str_dtype.
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
     
@@ -432,14 +432,14 @@ def test_fit_classifier_converts_to_str(encoder,leafnode_sampler,mocker):
 
     mocked_to_str.assert_called_with(y)
 
-    actual_y = mock_fit_decision_tree_consistently.mock_calls[0][2]["y"]
+    actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
     assert np.array_equal(str_y,actual_y)
     
 def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
     y = np.array([1,2.0],dtype=np.float64)
 
-    mock_fit_decision_tree_consistently = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_consistently",return_value =StubTree())
+    mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value =StubTree())
 
     # the missing handling can return a y of np.float64
     missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
@@ -451,7 +451,7 @@ def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
 
     tree_method.fit(X,y)
 
-    actual_y = mock_fit_decision_tree_consistently.mock_calls[0][2]["y"]
+    actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
 
     assert np.array_equal(converted_y,actual_y)
     assert actual_y.dtype == np.float32

@@ -11,7 +11,7 @@ from sklearn.base import clone
 from synthpop.reproducibility import RandomStateManager
 
 
-def _tree_is_consistent(tree, X_train) -> bool:
+def _check_all_leaf_nodes_are_reached(tree, X_train) -> bool:
     """
     Check if all leaf nodes are reached when the decision tree is applied to the same data used for fitting.
     Returns `True` if every leaf node in the fitted tree is reached by at least one training sample.
@@ -24,19 +24,19 @@ def _tree_is_consistent(tree, X_train) -> bool:
     return set(reached_leaf_nodes) == set(all_leaf_nodes)
 
 
-def _fit_decision_tree_consistently(decision_tree, X, y):
+def _fit_decision_tree_with_reachable_leaves(decision_tree, X, y):
     """
-    Fis the decision tree. Retry fitting with a new random seed if some laf nodes are not reached by the training data. This prevents difficult-to-reproduce failures during data generation.
+    Fits the decision tree. Retry fitting with a new random seed if some leaf nodes are not reached by the training data. This prevents difficult-to-reproduce failures during data generation.
     This prevents difficult to reproduce errors when generating data.
     """
 
     decision_tree.fit(X, y)
-    is_consistent = _tree_is_consistent(tree=decision_tree.tree_, X_train=X)
+    is_consistent = _check_all_leaf_nodes_are_reached(tree=decision_tree.tree_, X_train=X)
     while not is_consistent:
         tree = clone(decision_tree)
         tree.random_state = RandomStateManager.create_instance_seed()
         tree.fit(X, y)
-        is_consistent = _tree_is_consistent(tree=tree.tree_, X_train=X)
+        is_consistent = _check_all_leaf_nodes_are_reached(tree=tree.tree_, X_train=X)
         if is_consistent:
             return tree
 
