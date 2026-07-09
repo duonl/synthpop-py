@@ -372,7 +372,7 @@ def test_transform_ignores_extra_columns(mocker, result, method):
             transform_result=np.array(["a", "b"], dtype=str_dtype)))
     ]
 )
-def test_transform_outputs_same_dtype(y, method):
+def test_transform_outputs_same_dtype_as_target(y, method):
     cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
 
     cart.method_ = method
