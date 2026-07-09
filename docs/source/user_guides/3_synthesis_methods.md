@@ -1,6 +1,6 @@
 # 3. Synthesis methods
 
-This section describes the synthesis methods available in **synthpop-py**. A synthesis method  defines how individual columns are generated within a synthetic dataset. In `synthpop-py`, each column is generated sequentially using a user-specified or default synthesis method. This means that the generation of a given column may depend on previously synthesised columns, which act as predictors.
+This section describes the synthesis methods available in **synthpop-py**. A synthesis method defines how individual columns are generated within a synthetic dataset. In `synthpop-py`, each column is generated sequentially using a user-specified or default synthesis method. This means that the generation of a given column may depend on previously synthesised columns, which act as predictors.
 
 The synthesis process is orchestrated by the `Synthesiser`, which delegates the task of synthesising each column to an appropriate method. Each method implements a common interface and exposes two key operations:
 
@@ -21,7 +21,7 @@ Available synthesis methods are:
 CART (Classification And Regression Trees) is the default synthesis method. 
 ```python
 >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
->>> y_num = pd.Series([50, 60, 70], name='length')
+>>> y = pd.Series([50, 60, 70], name='length')
 >>> method = CartMethod().fit(X, y)
 >>> method.transform(X)
 0    50.0
@@ -30,87 +30,110 @@ CART (Classification And Regression Trees) is the default synthesis method.
 Name: length, dtype: float32
 ```                
 
-CART generates a column by learning a conditional model:
+CART generates a column by learning an approximation of the conditional distribution:
 ```{math}
 P(Y \mid X_1, \dots, X_k)
 ```
-
 where $Y$ is the target column and $X_1, \dots, X_k$ are previously synthesised columns.
 
-Instead of directly sampling from a parametric distribution, CART partitions the feature space into regions (tree leaves) and approximates the conditional distribution within each region using empirical data.
+CART (Classification And Regression Trees) models the relationship between a target column and previously synthesised columns by recursively partitioning the predictor space into smaller regions. Each region corresponds to a leaf node in the fitted decision tree.
+
+During synthesis, a synthetic observation is first assigned to a leaf node based on its predictor values. Instead of returning the average value or most likely category predicted by the tree, synthpop-py samples from the observed target values that were present in that leaf during training. This leaf-node sampling strategy allows the synthetic data to preserve local variability and reproduce complex empirical distributions.
+
+The following diagram illustrates a simplified CART model. The internal nodes represent decision rules applied to predictor variables, while the leaf nodes contain the empirical distribution of observed target values from which synthetic values are sampled.
+
+```mermaid
+flowchart TD
+    A["Root node<br/>Age < 50?"] -->|Yes| B["Profession = Cook?"]
+    A -->|No| C["Leaf 3<br/><br/>Observed target values:<br/>[72, 75, 80]"]
+
+    B -->|Yes| D["Leaf 1<br/><br/>Observed target values:<br/>[50, 55, 60]"]
+    B -->|No| E["Leaf 2<br/><br/>Observed target values:<br/>[62, 65, 68]"]
+
+    D --> F["Synthetic sample:<br/>draw randomly from<br/>[50, 55, 60]"]
+    E --> G["Synthetic sample:<br/>draw randomly from<br/>[62, 65, 68]"]
+    C --> H["Synthetic sample:<br/>draw randomly from<br/>[72, 75, 80]"]
+```
 
 CART is recommended when:
-- relationships between variables are important;
-- high-quality synthetic data is required;
+- preserving relationships between variables is important;
+- realistic conditional distributions are required;
 - interpretability of local structure matters.
 
-#### 3.1.1. Algorithm
+### 3.1.1. Algorithm
 
-For the first column, no predictors are available. In that case, CART samples directly from the empirical distribution of the target column. For each subsequent column $Y$, CART performs:
+For the first column, no predictors are available. In that case, CART samples directly from the empirical distribution of the target column. For each subsequent column $Y$, CART performs the following steps:
 
 1. **Feature construction**
-   - Use all previously synthesised columns as predictors:
-     ```{math}
-     X = (X_1, \dots, X_{k})
-     ```
+   
+   Use all previously synthesised columns as predictors:
+   ```{math}
+   X = (X_1, \dots, X_k)
+   ```
+   Where $X_1, \dots X_k$ are the columns that have already been synthesised.
 
 2. **Preprocessing**
-   - Categorical variables are encoded (defaults: PCA and mean encoding)
-   - Missing values are handled depending on target type
+
+   The variables are prepared before fitting the decision tree:
+   - Categorical predictors are encoded using the appropriate encoder (defaults: PCA encoding for categorical targets and mean encoding for numeric targets);
+   - Missing values in the target variable are handled according to the target type.
 
 3. **Model fitting**
-   - Fit a decision tree:
-     ```{math}
-     T = \text{Tree}(X, Y)
-     ```
+   
+   A decision tree is fitted to learn the relationship between the predictors and target:
+   ```{math}
+   T = \text{Tree}(X, Y)
+   ```
+   The fitted tree partitions the predictor space into regions represented by leaf nodes.
 
 4. **Leaf assignment**
-   - For each observation:
-     ```{math}
-     \ell_i = T(X_i)
-     ```
+   
+   Each observed training observation is assigned to a leaf ndoe:
+   ```{math}
+   \ell_i = T(X_i)
+   ```
+   Where $\ell_i$ is the leaf node reached by observation $i$.
+   
 
-5. **Leaf-based sampling (key mechanism)**
-   - For each leaf $\ell$, construct empirical distribution:
-     ```{math}
-     P(Y \mid \ell) = \frac{\text{count}(Y)}{\sum \text{count}(Y)}
-     ```
+5. **Store empirical leaf distributions**
+
+   For each leaf node, synthpop-py stores the empirical distribution of target values observed during training.
+
+   Let $Y_i$ denote the target value of observation $i$ and let $\ell_i$ denote the leaf node assigned to that observation. For a given leaf $\ell$, the probability of sampling a target value $y$ is:
+   ```math
+   P(Y=y \mid \ell)
+   =
+   \frac{
+   \operatorname{count}(Y_i=y \text{ and } \ell_i=\ell)
+   }{
+   \operatorname{count}(\ell_i=\ell)
+   }
+   ```
+   This distribution preserves the variability of observations within each leaf instead of reducing the target to a single predicted value such as a mean or most likely category.
 
 6. **Synthesis**
-   - For synthetic rows:
-     - assign leaf
-     - sample $Y$ from empirical leaf distribution
+   
+   For each synthetic observation:
+   - assign the observation to a leaf using the fitted decision tree;
+   - sample the target value from the empirical distribution associated with that leaf.
 
-### 3.1.1. Leaf node sampling
+   This leaf-node sampling strategy allows synthpop-py to reproduce local relationships and complex empirical distributions while preserving variations within regions of the predictor space.
 
-A key feature of CART synthesis is **explicit sampling from leaf nodes**.
+### 3.1.2. Properties
 
-Instead of predicting a single value:
-```{math} 
-\hat{y} = f(X)
-```
+- Captures conditional dependencies between variables.
+- Preserves non-linear relationships between predictors and targets.
+- Supports mixed data types through preprocessing.
+- Reproduces complex empirical distributions, including highly non-Gaussian distributions, through leaf-node sampling.
+- Preserves local variability rather than only modelling conditional averages or modes.
 
-the model samples:
-```{math}
-Y \sim P(Y \mid \ell(X))
-```
+### 3.1.3. Limitations
 
-This preserves intra-leaf variability and allows the synthetic data to reproduce realistic local distributions rather than only conditional means or modes.
+- The quality of synthesis depends on the selected tree parameters, such as leaf size and tree complexity.
+- CART models only relationships captured by the available predictors. Important dependencies cannot be reproduced if relevant predictors are unavailable.
+- As part of the sequential synthesis framework, the available predictors depend on the column synthesis order. The ordering of predictors within a single CART model does not affect the fitted tree; only the selection of available predictors through the synthesis order matters.
 
-### 3.1.3. Properties
-
-- Captures conditional dependencies between variables
-- Preserves non-linear relationships
-- Supports mixed data types
-- Reproduces local empirical distributions via leaf sampling
-
-### 3.1.4. Limitations
-
-- No support for explicit predictor selection (no prediction matrix as in synthpop-R)
-- Sensitive to column ordering due to sequential synthesis
-- Approximation quality depends on tree depth and leaf structure
-
-### 3.1.5. Configuring CART
+### 3.1.4. Configuring CART
 The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
 The most flexible approach is to construct a `CartMethod` directly:
@@ -145,7 +168,7 @@ Or directly in the `Synthesiser`:
 Synthesiser(default_syn_method=tune_cart(n_leaves=10, n_components=1))
 ```
 Currently `tune_cart` supports the following parameters:
-- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each tree.
+- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
 - `n_components`: configures the number of principal components retained by the `PCAEncoder` used for categorical predictors. More information can be found in 4.3.1. (ADD LINK)
 
 ---

@@ -9,14 +9,14 @@ For each target column:
 - missing values in the target are handled differently depending on target type.
 
 For fitting a categorical target:
-1. Replace missing target values with temporary category (e.g. "N.a.N.").
-2. Encode categorical predictors using the PCA encoder.
+1. Replace missing target values with temporary category (e.g. "N.a.N."). (See section 4.2.1)
+2. Encode categorical predictors using the PCA encoder. (See section 4.1.1)
 3. Fit a classification tree.
 
 For fitting a numeric target:
-1. Fit a Missing Value Predictor using the original predictors and target.
+1. Fit a Missing Value Predictor using the original predictors and target. (See section 4.2.2)
 2. Remove rows where the target is missing.
-3. Encode categorical predictors using the Mean encoder.
+3. Encode categorical predictors using the Mean encoder. (See section 4.1.2)
 4. Fit a regression tree.
 
 All preprocessing components are stored with the fitted synthesis model and reused during generation to ensure consistent transformations.
@@ -38,7 +38,9 @@ Green
 ```
 must be transformed into numeric representations before fitting a tree-based synthesis model.
 
-Unlike naive label encoding, synthpop-py uses supervised encoders that incorporate information from the target variable. This ensures that categories with similar relationships to the target receive similar numeric representations, improving synthesis quality.
+Unlike naive label encoding, synthpop-py uses supervised encoders that incorporate information from the target variable. This ensures that categories with similar relationships to the target receive similar numeric representations, which can improve the quality of the fitted synthesis model.[^1]
+
+[^1]: This is also a key difference from the original synthpop R implementation, which uses different approaches for handling categorical predictors. The supervised encoding strategy used in synthpop-py can substantially improve computational performance and model fitting efficiency for some synthesis tasks.
 
 The encoder used depends on the target type:
 | Target type | Default encoder |
@@ -47,7 +49,7 @@ The encoder used depends on the target type:
 | Numeric | Mean Encoder |
 
 ### 4.1.1. PCA encoding
-The PCA encoder is used for categorical targets and produces a low-dimensional numerical representation of categorical levels based on their relationship with the target.
+The PCA encoder is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying PCA transformation.
 ```python
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array(["x", "x", "y", "z", "w"])
@@ -71,7 +73,7 @@ Let:
 A contingency table $C \in \mathbb{R}^{m \times q}$ is constructed where:
 
 ```{math}
-C_{ij} = \text{count}(X = i, Y = j)
+C_{ij} = \operatorname{count}(X = i, Y = j)
 ```
 
 Each row corresponds to a feature level and each column corresponds to a target level.
@@ -99,7 +101,7 @@ PCA is applied to the scaled matrix $C''$. This produces a rotation matrix defin
 (C'')^\top C''
 ```
 
-Each category is then represented by its coordinates in the principal component space. The resulting encoding may be multi-dimensional. To select components, let $\sigma_i$ denote the singular values. The proportion of explain variance for the first $k$ components is:
+Each category is then represented by its coordinates in the principal component space. The resulting encoding may be multi-dimensional. To select components, let $\sigma_i$ denote the singular values. The proportion of explained variance for the first $k$ components is:
 ```{math}
 \frac{\sum_{i=1}^{k} \sigma_i}{\sum_{j=1}^{q} \sigma_j}
 ```
@@ -125,7 +127,7 @@ Let $G_k$ be the set of indices where feature $X$ equals category $c_k$. The enc
 
 Missing values in $y$ are ignored. Each observation is mapped as:
 ```{math}
-\tilde{x}_i = \mu{x_i}
+\tilde{x}_i = \mu_{x_i}
 ```
 
 This method produces a single numeric feature that captures the average relationship between category and target.
@@ -133,20 +135,48 @@ This method produces a single numeric feature that captures the average relation
 ---
 
 ## 4.2. Handling missing values
-Missing values are handled explicitly during synthesis because standard decision tree implementations cannot generate missing values in targets as they cannot model missing targets directly. Therefore, the missing values in targets must be handled otherwise trees would implicitly drop or mishandle them.
+Missing values are handled explicitly during synthesis because standard decision tree implementations cannot train on missing target values. If missing target values are passed directly to `scikit-learn` trees, model fitting will fail with an exception. Therefore, missing targets must be transformed before fitting and reconstructed after synthesis.
 
-To preserve realistic missingness patterns in synthetic data, the system separates:
-- Value generation
-- Missingness modelling
-- Missingness reconstruction.
+It is implemented via a missing value handling interface, which transforms data before and after synthesis. Synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target:
+- Categorical targets: missing values are treated as an additional category during synthesis. The synthesis model can therefore learn missingness as one of the possible target outcomes.
+- Numeric targetsL missingness is modelled separately from the target value. A dedicated missing value predictor learns the probability that the target is missing, while the regression model is trained only on observed target values.
 
-This separation ensures structural correctness of training data, faithful reproduction of missingness patterns and compatibility with `scikit-learn` trees.
+This separation allows synthpop-py to reproduce both the generated values and the missingness patterns present in the original data. Missing value handling is integrated into the synthesis methods in synthpop-py.
 
-It implemented via a missing value handling interface, which transforms data before and after synthesis. Synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target. For numeric targets, a predictor for missing values is used. For categorical targets, missing values are treated as their own category.
+### 4.2.1. Treating missing as category
+For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training.
+```python
+>>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
+>>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+>>> replace_missing = ReplaceNoneWithValue()
+>>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+>>> y_res
+array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
+>>> replace_missing.post_synth_transform(x_res, y_res)
+array(['x', 'y', nan, 'z'], dtype=StringDType(na_object=nan))
+```
 
-Missing value handling is integrated into the synthesis methods in synthpop-py.
+#### 4.2.1.1. Process
+Let:
+```{math}
+y \in C \cup \{\mathrm{NaN}\}
+```
+We define a transformation:
+```{math}
+T(y_i) = 
+\begin{cases}
+\text{"N.a.N." } & \text{if } y_i=\mathrm{NaN} \\
+y_i & \text{otherwise}
+\end{cases}
+```
+After synthesis, this mapping is inverted:
+```{math}
+\text{"N.a.N."} \to \mathrm{NaN}
+```
 
-### 4.2.1. Predicting missing values
+This method ensures that trees never see missing values in targets which they cannot handle, missingness is preserved exactly and missing values are structurally reproducible without imputation.
+
+### 4.2.2. Predicting missing values
 For numeric targets, missing values are treated probabilistically.
 ```python
 >>> X = {"num": np.array([25, 30, 35, 40])}
@@ -173,12 +203,12 @@ z_i =
 \end{cases}
 ```
 
-The system learns:
+The probability of missingness is learned using a classification tree, in the same way that other categorical synthesis models learn target distributions:
 ```{math}
 P(z = 1 \mid x), \quad P(z = 0 \mid x).
 ```
 
-#### 4.2.1.1. Process
+#### 4.2.2.1. Process
 1. Construct the missingness target vector.
 2. Apply mean encoding to the categorical predictors. Mean encoding is used as the boolean missingness vector is considered numerical.
 3. Fit a classifier for missingness:
@@ -186,44 +216,12 @@ P(z = 1 \mid x), \quad P(z = 0 \mid x).
 P(z \mid x)
 ```
 4. During synthesis:
-- Sample whether target is missing
+- Pass the predictors through the missing value predictor
+- Sample missingness using the probability distribution associated with the corresponding leaf node
 - If $z = 1$, output NaN
 - else keep the numeric value generated by the regression tree
 
 With this predictor, the synthetic data can reproduce missingness structures, not just frequencies as missingness is conditional on the features.
-
-### 4.2.2. Treating missing as category
-For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training.
-```python
->>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
->>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
->>> replace_missing = ReplaceNoneWithValue()
->>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
->>> y_res
-array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
->>> replace_missing.post_synth_transform(x_res, y_res)
-array(['x', 'y', nan, 'z'], dtype=StringDType(na_object=nan))
-```
-
-#### 4.2.2.1. Process
-Let:
-```{math}
-y \in C \cup \{\mathrm{NaN}\}
-```
-We define a transformation:
-```{math}
-T(y_i) = 
-\begin{cases}
-\text{"N.a.N." } & \text{if } y_i=\mathrm{NaN} \\
-y_i & \text{otherwise}
-\end{cases}
-```
-After synthesis, this mapping is inverted:
-```{math}
-\text{"N.a.N."} \to \mathrm{NaN}
-```
-
-This method ensures that trees never see missing values in targets which they cannot handle, missingness is preserved exactly and missing values are structurally reproducible without imputation.
 
 ---
 

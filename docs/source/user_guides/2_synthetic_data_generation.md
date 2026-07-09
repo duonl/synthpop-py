@@ -9,32 +9,39 @@ This section describes how synthetic data is generated using **synthpop-py**, in
 Synthetic data generation in synthpop-py follows a **sequential modelling approach**, where variables are generated one after another according to a specified column order.
 
 At a high level, the workflow is:
+```mermaid
+flowchart LR
 
-```
-Original data
-    │
-    ▼
-Synthesiser.fit()
-    │
-    ├── Preprocessing (encoding + missing value handling)
-    ├── Fit synthesis models per variable
-    └── Store fitted models
-    │
-    ▼
-Synthesiser.generate()
-    │
-    ├── Sequential prediction (column-by-column)
-    ├── Leaf node sampling
-    └── Post-processing
-    │
-    ▼
-Synthetic data
+    A[Original data]
+
+    subgraph FIT["Synthesiser.fit()"]
+        direction TB
+        B[Determine column order]
+        C[Fit synthesis for each variable]
+        D[Apply preprocessing within synthesis methods]
+        E[Store fitted models]
+        B --> C --> D --> E
+    end
+
+    subgraph GEN["Synthesiser.generate()"]
+        direction TB
+        F[Use previously generated variables as predictors]
+        G[Apply synthesis method to one column]
+        H[Generate columns sequentially]
+        I[Post-processing]
+        F --> G --> H --> I
+    end
+
+    J[Synthetic data]
+
+    A --> FIT
+    FIT --> GEN
+    GEN --> J
 ```
 
 The synthesis procedure is intentionally sequential and autoregressive:
 - Each generated variable is conditioned on previously generated variables
 - the **column order is a critical modelling assumption** as it defines structure
-- variability is introduced via leaf node sampling
 
 This design closely follows the original **synthpop** methodology while providing a modular and extensible Python implementation.
 
@@ -42,16 +49,9 @@ This design closely follows the original **synthpop** methodology while providin
 
 ## 2.2. The Synthesiser class
 
-The central interface in synthpop-py is the `Synthesiser` class. It provides a unified API for fitting synthesis models and generating synthetic datasets.
+The central interface in synthpop-py is the `Synthesiser` class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
 
 ```python
-Synthesiser(
-    random_seed=None,
-    column_order=None,
-    default_syn_method=None,
-    special_syn_method=None
-)
-
 synth = Synthesiser(random_seed=42)
 synth.fit(df)
 
@@ -60,18 +60,29 @@ synthetic_df = synth.generate(n=1000)
 
 ### 2.2.1. Key parameters
 
+During initialisation:
 - **`random_seed`**  
   Controls reproducibility of both fitting and generation.
 
 - **`column_order`**  
   Defines the order in which variables are synthesised.  
-  This order is structurally important: each variable is generated conditional on previously generated variables.
+  This order is structurally important: each variable is generated conditional on previously generated variables.  
+  The default is the column order of the original dataset.
 
 - **`default_syn_method`**  
-  The synthesis method applied to all variables unless explicitly overridden.
+  The synthesis method applied to all variables unless explicitly overridden. The default value is CART.
 
 - **`special_syn_method`**  
   Dictionary mapping variable names to custom synthesis methods.
+
+During `fit()`:
+- **`X`**  
+  The original dataset
+
+During `transform()`:
+- **`n`**  
+  The number of rows to generate for the synthetic dataset.  
+  The default is the same number of rows as the original dataset.
 
 ---
 
@@ -139,7 +150,7 @@ During fitting:
    - categorical variables are encoded
    - numeric variables are used directly or transformed as required by the synthesis method
 3. A separate model is fitted for each variable in sequence.
-4. Each model is trained using all previously processed variables as predictors.
+4. Each model receives previously ordered variables as predictors, which are internally transformed according to the selected synthesis method.
 
 Formally, for a variable $(X_j)$, the model learns:
 ```{math}
@@ -167,7 +178,7 @@ The `generate` method:
 3. For each variable:
    - uses previously generated synthetic columns as predictors
    - applies the fitted model
-   - samples values using leaf node sampling
+   - samples values using leaf node sampling if a tree-based model is used (See Guide 3.1.1 ADD LINK)
 4. Returns a fully synthetic dataset.
 
 Each variable is generated conditionally:
@@ -179,24 +190,7 @@ where $(\tilde{X})$ denotes synthetic variables.
 
 ---
 
-## 2.6. Leaf node sampling
-
-A key component of CART-based synthesis is **leaf node sampling**.
-
-After a decision tree is fitted for a variable:
-
-1. Each training observation is assigned to a leaf node.
-2. The empirical distribution of the target variable is stored per leaf.
-3. During generation, new observations are routed through the tree.
-4. Values are sampled from the empirical distribution of the corresponding leaf node.
-
-This step ensures that synthetic values are not deterministic tree predictions but are instead **drawn from observed local distributions**, which improves variability and realism.
-
-Although this mechanism is central to the performance of CART synthesis, it is largely internal to the implementation.
-
----
-
-## 2.7. Reproducibility
+## 2.6. Reproducibility
 
 Reproducibility is controlled through the `random_seed` parameter.
 
