@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from sklearn.base import TransformerMixin, clone
 import numpy as np
@@ -146,3 +148,19 @@ def test_fit_decision_tree_consistently_retry_when_inconsistent(mocker):
             tree.fit_y, y), "tree has not been fitted again with correct y  before passing it to tree_is_consistent"
 
     assert result.random_state_ == expected_random_states[-1], "fit_decision_tree_consistently returned the wrong results"
+
+def test_fit_decision_tree_with_reachable_leaves_raises_after_100_tries(mocker):
+    mock_check_all_leaf_nodes_are_reached = mocker.patch(
+        "synthpop.methods.tree_utils._check_all_leaf_nodes_are_reached",return_value=False)
+    new_random_states = range(99)
+    mock_create_instance_seed = mocker.patch(
+        "synthpop.reproducibility.RandomStateManager.create_instance_seed", side_effect=new_random_states)
+    decision_tree = MockTree(random_state=3)
+    decision_tree.tree = base_tree(parent=decision_tree)
+
+    X = np.array([1, 2, 3])
+    y = np.array([4, 5, 6])
+
+    with pytest.raises(RuntimeError,match=re.escape("tried 100 times fitting decision tree. Check the trainings data, or try again with a different seed.")):
+        _fit_decision_tree_with_reachable_leaves(
+            decision_tree=decision_tree, X=X, y=y)

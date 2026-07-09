@@ -37,7 +37,12 @@ def _fit_decision_tree_with_reachable_leaves(decision_tree:BaseDecisionTree, X:n
 
     decision_tree.fit(X, y)
     is_consistent = _check_all_leaf_nodes_are_reached(tree=decision_tree.tree_, X_train=X)
+    counter = 0
     while not is_consistent:
+        counter +=1
+
+        if counter >= 100:
+            raise RuntimeError("tried 100 times fitting decision tree. Check the trainings data, or try again with a different seed.")
         tree = clone(decision_tree)
         tree.random_state = RandomStateManager.create_instance_seed()
         tree.fit(X, y)
