@@ -103,7 +103,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             X_val, y)
 
         all_features_dict = {k: self.encoders_[k].transform(
-            v) if k in self.encoders_ else v for (k, v) in prepared_for_fit_X.items()}
+all_features_dict = {
+    k: self.encoders_[k].transform(v)
+    if k in self.encoders_
+    else v
+    for (k, v) in X_val.items()
+}
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
@@ -130,7 +135,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         elif self._all_missing:
             return np.array([np.nan]*len(X[next(iter(X))]))
 
-        
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
             self, 
