@@ -195,7 +195,7 @@ def test_fit_sets_fitted_attributes(mocker, y):
         (pd.Series(["a", "b"], dtype='object'))
     ]
 )
-def test_fit_save_input_dtypes(y):
+def test_fit_saves_input_dtypes(y):
     cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
 
     X = pd.DataFrame({"a": [1, 2], "b": [3, 4]})

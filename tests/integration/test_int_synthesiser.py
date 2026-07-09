@@ -174,9 +174,9 @@ def test_synthesiser_preserves_cat_cat_relation():
         CartMethod()
     ]
 )
-def test_synthesizer_preserves_datatypes(method):
+def test_synthesiser_preserves_datatypes(method):
     """
-    Reproduces bug 162, where synthesizer class returns object dtype in the synthetic data
+    Reproduces bug 162, where synthesiser class returns object dtype in the synthetic data
     while the original data is string datatype.
 
     All columns should return their original datatype.
