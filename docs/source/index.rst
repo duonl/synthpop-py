@@ -6,21 +6,31 @@
 Synthpop documentation
 ======================
 
+Introduction on Synthpop
+
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
 documentation for details.
 
 
+README
+======================
+
+.. include:: ../../README.md 
+   :parser: myst
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
 
-   intro
-   synthpop
-   user guides/examples
-   functional descriptions/fd_index
+   installing/installing.md
+   user_guides/user_guides_index
+   api_reference/synthpop
+   examples/examples_index
    developer/developer_index.md
-   documentation.md
+   about_us/about.md
+
+   
 
 Indices and tables
 ==================

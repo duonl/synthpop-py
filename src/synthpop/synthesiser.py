@@ -10,6 +10,7 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
+import synthpop.reproducibility 
 
 
 class Synthesiser:
@@ -64,7 +65,7 @@ class Synthesiser:
 
     """
 
-    def __init__(self, random_seed: int,
+    def __init__(self, random_seed: int | None = None,
                  column_order: list[str] | list[int] | None = None,
                  default_syn_method: BaseSynthMethod | None = None,
                  special_syn_method: Dict[str, BaseSynthMethod] | None = None,
@@ -73,6 +74,7 @@ class Synthesiser:
         self.default_syn_method = default_syn_method
         self.column_order = column_order
         self.special_syn_method = special_syn_method
+        self.random_seed = random_seed
 
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
@@ -110,6 +112,8 @@ class Synthesiser:
         :return: Fitted synthesiser.
         """
 
+        
+
         if not isinstance(X, pd.DataFrame):
             raise ValueError(
                 f"X must be a pandas DataFrame, got {type(X)} instead.")
@@ -146,21 +150,22 @@ class Synthesiser:
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
-        for i, y in enumerate(self.column_order_):
+        with synthpop.reproducibility.RandomStateManager(seed=self.random_seed):
+            for i, y in enumerate(self.column_order_):
 
-            if i == 0:
-                predictors = pd.DataFrame(
-                    {"init": np.zeros(X.shape[0], dtype=int)})
-            else:
-                predictors = X[self.column_order_[0:i]]
+                if i == 0:
+                    predictors = pd.DataFrame(
+                        {"init": np.zeros(X.shape[0], dtype=int)})
+                else:
+                    predictors = X[self.column_order_[0:i]]
 
-            model = self._get_model(y)
+                model = self._get_model(y)
 
-            self.models_[self.column_order_[i]] = model.fit(predictors, X[y])
+                self.models_[self.column_order_[i]] = model.fit(predictors, X[y])
 
         return self
 
-    def generate(self, n: int | None = None, random_seed: int = 42) -> pd.DataFrame:
+    def generate(self, n: int | None = None, random_seed: int|None =None) -> pd.DataFrame:
         """
         Generate a synthetic dataset of ``n`` rows. 
 
@@ -184,13 +189,22 @@ class Synthesiser:
         else:
             n_syn_rows = n
 
-        for i, y in enumerate(self.column_order_):
 
-            if i == 0:
-                pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
-            else:
-                pred = result
+        
+        if random_seed is None:
+            seed_to_use = self.random_seed
+        else:
+            seed_to_use = random_seed
 
-            new_syn_column = self.models_[y].transform(X=pred)
-            result[new_syn_column.name] = new_syn_column
+
+        with synthpop.reproducibility.RandomStateManager(seed=seed_to_use):
+            for i, y in enumerate(self.column_order_):
+
+                if i == 0:
+                    pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
+                else:
+                    pred = result
+
+                new_syn_column = self.models_[y].transform(X=pred)
+                result[new_syn_column.name] = new_syn_column
         return result

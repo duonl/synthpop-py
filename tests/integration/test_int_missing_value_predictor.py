@@ -8,6 +8,9 @@ from synthpop.data_processing.missing_value_handling import MissingValuePredicto
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
 
+# This imports an auto-use fixture to set the seed, in order to make the test reproducible
+from tests.integration.make_int_test_reproducible import control_random_state_manager
+
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
 @pytest.fixture
@@ -74,7 +77,6 @@ def test_tree_sampler_integration(predictor):
     assert len(mask) == len(y)
     assert mask.dtype == bool
 
-@pytest.mark.xfail(reason="known issue, see #139")
 def test_missingness_determinism(predictor):
     X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
 

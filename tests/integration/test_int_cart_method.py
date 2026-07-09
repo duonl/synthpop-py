@@ -4,6 +4,9 @@ import numpy as np
 
 from synthpop.methods.cart_synth import CartMethod, TreeRegressorMethod, TreeClassifierMethod
 
+# This imports an auto-use fixture to set the seed, in order to make the test reproducible
+from tests.integration.make_int_test_reproducible import control_random_state_manager
+
 
 def test_numeric_target_uses_regressor():
     X = pd.DataFrame(

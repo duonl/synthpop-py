@@ -9,6 +9,7 @@ from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.methods.copy_synth import CopyMethod
+from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations
 
 
 def test_synthesiser_correct_default_methods():
@@ -54,8 +55,6 @@ def test_synthesiser_first_column_is_sampled_categorical():
     assert np.abs(
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
-
-#@pytest.mark.xfail(reason="known issue, see #130")
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -85,46 +84,6 @@ def test_synthesiser_first_column_is_sampled_numeric():
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
 
-def simulate_realistic_dataset_correlations(n_samples=100):
-    rng = np.random.default_rng(seed=852456)
-
-    # first column is uniform random between 0 and 1.
-    first_column = rng.random((n_samples,))
-    # Second column is linearly related to the first
-    second_column = first_column*3 + 5.5 + rng.random((n_samples,))*0.1
-    # third column is independent categorical
-    third_column = rng.choice(["a", "b", "c"], size=n_samples, replace=True)
-
-    # fourth column is correlated with both numeric and categoric variables.
-    fourth_column = [first_column[i] if third_column[i] in [
-        "a", "b"] else second_column[i] for i in range(n_samples)] + rng.random((n_samples,))*0.1
-
-    # fifth column is categorial with many levels and correlated with both numeric and categorical columns
-    # This is done by calculating a numeric value roughly between 0 and 26 and map that value to the alphabet.
-
-    # The thrid column decides if the fifth is near the begin or the end of the alphabet
-    distribution_general_means = [9 if third_column[i] in [
-        "b", "c"] else 18 for i in range(n_samples)]
-
-    # The first column causes variance in the fifth column
-    distribution_means = distribution_general_means + (first_column - 0.5)*6
-
-    alphabet_index = [int(rng.normal(distribution_means[i], 6)) %
-                      26 for i in range(n_samples)]
-
-    fifth_column = [string.ascii_lowercase[alphabet_index[i]]
-                    for i in range(n_samples)]
-
-    dataset = pd.DataFrame({
-        "first": first_column,
-        "second": second_column,
-        "third": third_column,
-        "fourth": fourth_column,
-        "fifth": fifth_column
-    })
-
-    return (dataset, ["first", "second", "fourth"], ["third", "fifth"])
-
 
 def test_synthesiser_preserves_1D_statistics():
     """
@@ -137,7 +96,7 @@ def test_synthesiser_preserves_1D_statistics():
     n_samples_synthetic = 6000
     original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
-    synthesiser = Synthesiser(random_seed=74124)
+    synthesiser = Synthesiser(random_seed=74125)
 
     syn_df = synthesiser.fit(original_data).generate(n=n_samples_synthetic)
 
