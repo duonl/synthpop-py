@@ -9,7 +9,7 @@ This section describes how synthetic data is generated using **synthpop-py**, in
 Synthetic data generation in synthpop-py follows a **sequential modelling approach**, where variables are generated one after another according to a specified column order.
 
 At a high level, the workflow is:
-```mermaid
+```{mermaid}
 flowchart LR
 
     A[Original data]
