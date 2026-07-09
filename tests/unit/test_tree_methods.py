@@ -510,6 +510,7 @@ def test_tree_method_fit_returns_no_fitted_parameters_for_nan_array(X, y, index_
     assert not hasattr(fitted, "tree_")
     assert not hasattr(fitted, "tree_sampler_")
 
+
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
 def test_tree_method_fit_returns_fitting_parameters_for_not_full_nan_array(X, y, index_cat, tree_method):
     y = np.array([0, np.nan, np.nan, np.nan, np.nan, np.nan])
@@ -673,6 +674,7 @@ def test_classifier_transform_returns_str_dtype(leafnode_sampler):
     )
     assert result.dtype == str_dtype
 
+
 @pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])
 def test_transform_raises_not_fitted_when_missing_flag_absent(X, index_cat, tree_method):
 
@@ -703,7 +705,6 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
 
     assert np.isnan(result).all()
     assert len(result) == 6
-
 
 
 # general tests ------------------------------------------------------------------------------------

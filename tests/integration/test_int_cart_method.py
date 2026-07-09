@@ -296,7 +296,7 @@ def test_fitting_handles_all_missing_target(y):
         (pd.Series([pd.NA, pd.NA], name='c'), 'object')
     ]
 )
-def test_transform_handles_entire_nan_array(y):
+def test_transform_handles_entire_nan_array(y, dtype):
     cart = CartMethod()
 
     X = pd.DataFrame({

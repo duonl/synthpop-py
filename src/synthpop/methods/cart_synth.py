@@ -102,13 +102,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(
             X_val, y)
 
-        all_features_dict = {k: self.encoders_[k].transform(
-all_features_dict = {
-    k: self.encoders_[k].transform(v)
-    if k in self.encoders_
-    else v
-    for (k, v) in X_val.items()
-}
+        all_features_dict = {
+            k: self.encoders_[k].transform(v)
+            if k in self.encoders_
+            else v
+            for (k, v) in prepared_for_fit_X.items()
+        }
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
