@@ -6,7 +6,7 @@ This section describes how synthetic data is generated using **synthpop-py**, in
 
 ## 2.1. Overview of the synthesis workflow
 
-Synthetic data generation in synthpop-py follows a **sequential modelling approach**, where variables are generated one after another according to a specified column order.
+Rather than modelling the joint distribution of all variables simultaneously, synthpop-py models **one variable at a time according to a specified column order**. Each variable is synthesised using previously generated variables as predictors, allowing the synthetic dataset to preserve complex dependencies while keeping the modelling procedure modular. Preprocessing, such as encoding categorical variables and handling missing values, is performed internally by the selected synthesis methods.
 
 At a high level, the workflow is:
 ```{mermaid}
@@ -60,29 +60,32 @@ synthetic_df = synth.generate(n=1000)
 
 ### 2.2.1. Key parameters
 
-During initialisation:
+During initialisation (`Synthesiser()`):
 - **`random_seed`**  
-  Controls reproducibility of both fitting and generation.
+  A seed for randomness that makes both model fitting and data generation reproducible.
 
 - **`column_order`**  
   Defines the order in which variables are synthesised.  
   This order is structurally important: each variable is generated conditional on previously generated variables.  
-  The default is the column order of the original dataset.
+  If not specified, the column order of the original dataset will be used.
 
 - **`default_syn_method`**  
-  The synthesis method applied to all variables unless explicitly overridden. The default value is CART.
+  The synthesis method applied to all variables unless explicitly overridden.  
+  If not specified, `CartMethod` is used as the default synthesis method.
 
 - **`special_syn_method`**  
   Dictionary mapping variable names to custom synthesis methods.
 
 During `fit()`:
 - **`X`**  
-  The original dataset
+  The original dataset used to fit the synthesiser.
 
-During `transform()`:
+During `generate()`:
 - **`n`**  
   The number of rows to generate for the synthetic dataset.  
   The default is the same number of rows as the original dataset.
+- **``random_seed`**  
+  A seed for randomness that overrides the generation seed without refitting the synthesiser.
 
 ---
 
@@ -150,7 +153,7 @@ During fitting:
    - categorical variables are encoded
    - numeric variables are used directly or transformed as required by the synthesis method
 3. A separate model is fitted for each variable in sequence.
-4. Each model receives previously ordered variables as predictors, which are internally transformed according to the selected synthesis method.
+4. Each model receives all previously synthesised variables in the specified column order as predictors.
 
 Formally, for a variable $(X_j)$, the model learns:
 ```{math}
@@ -178,7 +181,7 @@ The `generate` method:
 3. For each variable:
    - uses previously generated synthetic columns as predictors
    - applies the fitted model
-   - samples values using leaf node sampling if a tree-based model is used (See Guide 3.1.1 ADD LINK)
+   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see Guide 3.1.1 ADD LINK).
 4. Returns a fully synthetic dataset.
 
 Each variable is generated conditionally:
@@ -194,8 +197,8 @@ where $(\tilde{X})$ denotes synthetic variables.
 
 Reproducibility is controlled through the `random_seed` parameter.
 
-- Setting `random_seed` in the `Synthesiser` ensures reproducible model fitting.
-- The `generate(random_seed=...)` argument overrides only the randomness of the generation step.
+- Setting `random_seed` when constructing the `Synthesiser` makes both model fitting and data generation reproducible.
+- Passing `random_seed` to `generate()` overrides the generation seed without refitting the synthesiser.
 
 This allows users to:
 - reuse fitted models, and
