@@ -21,7 +21,6 @@ def _categorise_spmse(spmse: pd.DataFrame, bins: Sequence[float]) -> pd.DataFram
     :param bins: list of bin edges
 
     :return: 4xN pandas DataFrame with new categorised column
-
     """
     spmse["category"] = np.digitize(spmse['S_pMSE'], bins=bins, right=True)
     return spmse
@@ -166,7 +165,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
         Default is `True`. In headless environments this parameter should be set to `False`.
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
-    bin-based colouring and S_pMSE values in the bins.
+        bin-based colouring and S_pMSE values in the bins.
 
     Example:
     --------
@@ -195,6 +194,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     ...     save_path=None,
     ...     show_plot=True,
     ... )
+
     """
 
     if not isinstance(spmse, pd.DataFrame):
