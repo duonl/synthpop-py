@@ -220,8 +220,7 @@ def test_synthesizer_preserves_datatypes(method):
     Reproduces bug 162, where synthesizer class returns object dtype in the synthetic data
     while the original data is string datatype.
 
-    All numeric columns should become float32 dtype.
-    String dtype should stay string dtype.
+    All columns should return their original datatype.
     """
 
     n_samples_orig = 1000
