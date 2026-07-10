@@ -36,6 +36,7 @@ def _fit_decision_tree_with_reachable_leaves(decision_tree:BaseDecisionTree, X:n
     """
 
     decision_tree.fit(X, y)
+
     is_consistent = _check_all_leaf_nodes_are_reached(tree=decision_tree.tree_, X_train=X)
     counter = 0
     while not is_consistent:
