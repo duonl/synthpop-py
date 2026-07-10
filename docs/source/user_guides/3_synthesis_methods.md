@@ -42,7 +42,7 @@ During synthesis, a synthetic observation is first assigned to a leaf node based
 
 The following diagram illustrates a simplified CART model. The internal nodes represent decision rules applied to predictor variables, while the leaf nodes contain the empirical distribution of observed target values from which synthetic values are sampled.
 
-```mermaid
+```{mermaid}
 flowchart TD
     A["Root node<br/>Age < 50?"] -->|Yes| B["Profession = Cook?"]
     A -->|No| C["Leaf 3<br/><br/>Observed target values:<br/>[72, 75, 80]"]
@@ -100,7 +100,7 @@ For the first column, no predictors are available. In that case, CART samples di
    For each leaf node, synthpop-py stores the empirical distribution of target values observed during training.
 
    Let $Y_i$ denote the target value of observation $i$ and let $\ell_i$ denote the leaf node assigned to that observation. For a given leaf $\ell$, the probability of sampling a target value $y$ is:
-   ```math
+   ```{math}
    P(Y=y \mid \ell)
    =
    \frac{

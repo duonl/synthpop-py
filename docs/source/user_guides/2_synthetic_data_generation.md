@@ -49,7 +49,7 @@ This design closely follows the original **synthpop** methodology while providin
 
 ## 2.2. The Synthesiser class
 
-The central interface in synthpop-py is the `Synthesiser` class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
+The central interface in synthpop-py is the [`Synthesiser`](../api_reference/synthesiser_class/synthesiser.rst) class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
 
 ```python
 synth = Synthesiser(random_seed=42)
