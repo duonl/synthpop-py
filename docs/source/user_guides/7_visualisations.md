@@ -147,7 +147,7 @@ The interpretation of S_pmSE values depends on characteristics such as dataset s
 
 The heatmap groups S_pMSE values into these ranges to make patterns easier to identify.
 
-### 7.2.3. Saving the visualisation
+### 7.2.2. Saving the visualisation
 The `save_path` parameter specifies the directory where the visualisation output is stored. The image is stored as a pdf.
 ```python
 plot_spmse(
@@ -161,7 +161,7 @@ results/spmse.pdf
 ```
 If you do not wish to save the visualisation, set `save_path=None` (default).
 
-### 7.2.4. Displaying plot
+### 7.2.3. Displaying plot
 The `show_plot` parameter controls whether the heatmap is displayed immediately.
 ```python
 plot_spmse(

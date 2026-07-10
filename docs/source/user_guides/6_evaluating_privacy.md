@@ -10,7 +10,7 @@ Privacy evaluation should be considered alongside utility evaluation. A syntheti
 Synthpop-py currently provides the framework for synthetic data generation but does not yet include automated privacy risk metrics. This guide describes common privacy risks that should be considered when evaluating synthetic data.
 
 ---
-## 6.1 Privacy risks
+## 6.1. Privacy risks
 Privacy risks in synthetic data are commonly divided into three main categories[^1]:
 
 [^1]: Zhe Si Yu (2025), *Synthetic Data Disclosure Risk Assessment: A Literature Review*, in *Proceedings of Statistics Canada Symposium 2024: The Future of Official Statistics*, Statistics Canada International Symposium Series: Proceedings, Issue 2025001.

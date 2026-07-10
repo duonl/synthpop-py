@@ -13,7 +13,7 @@ The current utility evaluation tools in synthpop-py focus on distributional simi
 
 ---
 
-## 5.1 Workflow
+## 5.1. Workflow
 A typical workflow for evaluating utility is:
 1. Generate a synthetic dataset.
 2. Compare univariate distributions between the original and synthetic data.
@@ -47,7 +47,7 @@ A synthetic dataset may have similar marginal distributions while still failing 
 
 ---
 
-## 5.3 Bivariate distributions and relationships
+## 5.3. Bivariate distributions and relationships
 Bivariate utility evaluation measures whether relationships between pairs of variables are preserved.
 
 Examples of relationships that may be important include:
