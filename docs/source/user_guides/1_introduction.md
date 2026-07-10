@@ -81,7 +81,7 @@ The **synthesiser** is the central component of synthpop-py. It is responsible f
 In the literature, this concept is also referred to as **analytical utility**, **data utility** or **fidelity**, depending on the context.
 
 ### 1.4.5. Privacy
-**Privacy** refers to the extent to which information about individuals in the original dataset is protected after synthesis. Although synthetic data can reduce disclosure risks, generating synthetic data does not automatically guarantee privacy. Privacy should therefore be considered alongside utility when evaluating synthetic datasets.
+**Privacy** refers to the extent to which information about individuals in the original dataset can be inferred from the synthetic data. Although synthetic data can reduce disclosure risks, generating synthetic data does not automatically guarantee privacy. Privacy should therefore be considered alongside utility when evaluating synthetic datasets. It is sometimes also referred to as **disclosure risk**.
 
 ### 1.4.6. Target
 The **target** is the column currently being synthesised. Each synthesis method generates a single target column at a time.

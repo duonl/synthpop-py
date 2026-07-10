@@ -1,4 +1,4 @@
-Multivariate S_pMSE
+Pairwise S_pMSE
 ---------------------------------------
 
 .. automodule:: synthpop.utility_metrics.spmse

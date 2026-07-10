@@ -1,4 +1,4 @@
-# 2. Synthetic Data Generation
+# 2. Synthetic data generation
 
 This section describes how synthetic data is generated using **synthpop-py**, including the role of the `Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
 
@@ -84,7 +84,7 @@ During `generate()`:
 - **`n`**  
   The number of rows to generate for the synthetic dataset.  
   The default is the same number of rows as the original dataset.
-- **``random_seed`**  
+- **`random_seed`**  
   A seed for randomness that overrides the generation seed without refitting the synthesiser.
 
 ---
