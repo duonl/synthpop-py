@@ -11,6 +11,15 @@ from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 import pandas as pd
 from synthpop.synthesiser import Synthesiser
+import pandas as pd
+import pytest
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+
+from synthpop.methods.sample_synth import SampleMethod
+from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.reproducibility import RandomStateManager
+from synthpop.synthesiser import Synthesiser
 from tests.integration.data_generated_for_tests import get_test_data_classifier, get_test_data_regressor, simulate_realistic_dataset_correlations
 
 

@@ -176,7 +176,7 @@ class LeafNodeSampler:
             self.random_state_ = RandomStateManager.create_instance_seed()
         else:
             self.random_state_ = self.random_state
-
+        
         self._y_dtype = np.asarray(y).dtype
 
         return self
@@ -207,18 +207,11 @@ class LeafNodeSampler:
             or not hasattr(self, "random_state_")
             or not hasattr(self, "_y_dtype")
         ):
-            raise NotFittedError(
-                "LeafNodeSampler is not fitted. Call `fit_sampler` first.")
-
-        # seed = getattr(self, "_seed", None)
-
-        # if seed is not None:
-        #     rng = np.random.default_rng(seed)
-        # else:
-        #     rng = self.random_state_ # fallback, not-resettable
+            raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
+        
 
         rng = RandomStateManager.create_rng(self.random_state_)
-
+        
         leaf_ids = np.asarray(leaf_ids)
         n_samples = len(leaf_ids)
 

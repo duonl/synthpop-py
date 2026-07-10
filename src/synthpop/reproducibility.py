@@ -23,6 +23,8 @@ class RandomStateManager:
 
     Instances of this class can be used as a context manager to temporary switch seed:
 
+    See `the developer guide on randomness <./developer/randomness.html>`_ and the `functional description <./develop/developer/functional_descriptions/reproducibility.html>`_ about this.
+
     Examples
     --------
         >>> from synthpop.reproducibility import RandomStateManager

@@ -30,7 +30,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
         1             b
         2             c
 
-        Without X:
+    Without X:
         >>> from synthpop.methods.copy_synth import CopyMethod
         >>> import pandas as pd
         >>> 

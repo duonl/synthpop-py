@@ -1,11 +1,12 @@
 import copy
+import string
+
 import pytest
 import pandas as pd
 import numpy as np
-import string
+from sklearn.datasets import make_classification, make_regression
 
 from synthpop.utils import str_dtype
-from sklearn.datasets import make_classification, make_regression
 
 
 def make_data_missing(X):
