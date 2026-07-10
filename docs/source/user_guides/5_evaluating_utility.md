@@ -37,7 +37,7 @@ Examples of aspects that can be inspected include:
 - Proportions of missing values.
 - Range and summary statistics of numeric variables.
 
-Univariate distributions can typically be inspected visually. Synthpop-py provides visualisations for comparing distributions (see Guide X.X ADD LINK). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
+Univariate distributions can typically be inspected visually. Synthpop-py provides visualisations for comparing distributions (see [Guide 7.1](7_visualisations.md#71-univariate-distribution-visualisation)). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
 ```python
 from synthpop import plot_univariate_distributions
 plot_univariate_distributions(original_data, synthetic_data)
@@ -117,7 +117,7 @@ S_pMSE measures the difference between the pairwise distributions of the origina
 - Lower values indicate that the synthetic data better preserve the pairwise distribution.
 - Higher values indicate larger deviations from the original relationships.
 
-Synthpop-py provides a **visualisation** that plots the values in a heatmap (see Guide X.X ADD LINK). This allows for fast identification of poorly synthesised variable pairs.
+Synthpop-py provides a **visualisation** that plots the values in a heatmap (see [Guide 7.2](7_visualisations.md#72-s_pmse-heatmap)). This allows for fast identification of poorly synthesised variable pairs.
 
 The absolute value of S_pMSE depends on factors such as:
 - Dataset size
