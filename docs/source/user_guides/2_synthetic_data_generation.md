@@ -1,6 +1,6 @@
 # 2. Synthetic data generation
 
-This section describes how synthetic data is generated using **synthpop-py**, including the role of the [`Synthesiser`](../api_reference/synthesiser_class/synthesiser.rst), synthesis methods, preprocessing, and the sequential modelling procedure.
+This section describes how synthetic data is generated using **synthpop-py**, including the role of the {class}`synthpop.synthesiser.Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
 
 ---
 
@@ -49,7 +49,7 @@ This design closely follows the original **synthpop** methodology while providin
 
 ## 2.2. The Synthesiser class
 
-The central interface in synthpop-py is the [`Synthesiser`](../api_reference/synthesiser_class/synthesiser.rst) class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
+The central interface in synthpop-py is the {class}`~synthpop.synthesiser.Synthesiser` class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
 
 ```python
 synth = Synthesiser(random_seed=42)
@@ -60,7 +60,7 @@ synthetic_df = synth.generate(n=1000)
 
 ### 2.2.1. Key parameters
 
-During initialisation (`Synthesiser()`):
+During initialisation ([`Synthesiser()`](../api_reference/synthesiser_class/synthesiser.rst)):
 - **`random_seed`**  
   A seed for randomness that makes both model fitting and data generation reproducible.
 
@@ -76,11 +76,11 @@ During initialisation (`Synthesiser()`):
 - **`special_syn_method`**  
   Dictionary mapping variable names to custom synthesis methods.
 
-During `fit()`:
+During {func}`~synthpop.synthesiser.Synthesiser.fit`:
 - **`X`**  
   The original dataset used to fit the synthesiser.
 
-During `generate()`:
+During {func}`~synthpop.synthesiser.Synthesiser.generate`:
 - **`n`**  
   The number of rows to generate for the synthetic dataset.  
   The default is the same number of rows as the original dataset.
@@ -95,14 +95,14 @@ See the [`Synthesiser` API reference](../api_reference/synthesiser_class/synthes
 
 A **synthesis method** defines how each variable is modelled conditionally.
 
-The default method is **CART-based synthesis**, implemented via [`CartMethod`](../api_reference/synthesis_methods/CART.rst), which automatically selects either:
+The default method is **CART-based synthesis**, implemented via {class}`~synthpop.methods.cart_synth.CartMethod`, which automatically selects either:
 
 - a regression tree (for numeric variables), or  
 - a classification tree (for categorical variables)
 
 Other available methods are:
-- [Sample method](../api_reference/synthesis_methods/Sample.rst)
-- [Copy method](../api_reference/synthesis_methods/Copy.rst)
+- {class}`~synthpop.methods.sample_synth.SampleMethod`
+- {class}`~synthpop.methods.copy_synth.CopyMethod`
 
 More information about these methods can be found in [Guide 3](3_synthesis_methods.md).
 
@@ -140,7 +140,7 @@ Preprocessing is described in more detail in [Guide 4](4_data_preparation.md).
 
 ## 2.4. Fitting the synthesiser
 
-The [`fit`](../api_reference/synthesiser_class/synthesiser.rst) method learns a sequence of predictive models from the original dataset.
+The {func}`~synthpop.synthesiser.Synthesiser.fit` method learns a sequence of predictive models from the original dataset.
 
 ```python
 synth.fit(original_data)
@@ -176,7 +176,7 @@ synthetic = synth.generate(n=1000)
 
 ### 2.5.1. Behaviour
 
-The [`generate`](../api_reference/synthesiser_class/synthesiser.rst) method:
+The {func}`~synthpop.synthesiser.Synthesiser.generate` method:
 
 1. Initialises an empty synthetic dataset.
 2. Iterates through variables in `column_order`.

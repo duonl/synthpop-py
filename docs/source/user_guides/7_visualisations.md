@@ -3,7 +3,7 @@ Synthetic data should be evaluated both quantitatively and visually. Quantitativ
 
 The `synthpop-py` package provides visualisations for assessing utility by comparing the original and synthetic datasets:
 - **Univariate distribution visualisation** compares the distribution of individual variables.
-- **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by `pairwise_spmse` (see [Guide 5.3.1](5_evaluating_utility.md#531-standardised-propensity-mean-squared-error-s_pmse)).
+- **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by {func}`~synthpop.utility_metrics.pairwise_spmse` (see [Guide 5.3.1](5_evaluating_utility.md#531-standardised-propensity-mean-squared-error-s_pmse)).
 
 The visualisation functions create interactive `plotly` figures.
 
@@ -14,7 +14,7 @@ Small differences between original and synthetic data are expected because synth
 ---
 
 ## 7.1. Univariate distribution visualisation
-The univariate distribution visualisation compares each variable in the original and synthetic datasets independently.
+The univariate distribution visualisation compares each variable in the original and synthetic datasets independently. It is generated using {func}`~synthpop.plotting.plot_univariate_distributions`.
 ```python
 from synthpop.plotting import plot_univariate_distributions
 
@@ -37,6 +37,10 @@ The comparison allows users to inspect whether the synthetic data preserves impo
 - skewness,
 - category proportions,
 - presence and frequency of missing values.
+
+For the complete function signature, including options for saving and
+interactive display, see
+{func}`~synthpop.plotting.plot_univariate_distributions`.
 
 Large deviations between the original and synthetic distributions may indicate that the synthesis method has not adequately captured the distribution of a variable.
 
@@ -109,7 +113,10 @@ When `interactive=False` (default), the HTML document is not opened automaticall
 
 ## 7.2. S_pMSE heatmap
 (ADD IMAGE OF OUTPUT)
-The S_pMSE heatmap provides a visual representation of pairwise utility evaluation.
+The S_pMSE heatmap provides a visual representation of pairwise utility evaluation. It is generated using
+{func}`~synthpop.plotting.plot_spmse`.
+The input is the pairwise S_pMSE table produced by
+{func}`~synthpop.utility_metrics.pairwise_spmse`.
 ```python
 from synthpop.utility_metrics import pairwise_spmse
 from synthpop.plotting import plot_spmse
@@ -124,6 +131,10 @@ fig = plot_spmse(
 ```
 
 The underlying metric is the pairwise Standardised Propensity Mean Squared Error (S_pMSE), which measures differences between the joint distributions of pairs of variables in the original and synthetic datasets.
+
+For the complete function signature, including options for saving and
+rendering, see
+{func}`~synthpop.plotting.plot_spmse`.
 
 The calculation of S_pMSE is described in the [utility evaluation guide](5_evaluating_utility.md#531-standardised-propensity-mean-squared-error-s_pmse). The heatmap uses the calculated S_pMSE values to provide an overview of how well relationships between variables are preserved.
 

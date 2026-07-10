@@ -189,7 +189,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
-    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
     The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
     Missing values will always be represented with `np.nan`.
@@ -249,7 +249,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
-    :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
     The output will always be a numpy array. The output will always have np.float32 as dtype.
     Missing values will always be represented with `np.nan`.
