@@ -37,14 +37,14 @@ Examples of aspects that can be inspected include:
 - Proportions of missing values.
 - Range and summary statistics of numeric variables.
 
-Univariate distributions can typically be inspected visually. Synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate_distributions` visualisation function for comparing distributions (see [Guide 7.1](7_visualisations.md#71-univariate-distribution-visualisation)). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
+Univariate distributions can typically be inspected visually. Synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate.plot_univariate_distributions` visualisation function for comparing distributions (see [Guide 7.1](7_visualisations.md#71-univariate-distribution-visualisation)). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
 ```python
 from synthpop.plotting import plot_univariate_distributions
 plot_univariate_distributions(original_data, synthetic_data)
 ```
 
 See
-{func}`~synthpop.plotting.plot_univariate_distributions`
+{func}`~synthpop.plotting.plot_univariate.plot_univariate_distributions`
 for available parameters and configuration options.
 
 A synthetic dataset may have similar marginal distributions while still failing to preserve relationships between variables. Therefore, univariate evaluation should be complemented with relationship-based evaluation.
@@ -124,7 +124,7 @@ S_pMSE measures the difference between the pairwise distributions of the origina
 - Lower values indicate that the synthetic data better preserve the pairwise distribution.
 - Higher values indicate larger deviations from the original relationships.
 
-Synthpop-py provides the {func}`~synthpop.plotting.plot_spmse` visualisation function that plots the values in a heatmap (see [Guide 7.2](7_visualisations.md#72-s_pmse-heatmap)). This allows for fast identification of poorly synthesised variable pairs.
+Synthpop-py provides the {func}`~synthpop.plotting.plot_spmse.plot_spmse` visualisation function that plots the values in a heatmap (see [Guide 7.2](7_visualisations.md#72-s_pmse-heatmap)). This allows for fast identification of poorly synthesised variable pairs.
 
 The absolute value of S_pMSE depends on factors such as:
 - Dataset size
