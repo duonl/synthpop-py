@@ -268,7 +268,7 @@ Y^{syn} = Y^{obs}
 
 ---
 
-## 4. Method comparison
+## 3.4. Method comparison
 
 | Method | Uses predictors | Randomness | Preserves relationships | Marginal distribution | Typical use |
 |--------|----------------|-------------|------------------------|------------------------|--------------|
@@ -278,7 +278,7 @@ Y^{syn} = Y^{obs}
 
 ---
 
-## 5. Practical guidance
+## 3.5. Practical guidance
 
 In most cases, **CART should be used as the default synthesis method** due to its ability to model conditional relationships between variables.
 
