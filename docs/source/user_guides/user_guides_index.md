@@ -94,14 +94,14 @@ Explain what visual inspection is useful for.
 
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 3
 
 1_introduction.md
 2_synthetic_data_generation.md
 3_synthesis_methods.md
 4_data_preparation.md
-user_guide1.md
-user_guide2.md
-user_guide3.md
+5_evaluating_utility.md
+6_evaluating_privacy.md
+7_visualisations.md
 ```
 
