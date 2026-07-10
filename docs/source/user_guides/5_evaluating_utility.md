@@ -62,7 +62,7 @@ Examples of relationships that may be important include:
 
 Pairwise comparisons provide more information than univariate comparisons, because they evaluate whether the synthetic data maintain dependencies present in the original dataset.
 
-Synthpop-py currently evaluates pairwise relationships using the Standardised Propensity Mean Squared Error (S_pMSE), implemented through {func}`~synthpop.utility_metrics.pairwise_spmse`.
+Synthpop-py currently evaluates pairwise relationships using the Standardised Propensity Mean Squared Error (S_pMSE), implemented through {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
 
 ### 5.3.1. Standardised Propensity Mean Squared Error (S_pMSE)
 The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1].
@@ -71,7 +71,7 @@ The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistica
 
 For each pair of variables, S_pMSE compares the observed frequencies in the original dataset with those in the synthetic dataset. Missing values are included in the computation and are treated as an additional category. Consequently, S_pMSE evaluates both the preservation of observed values and the preservation of missingness patterns.
 ```python
-from synthpop.utility_metrics import pairwise_spmse
+from synthpop.utility_metrics.spmse import pairwise_spmse
 
 scores = pairwise_spmse(original_data, synthetic_data)
 
@@ -87,7 +87,7 @@ income | income | 2.18
 A low S_pMSE indicates that the synthetic dataset preserves the pairwise (bivariate) distributions well. A higher S_pMSE indicates larger differences between the original and synthetic datasets.
 
 The complete function signature and available parameters are documented in
-{func}`~synthpop.utility_metrics.pairwise_spmse`.
+{func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
 
 #### 5.3.1.1. Definition
 For two variables $X$ and $Y$, the original and synthetic datasets are first converted into joint frequency tables.
