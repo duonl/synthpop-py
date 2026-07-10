@@ -1,6 +1,6 @@
 # 2. Synthetic data generation
 
-This section describes how synthetic data is generated using **synthpop-py**, including the role of the `Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
+This section describes how synthetic data is generated using **synthpop-py**, including the role of the [`Synthesiser`](../api_reference/synthesiser_class/synthesiser.rst), synthesis methods, preprocessing, and the sequential modelling procedure.
 
 ---
 
@@ -16,7 +16,7 @@ flowchart LR
 
     subgraph FIT["Synthesiser.fit()"]
         direction TB
-        B[Determine column order]
+        B[Use column order]
         C[Fit synthesis for each variable]
         D[Apply preprocessing within synthesis methods]
         E[Store fitted models]
@@ -87,20 +87,22 @@ During `generate()`:
 - **`random_seed`**  
   A seed for randomness that overrides the generation seed without refitting the synthesiser.
 
+See the [`Synthesiser` API reference](../api_reference/synthesiser_class/synthesiser.rst) for the complete constructor signature and parameter documentation.
+
 ---
 
 ### 2.2.2. Synthesis methods
 
 A **synthesis method** defines how each variable is modelled conditionally.
 
-The default method is **CART-based synthesis**, implemented via `CartMethod`, which automatically selects either:
+The default method is **CART-based synthesis**, implemented via [`CartMethod`](../api_reference/synthesis_methods/CART.rst), which automatically selects either:
 
 - a regression tree (for numeric variables), or  
 - a classification tree (for categorical variables)
 
 Other available methods are:
-- Copy method
-- Sample method
+- [Sample method](../api_reference/synthesis_methods/Sample.rst)
+- [Copy method](../api_reference/synthesis_methods/Copy.rst)
 
 More information about these methods can be found in [Guide 3](3_synthesis_methods.md).
 
@@ -138,10 +140,10 @@ Preprocessing is described in more detail in [Guide 4](4_data_preparation.md).
 
 ## 2.4. Fitting the synthesiser
 
-The `fit` method learns a sequence of predictive models from the original dataset.
+The [`fit`](../api_reference/synthesiser_class/synthesiser.rst) method learns a sequence of predictive models from the original dataset.
 
 ```python
-synth.fit(X)
+synth.fit(original_data)
 ```
 
 ### 2.4.1. Behaviour
@@ -150,7 +152,7 @@ During fitting:
 
 1. The column order is determined (either user-defined or from the DataFrame).
 2. Preprocessing is applied automatically:
-   - categorical variables are encoded
+   - categorical variables may be encoded if needed
    - numeric variables are used directly or transformed as required by the synthesis method
 3. A separate model is fitted for each variable in sequence.
 4. Each model receives all previously synthesised variables in the specified column order as predictors.
@@ -174,9 +176,9 @@ synthetic = synth.generate(n=1000)
 
 ### 2.5.1. Behaviour
 
-The `generate` method:
+The [`generate`](../api_reference/synthesiser_class/synthesiser.rst) method:
 
-1. Initializes an empty synthetic dataset.
+1. Initialises an empty synthetic dataset.
 2. Iterates through variables in `column_order`.
 3. For each variable:
    - uses previously generated synthetic columns as predictors

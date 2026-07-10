@@ -2,17 +2,17 @@
 
 This section describes the synthesis methods available in **synthpop-py**. A synthesis method defines how individual columns are generated within a synthetic dataset. In `synthpop-py`, each column is generated sequentially using a user-specified or default synthesis method. This means that the generation of a given column may depend on previously synthesised columns, which act as predictors.
 
-The synthesis process is orchestrated by the `Synthesiser`, which delegates the task of synthesising each column to an appropriate method. Each method implements a common interface and exposes two key operations:
+The synthesis process is orchestrated by the {meth}`~synthpop.synthesiser.Synthesiser`, which delegates the task of synthesising each column to an appropriate method. Each method implements a common interface and exposes two key operations:
 
-- `fit`: learns from the observed (original) data
-- `generate`: synthesises a column using previously generated synthetic data
+- {meth}`~synthesiser.Synthesiser.fit`: learns from the observed (original) data
+- {meth}`~synthesiser.Synthesiser.generate`: synthesises a column using previously generated synthetic data
 
-The default method is CART, which models conditional distributions using decision trees and a leaf-node sampling strategy inspired by the R package synthpop.
+The default method is {meth}`~synthpop.methods.cart_synth.CartMethod`, which models conditional distributions using decision trees and a leaf-node sampling strategy inspired by the R package synthpop.
 
 Available synthesis methods are:
-- CART
-- Sample
-- Copy
+- {meth}`~synthpop.methods.cart_synth.CartMethod`
+- {meth}`~synthpop.methods.sample_synth.SampleMethod`
+- {meth}`~synthpop.methods.copy_synth.CopyMethod`
 
 ---
 
@@ -75,8 +75,8 @@ For the first column, no predictors are available. In that case, CART samples di
 2. **Preprocessing**
 
    The variables are prepared before fitting the decision tree:
-   - Categorical predictors are encoded using the appropriate encoder (defaults: PCA encoding for categorical targets and mean encoding for numeric targets);
-   - Missing values in the target variable are handled according to the target type.
+   - Categorical predictors are encoded using the appropriate encoder (defaults: [PCA encoding](4_data_preparation.md#411-pca-encoding) for categorical targets and [mean encoding](4_data_preparation.md#412-mean-encoding) for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see [Guide 4.1](4_data_preparation.md#41-encoding-categorical-predictors);
+   - Missing values in the target variable are handled according to the target type. This step is added because `scikit-learn` cannot fit on missing targets. For more details, see [Guide 4.2](4_data_preparation.md#42-handling-missing-values).
 
 3. **Model fitting**
    
@@ -88,7 +88,7 @@ For the first column, no predictors are available. In that case, CART samples di
 
 4. **Leaf assignment**
    
-   Each observed training observation is assigned to a leaf ndoe:
+   Each observed training observation is assigned to a leaf node:
    ```{math}
    \ell_i = T(X_i)
    ```
@@ -136,7 +136,7 @@ For the first column, no predictors are available. In that case, CART samples di
 ### 3.1.4. Configuring CART
 The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
-The most flexible approach is to construct a `CartMethod` directly:
+The most flexible approach is to construct a {meth}`~synthpop.methods.cart_synth.CartMethod` directly:
 ```python
 CartMethod(
    regressor=TreeRegressorMethod(
@@ -159,23 +159,23 @@ CartMethod(
    )
 )
 ```
-For common tuning options, synthpop-py provides the convenience function `tune_cart`, which applies the same configuration consistently to all tree-based components:
+For common tuning options, synthpop-py provides the convenience function {func}`synthpop.methods.cart_synth.tune_cart`, which applies the same configuration consistently to all tree-based components:
 ```python
 tune_cart(n_leaves=10, n_components=1)
 ```
-Or directly in the `Synthesiser`:
+Or directly in the [`Synthesiser`](../api_reference/synthesiser_class/synthesiser.rst):
 ```python
 Synthesiser(default_syn_method=tune_cart(n_leaves=10, n_components=1))
 ```
 Currently `tune_cart` supports the following parameters:
 - `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
-- `n_components`: configures the number of principal components retained by the `PCAEncoder` used for categorical predictors. More information can be found in [Guide 4.1.1](4_data_preparation.md#411-pca-encoding). 
+- `n_components`: configures the number of principal components retained by the {meth}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in [Guide 4.1.1](4_data_preparation.md#411-pca-encoding). 
 
 ---
 
 ## 3.2. Sample synthesis method
 
-The Sample method generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
+The {meth}`~synthpop.methods.sample_synth.SampleMethod` generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
 ```python
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = SampleMethod(random_state=10).fit(None, y)
@@ -224,7 +224,7 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
 ## 3.3. Copy synthesis method
 
-The Copy method deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
+The {meth}`~synthpop.methods.copy_method.CopyMethod` deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
 ```python
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)
@@ -272,9 +272,9 @@ Y^{syn} = Y^{obs}
 
 | Method | Uses predictors | Randomness | Preserves relationships | Marginal distribution | Typical use |
 |--------|----------------|-------------|------------------------|------------------------|--------------|
-| CART   | Yes            | Yes         | Yes                    | Approximate            | General-purpose synthesis      |
-| Sample | No             | Yes         | No (marginal only)                    | Exact (empirical)      | Fast baseline, simple synthesis     |
-| Copy   | No             | No          | No                     | Exact                  | Identifiers, structural columns  |
+| {meth}`~synthpop.methods.cart_synth.CartMethod`   | Yes            | Yes         | Yes                    | Approximate            | General-purpose synthesis      |
+| {meth}`~synthpop.methods.sample_synth.SampleMethod` | No             | Yes         | No (marginal only)                    | Exact (empirical)      | Fast baseline, simple synthesis     |
+| {meth}`~synthpop.methods.copy_method.CopyMethod`   | No             | No          | No                     | Exact                  | Identifiers, structural columns  |
 
 ---
 
@@ -288,4 +288,4 @@ However:
 - Use **Sample** when a simple marginal model is sufficient or when computational simplicity is preferred.
 - Use mixed configurations via `special_syn_method` when different variables require different treatment.
 
-All methods can be combined within a single `Synthesiser` instance to support hybrid synthesis workflows.
+All methods can be combined within a single {meth}`~synthpop.synthesiser.Synthesiser` instance to support hybrid synthesis workflows.

@@ -59,7 +59,7 @@ The package supports datasets containing:
 - categorical variables; and
 - missing values.
 
-The package is not designed for generating unstructured data.
+The package is currently not designed for generating unstructured data.
 
 ---
 
