@@ -102,6 +102,9 @@ Explain what visual inspection is useful for.
 4_data_preparation.md
 5_evaluating_utility.md
 6_evaluating_privacy.md
+```
+```{toctree}
+:maxdepth: 2
 7_visualisations.md
 ```
 
