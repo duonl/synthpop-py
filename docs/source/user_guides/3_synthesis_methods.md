@@ -169,7 +169,7 @@ Synthesiser(default_syn_method=tune_cart(n_leaves=10, n_components=1))
 ```
 Currently `tune_cart` supports the following parameters:
 - `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
-- `n_components`: configures the number of principal components retained by the `PCAEncoder` used for categorical predictors. More information can be found in 4.3.1. (ADD LINK)
+- `n_components`: configures the number of principal components retained by the `PCAEncoder` used for categorical predictors. More information can be found in [Guide 4.1.1](4_data_preparation.md#411-pca-encoding). 
 
 ---
 

@@ -139,7 +139,7 @@ Missing values are handled explicitly during synthesis because standard decision
 
 It is implemented via a missing value handling interface, which transforms data before and after synthesis. Synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target:
 - Categorical targets: missing values are treated as an additional category during synthesis. The synthesis model can therefore learn missingness as one of the possible target outcomes.
-- Numeric targetsL missingness is modelled separately from the target value. A dedicated missing value predictor learns the probability that the target is missing, while the regression model is trained only on observed target values.
+- Numeric targets: missingness is modelled separately from the target value. A dedicated missing value predictor learns the probability that the target is missing, while the regression model is trained only on observed target values.
 
 This separation allows synthpop-py to reproduce both the generated values and the missingness patterns present in the original data. Missing value handling is integrated into the synthesis methods in synthpop-py.
 

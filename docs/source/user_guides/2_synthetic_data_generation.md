@@ -102,7 +102,7 @@ Other available methods are:
 - Copy method
 - Sample method
 
-More information about these methods can be found in User Guide 3 (ADD LINK)
+More information about these methods can be found in [Guide 3](3_synthesis_methods.md).
 
 ### 2.2.3. Column-level control
 
@@ -132,7 +132,7 @@ It includes:
 
 Missing value handling is integrated into the synthesis methods and is applied automatically.
 
-Preprocessing is described in more detail in User Guide 4. (ADD LINK)
+Preprocessing is described in more detail in [Guide 4](4_data_preparation.md).
 
 ---
 
@@ -181,7 +181,7 @@ The `generate` method:
 3. For each variable:
    - uses previously generated synthetic columns as predictors
    - applies the fitted model
-   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see Guide 3.1.1 ADD LINK).
+   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see [Guide 3.1.1](3_synthesis_methods.md#311-algorithm)).
 4. Returns a fully synthetic dataset.
 
 Each variable is generated conditionally:
