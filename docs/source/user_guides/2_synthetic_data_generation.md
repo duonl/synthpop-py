@@ -1,6 +1,6 @@
 # 2. Synthetic data generation
 
-This section describes how synthetic data is generated using **synthpop-py**, including the role of the {class}`synthpop.synthesiser.Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
+This section describes how synthetic data is generated using **synthpop-py**, including the role of the {class}`~synthpop.synthesiser.Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
 
 ---
 

@@ -159,7 +159,7 @@ CartMethod(
    )
 )
 ```
-For common tuning options, synthpop-py provides the convenience function {func}`synthpop.methods.cart_synth.tune_cart`, which applies the same configuration consistently to all tree-based components:
+For common tuning options, synthpop-py provides the convenience function {func}`~synthpop.methods.cart_synth.tune_cart`, which applies the same configuration consistently to all tree-based components:
 ```python
 tune_cart(n_leaves=10, n_components=1)
 ```
@@ -278,7 +278,7 @@ Y^{syn} = Y^{obs}
 |--------|----------------|-------------|------------------------|------------------------|--------------|
 | {class}`~synthpop.methods.cart_synth.CartMethod`   | Yes            | Yes         | Yes                    | Approximate            | General-purpose synthesis      |
 | {class}`~synthpop.methods.sample_synth.SampleMethod` | No             | Yes         | No (marginal only)                    | Exact (empirical)      | Fast baseline, simple synthesis     |
-| {class}`~synthpop.methods.copy_method.CopyMethod`   | No             | No          | No                     | Exact                  | Identifiers, structural columns  |
+| {class}`~synthpop.methods.copy_synth.CopyMethod`   | No             | No          | No                     | Exact                  | Identifiers, structural columns  |
 
 ---
 
