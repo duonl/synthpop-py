@@ -368,7 +368,7 @@ def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
     expected_X = get_exp_feature_matrix()
     expected_y = tree_method.missing_handler_.prepared_for_fit_result[1]
 
-    assert len(mock_fit_decision_tree_with_reachable_leaves.mock_calls) == 1, "fit_decision_tree_consistently should be called 1 time"
+    assert len(mock_fit_decision_tree_with_reachable_leaves.mock_calls) == 1, "_fit_decision_tree_with_reachable_leaves should be called 1 time"
 
     kwargs = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]
 

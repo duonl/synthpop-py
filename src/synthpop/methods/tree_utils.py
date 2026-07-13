@@ -5,14 +5,17 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn import tree
+from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 from sklearn.tree import BaseDecisionTree
-from sklearn.base import clone
 
 from synthpop.reproducibility import RandomStateManager
 
 
-def _check_all_leaf_nodes_are_reached(tree:tree._tree.Tree, X_train:npt.NDArray) -> bool:
+def _check_all_leaf_nodes_are_reached(
+        tree: tree._tree.Tree,
+        X_train: npt.NDArray
+) -> bool:
     """
     Check if all leaf nodes are reached when the decision tree is applied to the same data used for fitting.
     Returns `True` if every leaf node in the fitted tree is reached by at least one training sample.
@@ -25,33 +28,39 @@ def _check_all_leaf_nodes_are_reached(tree:tree._tree.Tree, X_train:npt.NDArray)
     return set(reached_leaf_nodes) == set(all_leaf_nodes)
 
 
-def _fit_decision_tree_with_reachable_leaves(decision_tree:BaseDecisionTree, X:npt.NDArray, y:npt.NDArray):
+def _fit_decision_tree_with_reachable_leaves(
+        decision_tree: BaseDecisionTree,
+        X: npt.NDArray,
+        y: npt.NDArray,
+) -> BaseDecisionTree:
     """
-    Fits the decision tree. Retry fitting with a new random seed if some leaf nodes are not reached by the training data. This prevents difficult-to-reproduce failures during data generation.
-    This prevents difficult to reproduce errors when generating data.
+    Fits a decision tree and retries fitting with different random seeds
+    if some leaf nodes are not reached by the training data.
+    This prevents difficult-to-reproduce failures during data generation.
 
-    In order to sample from leaf nodes, we assume that applying the decision tree to the trainings data reaches all leaf nodes.
-    This assumption does not seem to always hold, see issue #129.
+    Sampling from leaf nodes assumes that applying the fitted tree to the
+    training data reaches every leaf node. This is not always guaranteed;
+    see issue #129.
 
     """
 
     decision_tree.fit(X, y)
 
-    is_consistent = _check_all_leaf_nodes_are_reached(tree=decision_tree.tree_, X_train=X)
-    counter = 0
-    while not is_consistent:
-        counter +=1
+    if _check_all_leaf_nodes_are_reached(tree=decision_tree.tree_, X_train=X):
+        return decision_tree
 
-        if counter >= 100:
-            raise RuntimeError("tried 100 times fitting decision tree. Check the trainings data, or try again with a different seed.")
-        tree = clone(decision_tree)
-        tree.random_state = RandomStateManager.create_instance_seed()
-        tree.fit(X, y)
-        is_consistent = _check_all_leaf_nodes_are_reached(tree=tree.tree_, X_train=X)
-        if is_consistent:
-            return tree
+    for _ in range(99):
+        candidate = clone(decision_tree)
+        candidate.random_state=RandomStateManager.create_instance_seed()
+        candidate.fit(X, y)
 
-    return decision_tree
+        if _check_all_leaf_nodes_are_reached(tree=candidate.tree_, X_train=X):
+            return candidate
+
+    raise RuntimeError(
+        "Failed to fit a decision tree with reachable leaves after 100 attempts. "  # 99+the initial attempt is 100
+        "Try changing the root seed or tree parameters."
+    )
 
 
 def sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
@@ -176,7 +185,7 @@ class LeafNodeSampler:
             self.random_state_ = RandomStateManager.create_instance_seed()
         else:
             self.random_state_ = self.random_state
-        
+
         self._y_dtype = np.asarray(y).dtype
 
         return self
@@ -207,11 +216,11 @@ class LeafNodeSampler:
             or not hasattr(self, "random_state_")
             or not hasattr(self, "_y_dtype")
         ):
-            raise NotFittedError("LeafNodeSampler is not fitted. Call `fit_sampler` first.")
-        
+            raise NotFittedError(
+                "LeafNodeSampler is not fitted. Call `fit_sampler` first.")
 
         rng = RandomStateManager.create_rng(self.random_state_)
-        
+
         leaf_ids = np.asarray(leaf_ids)
         n_samples = len(leaf_ids)
 

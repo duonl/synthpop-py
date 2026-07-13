@@ -1,8 +1,8 @@
 import copy
-import pytest
-import pandas as pd
-import numpy as np
 
+import pandas as pd
+import pytest
+import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
@@ -16,43 +16,6 @@ from synthpop.utils import str_dtype
 # This imports an auto-use fixture to set the seed, in order to make the test reproducible
 from tests.integration.make_int_test_reproducible import control_random_state_manager
 from tests.integration.data_generated_for_tests import get_test_data_classifier, get_test_data_regressor
-
-
-def test_treemethod_classifier_fit_and_transform():
-    tree_method = TreeClassifierMethod()
-
-    X = {
-        "column1": np.array([1.1, 2.2]),
-        "column2": np.array([1.4, 1.2]),
-        "column3": np.array(["a", "b"], dtype=str_dtype)
-    }
-    y = np.array(["x", "y"], dtype=str_dtype)
-
-    tree_method.fit(X, y)
-    assert tree_method.n_features_in_ >= 3
-    assert y.dtype == str_dtype
-
-    result = tree_method.transform(X)
-
-    assert result.shape[0] == 2
-
-
-def test_treemethod_regressor_fit_and_transform():
-    tree_method = TreeRegressorMethod()
-
-    X = {
-        "column1": np.array([1.1, 2.2]),
-        "column2": np.array([1.4, 1.2]),
-        "column3": np.array(["a", "b"], dtype=str_dtype)
-    }
-    y = np.array([1, 2])
-
-    tree_method.fit(X, y)
-    assert tree_method.n_features_in_ >= 3
-
-    result = tree_method.transform(X)
-
-    assert result.shape[0] == 2
 
 
 class SpyDecisionTreeClassifier(DecisionTreeClassifier):
@@ -128,6 +91,43 @@ NO_MISSING_TARGET = [
      get_test_data_regressor(with_cats=True, with_missing_features=True)),
 
 ]
+
+
+def test_treemethod_classifier_fit_and_transform():
+    tree_method = TreeClassifierMethod()
+
+    X = {
+        "column1": np.array([1.1, 2.2]),
+        "column2": np.array([1.4, 1.2]),
+        "column3": np.array(["a", "b"], dtype=str_dtype)
+    }
+    y = np.array(["x", "y"], dtype=str_dtype)
+
+    tree_method.fit(X, y)
+    assert tree_method.n_features_in_ >= 3
+    assert y.dtype == str_dtype
+
+    result = tree_method.transform(X)
+
+    assert result.shape[0] == 2
+
+
+def test_treemethod_regressor_fit_and_transform():
+    tree_method = TreeRegressorMethod()
+
+    X = {
+        "column1": np.array([1.1, 2.2]),
+        "column2": np.array([1.4, 1.2]),
+        "column3": np.array(["a", "b"], dtype=str_dtype)
+    }
+    y = np.array([1, 2])
+
+    tree_method.fit(X, y)
+    assert tree_method.n_features_in_ >= 3
+
+    result = tree_method.transform(X)
+
+    assert result.shape[0] == 2
 
 
 @pytest.mark.parametrize("method,X,y", [*CLASSIFIER_CASES, *REGRESSOR_CASES])

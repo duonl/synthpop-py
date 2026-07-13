@@ -1,23 +1,22 @@
 """
-These test are regression test for #129.
+These are regression tests for Bug #129.
 
-We found the bug when we noticed that some integration tests fail sometimes.
-When they failed, they did so because the call to apply in treeMethod.transform resulted in leafnode ids 
-that were not seen during the call to fit.
+Bug #129 occurred when `DecisionTree.apply()` returned leaf IDs during prediction
+that were never reached by the training data. This caused downstream sampling to fail.
 
-When we made the entire synthesis process reproducible we found that for some combinations of random_state for the decision trees and
-the test data this error occurs. 
-
-In these test we try to reproduce the error by taking the random_states of the tree and test data that were more likely than others to reproduce this bug.
-We then test with all combinations of those random_states.
+After making the synthesis process reproducible, several combinations of tree seeds
+and generated datasets were found to reproduce the problem deterministically.
+These tests verify that those combinations no longer produce empty leaves
+and that prediction succeeds.
 """
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 import numpy as np
 import pytest
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
 from synthpop.methods.tree_utils import LeafNodeSampler
+
 from tests.integration.data_generated_for_tests import get_test_data_classifier, get_test_data_regressor
 
 
@@ -41,6 +40,15 @@ class SpyDecisionTreeRegressor(DecisionTreeRegressor):
     def apply(self, X):
         self.apply_X = X
         return super().apply(X)
+    
+
+def assert_all_leaf_nodes_reached(tree):
+    reached = tree.apply(tree.fit_X)
+    leaves = np.where(
+        tree.tree_.children_left == tree.tree_.children_right
+    )[0]
+
+    assert set(leaves) == set(reached)
 
 
 @pytest.mark.noautofixt
@@ -73,13 +81,7 @@ def test_regression_bug_129_regressor_no_empty_leaf_failure(tree_seed, data_seed
 
     method.fit(X, y)
 
-    X_train = method.tree_.fit_X
-    reached_nodes = method.tree_.apply(X_train)
-
-    all_leaf_nodes = np.where(
-        method.tree_.tree_.children_left == method.tree_.tree_.children_right)
-
-    assert set(all_leaf_nodes[0]) == set(reached_nodes)
+    assert_all_leaf_nodes_reached(method.tree_)
 
     rng = np.random.default_rng(seeds[4])
 
@@ -108,13 +110,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure(tree_seed, data_see
 
     method.fit(X, y)
 
-    X_train = method.tree_.fit_X
-    reached_nodes = method.tree_.apply(X_train)
-
-    all_leaf_nodes = np.where(
-        method.tree_.tree_.children_left == method.tree_.tree_.children_right)
-
-    assert set(all_leaf_nodes[0]) == set(reached_nodes)
+    assert_all_leaf_nodes_reached(method.tree_)
 
     rng = np.random.default_rng([tree_seed, data_seed])
 
