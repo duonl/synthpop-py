@@ -1,3 +1,7 @@
 S_pMSE
 ---------------------------------------
-This is a placeholder for now
+
+.. automodule:: synthpop.plotting.plot_spmse
+   :members:
+   :show-inheritance:
+   :undoc-members:
