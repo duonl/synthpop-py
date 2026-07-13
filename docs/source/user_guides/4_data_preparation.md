@@ -9,7 +9,7 @@ For each target column:
 - missing values in the target are handled differently depending on target type.
 
 For fitting a categorical target:
-1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1 <missing-as-category>`)
+1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1 <421_missing_as_category>`)
 2. Encode categorical predictors using the PCA encoder. (See [section 4.1.1](4_data_preparation.md#411-pca-encoding))
 3. Fit a classification tree.
 
@@ -49,7 +49,7 @@ The encoder used depends on the target type:
 | Numeric | Mean Encoder |
 
 ### 4.1.1. PCA encoding
-The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn.decomposition.PCA>` transformation.
+The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn:sklearn.decomposition.PCA` transformation.
 ```python
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array(["x", "x", "y", "z", "w"])
@@ -143,7 +143,7 @@ It is implemented via a missing value handling interface, which transforms data 
 
 This separation allows synthpop-py to reproduce both the generated values and the missingness patterns present in the original data. Missing value handling is integrated into the synthesis methods in synthpop-py.
 
-(missing_as_category)=
+(421_missing_as_category)=
 ### 4.2.1. Treating missing as category
 For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`.
 ```python
@@ -230,7 +230,7 @@ With this predictor, the synthetic data can reproduce missingness structures, no
 The default preprocessing components are suitable for most synthesis tasks. Users can customise individual components by constructing a {class}`~synthpop.methods.cart_synth.CartMethod` manually. For convenience, some common customisations are also available through helper functions such as {func}`~synthpop.methods.cart_synth.tune_cart`.
 
 ### 4.3.1. Choosing the number of principal components
-By default, {class}`~synthpop.data_processing.encoders.PCAEncoder` retains all principal components (or the number determined by the configured {class}`PCA <sklearn.decomposition.PCA>` object). The dimensionality of the encoding can be reduced by supplying a custom PCA transformation.
+By default, {class}`~synthpop.data_processing.encoders.PCAEncoder` retains all principal components (or the number determined by the configured {class}`PCA <sklearn:sklearn.decomposition.PCA>` object). The dimensionality of the encoding can be reduced by supplying a custom PCA transformation.
 
 For example, to retain only a single principal component:
 ```python
@@ -250,7 +250,7 @@ Or directly in the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
 Synthesiser(default_syn_method=tune_cart(n_components=1))
 ```  
-The `n_components` parameter is passed directly to {class}`PCA <sklearn.decomposition.PCA>` and therefore accepts the same values:
+The `n_components` parameter is passed directly to {class}`PCA <sklearn:sklearn.decomposition.PCA>` and therefore accepts the same values:
 - an integer specifying the exact number of principal components;
 - a float between 0 and 1 specifying the fraction of explained variance to retain;
 - `None` to reduce all components.

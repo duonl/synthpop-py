@@ -54,6 +54,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'myst_parser',
     'sphinxcontrib.mermaid',
+    "sphinx.ext.intersphinx",
 ]
 myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
 autodoc_member_order = "bysource"
@@ -65,4 +66,11 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',
     '.md': 'markdown',
+}
+
+intersphinx_mapping = {
+    "sklearn": (
+        "https://scikit-learn.org/stable/",
+        None,
+    ),
 }
