@@ -48,7 +48,7 @@ flowchart TD
         direction TD
         B["transform(initial predictors)<br>Generate column 1"]
         C["transform(synthetic column 1)<br>nGenerate column 2"]
-        D["transform(previous columns)<brnGenerate remaining columns"]
+        D["transform(previous columns)<br>Generate remaining columns"]
 
         B --> C --> D
     end
