@@ -45,7 +45,7 @@ flowchart TD
     A[Fitted synthesis methods]
 
     subgraph GEN["Synthesiser.generate()"]
-        direction TD
+        direction TB
         B["transform(initial predictors) - Generate column 1"]
         C["transform(synthetic column 1) - Generate column 2"]
         D["transform(previous columns) - Generate remaining columns"]
