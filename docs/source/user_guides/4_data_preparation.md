@@ -10,13 +10,13 @@ For each target column:
 
 For fitting a categorical target:
 1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1 <421-missing-as-category>`)
-2. Encode categorical predictors using the PCA encoder. (See {ref}`section 4.1.1 <411-pca-encoding`)
+2. Encode categorical predictors using the PCA encoder. (See {ref}`section 4.1.1 <411-pca-encoding>`)
 3. Fit a classification tree.
 
 For fitting a numeric target:
-1. Fit a Missing Value Predictor using the original predictors and target. (See {ref}`section 4.2.2 <422-predicting-missing-values`)
+1. Fit a Missing Value Predictor using the original predictors and target. (See {ref}`section 4.2.2 <422-predicting-missing-values>`)
 2. Remove rows where the target is missing.
-3. Encode categorical predictors using the Mean encoder. (See {ref}`section 4.1.2 <412-mean-encoding`)
+3. Encode categorical predictors using the Mean encoder. (See {ref}`section 4.1.2 <412-mean-encoding>`)
 4. Fit a regression tree.
 
 All preprocessing components are stored with the fitted synthesis model and reused during generation to ensure consistent transformations.

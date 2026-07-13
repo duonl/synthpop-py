@@ -76,7 +76,7 @@ For the first column, no predictors are available. In that case, CART samples di
 2. **Preprocessing**
 
    The variables are prepared before fitting the decision tree:
-   - Categorical predictors are encoded using the appropriate encoder (defaults: {ref}`PCA encoding <411-pca-encoding>`) for categorical targets and {ref}`mean encoding <412-mean-encoding>` for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see {ref}`Guide 4.1 <41-encoding-categorical-predictors>`;
+   - Categorical predictors are encoded using the appropriate encoder (defaults: {ref}`PCA encoding <411-pca-encoding>` for categorical targets and {ref}`mean encoding <412-mean-encoding>` for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see {ref}`Guide 4.1 <41-encoding-categorical-predictors>`;
    - Missing values in the target variable are handled according to the target type. This step is added because `scikit-learn` cannot fit on missing targets. For more details, see {ref}`Guide 4.2 <42-handling-missing-values>`.
 
 3. **Model fitting**
@@ -170,7 +170,7 @@ Synthesiser(default_syn_method=tune_cart(n_leaves=10, n_components=1))
 ```
 Currently `tune_cart` supports the following parameters:
 - `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
-- `n_components`: configures the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in [Guide 4.1.1](4_data_preparation.md#411-pca-encoding). 
+- `n_components`: configures the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
 
 ---
 
@@ -225,7 +225,7 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
 ## 3.3. Copy synthesis method
 
-The {class}`~synthpop.methods.copy_method.CopyMethod` deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
+The {class}`~synthpop.methods.copy_synth.CopyMethod` deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
 ```python
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)
