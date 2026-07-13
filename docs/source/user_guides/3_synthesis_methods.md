@@ -60,6 +60,7 @@ CART is recommended when:
 - realistic conditional distributions are required;
 - interpretability of local structure matters.
 
+(311-algorithm)=
 ### 3.1.1. Algorithm
 
 For the first column, no predictors are available. In that case, CART samples directly from the empirical distribution of the target column. For each subsequent column $Y$, CART performs the following steps:
@@ -75,8 +76,8 @@ For the first column, no predictors are available. In that case, CART samples di
 2. **Preprocessing**
 
    The variables are prepared before fitting the decision tree:
-   - Categorical predictors are encoded using the appropriate encoder (defaults: [PCA encoding](4_data_preparation.md#411-pca-encoding) for categorical targets and [mean encoding](4_data_preparation.md#412-mean-encoding) for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see [Guide 4.1](4_data_preparation.md#41-encoding-categorical-predictors);
-   - Missing values in the target variable are handled according to the target type. This step is added because `scikit-learn` cannot fit on missing targets. For more details, see [Guide 4.2](4_data_preparation.md#42-handling-missing-values).
+   - Categorical predictors are encoded using the appropriate encoder (defaults: {ref}`PCA encoding <411-pca-encoding>`) for categorical targets and {ref}`mean encoding <412-mean-encoding>` for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see {ref}`Guide 4.1 <41-encoding-categorical-predictors>`;
+   - Missing values in the target variable are handled according to the target type. This step is added because `scikit-learn` cannot fit on missing targets. For more details, see {ref}`Guide 4.2 <42-handling-missing-values>`.
 
 3. **Model fitting**
    

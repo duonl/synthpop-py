@@ -183,7 +183,7 @@ The {func}`~synthpop.synthesiser.Synthesiser.generate` method:
 3. For each variable:
    - uses previously generated synthetic columns as predictors
    - applies the fitted model
-   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see [Guide 3.1.1](3_synthesis_methods.md#311-algorithm)).
+   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see {ref}`Guide 3.1.1 <311-algorithm>`).
 4. Returns a fully synthetic dataset.
 
 Each variable is generated conditionally:

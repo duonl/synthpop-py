@@ -9,14 +9,14 @@ For each target column:
 - missing values in the target are handled differently depending on target type.
 
 For fitting a categorical target:
-1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1 <421_missing_as_category>`)
-2. Encode categorical predictors using the PCA encoder. (See [section 4.1.1](4_data_preparation.md#411-pca-encoding))
+1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1 <421-missing-as-category>`)
+2. Encode categorical predictors using the PCA encoder. (See {ref}`section 4.1.1 <411-pca-encoding`)
 3. Fit a classification tree.
 
 For fitting a numeric target:
-1. Fit a Missing Value Predictor using the original predictors and target. (See [section 4.2.2](4_data_preparation.md#422-predicting-missing-values))
+1. Fit a Missing Value Predictor using the original predictors and target. (See {ref}`section 4.2.2 <422-predicting-missing-values`)
 2. Remove rows where the target is missing.
-3. Encode categorical predictors using the Mean encoder. (See [section 4.1.2](4_data_preparation.md#412-mean-encoding))
+3. Encode categorical predictors using the Mean encoder. (See {ref}`section 4.1.2 <412-mean-encoding`)
 4. Fit a regression tree.
 
 All preprocessing components are stored with the fitted synthesis model and reused during generation to ensure consistent transformations.
@@ -27,6 +27,7 @@ This section explains how categorical predictors are encoded, how missing values
 
 ---
 
+(41-encoding-categorical-predictors)=
 ## 4.1 Encoding categorical predictors
 [`Scikit-learn` decision trees](https://scikit-learn.org/stable/modules/tree.html) only accept numerical input. Therefore, categorical variables such as:
 ```text
@@ -48,8 +49,9 @@ The encoder used depends on the target type:
 | Categorical | PCA Encoder |
 | Numeric | Mean Encoder |
 
+(411-pca-encoding)=
 ### 4.1.1. PCA encoding
-The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn:sklearn.decomposition.PCA` transformation.
+The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation.
 ```python
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array(["x", "x", "y", "z", "w"])
@@ -108,6 +110,7 @@ Each category is then represented by its coordinates in the principal component 
 
 The number of components $k$ is chosen such that a desired fraction of variance is retained.
 
+(412-mean-encoding)=
 ### 4.1.2. Mean encoding
 The {class}`~synthpop.data_processing.encoders.MeanEncoder` method is used for numeric targets. Each category is replaced by the average target value observed for that category.
 ```python
@@ -134,6 +137,7 @@ This method produces a single numeric feature that captures the average relation
 
 ---
 
+(42-handling-missing-values)=
 ## 4.2. Handling missing values
 Missing values are handled explicitly during synthesis because standard decision tree implementations cannot train on missing target values. If missing target values are passed directly to `scikit-learn` trees, model fitting will fail with an exception. Therefore, missing targets must be transformed before fitting and reconstructed after synthesis.
 
@@ -143,7 +147,7 @@ It is implemented via a missing value handling interface, which transforms data 
 
 This separation allows synthpop-py to reproduce both the generated values and the missingness patterns present in the original data. Missing value handling is integrated into the synthesis methods in synthpop-py.
 
-(421_missing_as_category)=
+(421-missing-as-category)=
 ### 4.2.1. Treating missing as category
 For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`.
 ```python
@@ -177,6 +181,7 @@ After synthesis, this mapping is inverted:
 
 This method ensures that trees never see missing values in targets which they cannot handle, missingness is preserved exactly and missing values are structurally reproducible without imputation.
 
+(422-predicting-missing-values)=
 ### 4.2.2. Predicting missing values
 For numeric targets, missing values are treated probabilistically using {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
 ```python

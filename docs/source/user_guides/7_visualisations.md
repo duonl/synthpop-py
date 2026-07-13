@@ -3,7 +3,7 @@ Synthetic data should be evaluated both quantitatively and visually. Quantitativ
 
 The `synthpop-py` package provides visualisations for assessing utility by comparing the original and synthetic datasets:
 - **Univariate distribution visualisation** compares the distribution of individual variables.
-- **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by {func}`~synthpop.utility_metrics.spmse.pairwise_spmse` (see [Guide 5.3.1](5_evaluating_utility.md#531-standardised-propensity-mean-squared-error-s_pmse)).
+- **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by {func}`~synthpop.utility_metrics.spmse.pairwise_spmse` (see {ref}`Guide 5.3.1 <531-spmse>`).
 
 The visualisation functions create interactive `plotly` figures.
 
@@ -13,6 +13,7 @@ Small differences between original and synthetic data are expected because synth
 
 ---
 
+(71-univariate-distribution-visualisation)=
 ## 7.1. Univariate distribution visualisation
 The univariate distribution visualisation compares each variable in the original and synthetic datasets independently. It is generated using {func}`~synthpop.plotting.plot_univariate.plot_univariate_distributions`.
 ```python
@@ -111,6 +112,7 @@ When `interactive=False` (default), the HTML document is not opened automaticall
 
 ---
 
+(72-spmse-heatmap)=
 ## 7.2. S_pMSE heatmap
 (ADD IMAGE OF OUTPUT)
 The S_pMSE heatmap provides a visual representation of pairwise utility evaluation. It is generated using
@@ -136,7 +138,7 @@ For the complete function signature, including options for saving and
 rendering, see
 {func}`~synthpop.plotting.plot_spmse.plot_spmse`.
 
-The calculation of S_pMSE is described in the [utility evaluation guide](5_evaluating_utility.md#531-standardised-propensity-mean-squared-error-s_pmse). The heatmap uses the calculated S_pMSE values to provide an overview of how well relationships between variables are preserved.
+The calculation of S_pMSE is described in the {ref}`utility evaluation guide <531-spmse>`. The heatmap uses the calculated S_pMSE values to provide an overview of how well relationships between variables are preserved.
 
 Each cell represents the S_pMSE value for a pair of variables:
 - diagonal cells represent individual variable comparisons;
