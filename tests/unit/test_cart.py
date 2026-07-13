@@ -193,15 +193,18 @@ def test_fit_sets_fitted_attributes(mocker, y):
         (pd.Series([1.0, 2.0], dtype=np.int64)),
         (pd.Series([1.0, 2.0], dtype=np.float64)),
         (pd.Series([1.0, 2.0], dtype=np.float32)),
-        (pd.Series(["a", "b"], dtype='str')),
-        (pd.Series(["a", "b"], dtype='object')),
-        (pd.Series(["a", "b"], dtype="string")),
         (pd.Series([1, None], dtype="Int64")),
         (pd.Series([1.0, 2.0], dtype="Float32")),
-        (pd.Series([True, None], dtype="boolean")),
-        (pd.Series(["a", "b"], dtype="category")),
+
         (pd.Series(["a", "b"], dtype=str_dtype)),
+        (pd.Series(["a", "b"], dtype='str')),
+        (pd.Series(["a", "b"], dtype="string")),
+
+        (pd.Series(["a", "b"], dtype='object')),
+        (pd.Series(["a", "b"], dtype="category")),
+
         (pd.Series([True, None], dtype=np.bool)),
+        (pd.Series([True, None], dtype="boolean")),
     ]
 )
 def test_fit_saves_input_dtypes(y):

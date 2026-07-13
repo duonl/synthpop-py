@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 
 from synthpop.methods.cart_synth import CartMethod, TreeRegressorMethod, TreeClassifierMethod
+from synthpop.utils import str_dtype
 
 # This imports an auto-use fixture to set the seed, in order to make the test reproducible
 from tests.integration.make_int_test_reproducible import control_random_state_manager
@@ -265,3 +266,39 @@ def test_fit_transform_with_missing_values_in_target(y):
 
     assert len(out) == len(y)
     assert out.isna().sum() > 0
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.int64),
+        pd.Series([1, 2, 3, 4],name='target', dtype=np.float64),
+        pd.Series([1, 2, 3, 4],name='target', dtype=np.float32),
+        pd.Series([1, 2, 3, 4], name='target',dtype="Int64"),
+        pd.Series([1.1, 2.2, 3.3, 4.4],name='target', dtype="Float32"),
+
+        pd.Series(['x', 'y', 'x', 'y'], name='target',dtype="str"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target',dtype="string"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target',dtype=str_dtype),
+
+        pd.Series(['x', 'y', 'x', 'y'], name='target',dtype="object"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target',dtype="category"),
+        
+        pd.Series([True, False, True, False], name='target',dtype="boolean"),
+        pd.Series([True, False, True, False], name='target',dtype=np.bool),
+    ],
+)
+def test_cart_preserves_target_dtype_end_to_end(y):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+            "group": ["a", "a", "b", "b"],
+        }
+    )
+
+    cart = CartMethod()
+
+    cart.fit(X, y)
+
+    result = cart.transform(X)
+
+    assert result.dtype == y.dtype

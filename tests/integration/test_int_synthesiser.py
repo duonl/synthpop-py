@@ -79,10 +79,10 @@ def test_synthesiser_first_column_is_sampled_numeric():
     result_proportions = result["first_column"].value_counts(
         dropna=False, normalize=True)
 
-    assert np.abs(expected_proportions["1.1"] - result_proportions[1.1]) < 0.05
-    assert np.abs(expected_proportions["2"] - result_proportions[2]) < 0.05
+    assert np.abs(expected_proportions["1.1"] - result_proportions.iloc[0]) < 0.05
+    assert np.abs(expected_proportions["2"] - result_proportions.iloc[1]) < 0.05
     assert np.abs(
-        expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
+        expected_proportions["missing"] - result_proportions.iloc[2]) < 0.05
 
 
 
