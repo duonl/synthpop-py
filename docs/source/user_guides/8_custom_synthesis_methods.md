@@ -46,9 +46,9 @@ flowchart TD
 
     subgraph GEN["Synthesiser.generate()"]
         direction TD
-        B["transform(initial predictors)<br/>Generate column 1"]
-        C["transform(synthetic column 1)<br/>Generate column 2"]
-        D["transform(previous columns)<br/>Generate remaining columns"]
+        B["transform(initial predictors) \nGenerate column 1"]
+        C["transform(synthetic column 1) \nGenerate column 2"]
+        D["transform(previous columns) \nGenerate remaining columns"]
 
         B --> C --> D
     end
@@ -67,7 +67,7 @@ A custom synthesis method should inherit from {class}`~synthpop.methods.base_syn
 
 The base class follows the [`scikit-learn` estimator API](https://scikit-learn.org/stable/developers/develop.html) by inheriting from:
 - {class}`BaseEstimator <sklearn:sklearn.base.BaseEstimator>`
-- {class}`TransformerMixin <sklearn:sklearn.base.TransformerMixin>`.
+- {class}`TransformerMixin <sklearn:sklearn.base.TransformerMixin>`
 
 This ensures compatibility with tools such as cloning and pipelines.
 
