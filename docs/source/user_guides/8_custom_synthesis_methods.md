@@ -223,6 +223,8 @@ In this example:
 
 Each synthesis method is cloned before fitting. Therefore, custom synthesis methods should follow the [`scikit-learn` estimator conventions](https://scikit-learn.org/stable/developers/develop.html).
 
+A full example can be found on the [Examples page](../examples/custom_synth.md).
+
 ## 8.4. Adding custom processing components
 A new synthesis method is not always required when only the preprocessing needs to change. Existing synthesis methods can be combined with custom preprocessing components. For example, the {class}`~synthpop.methods.cart_synth.CartMethod` is built from separate tree-based synthesis components:
 - {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` for numeric targets;
