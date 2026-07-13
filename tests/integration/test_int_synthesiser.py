@@ -1,8 +1,6 @@
-import string
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.exceptions import NotFittedError
 
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
@@ -169,10 +167,11 @@ def test_synthesiser_preserves_cat_cat_relation():
     [np.nan, None, pd.NA],
 )
 def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
-    """This test resulted in bugfix 152. The CartMethod failed for a numerical entire np.nan array, 
-    as columns with nan are masked. As such, fitting on an entire np.nan array is the same as fitting to an empty array.
-    Which failed. A work-around wass implemented"""
-
+    """
+    Regression test for bug 152. The CartMethod failed for a numerical array with only missing values, 
+    Missing values are masked. As such, fitting on an entire np.nan array is the same as fitting on an empty array.
+    This threw an error resulting in bug issue 152. A fix was implemented
+    """
     df = pd.DataFrame(
         {
             "a": [1, None],

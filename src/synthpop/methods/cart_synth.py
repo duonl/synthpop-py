@@ -78,6 +78,10 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         Fit to predict `y` using `X`
 
+        If the target consists entirely of missing values, 
+        the estimator records this state and returns without fitting a tree. 
+        Subsequent calls to transform() produce an all-missing output
+
         :param X: features to predict `y`.
         :param y: target to synthesise.
 
@@ -123,10 +127,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         Synthesise new column.
 
-        If the target consists entirely of missing values, 
-        the estimator records this state and returns without fitting a tree. 
-        Subsequent calls to transform() produce an all-missing output
-
         :param X: features used to predict the target variable.
 
         :return: synthesised column.
@@ -137,7 +137,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             raise NotFittedError
         elif self._all_missing:
             n = len(next(iter(X.values()))) if X else 0
-            return np.full(n, np.nan) # __super__() in specific method transforms will do correct dtype conversion
+            return np.full(n, np.nan) # method in child class will do correct dtype conversion
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
