@@ -46,9 +46,9 @@ flowchart TD
 
     subgraph GEN["Synthesiser.generate()"]
         direction TD
-        B["transform(initial predictors) \nGenerate column 1"]
-        C["transform(synthetic column 1) \nGenerate column 2"]
-        D["transform(previous columns) \nGenerate remaining columns"]
+        B["transform(initial predictors)<br>Generate column 1"]
+        C["transform(synthetic column 1)<br>nGenerate column 2"]
+        D["transform(previous columns)<brnGenerate remaining columns"]
 
         B --> C --> D
     end
