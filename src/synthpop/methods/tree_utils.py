@@ -45,6 +45,7 @@ def _fit_decision_tree_with_reachable_leaves(
     Sampling from leaf nodes assumes that applying the fitted tree to the
     training data reaches every leaf node. This is not always guaranteed;
     see issue #129.
+
     :param decision_tree: The decision tree estimator to fit.
     :param X: The training input samples.
     :param y: The target values.
@@ -67,7 +68,7 @@ def _fit_decision_tree_with_reachable_leaves(
             return candidate
 
     raise RuntimeError(
-        "Failed to fit a decision tree with reachable leaves after 100 attempts. "  # 99+the initial attempt is 100
+        f"Failed to fit a decision tree with reachable leaves after 100 attempts. "  # 99+the initial attempt is 100
         "Try changing the root seed or tree parameters."
     )
 

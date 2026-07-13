@@ -21,7 +21,7 @@ from synthpop.data_processing.missing_value_handling import (
     ReplaceNoneWithValue
 )
 from synthpop.methods import base_synth
-from synthpop.methods.tree_utils import LeafNodeSampler, _fit_decision_tree_with_reachable_leaves
+from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 
 

@@ -42,7 +42,9 @@ class SpyDecisionTreeRegressor(DecisionTreeRegressor):
         return super().apply(X)
     
 
-def assert_all_leaf_nodes_reached(tree):
+def assert_tree_reaches_all_leaf_nodes(tree):
+    # Intentionally implemented independently from tree_utils._check_all_leaf_nodes_are_reached.
+    # The regression tests verify the externally observable invariant rather than the helper itself.
     reached = tree.apply(tree.fit_X)
     leaves = np.where(
         tree.tree_.children_left == tree.tree_.children_right
@@ -81,7 +83,11 @@ def test_regression_bug_129_regressor_no_empty_leaf_failure(tree_seed, data_seed
 
     method.fit(X, y)
 
-    assert_all_leaf_nodes_reached(method.tree_)
+    assert_tree_reaches_all_leaf_nodes(method.tree_)
+
+    # Generate new combinations of observed feature values.
+    # Bug #129 occurred during transform when tree.apply() produced leaf IDs
+    # that were not observed during training, causing sampling to fail.
 
     rng = np.random.default_rng(seeds[4])
 
@@ -110,8 +116,11 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure(tree_seed, data_see
 
     method.fit(X, y)
 
-    assert_all_leaf_nodes_reached(method.tree_)
+    assert_tree_reaches_all_leaf_nodes(method.tree_)
 
+    # Generate new combinations of observed feature values.
+    # Bug #129 occurred during transform when tree.apply() produced leaf IDs
+    # that were not observed during training, causing sampling to fail.
     rng = np.random.default_rng([tree_seed, data_seed])
 
     X_pred = {}
