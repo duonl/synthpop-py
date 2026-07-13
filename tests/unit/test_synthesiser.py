@@ -21,6 +21,19 @@ from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.synthesiser import Synthesiser
 
 
+import copy
+import re
+
+import numpy as np
+import pandas as pd
+import pytest
+from sklearn import clone
+from sklearn.exceptions import NotFittedError
+
+from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.synthesiser import Synthesiser
+
+
 class StubSynthMethod(BaseSynthMethod):
 
     def __init__(self, transform_result=None, name=None):

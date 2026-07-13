@@ -101,9 +101,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
-        self.tree_ = tree_utils._fit_decision_tree_with_reachable_leaves(decision_tree=self._new_tree(),
-                                                               X = all_features,
-                                                               y = self._convert_y(prepared_y))
+        self.tree_ = tree_utils._fit_decision_tree_with_reachable_leaves(
+               decision_tree=self._new_tree(),
+                X = all_features,
+                y = self._convert_y(prepared_y)
+            )
 
         leaf_ids = self.tree_.apply(all_features)
 

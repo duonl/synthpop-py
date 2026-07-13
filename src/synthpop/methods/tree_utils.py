@@ -18,7 +18,11 @@ def _check_all_leaf_nodes_are_reached(
 ) -> bool:
     """
     Check if all leaf nodes are reached when the decision tree is applied to the same data used for fitting.
-    Returns `True` if every leaf node in the fitted tree is reached by at least one training sample.
+
+    :param tree: The fitted decision tree.
+    :param X_train: The training data used to fit the tree.
+    :return: ``True`` if every leaf node is reached by at least one training sample;
+        otherwise ``False``.
     """
 
     is_leaf = tree.children_left == tree.children_right
@@ -41,7 +45,12 @@ def _fit_decision_tree_with_reachable_leaves(
     Sampling from leaf nodes assumes that applying the fitted tree to the
     training data reaches every leaf node. This is not always guaranteed;
     see issue #129.
-
+    :param decision_tree: The decision tree estimator to fit.
+    :param X: The training input samples.
+    :param y: The target values.
+    :return: A fitted decision tree for which every leaf node is reached.
+    :raises RuntimeError: If no suitable decision tree is found after 100
+        fitting attempts.
     """
 
     decision_tree.fit(X, y)

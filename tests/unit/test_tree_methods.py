@@ -9,7 +9,6 @@ from sklearn.exceptions import NotFittedError
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
 from synthpop.methods.cart_synth import _AbstractTreeMethod,TreeClassifierMethod, TreeRegressorMethod, _to_fixed_length_string_array
 from sklearn.utils.estimator_checks import parametrize_with_checks
-
 import copy
 import pytest
 
