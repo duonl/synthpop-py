@@ -24,9 +24,9 @@ from sklearn.tree import (
 from synthpop import utils
 from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
-    BaseMissingValueHandler,
-    MissingValuePredictor,
-    ReplaceNoneWithValue,
+    BaseMissingValueHandler, 
+    MissingValuePredictor, 
+    ReplaceMissingWithValue
 )
 from synthpop.methods import base_synth
 import synthpop.methods.tree_utils as tree_utils
@@ -123,7 +123,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
-        self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
+        self.tree_ = tree_utils._fit_decision_tree_with_reachable_leaves(
+               decision_tree=self._new_tree(),
+                X = all_features,
+                y = self._convert_y(prepared_y)
+            )
 
         leaf_ids = self.tree_.apply(all_features)
 
@@ -215,7 +219,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
-    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
     The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
@@ -256,7 +260,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         return PCAEncoder()
 
     def _get_missing_handling(self):
-        return ReplaceNoneWithValue()
+        return ReplaceMissingWithValue()
 
     def _get_tree(self):
         return DecisionTreeClassifier(min_samples_leaf=5,   # equivalent to minbucket in synthpop-r

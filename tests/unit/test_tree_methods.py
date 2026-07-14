@@ -1,3 +1,5 @@
+import copy
+
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
@@ -14,8 +16,6 @@ from synthpop.methods.cart_synth import (
     _to_fixed_length_string_array,
 )
 from sklearn.utils.estimator_checks import parametrize_with_checks
-
-import copy
 
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
@@ -122,12 +122,13 @@ class StubTree:
         self.apply_result = apply_result
         pass
 
-    def fit(self, X, y):
-        self.fit_X_ = X
-        self.fit_y_ = y
-        return self
-
-    def apply(self, X):
+    # fit is not called anymore because of tree_utils._fit_decision_tree_with_reachable_leaves
+    # def fit(self,X,y):
+    #     self.fit_X_ = X
+    #     self.fit_y_ = y
+    #     return self
+    
+    def apply(self,X):
         self.apply_X_ = X
         return self.apply_result
 
@@ -157,14 +158,8 @@ class TestTreeMethod(_AbstractTreeMethod):
 
 
 @pytest.fixture
-def tree_method(encoder, missing_handling, leafnode_sampler):
-    return TestTreeMethod(
-        encoder=encoder,
-        missing_handling=missing_handling,
-        tree_sampler=leafnode_sampler,
-        tree=StubTree(),
-    )
-
+def tree_method(encoder,missing_handling,leafnode_sampler):
+    return TestTreeMethod(encoder=encoder,missing_handling=missing_handling,tree_sampler=leafnode_sampler,tree=StubTree(apply_result=[1,2,3]))
 
 @pytest.fixture()
 def fitted_tree(tree_method, request):
@@ -182,8 +177,9 @@ def fitted_tree(tree_method, request):
 
     return tree_method
 
-
-# ---------------------------------------------------
+@pytest.fixture(autouse=True)
+def mock_fit_decision_tree(mocker,):
+    mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value = StubTree())
 
 
 def assert_dict_array_equal(expected, actual):
@@ -389,15 +385,33 @@ def test_fit_build_feature_matrix(X, y, index_cat, tree_method, mocker):
     expected_order = tree_method.feature_order_
     spy.assert_called_once_with(X_exp, expected_order)
 
+@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
+def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
+
+    expected_tree = clone(tree_method.tree)
+
+    mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value = expected_tree)
 
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
 def test_fit_tree_is_fit(X, y, index_cat, tree_method):
 
-    tree_method.fit(X, y)
+    tree_method.fit(X,y)
 
-    assert np.array_equal(
-        get_exp_feature_matrix(), tree_method.tree_.fit_X_, equal_nan=True
-    )
+    expected_X = get_exp_feature_matrix()
+    expected_y = tree_method.missing_handler_.prepared_for_fit_result[1]
+
+    assert len(mock_fit_decision_tree_with_reachable_leaves.mock_calls) == 1, "_fit_decision_tree_with_reachable_leaves should be called 1 time"
+
+    kwargs = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]
+
+    assert isinstance(kwargs["decision_tree"], StubTree)
+    assert tree_method.tree_ is expected_tree, "fitted decision tree should be stored"
+    assert kwargs["decision_tree"] is not tree_method.tree
+
+    assert np.array_equal(kwargs["X"],expected_X,equal_nan=True)
+    assert np.array_equal(kwargs["y"],expected_y,equal_nan=True)
+
+    
 
     assert np.array_equal(
         tree_method.missing_handler_.prepared_for_fit_result[1],
@@ -419,14 +433,9 @@ def test_fit_tree_is_applied(X, y, index_cat, tree_method):
 def test_fit_sampler_fit(X, y, index_cat, tree_method):
     tree_method.fit(X, y)
 
-    assert np.array_equal(
-        tree_method.tree_sampler_.fit_sampler_leaf_ids, tree_method.tree_.apply_result
-    ), "input of the sampler must be the output of the tree"
-    assert np.array_equal(
-        tree_method.tree_sampler_.fit_sampler_y,
-        tree_method.missing_handler_.prepared_for_fit_result[1],
-    )
-    assert not (tree_method.tree_sampler is tree_method.tree_sampler_)
+    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,tree_method.tree_.apply_result), "input of the sampler must be the output of the tree"
+    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,tree_method.missing_handler_.prepared_for_fit_result[1])
+    assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
 
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
@@ -450,6 +459,12 @@ def test_fit_set_feature_names_out_no_target_name(X, y, index_cat, tree_method):
 def test_fit_classifier_converts_to_str(encoder, leafnode_sampler, mocker):
     X = {"a": np.array([1, 2])}
     y = np.array(["a", "b"], dtype=str_dtype)
+    mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value =StubTree())
+    # the missing handling can return a y of str_dtype.
+    missing_handling = StubMissingHandler(prepared_for_fit_result=(X,y),post_synth_transform_result=None)
+    
+    str_y = np.array(["x","y"])
+    mocked_to_str= mocker.patch('synthpop.methods.cart_synth._to_fixed_length_string_array',return_value=str_y)
 
     # the missing handling can return a y of str_dtype.
     missing_handling = StubMissingHandler(
@@ -478,6 +493,15 @@ def test_fit_regressor_converts_to_float32(encoder, leafnode_sampler):
     X = {"a": np.array([1, 2])}
     y = np.array([1, 2.0], dtype=np.float64)
 
+    actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
+    assert np.array_equal(str_y,actual_y)
+    
+def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
+    X = {"a":np.array([1,2])}
+    y = np.array([1,2.0],dtype=np.float64)
+
+    mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value =StubTree())
+
     # the missing handling can return a y of np.float64
     missing_handling = StubMissingHandler(
         prepared_for_fit_result=(X, y), post_synth_transform_result=None
@@ -492,10 +516,10 @@ def test_fit_regressor_converts_to_float32(encoder, leafnode_sampler):
         tree=StubTree(),
     )
 
-    tree_method.fit(X, y)
+    actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
 
-    assert np.array_equal(converted_y, tree_method.tree_.fit_y_)
-    assert tree_method.tree_.fit_y_.dtype == np.float32
+    assert np.array_equal(converted_y,actual_y)
+    assert actual_y.dtype == np.float32
 
 
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())

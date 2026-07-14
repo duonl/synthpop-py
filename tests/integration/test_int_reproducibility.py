@@ -210,6 +210,7 @@ def test_sample_method_reproducible():
 
     assert result1.equals(result2)
 
+
 def test_sample_method_explicit_seed_reproducible():
 
     y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
