@@ -73,7 +73,7 @@ def _fit_decision_tree_with_reachable_leaves(
     )
 
 
-def sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
+def _sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
     """
     Helper function that draws samples with replacement from the empirical distribution of an array.
 
@@ -264,7 +264,7 @@ class LeafNodeSampler:
                 raise ValueError(f"Leaf {leaf} has an empty leaf map. "
                                  "This indicates a corrupted or inconsistent LeafNodeSampler state.")
 
-            sampled = sample_array(
+            sampled = _sample_array(
                 rng=rng,
                 counts=counts,
                 values=np.asarray(values, dtype=self._y_dtype),
