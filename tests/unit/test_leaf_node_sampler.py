@@ -291,7 +291,7 @@ def test_sample_from_leaves_creates_rng(mocker):
     mock_create_rng = mocker.patch(
         "synthpop.reproducibility.RandomStateManager.create_rng", return_value=expected_rng)
     mock_sample_array = mocker.patch(
-        "synthpop.methods.tree_utils.sample_array", return_value=y)
+        "synthpop.methods.tree_utils._sample_array", return_value=y)
 
     sampler = helper_make_sampler(
         leaf_map=leaf_map, leaf_ids=leaf_ids, random_state=987)

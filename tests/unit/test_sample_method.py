@@ -123,7 +123,7 @@ def test_transform_uses_random_state_manager(mocker):
     mock_create_rng = mocker.patch(
         "synthpop.reproducibility.RandomStateManager.create_rng", return_value=expected_rng)
     mock_sample_array = mocker.patch(
-        "synthpop.methods.tree_utils.sample_array", return_value=expected_result)
+        "synthpop.methods.tree_utils._sample_array", return_value=expected_result)
     values = [1, 2, 3, np.nan]
     model = make_fitted_model(values=values, counts=[1, 1, 1, 1], n_samples=4)
 
