@@ -124,4 +124,4 @@ These visualisations allow us to compare variables one by one. As seen in the pl
 More information about this visualisation and the interpretation can be found in User Guide 7.2 ADD LINK. 
 
 ## Next steps
-Congratulations, you have created and evaluated your first synthetic dataset. Now it is time to find out how to make even better synthetic datasets. The next examples in this module explain the importance of the synthesis order, how to make your synthesis reproducible and how to generate larger datasets.
+Congratulations, you have created and evaluated your first synthetic dataset. Now it is time to find out how to make even better synthetic datasets. The next examples in this module explain how to make your synthesis reproducible, how to generate larger datasets and the importance of the synthesis order. The next module will go into more detail on more parameters to make your synthesis better.

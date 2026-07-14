@@ -12,9 +12,9 @@ Many examples build upon concepts introduces in the [**User Guide**](../user_gui
 :caption: Getting started
 
 your_first_synthetic_dataset.md
-choosing_a_synthesis_order.md
 reproducible_synthesis.md
 generating_a_larger_dataset.md
+choosing_a_synthesis_order.md
 
 ```
 
