@@ -61,7 +61,8 @@ The generated dataset has the same columns as the original dataset:
 |  1 |  0.0598711  |  0.0506801 | -0.0212953  |  0.00465813 |  0.0644768 |  0.0494162 |  0.0302319 | -0.00259226 |  0.0383939 | -0.0052198 |      196 |
 |  2 | -0.0817979  | -0.0446416 | -0.0816528  | -0.0400989  | -0.0455994 | -0.0370128 |  0.0339135 | -0.0394934  | -0.0891334 | -0.092204  |       72 |
 
-****Congratulations, you have created your first synthetic dataset!**** |:tada:|
+****Congratulations, you have created your first synthetic dataset!****
+<img src="../images/tada_emoji.gif" width="25" style="vertical-align: middle;">
 
 The generated records are not copies of the original observations. Instead, they are newly generated values that aim to preserve the statistical properties and relationships present in the original data.
 
