@@ -385,15 +385,12 @@ def test_fit_build_feature_matrix(X, y, index_cat, tree_method, mocker):
     expected_order = tree_method.feature_order_
     spy.assert_called_once_with(X_exp, expected_order)
 
-@pytest.mark.parametrize("X,y,index_cat",get_input_test_data())
-def test_fit_tree_is_fit(X,y,index_cat,tree_method,mocker):
-
+@pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
+def test_fit_tree_is_fit(X, y, index_cat, tree_method, mocker):
+    
     expected_tree = clone(tree_method.tree)
 
     mock_fit_decision_tree_with_reachable_leaves = mocker.patch("synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",return_value = expected_tree)
-
-@pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
-def test_fit_tree_is_fit(X, y, index_cat, tree_method):
 
     tree_method.fit(X,y)
 
@@ -410,13 +407,6 @@ def test_fit_tree_is_fit(X, y, index_cat, tree_method):
 
     assert np.array_equal(kwargs["X"],expected_X,equal_nan=True)
     assert np.array_equal(kwargs["y"],expected_y,equal_nan=True)
-
-    
-
-    assert np.array_equal(
-        tree_method.missing_handler_.prepared_for_fit_result[1],
-        tree_method.tree_.fit_y_,
-    )
 
 
 @pytest.mark.parametrize("X,y,index_cat", get_input_test_data())
@@ -486,13 +476,7 @@ def test_fit_classifier_converts_to_str(encoder, leafnode_sampler, mocker):
     tree_method.fit(X, y)
 
     mocked_to_str.assert_called_with(y)
-    assert np.array_equal(str_y, tree_method.tree_.fit_y_)
-
-
-def test_fit_regressor_converts_to_float32(encoder, leafnode_sampler):
-    X = {"a": np.array([1, 2])}
-    y = np.array([1, 2.0], dtype=np.float64)
-
+    
     actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
     assert np.array_equal(str_y,actual_y)
     
@@ -515,6 +499,8 @@ def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
         tree_sampler=leafnode_sampler,
         tree=StubTree(),
     )
+
+    tree_method.fit(X,y)
 
     actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
 
