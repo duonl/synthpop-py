@@ -2,26 +2,34 @@
 This module contains the CART method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
-from typing import Self, Dict, Any
+from typing import Any, Dict, Self
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn import clone
-from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
+from sklearn.base import (
+    BaseEstimator,
+    TransformerMixin,
+    check_is_fitted,
+)
 from sklearn.decomposition import PCA
-from sklearn.tree import BaseDecisionTree, DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.exceptions import NotFittedError
+from sklearn.tree import (
+    BaseDecisionTree,
+    DecisionTreeClassifier,
+    DecisionTreeRegressor,
+)
 
 from synthpop import utils
-import synthpop.methods.tree_utils as tree_utils
 from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
-    BaseMissingValueHandler, 
-    MissingValuePredictor, 
-    ReplaceNoneWithValue
+    BaseMissingValueHandler,
+    MissingValuePredictor,
+    ReplaceNoneWithValue,
 )
 from synthpop.methods import base_synth
+import synthpop.methods.tree_utils as tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 
@@ -158,7 +166,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             raise ValueError(
                 f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
-        
         all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k, v) in X_val.items()}
 
         all_features = tree_utils.build_feature_matrix(all_features_dict, self.feature_order_)
