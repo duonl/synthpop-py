@@ -277,19 +277,22 @@ class MissingValuePredictor(BaseMissingValueHandler):
         return self.__class__(encoder=self.encoder, tree=self.tree, tree_sampler=self.tree_sampler)
 
 
-class ReplaceNoneWithValue(BaseMissingValueHandler):
+class ReplaceMissingWithValue(BaseMissingValueHandler):
     """
-    Replace missing values by a specified value, and remove after synthesis.
+    Maps missing values to a specified value, and reverses this after synthesis.
+    This method is used for categorical variables and ensures that trees never
+    see missing values in targets which they cannot handle. Missingness
+    is preserved exactly.
 
     :param missing_marker: The value to replace missing values with.
 
     Examples
     --------
     >>> import numpy as np
-    >>> from synthpop.data_processing.missing_value_handling import ReplaceNoneWithValue
+    >>> from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
     >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
-    >>> replace_missing = ReplaceNoneWithValue()
+    >>> replace_missing = ReplaceMissingWithValue()
     >>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
     >>> x_res
     array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))
@@ -344,18 +347,18 @@ class ReplaceNoneWithValue(BaseMissingValueHandler):
 
     def clone(self) -> Self:
         """
-        Create a new instance of ReplaceNoneWithValue with the same configuration.
+        Create a new instance of ReplaceMissingWithValue with the same configuration.
 
         The method only copies initialisation parameters and does not copy
         any fitted state. Similar to sklearn's `clone()`.
 
-        Note: `ReplaceNoneWithValue` does not have learned attributes.
+        Note: `ReplaceMissingWithValue` does not have learned attributes.
 
-        :return: A new, unfitted instance of `ReplaceNoneWithValue()` with the 
+        :return: A new, unfitted instance of `ReplaceMissingWithValue()` with the 
             same `missing_marker` setting.
 
         Examples
         --------
-        >>> ReplaceNoneWithValue().clone()
+        >>> ReplaceMissingWithValue().clone()
         """
         return self.__class__(missing_marker=self.missing_marker)
