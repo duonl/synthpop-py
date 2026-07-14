@@ -339,7 +339,7 @@ def test_regressor_trainings_data_reaches_all_nodes():
         tree=SpyDecisionTreeRegressor(
             min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
             min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-            random_state=89  # None#bad_tree_seed#seeds[0]
+            random_state=89,    # seed that produces the bug (one of the seeds)
         ),
         missing_handler=MissingValuePredictor(
             tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=1)
@@ -367,7 +367,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
         tree=SpyDecisionTreeClassifier(
             min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
             min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-            random_state=tree_seed  # None#bad_tree_seed#seeds[0]
+            random_state=tree_seed,
         ),
         tree_sampler=LeafNodeSampler(random_state=0)
     )
@@ -385,8 +385,8 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
 
     assert set(all_leaf_nodes[0]) == set(reached_nodes)
 
+    # simulate synthetic data
     rng = np.random.default_rng([tree_seed, data_seed])
-
     X_pred = {}
     for col in X.keys():
         X_pred[col] = rng.choice(X[col], size=len(X[col])*100, replace=True)
@@ -394,5 +394,6 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
             [True, False], size=len(X[col])*100, replace=True)
         X_pred[col][make_missing] = np.nan
 
+    # check if transform does not fail
     result = method.transform(X_pred)
     assert len(result) == len(y)*100
