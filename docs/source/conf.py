@@ -54,6 +54,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'myst_parser',
     'sphinxcontrib.mermaid',
+    'sphinxemoji.sphinxemoji'
 ]
 myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
 autodoc_member_order = "bysource"

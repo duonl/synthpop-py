@@ -1,19 +1,20 @@
 # Examples
 
-This is where we would explain examples, etc.
+This section contains practical examples demonstrating how to use **synthpop-py** for generating and evaluating synthetic data. The examples range from basic workflows for first-time users to more advanced customisation and extension of the synthesis process.
 
-Here I explain [Regular Use](regular_use.md).
+If you are new to `synthpop-py`, we recommend starting with the **Getting started** examples before exploring parameter tuning, alternative synthesis methods and custom components.
 
-But what if I want to [adjust the column order](adjusting_column_order.md)
-...
-
+Many examples build upon concepts introduces in the [**User Guide**](../user_guides/user_guides_index.md). Where appropriate, links are provided to the relevant sections for more detailed explanations of the underlying methods and algorithms.
 
 ```{toctree}
 :maxdepth: 1
 :hidden:
-:caption: Basics
+:caption: Getting started
 
-regular_use.md
+your_first_synthetic_dataset.md
+choosing_a_synthesis_order.md
+reproducible_synthesis.md
+generating_a_larger_dataset.md
 
 ```
 
