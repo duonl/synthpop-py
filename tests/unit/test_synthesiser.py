@@ -8,7 +8,30 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.base_synth import BaseSynthMethod
+import copy
+import pytest
+import re
+
+import numpy as np
+import pandas as pd
 from sklearn import clone
+from sklearn.exceptions import NotFittedError
+
+from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.synthesiser import Synthesiser
+
+
+import copy
+import re
+
+import numpy as np
+import pandas as pd
+import pytest
+from sklearn import clone
+from sklearn.exceptions import NotFittedError
+
+from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.synthesiser import Synthesiser
 
 
 class StubSynthMethod(BaseSynthMethod):
