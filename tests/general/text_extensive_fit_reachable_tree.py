@@ -1,5 +1,13 @@
 """
-These are regression tests for Bug #129.
+These are extensive regression tests for Bug #129.
+
+The difference between these tests and tests/integration/test_int_tree_methods:
+- test_regressor_trainings_data_reaches_all_nodes()
+- test_regression_bug_129_classifier_no_empty_leaf_failure()
+
+is the amount of seeds tried. The integration tests are designed to be lightweight.
+These tests check more of the known seeds that caused a failure before bug #129
+was patched.
 
 Bug #129 occurred when `DecisionTree.apply()` returned leaf IDs during prediction
 that were never reached by the training data. This caused downstream sampling to fail.
@@ -8,6 +16,7 @@ After making the synthesis process reproducible, several combinations of tree se
 and generated datasets were found to reproduce the problem deterministically.
 These tests verify that those combinations no longer produce empty leaves
 and that prediction succeeds.
+
 """
 import numpy as np
 import pytest
