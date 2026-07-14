@@ -1,4 +1,4 @@
-# User Guides
+# User Guide
 
 This is where we could put our user Guides
 

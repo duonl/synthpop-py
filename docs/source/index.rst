@@ -3,15 +3,30 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Contents:
+
+   getting_started/getting_started
+   user_guides/user_guides_index
+   api_reference/synthpop
+   examples/examples_index
+   developer/developer_index
+   about_us/about
+
 Synthpop documentation
 ======================
 
-Introduction on Synthpop
+**Version**: |release|
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+**Useful links**:
+`Installation <https://synthpop-py.readthedocs.io/en/develop/installing/installing.html>`_ |
+`Source Repository <https://github.com/duonl/synthpop-py/tree/main>`_ |
+`Issue Tracker <https://github.com/duonl/synthpop-py/issues>`_ |
+`Synthpop R Package <https://www.synthpop.org.uk/index.html>`_
 
+.. CHECK LINKS WHEN WE BECOME PUBLIC
 
 .. grid:: 1 1 2 2
    :gutter: 2 3 4 4
@@ -23,17 +38,18 @@ documentation for details.
       Getting started
       ^^^
 
-      New to NumPy? Check out the Absolute Beginner's Guide. It contains an
-      introduction to NumPy's main concepts and links to additional tutorials.
+      New to Synthpop? Check out the getting started guides. 
+      It introduces the key concepts behind Synthpop and includes step-by-step installation instructions 
+      to help you begin creating synthetic datasets.
 
       +++
 
-      .. button-ref:: user/absolute_beginners
+      .. button-ref:: getting_started/getting_started
          :expand:
          :color: secondary
          :click-parent:
 
-         To the absolute beginner's guide
+         To the getting started guide
 
    .. grid-item-card::
       :img-top: ../source/_static/index-images/user_guide.svg
@@ -42,12 +58,13 @@ documentation for details.
       User guide
       ^^^
 
-      The user guide provides in-depth information on the
-      key concepts of NumPy with useful background information and explanation.
+      The user guide provides in-depth information on the key concepts of Synthpop, 
+      including useful background information, examples, and explanations 
+      to help you understand how synthetic datasets are generated and used.
 
       +++
 
-      .. button-ref:: user
+      .. button-ref:: user_guides/user_guides_index
          :expand:
          :color: secondary
          :click-parent:
@@ -61,63 +78,49 @@ documentation for details.
       API reference
       ^^^
 
-      The reference guide contains a detailed description of the functions,
-      modules, and objects included in NumPy. The reference describes how the
-      methods work and which parameters can be used. It assumes that you have an
-      understanding of the key concepts.
+      The reference guide contains a detailed description of the functions, modules, and objects included in Synthpop. 
+      It explains how specific methods work, and which parameters can be used. 
+      It assumes that you have a basic understanding of Synthpop's core concepts.
 
       +++
 
-      .. button-ref:: reference
+      .. button-ref:: api_reference/synthpop
          :expand:
          :color: secondary
          :click-parent:
 
-         To the reference guide
+         To the API reference guide
 
    .. grid-item-card::
       :img-top: ../source/_static/index-images/contributor.svg
       :text-align: center
 
-      Contributor's guide
+      Developer's guide
       ^^^
 
-      Want to add to the codebase? Can help add translation or a flowchart to the
-      documentation? The contributing guidelines will guide you through the
-      process of improving NumPy.
+      Saw a typo? Want to contribute to the codebase? 
+      Help improve the documentation, add examples, or suggest new features? 
+      The Developer's guide will guide you through the process of improving Synthpop.
 
       +++
 
-      .. button-ref:: devindex
+      .. button-ref:: developer/developer_index
          :expand:
          :color: secondary
          :click-parent:
 
-         To the contributor's guide
+         To the developer's guide
 
 
-README
-======================
+.. README
+.. ======================
 
-.. include:: ../../README.md 
-   :parser: myst
+.. .. include:: ../../README.md 
+..    :parser: myst
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+.. Indices and tables
+.. ==================
 
-   installing/installing.md
-   user_guides/user_guides_index
-   api_reference/synthpop
-   examples/examples_index
-   developer/developer_index.md
-   about_us/about.md
-
-   
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
