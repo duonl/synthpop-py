@@ -149,11 +149,11 @@ This separation allows synthpop-py to reproduce both the generated values and th
 
 (421-missing-as-category)=
 ### 4.2.1. Treating missing as category
-For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`.
+For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
 ```python
 >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
 >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
->>> replace_missing = ReplaceNoneWithValue()
+>>> replace_missing = ReplaceMissingWithValue()
 >>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
 >>> y_res
 array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
@@ -267,9 +267,9 @@ The missing value handling strategy is determined by the `missing_handler` argum
 
 By default:
 - {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` uses {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`;
-- {class}`~synthpop.methods.cart_synth.TreeClassifierMethod` uses {class}`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`.
+- {class}`~synthpop.methods.cart_synth.TreeClassifierMethod` uses {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
 
-The default for the {class}`~synthpop.methods.cart_synth.TreeClassifierMethod` can be overridden to use the probabilistic {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` instead of {class}`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`:
+The default for the {class}`~synthpop.methods.cart_synth.TreeClassifierMethod` can be overridden to use the probabilistic {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` instead of {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`:
 ```python
 CartMethod(
     classifier=TreeClassifierMethod(
