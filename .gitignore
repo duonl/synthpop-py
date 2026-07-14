@@ -12,3 +12,4 @@ pyproject.toml
 tests/unit/__pycache__/
 *.svg
 *.png
+.vscode
