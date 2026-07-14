@@ -18,7 +18,7 @@ from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
     BaseMissingValueHandler, 
     MissingValuePredictor, 
-    ReplaceNoneWithValue
+    ReplaceMissingWithValue
 )
 from synthpop.methods import base_synth
 from synthpop.methods.tree_utils import LeafNodeSampler
@@ -192,7 +192,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
-    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
     The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
@@ -233,7 +233,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         return PCAEncoder()
 
     def _get_missing_handling(self):
-        return ReplaceNoneWithValue()
+        return ReplaceMissingWithValue()
 
     def _get_tree(self):
         return DecisionTreeClassifier(min_samples_leaf=5,   # equivalent to minbucket in synthpop-r
