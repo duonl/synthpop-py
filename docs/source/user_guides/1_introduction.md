@@ -2,7 +2,7 @@
 
 **synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the ideas and methodology of the R package [**synthpop**](https://www.synthpop.org.uk/), while providing a modern Python interface and software architecture that is easier to learn, integrate and maintain.
 
-The package is intended for researchers, data scientists, statisticians and practitioners who want to generate synthetic versions of tabular datasets for analysis, development or data sharing.
+The package is intended for researchers, data scientists, statisticians and practitioners who want to generate synthetic versions of tabular datasets for e.g. analysis, development or data sharing.
 
 synthpop-py supports tabular datasets containing both numeric and non-numeric variables, including floating-point numbers, integers, booleans, strings and categorical variables. The package is designed for structured tabular data and does not support unstructured data such as free text, images or audio. Missing values are supported throughout the synthesis process.
 
@@ -64,7 +64,7 @@ The package is currently not designed for generating unstructured data.
 ---
 
 ##  1.4. Terminology
-The terminology used in the synthetic data literature is not always consistent. Throughout this user guide we use the following definitions.
+The terminology used around synthetic data is not always consistent. Throughout this user guide we use the following definitions:
 
 ### 1.4.1. Original data
 The **original data** is the dataset provided to the synthesiser. It contains the observations from which statistical relationships are learned. In the literature, this dataset is also commonly referred to as the **observed data**, **real data** or **source data**.
@@ -76,12 +76,12 @@ The **original data** is the dataset provided to the synthesiser. It contains th
 The **synthesiser** is the central component of synthpop-py. It is responsible for fitting the synthesis models on the original data and generating synthetic observations. Other packages may refer to this component as a **generator**.
 
 ### 1.4.4. Utility
-**Utility** described how useful a synthetic dataset is for analyses that would otherwise be performed on the original data. Literature distinguishes between utility and fidelity. In synthpop-py, the term utility is used broadly to describe how well the synthetic data preserves the statistical properties and relationships of the original data. A synthetic dataset with high utility should therefore support analyses that lead to conclusions similar to those obtained from the original data.
+**Utility** describes how useful a synthetic dataset is for analyses that would otherwise be performed on the original data. In synthpop-py, the term utility is used broadly to describe how well the synthetic data preserves the statistical properties and relationships of the original data. A synthetic dataset with high utility should therefore support analyses that lead to conclusions similar to those obtained from the original data.
 
-In the literature, this concept is also referred to as **analytical utility**, **data utility** or **fidelity**, depending on the context.
+Elswhere, this concept is also referred to as **analytical utility**, **data utility** or **fidelity**, depending on the context.
 
 ### 1.4.5. Privacy
-**Privacy** refers to the extent to which information about individuals in the original dataset can be inferred from the synthetic data. Although synthetic data can reduce disclosure risks, generating synthetic data does not automatically guarantee privacy. Privacy should therefore be considered alongside utility when evaluating synthetic datasets. It is sometimes also referred to as **disclosure risk**.
+**Privacy** refers to the extent to which information about individuals in the original dataset can be inferred from the synthetic data. Although synthetic data can reduce disclosure risks, generating synthetic data does not automatically guarantee privacy. For example, if there is a `last name` variable in the original data, many of those last names will also appear in synthetic data generated with synthpop-py. Privacy should therefore be considered when evaluating synthetic datasets. It is sometimes also referred to as **disclosure risk**.
 
 ### 1.4.6. Target
 The **target** is the column currently being synthesised. Each synthesis method generates a single target column at a time.
