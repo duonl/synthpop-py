@@ -202,15 +202,18 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         >>> from synthpop.methods.cart_synth import TreeClassifierMethod
         >>> import numpy as np
         >>> from synthpop.utils import str_dtype
+        >>>
         >>> X = {
-        ...         "column1":np.array([1.1,2.2]),
-        ...         "column2":np.array([1.4,1.2]),
-        ...         "column3":np.array(["a","b"],dtype=str_dtype)
+        ...         "column1":np.array([1.1, 2.2]),
+        ...         "column2":np.array([1.4, 1.2]),
+        ...         "column3":np.array(["a", "b"], dtype=str_dtype)
         ...         }
-        >>> y = np.array(["x","y"],dtype=str_dtype)
+        >>> y = np.array(["x", "y"], dtype=str_dtype)
+        >>>
         >>> tree_method = TreeClassifierMethod()
-        >>> tree_method.fit(X,y)
+        >>> tree_method.fit(X, y)
         TreeClassifierMethod()
+        >>>
         >>> tree_method.transform(X)
         array(['x', 'y'], dtype=StringDType(na_object=nan))
 
@@ -262,15 +265,18 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         >>> from synthpop.methods.cart_synth import TreeRegressorMethod
         >>> import numpy as np
         >>> from synthpop.utils import str_dtype
+        >>>
         >>> X = {
-        ...         "column1":np.array([1.1,2.2]),
-        ...         "column2":np.array([1.4,1.2]),
-        ...         "column3":np.array(["a","b"],dtype=str_dtype)
+        ...         "column1":np.array([1.1, 2.2]),
+        ...         "column2":np.array([1.4, 1.2]),
+        ...         "column3":np.array(["a", "b"], dtype=str_dtype)
         ...         }
-        >>> y = np.array([1,2])
+        >>> y = np.array([1, 2], dtype=np.float32)
+        >>>
         >>> tree_method = TreeRegressorMethod()
-        >>> tree_method.fit(X,y)
+        >>> tree_method.fit(X, y)
         TreeRegressorMethod()
+        >>>
         >>> tree_method.transform(X)
         array([1., 2.], dtype=float32)
 
@@ -295,10 +301,10 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     def _get_tree(self):
         return DecisionTreeRegressor(min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
-                                    min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
-                                    random_state=RandomStateManager.create_instance_seed()
-                                    )
-    
+                                     min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                                     random_state=RandomStateManager.create_instance_seed()
+                                     )
+
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return y.astype(np.float32, copy=False)
 
@@ -336,8 +342,8 @@ class CartMethod(base_synth.BaseSynthMethod):
     >>> from synthpop.methods.cart_synth import CartMethod
     >>>
     >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
-    >>> y_num = pd.Series([50, 60, 70], name='length')
-    >>> y_cat = pd.Series(['A', 'B', 'AB'], name='blood type')
+    >>> y_num = pd.Series([50, 60, 70], name='length', dtype='float32')
+    >>> y_cat = pd.Series(['A', 'B', 'AB'], name='blood type', dtype='string')
     >>> method = CartMethod()
     >>> method.fit(X, y_num)                                                                                                                                                                                                    
     CartMethod()                                                                                                                                                                                                                
@@ -353,7 +359,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     0     A                                                                                                                                                                                                                     
     1    AB                                                                                                                                                                                                                     
     2     B                                                                                                                                                                                                                     
-    Name: blood type, dtype: str         
+    Name: blood type, dtype: string         
     """
 
     def __init__(self,
@@ -419,7 +425,14 @@ class CartMethod(base_synth.BaseSynthMethod):
         """
 
         check_is_fitted(
-            self, ["method_", "feature_names_in_", "target_name_", "target_dtype_"])
+            self,
+            [
+                "method_",
+                "feature_names_in_",
+                "target_name_",
+                "target_dtype_"
+            ]
+        )
 
         if not isinstance(X, pd.DataFrame):
             raise TypeError(

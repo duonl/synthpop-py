@@ -10,7 +10,7 @@ from synthpop.synthesiser import Synthesiser
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.cart_synth import CartMethod
-from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations
+from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations, make_data_missing
 
 
 def test_synthesiser_correct_default_methods():
@@ -191,6 +191,41 @@ def test_synthesiser_preserves_datatypes(method):
     "fourth": "Int64",
     "fifth": "object"
 })
+
+    synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+    assert all(syn_df.dtypes == original_data.dtypes)
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        CopyMethod,
+        SampleMethod,
+        CartMethod
+    ]
+)
+def test_synthesiser_preserves_datatypes(method):
+    """
+    Reproduces bug 162, where synthesiser class returns object dtype in the synthetic data
+    while the original data is string datatype.
+
+    All columns should return their original datatype.
+    """
+
+    n_samples_orig = 1000
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+        n_samples=n_samples_orig)
+
+    original_data = original_data.astype({
+    "second": "float32",
+    "fourth": "Int64",
+    "fifth": "object"
+})
+
+    
+    original_data = make_data_missing(original_data)
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
 
