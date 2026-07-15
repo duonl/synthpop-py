@@ -1,0 +1,17 @@
+{
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+                "./src/",
+                "./tests/",
+                // "--cov=./src/",
+            ],
+            "cSpell.words": [
+                "BDFL",
+                "crosstab",
+                "docstrings",
+                "setdiff"
+            ],
+            "python-envs.defaultEnvManager": "ms-python.python:venv",
+            "python-envs.defaultPackageManager": "ms-python.python:pip"
+}
