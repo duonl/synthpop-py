@@ -48,7 +48,7 @@ Large deviations between the original and synthetic distributions may indicate t
 Depending on the synthesis method, small deviations are expected due to sampling variation. They are generally not problematic.
 
 ### 7.1.1. Numeric variables
-(ADD IMAGE OF OUTPUT)
+![Histogram of age distribution comparison](../images/age_distribution.png)
 For numeric variables, the visualisation displays overlapping histograms of the original and synthetic distributions.
 
 The histograms are normalised as densities, allowing datasets with different numbers of observations to be compared directly.
@@ -66,7 +66,7 @@ Potential issues include:
 - large differences in skewness or variability.
 
 ### 7.1.2. Categorical variables
-(ADD IMAGE OF OUTPUT)
+![Bar chart of sex distribution comparison](../images/sex_distribution.png)
 For categorical variables, the visualisation displays the relative frequency of each category in the original and synthetic datasets. This allows datasets with different numbers of observations to be compared directly.
 
 Categories occurring in only one of the datasets are also shown, allowing users to identify categories that were lost or introduced during synthesis.
@@ -114,7 +114,7 @@ When `interactive=False` (default), the HTML document is not opened automaticall
 
 (72-spmse-heatmap)=
 ## 7.2. S_pMSE heatmap
-(ADD IMAGE OF OUTPUT)
+![S_pMSE heatmap](../images/spmse_user_guide.png)
 The S_pMSE heatmap provides a visual representation of pairwise utility evaluation. It is generated using
 {func}`~synthpop.plotting.plot_spmse.plot_spmse`.
 The input is the pairwise S_pMSE table produced by

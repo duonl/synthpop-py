@@ -11,4 +11,4 @@ classes.dot
 pyproject.toml
 tests/unit/__pycache__/
 *.svg
-*.png
+src/*.png
