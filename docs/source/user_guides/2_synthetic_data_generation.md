@@ -18,7 +18,7 @@ flowchart LR
         direction TB
         B[Use column order]
         C[Fit synthesis for each variable]
-        D[Apply preprocessing within synthesis methods]
+        D[Apply preprocessing within fitting synthesis methods]
         E[Store fitted models]
         B --> C --> D --> E
     end
@@ -26,7 +26,7 @@ flowchart LR
     subgraph GEN["Synthesiser.generate()"]
         direction TB
         F[Use previously generated variables as predictors]
-        G[Apply synthesis method to one column]
+        G[Apply fitted synthesis method to one column]
         H[Generate columns sequentially]
         I[Post-processing]
         F --> G --> H --> I
@@ -39,9 +39,7 @@ flowchart LR
     GEN --> J
 ```
 
-The synthesis procedure is intentionally sequential and autoregressive:
-- Each generated variable is conditioned on previously generated variables
-- the **column order is a critical modelling assumption** as it defines structure
+The synthesis procedure is intentionally sequential and each generated variable is conditioned on previously generated variables. Therefore, the **column order is a critical modelling parameter**.
 
 This design closely follows the original **synthpop** methodology while providing a modular and extensible Python implementation.
 
@@ -71,7 +69,7 @@ During initialisation ([`Synthesiser()`](../api_reference/synthesiser_class/synt
 
 - **`default_syn_method`**  
   The synthesis method applied to all variables unless explicitly overridden.  
-  If not specified, `CartMethod` is used as the default synthesis method.
+  If not specified, {class}`~synthpop.methods.cart_synth.CartMethod` is used as the default synthesis method.
 
 - **`special_syn_method`**  
   Dictionary mapping variable names to custom synthesis methods.
@@ -104,7 +102,7 @@ Other available methods are:
 - {class}`~synthpop.methods.sample_synth.SampleMethod`
 - {class}`~synthpop.methods.copy_synth.CopyMethod`
 
-More information about these methods can be found in [Guide 3](3_synthesis_methods.md).
+More information about these methods can be found in [Guide 3: Synthesis methods](3_synthesis_methods.md).
 
 ### 2.2.3. Column-level control
 
@@ -134,7 +132,7 @@ It includes:
 
 Missing value handling is integrated into the synthesis methods and is applied automatically.
 
-Preprocessing is described in more detail in [Guide 4](4_data_preparation.md).
+Preprocessing, including encoding and missing value handling, is described in more detail in [Guide 4: Data preparation](4_data_preparation.md).
 
 ---
 
@@ -162,7 +160,7 @@ Formally, for a variable $(X_j)$, the model learns:
 P(X_j \mid X_1, \dots, X_{j-1})
 ```
 
-All preceding variables are used as predictors by default.
+All preceding variables are used as predictors by default. In a future release, users may be able to select specific predictors for a target variable.
 
 ---
 
@@ -183,7 +181,7 @@ The {func}`~synthpop.synthesiser.Synthesiser.generate` method:
 3. For each variable:
    - uses previously generated synthetic columns as predictors
    - applies the fitted model
-   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see {ref}`Guide 3.1.1 <311-algorithm>`).
+   - samples values according to the fitted synthesis method. For the default CART method, this is done using leaf-node sampling (see {ref}`Guide 3.1.1: CART synthesis <311-algorithm>`).
 4. Returns a fully synthetic dataset.
 
 Each variable is generated conditionally:

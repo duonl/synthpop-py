@@ -135,7 +135,7 @@ For the first column, no predictors are available. In that case, CART samples di
 - As part of the sequential synthesis framework, the available predictors depend on the column synthesis order. The ordering of predictors within a single CART model does not affect the fitted tree; only the selection of available predictors through the synthesis order matters.
 
 ### 3.1.4. Configuring CART
-The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
+The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify hyperparameters of the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
 The most flexible approach is to construct a {class}`~synthpop.methods.cart_synth.CartMethod` directly:
 ```python
@@ -162,11 +162,11 @@ CartMethod(
 ```
 For common tuning options, synthpop-py provides the convenience function {func}`~synthpop.methods.cart_synth.tune_cart`, which applies the same configuration consistently to all tree-based components:
 ```python
-tune_cart(n_leaves=10, n_components=1)
+tuned_cart = tune_cart(n_leaves=10, n_components=1)
 ```
-Or directly in the {class}`~synthpop.synthesiser.Synthesiser`:
+Which can then be passed in the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
-Synthesiser(default_syn_method=tune_cart(n_leaves=10, n_components=1))
+Synthesiser(default_syn_method=tuned_cart)
 ```
 Currently `tune_cart` supports the following parameters:
 - `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
@@ -200,6 +200,11 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
    ```{math}
    \hat{P}(Y = y_i) = \frac{n_i}{N}
    ```
+   Where:
+   - $\hat{P}(Y)$ is the empirical distribution of the observed column;
+   - $y_i$ is the $i$-th distinct observed value;
+   - $n_i$ is the number of times $y_i$ occurs in the original column;
+   - $N$ is the total number of observed values in the original column.
 
 2. Store value–frequency pairs:
    ```{math}
@@ -220,6 +225,7 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
 - Does not preserve relationships between variables
 - Equivalent to an unconditional bootstrap sampler
+- The method can only reproduce values that already exist in the original column. It cannot create plausible new values outside the observed data (for example, in the observed range of an original numeric variable)
 
 ---
 
@@ -242,7 +248,7 @@ Y^{syn} = Y^{obs}
 ```
 
 ```{warning}
-{class}`~synthpop.methods.copy_synth.CopyMethod` reproduces observed values directly and does not provide statistical protection for the copied variable. Any sensitive, confidential or identifying information copied using this method remains present in the synthetic dataset.
+{class}`~synthpop.methods.copy_synth.CopyMethod` reproduces observed values directly and therefore does not provide any privacy protection for the copied variable. Any sensitive, confidential or identifying information can be present in the synthetic dataset. As a result, this method should only be used for variables where direct reproduction of the original values is acceptable.
 ```
 
 ### 3.3.1. Algorithm
@@ -256,7 +262,7 @@ Y^{syn} = Y^{obs}
    - return stored values unchanged
 
 3. Enforce row consistency:
-   - synthetic dataset must have same number of rows as original
+   - synthetic dataset must have same number of rows as the original dataset because {class}`~synthpop.methods.copy_synth.CopyMethod` assigns each synthetic row the corresponding observed value rather than generating new values. Changing the number of rows would make it impossible to maintain the one-to-one correspondence between original and synthetic rows.
 
 ### 3.3.2. Properties
 
@@ -267,9 +273,10 @@ Y^{syn} = Y^{obs}
 
 ### 3.3.3. Limitations
 
-- No statistical modelling
-- No generalisation beyond observed data
-- Does not preserve relationships under resampling or permutation
+- No statistical modelling.
+- Cannot generate more values than the number of observed values
+- he method can only reproduce values that already exist in the original column. It cannot create plausible new values outside the observed data (for example, in the observed range of an original numeric variable)
+- Gives no protection against broken row relationships. If the copied column is combined with data from another source, or if rows are reordered, sampled, or filtered independently, the copied values may no longer correspond to the correct records or preserve their original relationships with other variables
 
 ---
 

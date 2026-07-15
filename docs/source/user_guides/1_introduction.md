@@ -2,7 +2,7 @@
 
 **synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the ideas and methodology of the R package [**synthpop**](https://www.synthpop.org.uk/), while providing a modern Python interface and software architecture that is easier to learn, integrate and maintain.
 
-The package is intended for researchers, data scientists, statisticians and practitioners who want to generate synthetic versions of tabular datasets for e.g. analysis, development or data sharing.
+The package is intended for researchers, data scientists, statisticians and practitioners who want to generate synthetic versions of tabular datasets that can be used for, for example, analysis, development or data sharing.
 
 synthpop-py supports tabular datasets containing both numeric and non-numeric variables, including floating-point numbers, integers, booleans, strings and categorical variables. The package is designed for structured tabular data and does not support unstructured data such as free text, images or audio. Missing values are supported throughout the synthesis process.
 
@@ -26,7 +26,7 @@ The project was motivated by several practical limitations of the original imple
 
 Consequently, synthpop-py provides a native Python implementation with familiar APIs, comprehensive documentation, and a modular architecture designed for extensibility, testing and reproducibility. The package integrates naturally with the scientific Python ecosystem, improves scalability for larger datasets, and establishes a foundation for future computational enhancements.
 
-The current release focuses on providing a robust Python implementation of the synthpop methodology. While the R package currently contains a larger collection of synthesis methods and evaluation metrics, synthpop-py emphasises usability, reproducibility and maintainability. Future development may include additional performance improvements, such as better utilisation of modern computing resources.
+The current release focuses on providing a robust Python implementation of the synthpop methodology. While the R package currently contains a larger collection of synthesis methods and evaluation metrics, synthpop-py focuses on usability, reproducibility and maintainability. Future development may include additional performance improvements, such as better utilisation of modern computing resources.
 
 ---
 

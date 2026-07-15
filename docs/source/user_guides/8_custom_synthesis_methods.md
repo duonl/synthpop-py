@@ -12,9 +12,9 @@ Custom synthesis methods are useful when:
 
 The recommended approach is to inherit from {class}`~synthpop.methods.base_synth.BaseSynthMethod` and implement the required interface.
 
-## 8.1. Synthesis method lifecycle
+## 8.1. Synthesis method workflow
 
-The {class}`~synthpop.synthesiser.Synthesiser` generates data sequentially. Each synthesis method is responsible for one target column and received previously generated columns as predictors.
+The {class}`~synthpop.synthesiser.Synthesiser` generates data sequentially. Each synthesis method is responsible for generating one target column and received previously synthesised columns as predictors.
 
 During fitting, synthesis methods learn from the original dataset:
 ```{mermaid}

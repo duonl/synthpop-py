@@ -37,7 +37,7 @@ Examples of aspects that can be inspected include:
 - Proportions of missing values.
 - Range and summary statistics of numeric variables.
 
-Univariate distributions can typically be inspected visually. Synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate.plot_univariate_distributions` visualisation function for comparing distributions (see {ref}`Guide 7.1 <71-univariate-distribution-visualisation>`). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
+Univariate distributions can typically be inspected visually. Synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate.plot_univariate_distributions` visualisation function for comparing distributions (see {ref}`Guide 7.1: Univariate distribution visualisations <71-univariate-distribution-visualisation>`). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
 ```python
 from synthpop.plotting import plot_univariate_distributions
 plot_univariate_distributions(original_data, synthetic_data)
@@ -66,7 +66,7 @@ Synthpop-py currently evaluates pairwise relationships using the Standardised Pr
 
 (531-spmse)=
 ### 5.3.1. Standardised Propensity Mean Squared Error (S_pMSE)
-The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1].
+The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original `synthpop` R implementation.
 
 [^1]: Joshua Snoke, Gillian M. Raab, Beata Nowok, Chris Dibben, Aleksandra Slavković (2018), *General and Specific Utility Measures for Synthetic Data*, in Journal of the Royal Statistical Society: Series A (Statistics in Society), Volume 181, Issue 3, Pages 663–688.
 
@@ -125,14 +125,14 @@ S_pMSE measures the difference between the pairwise distributions of the origina
 - Lower values indicate that the synthetic data better preserve the pairwise distribution.
 - Higher values indicate larger deviations from the original relationships.
 
-Synthpop-py provides the {func}`~synthpop.plotting.plot_spmse.plot_spmse` visualisation function that plots the values in a heatmap (see {ref}`Guide 7.2 <72-spmse-heatmap>`). This allows for fast identification of poorly synthesised variable pairs.
+Synthpop-py provides the {func}`~synthpop.plotting.plot_spmse.plot_spmse` visualisation function that plots the values in a heatmap (see {ref}`Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`). This allows for fast identification of poorly synthesised variable pairs.
 
 The absolute value of S_pMSE depends on factors such as:
-- Dataset size
-- Number of categories
-- Variable cardinality
+- Dataset size;
+- Number of unique values or categories in the variables;
+- The distribution of frequencies across value combinations.
 
-S_pMSE values are most useful when comparing synthesis approaches or identifying variable pairs where utility loss is concentrated.
+S_pMSE values are most useful when comparing synthesis approaches or identifying variable pairs where relationships are less maintained.
 
 #### 5.3.1.3. Discretisation of numeric variables
 S_pMSE operates on frequency tables, which require variables to have a finite number of levels.
@@ -154,9 +154,7 @@ Important properties of S_pMSE are:
 \text{S\_pMSE}(X,Y)=\text{S\_pMSE}(Y,X)
 ```
 - **Pairwise evaluation**  
-The metric evaluates relationships between two variables at a time and does not capture higher-order dependencies involving three or more variables.
-- **Support restriction**  
-Only value combinations occurring in at least one dataset contribute to the calculation.
+The metric evaluates relationships between two variables at a time and does not capture dependencies involving three or more variables.
 
 #### 5.3.1.5. Limitations
 S_pMSE has several limitations:

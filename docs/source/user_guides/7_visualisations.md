@@ -3,7 +3,7 @@ Synthetic data should be evaluated both quantitatively and visually. Quantitativ
 
 The `synthpop-py` package provides visualisations for assessing utility by comparing the original and synthetic datasets:
 - **Univariate distribution visualisation** compares the distribution of individual variables.
-- **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by {func}`~synthpop.utility_metrics.spmse.pairwise_spmse` (see {ref}`Guide 5.3.1 <531-spmse>`).
+- **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by {func}`~synthpop.utility_metrics.spmse.pairwise_spmse` (see {ref}`Guide 5.3.1: S_pMSE <531-spmse>`).
 
 The visualisation functions create interactive `plotly` figures.
 

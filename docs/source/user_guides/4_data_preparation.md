@@ -6,17 +6,17 @@ Before a synthesis method such as CART is fitted, synthpop-py prepares the predi
 For each target column:
 - numeric predictors (features) are used directly;
 - categorical predictors are converted into numerical representations using an encoder; and
-- missing values in the target are handled differently depending on target type.
+- missing values in the target are handled differently depending on target type:
 
 For fitting a categorical target:
-1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1 <421-missing-as-category>`)
-2. Encode categorical predictors using the PCA encoder. (See {ref}`section 4.1.1 <411-pca-encoding>`)
+1. Replace missing target values with temporary category (e.g. "N.a.N."). (See {ref}`section 4.2.1: Missing as category <421-missing-as-category>`)
+2. Encode categorical predictors using the PCA encoder. (See {ref}`section 4.1.1: PCA encoding <411-pca-encoding>`)
 3. Fit a classification tree.
 
 For fitting a numeric target:
-1. Fit a Missing Value Predictor using the original predictors and target. (See {ref}`section 4.2.2 <422-predicting-missing-values>`)
+1. Fit a Missing Value Predictor using the original predictors and target. (See {ref}`section 4.2.2: Predicting missing values <422-predicting-missing-values>`)
 2. Remove rows where the target is missing.
-3. Encode categorical predictors using the Mean encoder. (See {ref}`section 4.1.2 <412-mean-encoding>`)
+3. Encode categorical predictors using the Mean encoder. (See {ref}`section 4.1.2: Mean encoding <412-mean-encoding>`)
 4. Fit a regression tree.
 
 All preprocessing components are stored with the fitted synthesis model and reused during generation to ensure consistent transformations.
@@ -39,9 +39,9 @@ Green
 ```
 must be transformed into numeric representations before fitting a tree-based synthesis model.
 
-Unlike naive label encoding, synthpop-py uses supervised encoders that incorporate information from the target variable. This ensures that categories with similar relationships to the target receive similar numeric representations, which can improve the quality of the fitted synthesis model.[^1]
+Unlike naive label encoding, synthpop-py uses target-informed encodings that incorporate the relationship between predictor categories and the target variable. This allows categories with similar relationships to the target to receive similar numeric representations, which can improve the quality of the tree-based synthesis model.[^1]
 
-[^1]: This is also a key difference from the original synthpop R implementation, which uses different approaches for handling categorical predictors. The supervised encoding strategy used in synthpop-py can substantially improve computational performance and model fitting efficiency for some synthesis tasks.
+[^1]: This is also a key difference from the original synthpop R implementation, which uses different approaches for handling categorical predictors. The encoding strategy used in synthpop-py can substantially improve computational performance and model fitting efficiency for some synthesis tasks.
 
 The encoder used depends on the target type:
 | Target type | Default encoder |
@@ -51,7 +51,7 @@ The encoder used depends on the target type:
 
 (411-pca-encoding)=
 ### 4.1.1. PCA encoding
-The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation.
+The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components. <431_choosing_pca>`.
 ```python
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array(["x", "x", "y", "z", "w"])
@@ -64,7 +64,7 @@ array([[-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
 [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
 ```
 
-[Computation works](https://scikit-learn.org/stable/modules/tree.html) as follows:
+Computation works as follows:
 
 #### 4.1.1.1. Contingency table
 
@@ -108,7 +108,7 @@ Each category is then represented by its coordinates in the principal component 
 \frac{\sum_{i=1}^{k} \sigma_i}{\sum_{j=1}^{q} \sigma_j}
 ```
 
-The number of components $k$ is chosen such that a desired fraction of variance is retained.
+The number of components $k$ is chosen such that a desired fraction of variance is retained. By default, synthpop-py retains all components. The component selection described above is only relevant when users configure PCA dimensionality reduction manually, as seen in {ref}`section 4.3.1: Choosing the number of principal components. <431_choosing_pca>`.
 
 (412-mean-encoding)=
 ### 4.1.2. Mean encoding
@@ -227,13 +227,14 @@ P(z \mid x)
 - If $z = 1$, output NaN
 - else keep the numeric value generated by the regression tree
 
-With this predictor, the synthetic data can reproduce missingness structures, not just frequencies as missingness is conditional on the features.
+With this {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`, the synthetic data can reproduce missingness structures, not just frequencies as missingness is conditional on the features.
 
 ---
 
 ## 4.3. Customising preprocessing components
 The default preprocessing components are suitable for most synthesis tasks. Users can customise individual components by constructing a {class}`~synthpop.methods.cart_synth.CartMethod` manually. For convenience, some common customisations are also available through helper functions such as {func}`~synthpop.methods.cart_synth.tune_cart`.
 
+(431_choosing_pca)=
 ### 4.3.1. Choosing the number of principal components
 By default, {class}`~synthpop.data_processing.encoders.PCAEncoder` retains all principal components (or the number determined by the configured {class}`PCA <sklearn:sklearn.decomposition.PCA>` object). The dimensionality of the encoding can be reduced by supplying a custom PCA transformation.
 
@@ -247,7 +248,7 @@ method = CartMethod(
     )
 )
 ```
-The equivalent configuration using {func}`~synthpop.methods.cart_synth.tune_cart` is:
+For convenience, the same PCA configuration can also be passed through {func}`~synthpop.methods.cart_synth.tune_cart`:
 ```python
 tune_cart(n_components=1)
 ```
