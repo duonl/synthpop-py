@@ -10,8 +10,8 @@
 
    getting_started/getting_started
    user_guides/user_guides_index
-   api_reference/synthpop
    examples/examples_index
+   api_reference/synthpop
    developer/developer_index
    about_us/about
 

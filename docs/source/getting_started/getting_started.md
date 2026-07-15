@@ -11,6 +11,9 @@ If you are new to Synthpop, we recommend following the guides in order:
 2. **{doc}`overview`** — Learn about the package structure, workflow, and key concepts.
 3. **{doc}`first_synthesis`** — Create your first synthesis in 5 lines of code, and explore the generated output.
 
+For more detailed use cases and tutorials, see the {doc}`../user_guides/user_guides_index`.
+
+For a complete reference of all Synthpop functions, methods, and their arguments, see the {doc}`../api_reference/synthpop`.
 ```{toctree}
 :maxdepth: 1
 :hidden:
