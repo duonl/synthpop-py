@@ -1,112 +1,86 @@
 # Installation
 
-This guide describes how to install Synthpop using either the latest stable release from PyPI or from the GitHub source repository.
+This page explains how to install Synthpop-py.
+
+For most users, the recommended installation method is through PyPI. If you want to contribute to Synthpop-py or use the latest development version, see the source installation instructions.
 
 ## Requirements
 
-Synthpop requires the following:
+Synthpop requires:
 
 - Python 3.13 or later
 - `pip`
 
-We strongly recommend installing Synthpop inside a virtual environment to avoid dependency conflicts.
+We recommend installing Synthpop-py in a virtual environment to keep dependencies isolated from other Python projects.
+
+## Create a virtual environment
 
 ```bash
 # Create a virtual environment
 python -m venv YOUR_VENV_NAME
 
-# Activate it on Linux/macOS
+# Activate it:
+# Linux/macOS
 source YOUR_VENV_NAME/bin/activate
 
-# Activate it on Windows (Command Prompt)
+# Windows (Command Prompt)
 YOUR_VENV_NAME\Scripts\activate
 
-# Activate it on Windows (PowerShell)
+# Windows (PowerShell)
 YOUR_VENV_NAME\Scripts\Activate.ps1
 ```
-
-Once the virtual environment is active, proceed with the Synthpop installation as described below.
+After activation, install synthpop-py as described below.
 
 ---
 
-## Install from PyPI
+## Install synthpop-py from PyPI
 
-Install the latest stable release using `pip`:
-
+The recommended installation method is::
 ```bash
 pip install synthpop-py
 ```
-
-Or:
-
+Alternatively:
 ```bash
 python -m pip install synthpop-py
 ```
 
 ---
 
-## Install from Source
+## Verify the installation
 
-Clone the repository and install the package locally:
+Check that synthpop-py can be imported successfully:
+```bash
+python -c "import synthpop-py"
+```
+Or start Python:
+```python
+import synthpop-py
+```
+If no errors occurs, synthpop-py has been installed successfully.
+
+---
+
+## Install from source
+
+Installing from source if useful if you want to:
+- contribute to synthpop-py;
+- test unreleased features;
+- modify the package locally.
+
+Clone the repository and install the package:
 
 ```bash
 git clone https://github.com/duonl/synthpop-py.git
 cd synthpop-py
 python -m pip install .
 ```
-
-## For development
-
-```bash
-git clone https://github.com/duonl/synthpop-py.git
-cd synthpop-py
-git checkout develop
-```
-
-The project uses **pipx** and **Poetry** for dependency management. Follow the steps below after cloning the repository.
-
-1. Open a terminal in the root of the repository.
-2. Install pipx: ```python -m pip install --user pipx```
-3. Navigate to Scripts folder (the exact path is shown in the warning from the previous command): ```cd <USER folder>\AppData\Roaming\Python\Python<VERSIE>\Scripts```. 
-4. Add pipx to your $PATH: ```run .\pipx.exe ensurepath```
-5. Close the terminal and open a new one (anywhere).
-6. Verify the installation: ```pipx --version```
-7. Install poetry: ```pipx install poetry```
-8. Close the terminal and open a new one (anywhere).
-9. Verify the installation: ```poetry --version```
-
-You can close the terminal.
-
-### Install project dependencies
-
-1. Open a terminal in the root of the repository.
-2. Install all dependencies: ```poetry install --with=docs```
-3. Navigate to the **docs** directory: ```cd docs``` 
-4. Build the documentation: ```poetry run sphinx-build source build```
+For development setup instructions, including documentation building and development dependencies, see the [developer documentation](../developer/way_of_working/developing.md).
 
 ---
 
-## Verify the Installation
+## Updating synthpop-py
 
-Verify that Synthpop is installed correctly:
-
-```bash
-python -c "import synthpop"
-```
-
-Or start a Python session:
-
-```python
-import synthpop
-```
-
-If no errors are raised, the installation was successful.
-
----
-
-## Updating
-
-Upgrade to the latest release with:
+Upgrade to the latest release:
 
 ```bash
 python -m pip install --upgrade synthpop-py
@@ -123,7 +97,10 @@ python -m pip install .
 
 ## Troubleshooting
 
-If you encounter installation issues:
-
-- Ensure you are using Python 3.13 or newer.
-- If using a virtual environment, ensure it is activated.
+If you encounter installation problems:
+- Confirm that you are using Python 3.13 or newer.
+- Ensure your virtual environment is activated.
+- Check that `pip` is associated with the Python version you are using:
+```bash
+python -m pip --version
+```
