@@ -1,7 +1,7 @@
 # Package overview
 
 ## What is synthpop?
-Synthpop is a package to generate synthetic data, primarily for use in data analysis. This Python package is a redesign of the existing [R package](https://www.synthpop.org.uk/), with approval from and cooperation with the R package author's.
+Synthpop is a package to generate synthetic data, primarily for use in tabular data analysis. This Python package is a redesign of the existing [R package](https://www.synthpop.org.uk/), with approval from and cooperation with the R package author's.
 
 The Synthpop R package has consistently been found to outperform other synthesis methods when it comes to generating synthetic data that is statistically similar to the original data. [1](https://www.nature.com/articles/s41598-025-01514-0) [2](https://arxiv.org/abs/2211.14428) [3](https://www.researchgate.net/publication/363521664_Challenges_in_Measuring_Utility_for_Fully_Synthetic_Data). We aim to have the Python package perform as least as well.
 
@@ -18,50 +18,39 @@ For now, we aim to make it easier for two groups of people.
 One group are people who are just starting out with synthetic data.
 The other group are people that want to provide synthetic data to third parties or want to include synthetic data in their standard toolbox.
 
-## Package structure
+## Package workflow and structure
 
-The synthpop package is organized around a workflow where users import their original data, define synthesis settings, generate synthetic data, and evaluate the results.
+The synthpop package is organized around a workflow to generate and evaluate synthetic data. The steps one should take are outlined below:
 
-At a high level, the package consists of the following components:
+### 1. Prepare the data
 
-- **Data input**  
-    The package uses [pandas](https://pandas.pydata.org/docs/index.html) as its primary data interface. Pandas provides the core data structures and tools for working with tabular data in Python. Datasets supplied to synthpop should be represented as a `pandas.DataFrame`, where rows correspond to observations and columns correspond to variables to be synthesized.
+Start with an observed dataset containing the variables you want to synthesize. Synthpop uses [pandas](https://pandas.pydata.org/docs/index.html) as its primary data interface. 
+Datasets should therefore be provided as a `pandas.DataFrame`, where rows represent observations and columns represent the variables to be synthesized.
+Most data preprocessing is not included in the package, and thus should be done by the user.
 
-- **Synthesis methods**  
-  Synthpop generates synthetic values by modelling the relationships between variables in the original data. Different synthesis methods can be applied, dependent on the user's requirements.
+### 2. Specify the synthesis setup
 
-- **Synthesis workflow**  
-  The customizable workflow coordinates the order in which variables are synthesized, taking dependencies between variables into account. This allows the generated data to preserve important patterns from the original dataset.
+Configure the synthesis process by defining the synthesis methods and any optional parameters.
+Synthpop supports multiple synthesis methods, allowing users to choose an approach that best fits their data and application. See {doc}`../user_guides/user_guide2` (Placeholder) for more information.
 
-- **Evaluation and validation**  
-  Synthetic data should be assessed based on both utility and privacy considerations. Evaluation helps determine how well the synthetic data represents the original data while avoiding disclosure of information about individual records.
+### 3. Generate synthetic data
 
-The package is designed to keep these components separate, allowing users to customize parts of the synthesis process while also providing sensible defaults for common use cases.
+Run the synthesis process to create one or more synthetic datasets. The generated datasets contain artificial records that are learned from the original data.
 
-## Workflow
+### 4. Evaluate the synthetic data
 
-A typical synthpop workflow consists of the following steps:
+Assess the quality of the synthetic data by considering both **utility** and **privacy**. Evaluation helps determine whether the synthetic data preserves important statistical properties of the original dataset while reducing the risk of disclosing information about individual records.
+Typical evaluation methods include comparing the univariate distribution and multivariate Standardized Propensity Mean Squared Error.
 
-1. **Prepare the data**  
-   Start with an observed dataset that contains the variables you want to synthesize. Define the relevant metadata and ensure the data is in a format that synthpop can process. Most data preprocessing is not included in the package.
+### 5. Use and share the synthetic data
 
-2. **Specify the synthesis setup**  
-   Configure the synthesis process by defining synthesis methods, and setting any optional parameters.
-
-3. **Generate synthetic data**  
-   Run the synthesis to create one or more synthetic datasets. The generated datasets contain artificial records that follow patterns learned from the original data.
-
-4. **Evaluate the synthetic data**  
-   Compare the synthetic data with the original data to assess whether important statistical properties have been preserved. Evaluation can include comparing distributions, correlations, and other relevant characteristics.
-
-5. **Use and share the synthetic data**  
-   Once validated, synthetic datasets can be used for development, research, testing, and collaboration without requiring direct access to the original sensitive dataset.
+Once the synthetic data has been validated, it can be used for development, research, testing, and collaboration without requiring direct access to the original sensitive dataset.
 
 ## Key concepts
 
 ### Synthetic data
 
-Synthetic data is artificially generated data that aims to reproduce the statistical properties of an observed dataset. Unlike anonymized copies of real records, synthetic records are newly created and do not correspond directly to individual observations in the original data.
+Synthetic data is artificially generated data that aims to reproduce the statistical properties of an observed dataset. Unlike anonymized copies of real data, synthetic data are newly created and do not correspond directly to individual observations in the original data.
 
 ### Utility
 

@@ -10,3 +10,8 @@
   margin-right: auto;
   margin-top: 10px;
 }
+
+html[data-theme=dark] .sd-card img[src*='.svg'] {
+  filter: invert(1.0) saturate(0.0);
+  background: none;
+}

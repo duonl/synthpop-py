@@ -1,9 +1,6 @@
 # Installation
 
-This guide describes how to install Synthpop using either the latest stable release from PyPI or from the source repository.
-
-For the recommended setup, install Synthpop inside a virtual environment to keep dependencies isolated and avoid conflicts with other Python projects.
-
+This guide describes how to install Synthpop using either the latest stable release from PyPI or from the GitHub source repository.
 
 ## Requirements
 
@@ -37,13 +34,13 @@ Once the virtual environment is active, proceed with the Synthpop installation a
 Install the latest stable release using `pip`:
 
 ```bash
-pip install synthpop
+pip install synthpop-py
 ```
 
 Or:
 
 ```bash
-python -m pip install synthpop
+python -m pip install synthpop-py
 ```
 
 ---
@@ -63,6 +60,7 @@ python -m pip install .
 ```bash
 git clone https://github.com/duonl/synthpop-py.git
 cd synthpop-py
+git checkout develop
 ```
 
 The project uses **pipx** and **Poetry** for dependency management. Follow the steps below after cloning the repository.
@@ -111,7 +109,7 @@ If no errors are raised, the installation was successful.
 Upgrade to the latest release with:
 
 ```bash
-python -m pip install --upgrade synthpop
+python -m pip install --upgrade synthpop-py
 ```
 
 If you installed from source:

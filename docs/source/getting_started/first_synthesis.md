@@ -52,4 +52,4 @@ fig = plot_spmse(
 ```
 
 Lower SPMSE values indicate that the synthetic data has similar multivariate properties to the original data. 
-Combining univariate and multivariate evaluations provides a more complete understanding of the quality and usefulness of the generated synthetic dataset.
+Combining univariate and multivariate evaluations provides a more complete understanding of the quality and usefullness of the generated synthetic dataset.
