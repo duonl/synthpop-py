@@ -395,11 +395,11 @@ def test_fit_tree_is_fit(X, y, index_cat, tree_method, mocker):
     tree_method.fit(X,y)
 
     expected_X = get_exp_feature_matrix()
-    expected_y = tree_method.missing_handler_.prepared_for_fit_result[1]
+    expected_y = tree_method._convert_y(tree_method.missing_handler_.prepared_for_fit_result[1])
 
-    assert len(mock_fit_decision_tree_with_reachable_leaves.mock_calls) == 1, "_fit_decision_tree_with_reachable_leaves should be called 1 time"
+    mock_fit_decision_tree_with_reachable_leaves.mock_calls.assert_called_once(), "_fit_decision_tree_with_reachable_leaves should be called 1 time"
 
-    kwargs = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]
+    kwargs = mock_fit_decision_tree_with_reachable_leaves.call_args.kwargs
 
     assert isinstance(kwargs["decision_tree"], StubTree)
     assert tree_method.tree_ is expected_tree, "fitted decision tree should be stored"
@@ -503,7 +503,7 @@ def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
 
     tree_method.fit(X,y)
 
-    actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
+    actual_y = mock_fit_decision_tree_with_reachable_leaves.call_args.kwargs["y"]
 
     assert np.array_equal(converted_y,actual_y)
     assert actual_y.dtype == np.float32
