@@ -200,7 +200,7 @@ def test_fit_sets_fitted_attributes(mocker, y):
 )
 def test_transform_returns_series(mocker, result, method):
     cart = CartMethod()
-                      classifier=StubClassifier(result))
+    classifier = StubClassifier(result)
 
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
@@ -220,13 +220,15 @@ def test_transform_returns_series(mocker, result, method):
 
     out = cart.transform(X)
 
-    mocked_X.assert_called_once_with(X)
+    pd.testing.assert_frame_equal(
+        mocked_X.call_args.args[0],
+        X,
+    )
 
     assert isinstance(out, pd.Series)
     assert out.name == "target"
 
     pd.testing.assert_index_equal(out.index, X.index)
-
     np.testing.assert_array_equal(out.to_numpy(), result)
 
 
@@ -342,8 +344,9 @@ def test_transform_requires_fit():
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
+    # ----- get_feature_names_out test -----
 
-# ----- get_feature_names_out test -----
+
 def test_get_feature_names_out_delegates():
     cart = CartMethod()
     cart.method_ = StubRegressor()
@@ -357,7 +360,7 @@ def test_get_feature_names_out_raises_unfitted():
     with pytest.raises(NotFittedError):
         cart.get_feature_names_out()
 
-# ----- clonability test -----
+    # ----- clonability test -----
 
 
 def test_clone_works_and_fitted_cart_does_not_preserve_state():
@@ -372,7 +375,7 @@ def test_clone_works_and_fitted_cart_does_not_preserve_state():
     for attr in ["method_", "feature_names_in_", "target_name_"]:
         assert not hasattr(cloned, attr)
         assert hasattr(cart, attr)
-    assert hasattr(cloned, "regressor")
-    assert hasattr(cloned, "classifier")
-    assert hasattr(cart, "regressor")
-    assert hasattr(cart, "classifier")
+        assert hasattr(cloned, "regressor")
+        assert hasattr(cloned, "classifier")
+        assert hasattr(cart, "regressor")
+        assert hasattr(cart, "classifier")

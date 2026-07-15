@@ -24,8 +24,8 @@ from sklearn.tree import (
 from synthpop import utils
 from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
-    BaseMissingValueHandler, 
-    MissingValuePredictor, 
+    BaseMissingValueHandler,
+    MissingValuePredictor,
     ReplaceMissingWithValue
 )
 from synthpop.methods import base_synth
@@ -53,13 +53,13 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     """
 
     def __init__(
-            self, 
-            *, 
-            tree: BaseDecisionTree | None = None,
-            encoder: TransformerMixin | None = None,
-            missing_handler: BaseMissingValueHandler | None = None,
-            tree_sampler: LeafNodeSampler | None = None,
-        ) -> None:
+        self,
+        *,
+        tree: BaseDecisionTree | None = None,
+        encoder: TransformerMixin | None = None,
+        missing_handler: BaseMissingValueHandler | None = None,
+        tree_sampler: LeafNodeSampler | None = None,
+    ) -> None:
         super().__init__()
         self.encoder = encoder
         self.missing_handler = missing_handler
@@ -124,10 +124,10 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             all_features_dict, self.feature_order_)
 
         self.tree_ = tree_utils._fit_decision_tree_with_reachable_leaves(
-               decision_tree=self._new_tree(),
-                X = all_features,
-                y = self._convert_y(prepared_y)
-            )
+            decision_tree=self._new_tree(),
+            X=all_features,
+            y=self._convert_y(prepared_y)
+        )
 
         leaf_ids = self.tree_.apply(all_features)
 
@@ -146,23 +146,25 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         if not hasattr(self, '_all_missing'):
-            raise NotFittedError(f"{self.__class__.__name__} instance is not fitted yet.")
+            raise NotFittedError(
+                f"{self.__class__.__name__} instance is not fitted yet.")
         elif self._all_missing:
             n = len(next(iter(X.values()))) if X else 0
-            return np.full(n, np.nan) # method in child class will do correct dtype conversion
+            # method in child class will do correct dtype conversion
+            return np.full(n, np.nan)
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
-            self, 
+            self,
             [
-                "tree_", 
-                "encoders_",  
-                "missing_handler_", 
-                "tree_sampler_", 
+                "tree_",
+                "encoders_",
+                "missing_handler_",
+                "tree_sampler_",
                 "feature_order_"
-                ],
+            ],
         )
-        
+
         X_val, _ = utils.validate_2d_dict(X)
 
         n_features_given = len(X.keys())
@@ -170,9 +172,11 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             raise ValueError(
                 f"X has {n_features_given} features, but {self.__class__.__name__} is expecting {self.n_features_in_} features as input")
 
-        all_features_dict = {k: self.encoders_[k].transform(v) if k in self.encoders_ else v for (k, v) in X_val.items()}
+        all_features_dict = {k: self.encoders_[k].transform(
+            v) if k in self.encoders_ else v for (k, v) in X_val.items()}
 
-        all_features = tree_utils.build_feature_matrix(all_features_dict, self.feature_order_)
+        all_features = tree_utils.build_feature_matrix(
+            all_features_dict, self.feature_order_)
         leaf_ids = self.tree_.apply(all_features)
 
         sample = self.tree_sampler_.sample_from_leaves(leaf_ids)
@@ -246,11 +250,11 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     """
 
     def __init__(
-            self, 
-            *, 
+            self,
+            *,
             tree=None,
-            encoder=None, 
-            missing_handler=None, 
+            encoder=None,
+            missing_handler=None,
             tree_sampler=None
     ) -> None:
         super().__init__(encoder=encoder, missing_handler=missing_handler,
@@ -270,7 +274,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return _to_fixed_length_string_array(y)
-    
+
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         return super().transform(X).astype(utils.str_dtype, copy=False)
 
@@ -306,11 +310,11 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     """
 
     def __init__(
-            self, 
-            *, 
+            self,
+            *,
             tree=None,
-            encoder=None, 
-            missing_handler=None, 
+            encoder=None,
+            missing_handler=None,
             tree_sampler=None
     ) -> None:
         super().__init__(encoder=encoder, missing_handler=missing_handler,
@@ -324,13 +328,13 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     def _get_tree(self):
         return DecisionTreeRegressor(min_samples_leaf=5,    # equivalent to minbucket in synthpop-r
-                                    min_impurity_decrease= 1e-08,   # equivalent to cp in synthpop-r
-                                    random_state=RandomStateManager.create_instance_seed()
-                                    )
-    
+                                     min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                                     random_state=RandomStateManager.create_instance_seed()
+                                     )
+
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return y.astype(np.float32, copy=False)
-    
+
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         return super().transform(X).astype(np.float32, copy=False)
 
