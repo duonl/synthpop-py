@@ -1,11 +1,11 @@
 # 7. Visualisations
 Synthetic data should be evaluated both quantitatively and visually. Quantitative metrics provide numerical measures of similarity between original and synthetic data, while visualisations provide an intuitive way to inspect whether important characteristics of the original data have been preserved.
 
-The `synthpop-py` package provides visualisations for assessing utility by comparing the original and synthetic datasets:
+The synthpop-py package provides visualisations for assessing utility by comparing the original and synthetic datasets:
 - **Univariate distribution visualisation** compares the distribution of individual variables.
 - **S_pMSE heatmap visualisation** provides an overview of pairwise relationships between variables using the S_pMSE values calculated by {func}`~synthpop.utility_metrics.spmse.pairwise_spmse` (see {ref}`Guide 5.3.1: S_pMSE <531-spmse>`).
 
-The visualisation functions create interactive `plotly` figures.
+The visualisation functions create interactive [`plotly`](https://python-graph-gallery.com/plotly/) figures.
 
 The visualisations can help identify patterns, deviations or potential issues that require further investigation.
 
@@ -17,15 +17,13 @@ Small differences between original and synthetic data are expected because synth
 ## 7.1. Univariate distribution visualisation
 The univariate distribution visualisation compares each variable in the original and synthetic datasets independently. It is generated using {func}`~synthpop.plotting.plot_univariate.plot_univariate_distributions`.
 ```python
-from synthpop.plotting import plot_univariate_distributions
+>>> from synthpop.plotting.plot_univariate import plot_univariate_distributions
 
-plots = plot_univariate_distributions(
-    original_data, 
-    synthetic_data,
-    save_path=None,
-    interactive=False)
-
-plots[0].show()
+>>>> plots = plot_univariate_distributions(
+...     original_data, 
+...     synthetic_data,
+...     save_path=None,
+...     interactive=False)
 ```
 For each variable:
 - Numeric variables are displayed using overlapping density histograms.
@@ -85,13 +83,13 @@ Potential issues include:
 ### 7.1.3. Saving visualisations
 The `save_path` parameter specifies the directory where the visualisation output is stored. The output is saved as an interactive HTML file:
 ```python
-plot_univariate_distributions(
-    original_data,
-    synthetic_data,
-    save_path="results"
-)
+>>> plot_univariate_distributions(
+...     original_data,
+...     synthetic_data,
+...     save_path="results"
+... )
 ```
-This creates:
+This creates the following file in `save_path`:
 ```text
 results/univariate_distributions_comparison.html
 ```
@@ -100,15 +98,15 @@ The HTML file can be opened in a web browser and retains the interactive `plotly
 ### 7.1.4. Interactive display
 The `interactive` parameter controls whether the generated HTML visualisation is automatically opened in the default web browser.
 ```python
-plot_univarate_distributions(
-    original_data,
-    synthetic_data,
-    interactive=True
-)
+>>> plot_univarate_distributions(
+...     original_data,
+...     synthetic_data,
+...     interactive=True
+... )
 ```
 When `interactive=True`, synthpop-py creates an HTML document containing all univariate distribution plots and opens it in the system's default browser. This provides a convenient way to browse and interact with all visualisations. If `save_plot=None`, a temporary file is created that will be opened, otherwise the saved file is opened.
 
-When `interactive=False` (default), the HTML document is not opened automatically and the figures are not rendered. The function simply returns the list of Plotly figures. This is recommended when running in headless environments without graphical interfaces. If `save_path` is specified, the HTML file is still written to disk and can be opened manually later.
+When `interactive=False` (default), the HTML document is not opened automatically and the figures are not rendered. The function simply returns the list of `plotly` figures. This is recommended when running in headless environments without graphical interfaces. If `save_path` is specified, the HTML file is still written to disk and can be opened manually later.
 
 ---
 
@@ -120,16 +118,16 @@ The S_pMSE heatmap provides a visual representation of pairwise utility evaluati
 The input is the pairwise S_pMSE table produced by
 {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
 ```python
-from synthpop.utility_metrics.spmse import pairwise_spmse
-from synthpop.plotting import plot_spmse
+>>> from synthpop.utility_metrics.spmse import pairwise_spmse
+>>> from synthpop.plotting import plot_spmse
 
-spmse = pairwise_spmse(original_data, synthetic_data)
+>>> spmse = pairwise_spmse(original_data, synthetic_data)
 
-fig = plot_spmse(
-    spmse,
-    save_path = None,
-    show_plot = True
-)
+>>> fig = plot_spmse(
+...     spmse,
+...     save_path = None,
+...     show_plot = True
+... )
 ```
 
 The underlying metric is the pairwise Standardised Propensity Mean Squared Error (S_pMSE), which measures differences between the joint distributions of pairs of variables in the original and synthetic datasets.
@@ -163,12 +161,12 @@ The heatmap groups S_pMSE values into these ranges to make patterns easier to id
 ### 7.2.2. Saving the visualisation
 The `save_path` parameter specifies the directory where the visualisation output is stored. The image is stored as a pdf.
 ```python
-plot_spmse(
-    spmse,
-    save_path="results"
-)
+>>> plot_spmse(
+...     spmse,
+...     save_path="results"
+... )
 ```
-This creates:
+This creates the following file in `save_path`:
 ```text
 results/spmse.pdf
 ```
@@ -177,12 +175,12 @@ If you do not wish to save the visualisation, set `save_path=None` (default).
 ### 7.2.3. Displaying plot
 The `show_plot` parameter controls whether the heatmap is displayed immediately.
 ```python
-plot_spmse(
-    spmse,
-    show_plot=True
-)
+>>> plot_spmse(
+...     spmse,
+...     show_plot=True
+... )
 ```
 When `show_plot=True` (default), the plot is displayed using the active `plotly` renderer. The exact behaviour depends on the environment in which the code is executed:
-- **Jupyter Notebook / JupyterLab**: the figure is rendered directly below the code cell as an interactive Plotly visualisation.
-- **Python scripts (`.py` files)**: the figure is opened using the configured Plotly renderer. Depending on the environment, this may open the plot in a web browser or another supported viewer.
-- **Headless environments** (for example, remote servers without a graphical interface): set `show_plot=False` to prevent attempts to render the figure interactively. The returned Plotly figure object can still be saved or displayed later in a supported environment.
+- **Jupyter Notebook / JupyterLab**: the figure is rendered directly below the code cell as an interactive `plotly` visualisation.
+- **Python scripts (`.py` files)**: the figure is opened using the configured `plotly` renderer. Depending on the environment, this may open the plot in a web browser or another supported viewer.
+- **Headless environments** (for example, remote servers without a graphical interface): set `show_plot=False` to prevent attempts to render the figure interactively. The returned `plotly` figure object can still be saved or displayed later in a supported environment.

@@ -37,10 +37,11 @@ Examples of aspects that can be inspected include:
 - Proportions of missing values.
 - Range and summary statistics of numeric variables.
 
-Univariate distributions can typically be inspected visually. Synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate.plot_univariate_distributions` visualisation function for comparing distributions (see {ref}`Guide 7.1: Univariate distribution visualisations <71-univariate-distribution-visualisation>`). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
+Univariate distributions can typically be inspected visually. synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate.plot_univariate_distributions` visualisation function for comparing distributions (see {ref}`Guide 7.1: Univariate distribution visualisations <71-univariate-distribution-visualisation>`). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
 ```python
-from synthpop.plotting import plot_univariate_distributions
-plot_univariate_distributions(original_data, synthetic_data)
+>>> from synthpop.plotting.plot_univariate import plot_univariate_distributions
+
+>>> plot_univariate_distributions(original_data, synthetic_data)
 ```
 
 See
@@ -62,21 +63,20 @@ Examples of relationships that may be important include:
 
 Pairwise comparisons provide more information than univariate comparisons, because they evaluate whether the synthetic data maintain dependencies present in the original dataset.
 
-Synthpop-py currently evaluates pairwise relationships using the Standardised Propensity Mean Squared Error (S_pMSE), implemented through {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
+synthpop-py currently evaluates pairwise relationships using the Standardised Propensity Mean Squared Error (S_pMSE), implemented through {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
 
 (531-spmse)=
 ### 5.3.1. Standardised Propensity Mean Squared Error (S_pMSE)
-The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original `synthpop` R implementation.
+The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original synthpop R implementation.
 
 [^1]: Joshua Snoke, Gillian M. Raab, Beata Nowok, Chris Dibben, Aleksandra Slavković (2018), *General and Specific Utility Measures for Synthetic Data*, in Journal of the Royal Statistical Society: Series A (Statistics in Society), Volume 181, Issue 3, Pages 663–688.
 
 For each pair of variables, S_pMSE compares the observed frequencies in the original dataset with those in the synthetic dataset. Missing values are included in the computation and are treated as an additional category. Consequently, S_pMSE evaluates both the preservation of observed values and the preservation of missingness patterns.
 ```python
-from synthpop.utility_metrics.spmse import pairwise_spmse
+>>> from synthpop.utility_metrics.spmse import pairwise_spmse
 
-scores = pairwise_spmse(original_data, synthetic_data)
-
-scores.head()
+>>> scores = pairwise_spmse(original_data, synthetic_data)
+>>> scores.head()
 ```
 The function returns a pandas DataFrame containing one row for every pair of variables:
 column 1 | column 2 | S_pMSE
@@ -125,7 +125,7 @@ S_pMSE measures the difference between the pairwise distributions of the origina
 - Lower values indicate that the synthetic data better preserve the pairwise distribution.
 - Higher values indicate larger deviations from the original relationships.
 
-Synthpop-py provides the {func}`~synthpop.plotting.plot_spmse.plot_spmse` visualisation function that plots the values in a heatmap (see {ref}`Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`). This allows for fast identification of poorly synthesised variable pairs.
+synthpop-py provides the {func}`~synthpop.plotting.plot_spmse.plot_spmse` visualisation function that plots the values in a heatmap (see {ref}`Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`). This allows for fast identification of poorly synthesised variable pairs.
 
 The absolute value of S_pMSE depends on factors such as:
 - Dataset size;
@@ -141,7 +141,7 @@ Numeric variables are therefore discretised into bins before calculating the met
 
 The maximum number of bins can be controlled using the `max_bins` parameter.
 ```python
-pairwise_spmse(original_data, synthetic_data, max_bins=25)
+>>> pairwise_spmse(original_data, synthetic_data, max_bins=25)
 ```
 Increasing the number of bins provides a more detailed comparison but may make the metric more sensitive to small frequency differences.
 
@@ -161,8 +161,6 @@ S_pMSE has several limitations:
 - It only evaluates pairwise relationships and does not capture multivariate dependencies.
 - Numeric variables are affected by the chosen discretisation.
 - Interpretation depends on dataset size and variable cardinality.
-
----
 
 
 

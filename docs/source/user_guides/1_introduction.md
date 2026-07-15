@@ -1,10 +1,10 @@
 # 1. Introduction
 
-**synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the ideas and methodology of the R package [**synthpop**](https://www.synthpop.org.uk/), while providing a modern Python interface and software architecture that is easier to learn, integrate and maintain.
+synthpop-py is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the ideas and methodology of the R package [**synthpop**](https://www.synthpop.org.uk/), while providing a modern Python interface and software architecture that is easier to learn, integrate and maintain.
 
-The package is intended for researchers, data scientists, statisticians and practitioners who want to generate synthetic versions of tabular datasets that can be used for, for example, analysis, development or data sharing.
+The package is intended for researchers, data scientists, statisticians and practitioners who want to generate synthetic versions of tabular datasets that can be used for various purposes, including analysis, development, research and data sharing.
 
-synthpop-py supports tabular datasets containing both numeric and non-numeric variables, including floating-point numbers, integers, booleans, strings and categorical variables. The package is designed for structured tabular data and does not support unstructured data such as free text, images or audio. Missing values are supported throughout the synthesis process.
+synthpop-py supports tabular datasets containing both numeric and non-numeric variables, including floating-point numbers, integers, booleans, strings and categorical variables. The package is designed for structured tabular data and does not support unstructured data such as free text, images or audio. Missing values are standardised and supported throughout the synthesis process.
 
 ---
 
@@ -18,15 +18,15 @@ Generating useful synthetic data requires balancing several objectives. A synthe
 ---
 
 ## 1.2. Why synthpop-py?
-The original **synthpop** package established a practical and widely adopted framework for generating synthetic tabular data through sequential modelling. Its methodology has demonstrated that synthetic datasets can closely resemble the statistical properties of the original data while reducing disclosure risks, making it valuable for data sharing, method development and reproducible research. In addition, the sequential modelling approach is transparent and interpretable: each variable is synthesised conditionally on previously synthesised variables using familiar statistical or machine learning models, allowing users to understand and control the synthesis process.
+The original [synthpop R package](https://www.synthpop.org.uk/) established a practical and widely adopted framework for generating synthetic tabular data through sequential modelling. Its methodology has demonstrated that synthetic datasets can closely resemble the statistical properties of the original data while reducing disclosure risks, making it valuable for data sharing, method development and reproducible research. In addition, the sequential modelling approach is transparent and interpretable: each variable is synthesised conditionally on previously synthesised variables using familiar statistical or machine learning models, allowing users to understand and control the synthesis process.
 
-**synthpop-py** builds on these methodological strengths while modernising the software implementation. Rather than introducing a new synthesis methodology, the project aims to make the synthpop approach more accessible, maintainable and easier to integrate into modern Python data science workflows.
+synthpop-py builds on these methodological strengths while modernising the software implementation. Rather than introducing a new synthesis methodology, the project aims to make the synthpop approach more accessible, maintainable and easier to integrate into modern Python data science workflows.
 
 The project was motivated by several practical limitations of the original implementation. Although synthpop has proven to be an effective methodology, it is available only in R, its APIs and documentation differ from conventions commonly used in the Python scientific ecosystem, and its software architecture makes maintenance, testing and extension challenging. In addition, the implementation is difficult to incorporate into larger software projects as it does not exploit modern computational capabilities such as parallel execution or hardware acceleration.
 
 Consequently, synthpop-py provides a native Python implementation with familiar APIs, comprehensive documentation, and a modular architecture designed for extensibility, testing and reproducibility. The package integrates naturally with the scientific Python ecosystem, improves scalability for larger datasets, and establishes a foundation for future computational enhancements.
 
-The current release focuses on providing a robust Python implementation of the synthpop methodology. While the R package currently contains a larger collection of synthesis methods and evaluation metrics, synthpop-py focuses on usability, reproducibility and maintainability. Future development may include additional performance improvements, such as better utilisation of modern computing resources.
+The current release focuses on providing a robust Python implementation of the synthpop methodology. While the R package contains a larger collection of synthesis methods and evaluation metrics, synthpop-py currently focuses on usability, reproducibility and maintainability. Future development may include additional performance improvements, such as better utilisation of modern computing resources.
 
 ---
 
@@ -48,7 +48,7 @@ The package supports datasets containing:
 - categorical variables; and
 - missing values.
 
-The package is currently not designed for generating unstructured data.
+The package is currently not designed for generating unstructured or time-series data.
 
 ---
 

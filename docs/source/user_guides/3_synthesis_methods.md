@@ -1,13 +1,13 @@
 # 3. Synthesis methods
 
-This section describes the synthesis methods available in **synthpop-py**. A synthesis method defines how individual columns are generated within a synthetic dataset. In `synthpop-py`, each column is generated sequentially using a user-specified or default synthesis method. This means that the generation of a given column may depend on previously synthesised columns, which act as predictors.
+This section describes the synthesis methods available in synthpop-py. A synthesis method defines how individual columns are generated within a synthetic dataset. In synthpop-py, each column is generated sequentially using a user-specified or default synthesis method. This means that the generation of a given column may depend on previously synthesised columns, which act as predictors.
 
 The synthesis process is orchestrated by the {class}`~synthpop.synthesiser.Synthesiser`, which delegates the task of synthesising each column to an appropriate method. Each method implements a common interface and exposes two key operations:
 
 - {class}`~synthesiser.Synthesiser.fit`: learns from the observed (original) data
 - {class}`~synthesiser.Synthesiser.generate`: synthesises a column using previously generated synthetic data
 
-The default method is {class}`~synthpop.methods.cart_synth.CartMethod`, which models conditional distributions using decision trees and a leaf-node sampling strategy inspired by the R package synthpop.
+The default method is {class}`~synthpop.methods.cart_synth.CartMethod`, which models conditional distributions using decision trees and a leaf-node sampling strategy inspired by the [synthpop R package](https://www.synthpop.org.uk/).
 
 Available synthesis methods are:
 - {class}`~synthpop.methods.cart_synth.CartMethod`
@@ -20,6 +20,8 @@ Available synthesis methods are:
 
 CART (Classification And Regression Trees) is the default synthesis method. 
 ```python
+>>> from synthpop.methods.cart_synth import CartMethod
+
 >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
 >>> y = pd.Series([50, 60, 70], name='length')
 >>> method = CartMethod().fit(X, y)
@@ -76,8 +78,8 @@ For the first column, no predictors are available. In that case, CART samples di
 2. **Preprocessing**
 
    The variables are prepared before fitting the decision tree:
-   - Categorical predictors are encoded using the appropriate encoder (defaults: {ref}`PCA encoding <411-pca-encoding>` for categorical targets and {ref}`mean encoding <412-mean-encoding>` for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see {ref}`Guide 4.1 <41-encoding-categorical-predictors>`;
-   - Missing values in the target variable are handled according to the target type. This step is added because `scikit-learn` cannot fit on missing targets. For more details, see {ref}`Guide 4.2 <42-handling-missing-values>`.
+   - Categorical predictors are encoded using the appropriate encoder (defaults: {ref}`PCA encoding <411-pca-encoding>` for categorical targets and {ref}`mean encoding <412-mean-encoding>` for numeric targets). This step is added because `scikit-learn` decision trees only work with numeric predictors. For more details, see {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`;
+   - Missing values in the target variable are handled according to the target type. This step is added because `scikit-learn` cannot fit on missing targets. For more details, see {ref}`Guide 4.2: Handling missing values <42-handling-missing-values>`.
 
 3. **Model fitting**
    
@@ -139,34 +141,36 @@ The behaviour of the CART synthesis method can be customised by replacing or con
 
 The most flexible approach is to construct a {class}`~synthpop.methods.cart_synth.CartMethod` directly:
 ```python
-CartMethod(
-   regressor=TreeRegressorMethod(
-      tree=DecisionTreeRegressor(
-         min_samples_leaf=10,    # equivalent to minbucket in synthpop-r
-         min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-      ),
-      missing_handler=MissingValuePredictor(
-         tree=DecisionTreeClassifier(min_samples_leaf=10)
-      )
-   ),
-   classifier=TreeClassifierMethod(
-      tree=DecisionTreeClassifier(
-         min_samples_leaf=10,    # equivalent to minbucket in synthpop-r
-         min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-      ),
-      encoder=PCAEncoder(
-         pca_transform=PCA(n_components=1)
-      )
-   )
-)
+>>> CartMethod(
+...    regressor=TreeRegressorMethod(
+...       tree=DecisionTreeRegressor(
+...          min_samples_leaf=10,    # equivalent to minbucket in synthpop-r
+...          min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+...       ),
+...       missing_handler=MissingValuePredictor(
+...          tree=DecisionTreeClassifier(min_samples_leaf=10)
+...       )
+...    ),
+...    classifier=TreeClassifierMethod(
+...       tree=DecisionTreeClassifier(
+...          min_samples_leaf=10,    # equivalent to minbucket in synthpop-r
+...          min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+...       ),
+...       encoder=PCAEncoder(
+...          pca_transform=PCA(n_components=1)
+...       )
+...    )
+... )
 ```
 For common tuning options, synthpop-py provides the convenience function {func}`~synthpop.methods.cart_synth.tune_cart`, which applies the same configuration consistently to all tree-based components:
 ```python
-tuned_cart = tune_cart(n_leaves=10, n_components=1)
+>>> from synthpop.methods.cart_synth import tune_cart
+
+>>> tuned_cart = tune_cart(n_leaves=10, n_components=1)
 ```
 Which can then be passed in the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
-Synthesiser(default_syn_method=tuned_cart)
+>>> Synthesiser(default_syn_method=tuned_cart)
 ```
 Currently `tune_cart` supports the following parameters:
 - `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
@@ -178,6 +182,8 @@ Currently `tune_cart` supports the following parameters:
 
 The {class}`~synthpop.methods.sample_synth.SampleMethod` generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
 ```python
+>>> from synthpop.methods.sample_synth import SampleMethod
+
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = SampleMethod(random_state=10).fit(None, y)
 >>> model.transform(None)
@@ -233,6 +239,8 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
 The {class}`~synthpop.methods.copy_synth.CopyMethod` deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
 ```python
+>>> from synthpop.methods.copy_synth import CopyMethod
+
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)
 >>> model.transform(None)

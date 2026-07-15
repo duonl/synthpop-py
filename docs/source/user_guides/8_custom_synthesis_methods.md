@@ -1,6 +1,6 @@
 # 8. Custom synthesis methods
 
-`synthpop-py` is designed to be extensible. In addition to the built-in synthesis methods, users can define custom synthesis methods for specialised synthesis requirements.
+synthpop-py is designed to be extensible. In addition to the built-in synthesis methods, users can define custom synthesis methods for specialised synthesis requirements.
 
 A synthesis method defines how a single target column is generated based on previously synthesised columns. During synthesis, the {class}`~synthpop.synthesiser.Synthesiser` fits one synthesis method per column and subsequently uses those fitted methods to generate synthetic values sequentially.
 
@@ -99,7 +99,7 @@ The signature is:
 fit(
     X: pd.DataFrame | None,
     y: pd.Series
-)
+) -> self
 ```
 Where:
 - `X` contains original predictor columns that have already been synthesised during the sequential synthesis process (earlier columns in the column order);
@@ -194,27 +194,27 @@ class CustomSynth(BaseSynthMethod):
 ```
 This method can then be supplied to the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
-synth = Synthesiser(
-    default_syn_method=CustomSynth(some_param=42)
-)
+>>> synth = Synthesiser(
+...     default_syn_method=CustomSynth(some_param=42)
+... )
 
-synthetic_data = (
-    synth
-    .fit(data)
-    .generate()
-)
+>>> synthetic_data = (
+...     synth
+...     .fit(data)
+...     .generate()
+... )
 ```
 Custom synthesis methods can be assigned to selected variables using `special_syn_method`.
 
 For example:
 ```python
-Synthesiser(
-    default_syn_method=CartMethod(),
-    special_syn_method={
-        "income": CustomSynth(some_param=42),
-        "age": SampleMethod()
-    }
-)
+>>> Synthesiser(
+...     default_syn_method=CartMethod(),
+...     special_syn_method={
+...         "income": CustomSynth(some_param=42),
+...         "age": SampleMethod()
+...     }
+... )
 ```
 In this example:
 - `income` is generated using `CustomSynth`;

@@ -1,4 +1,4 @@
-S_pMSE
+Pairwise S_pMSE
 ---------------------------------------
 
 .. automodule:: synthpop.plotting.plot_spmse

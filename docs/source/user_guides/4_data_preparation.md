@@ -1,5 +1,5 @@
 # 4. Data preparation for synthesis
-Many synthesis methods in `synthpop-py`, most notably {class}`~synthpop.methods.cart_synth.CartMethod`, rely on machine learning models from `scikit-learn`. Because these models only accept numerical input, synthpop-py automatically prepares the data before fitting and generation.
+Many synthesis methods in synthpop-py, most notably {class}`~synthpop.methods.cart_synth.CartMethod`, rely on machine learning models from `scikit-learn`. Because these models only accept numerical input, synthpop-py automatically prepares the data before fitting and generation.
 
 Before a synthesis method such as CART is fitted, synthpop-py prepares the predictor variables according to their data type.
 
@@ -53,6 +53,8 @@ The encoder used depends on the target type:
 ### 4.1.1. PCA encoding
 The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components. <431_choosing_pca>`.
 ```python
+>>> from synthpop.data_processing.encoders import PCAEncoder
+
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array(["x", "x", "y", "z", "w"])
 >>> pca_encoder = PCAEncoder().fit(X, y)
@@ -114,6 +116,8 @@ The number of components $k$ is chosen such that a desired fraction of variance 
 ### 4.1.2. Mean encoding
 The {class}`~synthpop.data_processing.encoders.MeanEncoder` method is used for numeric targets. Each category is replaced by the average target value observed for that category.
 ```python
+>>> from synthpop.data_processing.encoders import MeanEncoder
+
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array([1, 0, 2, 0, 3])
 >>> encoder = MeanEncoder().fit(X, y)
@@ -151,6 +155,8 @@ This separation allows synthpop-py to reproduce both the generated values and th
 ### 4.2.1. Treating missing as category
 For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
 ```python
+>>> from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
+
 >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
 >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
 >>> replace_missing = ReplaceMissingWithValue()
@@ -185,6 +191,8 @@ This method ensures that trees never see missing values in targets which they ca
 ### 4.2.2. Predicting missing values
 For numeric targets, missing values are treated probabilistically using {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
 ```python
+>>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+
 >>> X = {"num": np.array([25, 30, 35, 40])}
 >>> y = np.array([1.0, np.nan, 3.0, np.nan])
 >>> mvp = MissingValuePredictor()
@@ -240,21 +248,21 @@ By default, {class}`~synthpop.data_processing.encoders.PCAEncoder` retains all p
 
 For example, to retain only a single principal component:
 ```python
-method = CartMethod(
-    classifier=TreeClassifierMethod(
-        encoder=PCAEncoder(
-            pca_transform=PCA(n_components=1)
-        )
-    )
-)
+>>> method = CartMethod(
+...     classifier=TreeClassifierMethod(
+...         encoder=PCAEncoder(
+...             pca_transform=PCA(n_components=1)
+...         )
+...     )
+... )
 ```
 For convenience, the same PCA configuration can also be passed through {func}`~synthpop.methods.cart_synth.tune_cart`:
 ```python
-tune_cart(n_components=1)
+>>> tune_cart(n_components=1)
 ```
 Or directly in the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
-Synthesiser(default_syn_method=tune_cart(n_components=1))
+>>> Synthesiser(default_syn_method=tune_cart(n_components=1))
 ```  
 The `n_components` parameter is passed directly to {class}`PCA <sklearn:sklearn.decomposition.PCA>` and therefore accepts the same values:
 - an integer specifying the exact number of principal components;
@@ -272,11 +280,11 @@ By default:
 
 The default for the {class}`~synthpop.methods.cart_synth.TreeClassifierMethod` can be overridden to use the probabilistic {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` instead of {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`:
 ```python
-CartMethod(
-    classifier=TreeClassifierMethod(
-        missing_handler=MissingValuePredictor()
-    )
-)
+>>> CartMethod(
+...     classifier=TreeClassifierMethod(
+...         missing_handler=MissingValuePredictor()
+...     )
+... )
 ```
 This change is not implemented in {func}`~synthpop.methods.cart_synth.tune_cart` as it is not considered a common customisation.
 

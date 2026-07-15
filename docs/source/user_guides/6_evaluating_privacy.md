@@ -7,7 +7,7 @@ There is therefore no universally optimal balance between utility and privacy. T
 
 Privacy evaluation should be considered alongside utility evaluation. A synthetic dataset that has high utility but insufficient privacy protection may not be suitable for release, while a highly private dataset with very low utility may not be useful for analysis.
 
-Synthpop-py currently provides the framework for synthetic data generation but does not yet include automated privacy risk metrics. This guide describes common privacy risks that should be considered when evaluating synthetic data.
+synthpop-py currently provides the framework for synthetic data generation but does not yet include automated privacy risk metrics. This guide describes common privacy risks that should be considered when evaluating synthetic data.
 
 ---
 ## 6.1. Privacy risks

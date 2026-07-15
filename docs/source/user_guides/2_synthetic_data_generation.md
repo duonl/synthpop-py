@@ -1,6 +1,6 @@
 # 2. Synthetic data generation
 
-This section describes how synthetic data is generated using **synthpop-py**, including the role of the {class}`~synthpop.synthesiser.Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
+This section describes how synthetic data is generated using synthpop-py, including the role of the {class}`~synthpop.synthesiser.Synthesiser`, synthesis methods, preprocessing, and the sequential modelling procedure.
 
 ---
 
@@ -39,9 +39,9 @@ flowchart LR
     GEN --> J
 ```
 
-The synthesis procedure is intentionally sequential and each generated variable is conditioned on previously generated variables. Therefore, the **column order is a critical modelling parameter**.
+The synthesis procedure is intentionally sequential and each generated variable is conditioned on previously generated variables. Therefore, the **column order is a critical modelling parameter** and should be chosen carefully.
 
-This design closely follows the original **synthpop** methodology while providing a modular and extensible Python implementation.
+This design closely follows the original synthpop methodology while providing a modular and extensible Python implementation.
 
 ---
 
@@ -50,10 +50,12 @@ This design closely follows the original **synthpop** methodology while providin
 The central interface in synthpop-py is the {class}`~synthpop.synthesiser.Synthesiser` class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
 
 ```python
-synth = Synthesiser(random_seed=42)
-synth.fit(df)
+>>> from synthpop.synthesiser import Synthesiser
 
-synthetic_df = synth.generate(n=1000)
+>>> synth = Synthesiser(random_seed=42)
+>>> synth.fit(df)
+
+>>> synthetic_df = synth.generate(n=1000)
 ```
 
 ### 2.2.1. Key parameters
@@ -109,13 +111,13 @@ More information about these methods can be found in [Guide 3: Synthesis methods
 Different variables can use different synthesis methods:
 
 ```python
-Synthesiser(
-    default_syn_method=CartMethod(),
-    special_syn_method={
-        "income": SampleMethod(),
-        "age": CartMethod()
-    }
-)
+>>> Synthesiser(
+...     default_syn_method=CartMethod(),
+...     special_syn_method={
+...         "income": SampleMethod(),
+...         "age": CartMethod()
+...     }
+... )
 ```
 
 ---
@@ -141,7 +143,7 @@ Preprocessing, including encoding and missing value handling, is described in mo
 The {func}`~synthpop.synthesiser.Synthesiser.fit` method learns a sequence of predictive models from the original dataset.
 
 ```python
-synth.fit(original_data)
+>>> synth.fit(original_data)
 ```
 
 ### 2.4.1. Behaviour
@@ -166,10 +168,10 @@ All preceding variables are used as predictors by default. In a future release, 
 
 ## 2.5. Generating synthetic data
 
-Once fitted, synthetic data can be generated using:
+Once fitted, synthetic data with `n` rows can be generated using:
 
 ```python
-synthetic = synth.generate(n=1000)
+>>> synthetic = synth.generate(n=1000)
 ```
 
 ### 2.5.1. Behaviour
@@ -203,5 +205,3 @@ Reproducibility is controlled through the `random_seed` parameter.
 This allows users to:
 - reuse fitted models, and
 - generate multiple synthetic datasets from the same fitted synthesiser.
-
----
