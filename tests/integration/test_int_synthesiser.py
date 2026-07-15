@@ -186,9 +186,11 @@ def test_synthesiser_preserves_datatypes(method):
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
     
+    original_data["sixth"] = pd.Series(np.zeros(n_samples_orig), dtype='Int64')
+
     original_data = original_data.astype({
     "second": "float32",
-    "fourth": "Int64",
+    "fourth": "int64",
     "fifth": "object"
 })
 
@@ -206,7 +208,7 @@ def test_synthesiser_preserves_datatypes(method):
         CartMethod
     ]
 )
-def test_synthesiser_preserves_datatypes(method):
+def test_synthesiser_preserves_datatypes_with_missing(method):
     """
     Reproduces bug 162, where synthesiser class returns object dtype in the synthetic data
     while the original data is string datatype.
@@ -217,10 +219,12 @@ def test_synthesiser_preserves_datatypes(method):
     n_samples_orig = 1000
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
+    
+    original_data["sixth"] = pd.Series(np.zeros(n_samples_orig), dtype='Int64')
 
     original_data = original_data.astype({
     "second": "float32",
-    "fourth": "Int64",
+    "fourth": "int64",
     "fifth": "object"
 })
 

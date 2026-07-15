@@ -402,6 +402,44 @@ def test_transform_outputs_same_dtype_as_target(y, method):
     out = cart.transform(X)
     assert y.dtype == out.dtype
 
+def test_cart_preserves_categorical_dtype_and_categories():
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+        }
+    )
+
+    y = pd.Series(
+        ["low", "medium", "high", "medium"],
+        dtype=pd.CategoricalDtype(
+            categories=["low", "medium", "high"],
+            ordered=True,
+        ),
+        name="risk",
+    )
+
+    classifier = StubClassifier(
+        transform_result=np.array(
+            ["medium", "high", "medium", "high"]
+        )
+    )
+
+    cart = CartMethod(
+        classifier=classifier,
+        regressor=StubRegressor(),
+    )
+
+    cart.fit(X, y)
+
+    result = cart.transform(X)
+
+    expected_dtype = y.dtype
+
+    assert result.dtype == expected_dtype
+    assert result.cat.categories.equals(
+        expected_dtype.categories
+    )
+    assert result.cat.ordered == expected_dtype.ordered
 
 @pytest.mark.parametrize(
     "missing_attr",
