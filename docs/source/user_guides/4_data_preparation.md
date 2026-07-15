@@ -51,7 +51,7 @@ The encoder used depends on the target type:
 
 (411-pca-encoding)=
 ### 4.1.1. PCA encoding
-The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components. <431_choosing_pca>`.
+The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components <431_choosing_pca>`.
 ```python
 >>> from synthpop.data_processing.encoders import PCAEncoder
 

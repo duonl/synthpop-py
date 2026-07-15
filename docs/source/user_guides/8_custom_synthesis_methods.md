@@ -232,8 +232,8 @@ A new synthesis method is not always required when only the preprocessing needs 
 
 These components allow customisation of parts of the synthesis process, including:
 - the underlying decision tree model;
-- the encoder used for categorical predictors (see {ref}`Guide 4.1 <41-encoding-categorical-predictors>`);
-- the missing value handling strategy (see {ref}`Guide 4.2 <42-handling-missing-values>`);
+- the encoder used for categorical predictors (see {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`);
+- the missing value handling strategy (see {ref}`Guide 4.2: Handling missing values <42-handling-missing-values>`);
 - the method used for sampling values within terminal leaf nodes.
 
 This allows users to modify individual parts of the CART synthesis pipeline while retaining the general CART workflow.
