@@ -1,12 +1,12 @@
-import string
-
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.exceptions import NotFittedError
 
-from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
+from synthpop.methods.copy_synth import CopyMethod
+from synthpop.methods.sample_synth import SampleMethod
+from synthpop.synthesiser import Synthesiser
+
 from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations
 
 
@@ -53,6 +53,7 @@ def test_synthesiser_first_column_is_sampled_categorical():
     assert np.abs(
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
+
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -80,7 +81,6 @@ def test_synthesiser_first_column_is_sampled_numeric():
     assert np.abs(expected_proportions["2"] - result_proportions[2]) < 0.05
     assert np.abs(
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
-
 
 
 def test_synthesiser_preserves_1D_statistics():
@@ -161,3 +161,43 @@ def test_synthesiser_preserves_cat_cat_relation():
     for col in obs_ct.columns:
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
+
+
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, None, pd.NA],
+)
+def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
+    """
+    Regression test for bug 152. The CartMethod failed for a numerical array with only missing values, 
+    Missing values are masked. As such, fitting on an entire np.nan array is the same as fitting on an empty array.
+    This threw an error resulting in bug issue 152. A fix was implemented
+    """
+    df = pd.DataFrame(
+        {
+            "a": [1, None],
+            "b": [0, 0],
+            "c": [missing_value, missing_value]
+        }
+    )
+
+    special_syn_method = {
+        "a": SampleMethod(),
+        "b": CopyMethod(),
+        "c": CartMethod()
+    }
+
+    synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
+    fit = synth.fit(df)
+
+    assert isinstance(fit.models_['a'], SampleMethod)
+    assert isinstance(fit.models_['b'], CopyMethod)
+    assert isinstance(fit.models_['c'], CartMethod)
+
+    generated = fit.generate()
+
+    assert len(generated) == len(df)
+
+    assert df['b'].equals(generated['b'])
+
+    assert generated['c'].isna().all()
