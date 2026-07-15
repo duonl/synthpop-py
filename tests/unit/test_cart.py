@@ -199,7 +199,7 @@ def test_fit_sets_fitted_attributes(mocker, y):
     ]
 )
 def test_transform_returns_series(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result),
+    cart = CartMethod()
                       classifier=StubClassifier(result))
 
     cart.feature_names_in_ = ["a"]
@@ -220,7 +220,7 @@ def test_transform_returns_series(mocker, result, method):
 
     out = cart.transform(X)
 
-    pd.testing.assert_frame_equal(mocked_X.call_args.args[0], X)
+    mocked_X.assert_called_once_with(X)
 
     assert isinstance(out, pd.Series)
     assert out.name == "target"

@@ -477,8 +477,9 @@ def test_fit_classifier_converts_to_str(encoder, leafnode_sampler, mocker):
 
     mocked_to_str.assert_called_with(y)
     
-    actual_y = mock_fit_decision_tree_with_reachable_leaves.mock_calls[0][2]["y"]
-    assert np.array_equal(str_y,actual_y)
+    actual_y = mock_fit_decision_tree_with_reachable_leaves.call_args.kwargs["y"]
+    assert np.array_equal(str_y, actual_y)
+    assert str_y.dtype == actual_y.dtype
     
 def test_fit_regressor_converts_to_float32(encoder,leafnode_sampler,mocker):
     X = {"a":np.array([1,2])}
@@ -686,7 +687,7 @@ def test_classifier_transform_returns_str_dtype(leafnode_sampler):
 
 
 @pytest.mark.parametrize("X,index_cat", [(v[0], v[2]) for v in get_input_test_data()])
-def test_transform_raises_not_fitted_when_missing_flag_absent(X, index_cat, tree_method):
+def test_transform_raises_not_fitted_when_missing_flag_absent(X, index_cat, tree_method, missing_handling, leafnode_sampler):
 
     tree_method.encoders_ = {}
     tree_method.missing_handler_ = missing_handling

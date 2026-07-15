@@ -146,7 +146,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         if not hasattr(self, '_all_missing'):
-            raise NotFittedError
+            raise NotFittedError(f"{self.__class__.__name__} instance is not fitted yet.")
         elif self._all_missing:
             n = len(next(iter(X.values()))) if X else 0
             return np.full(n, np.nan) # method in child class will do correct dtype conversion
