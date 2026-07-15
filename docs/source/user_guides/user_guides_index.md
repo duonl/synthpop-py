@@ -7,19 +7,19 @@ The guides below provide more detailed explanations of specific topics:
 
 - **{doc}`1_introduction`** introduces synthetic data and its role in statistical disclosure control. It discusses the motivation for generating synthetic data, common use cases, and the balance between data utility and privacy.
 
-- **{doc}`2_synthetic_data_generation`** describes the synthetic data generation process in **synthpop-py**. It introduces the synthesis workflow, the `Synthesiser`, sequential synthesis, and the terminology used throughout the package.
+- **{doc}`2_synthetic_data_generation`** describes the synthetic data generation process in synthpop-py. It introduces the synthesis workflow, the `Synthesiser`, sequential synthesis, and the terminology used throughout the package.
 
 - **{doc}`3_synthesis_methods`** provides an overview of the available synthesis methods, explains when they are appropriate, and describes how they can be customised.
 
 - **{doc}`4_data_preparation`** explains how data are prepared before synthesis, including preprocessing, encoding categorical variables, and handling missing values.
 
-- **{doc}`5_evaluating_utility`** discusses how to assess whether synthetic data preserve the statistical properties of the original dataset. It introduces the utility measures currently implemented in **synthpop-py** and provides guidance on interpreting the results.
+- **{doc}`5_evaluating_utility`** discusses how to assess whether synthetic data preserve the statistical properties of the original dataset. It introduces the utility measures currently implemented in synthpop-py and provides guidance on interpreting the results.
 
 - **{doc}`6_evaluating_privacy`** introduces the main types of disclosure risk associated with synthetic data and explains how privacy should be considered when releasing synthetic datasets.
 
-- **{doc}`7_visualisations`** describes the visualisation tools included in **synthpop-py** for comparing original and synthetic datasets and interpreting utility metrics.
+- **{doc}`7_visualisations`** describes the visualisation tools included in synthpop-py for comparing original and synthetic datasets and interpreting utility metrics.
 
-- **{doc}`8_custom_synthesis_methods`** explains how to extend **synthpop-py** by implementing custom synthesis methods, preprocessing components, and other extensible parts of the package.
+- **{doc}`8_custom_synthesis_methods`** explains how to extend synthpop-py by implementing custom synthesis methods, preprocessing components, and other extensible parts of the package.
 
 ## Guides
 ```{toctree}
