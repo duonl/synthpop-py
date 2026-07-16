@@ -21,7 +21,7 @@ Synthpop documentation
 **Version**: |release|
 
 **Useful links**:
-[Installation](./getting_started/installation.md) _ |
+:doc:`getting_started/installation` |
 `Source Repository <https://github.com/duonl/synthpop-py/tree/main>`_ |
 `Issue Tracker <https://github.com/duonl/synthpop-py/issues>`_ |
 `Synthpop R Package <https://www.synthpop.org.uk/index.html>`_
@@ -38,7 +38,7 @@ Synthpop documentation
       Getting started
       ^^^
 
-      New to Synthpop? Check out the getting started guides. 
+      New to Synthpop? Check out the getting started guide. 
       It introduces the key concepts behind Synthpop and includes step-by-step installation instructions 
       to help you begin creating synthetic datasets.
 

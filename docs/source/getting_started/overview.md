@@ -1,11 +1,11 @@
 # About synthpop-py
 
 ## What is synthpop-py?
-Synthpop-py is a package for generating high-quality synthetic data, with a primary focus on tabular data. It is a Python redesign of the established [Synthpop R package](https://www.synthpop.org.uk/), developed with approval from and in cooperation with the original authors.
+Synthpop-py is a package for generating high-quality synthetic data, with a primary focus on tabular data. It is a Python redesign of the established [Synthpop R package](https://www.synthpop.org.uk/), developed with approval from, and in cooperation with, the original authors.
 
 Synthetic data can help organisations share, analyse and develop with data while reducing the need to expose sensitive information. Synthpop-py aims to generate synthetic datasets that preserve the statistical characteristics and relationships present in the original data, while ensuring that synthetic records do not correspond directly to real individuals.
 
-The original Synthpop R package has consistently demonstrated strong performance compared with other synthesis approaches in producing synthetic data that closely resembles observed data. [^1][^2][^3]. The goal of this Python implementation is to provide comparable performance while making synthetic data generation accessible to Python users.
+The original synthpop R package has consistently demonstrated strong performance compared to other synthesis approaches in producing synthetic data that closely resembles observed data[^1][^2][^3]. As such, we aim with this Python implementation to provide comparable performance while making synthetic data generation accessible to Python users.
 
 [^1]: Ji, E., Ohn, J.H., Jo, H. et al. Evaluating the utility of data integration with synthetic data and statistical matching. *Sci Rep* 15, 19627 (2025). https://doi.org/10.1038/s41598-025-01514-0
 [^2]: Khan, M.S.N., Reje, N., Buchegger, S. Utility Assessment of Synthetic Data Generation Methods. (2022). https://doi.org/10.48550/arXiv.2211.14428

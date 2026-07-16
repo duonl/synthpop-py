@@ -1,12 +1,12 @@
 # Installation
 
-This page explains how to install Synthpop-py.
+This page explains how to install synthpop-py.
 
-For most users, the recommended installation method is through PyPI. If you want to contribute to Synthpop-py or use the latest development version, see the source installation instructions.
+For most users, the recommended installation method is through PyPI. If you want to contribute to synthpop-py or use the latest development version, see the source installation instructions.
 
 ## Requirements
 
-Synthpop requires:
+Synthpop-py requires:
 
 - Python 3.13 or later
 - `pip`
@@ -35,7 +35,7 @@ After activation, install synthpop-py as described below.
 
 ## Install synthpop-py from PyPI
 
-The recommended installation method is::
+The recommended installation method is:
 ```bash
 pip install synthpop-py
 ```

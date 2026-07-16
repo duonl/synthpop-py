@@ -7,12 +7,13 @@ To create your first synthetic dataset, start by loading your original data into
 ```python
 from synthpop import Synthesiser
 import pandas as pd
+
 orig_df = pd.read_csv("path/to/your/data.csv")
 syn_df = Synthesiser().fit(orig_df).generate(n=len(orig_df.index))
 print(synthetic_data)
 ```
 
-The `fit()` step learns the relationships and distributions present in the original dataset. The `generate()` step uses this learned information to create synthetic records. In this example, the number of synthetic records is set equal to the number of records in the original dataset.
+The `fit()` step learns the relationships and distributions present in the original dataset. The `generate()` step uses this learned information to create synthetic data. In this example, the number of synthetic rows `n` is set equal to the number of rows in the original dataset.
 
 ## Evaluate the synthetic data
 
@@ -20,23 +21,25 @@ Synthetic data should be evaluated before it is used for analysis or shared with
 
 ### Univariate distributions
 
-A first check is to compare univariate distributions of individual variables in the original and synthetic dataset. 
+A first check is to compare {doc}`../api_reference/plotting/Univariate` of individual variables in the original and synthetic dataset. 
 
 ```python
 from synthpop.plotting.plot import plot_univariate_distributions
+
 plots = plot_univariate_distributions(
     orig_df=orig_df,
     syn_df=syn_df,
     save_path=None,
     interactive=False,
     )
+
 for fig in plots:
     fig.show()
 ```
 
 ### Multivariate Standardized Propensity Mean Squared Error (SPMSE)
 Univariate comparisons evaluate variables individually, but they do not capture relationships between variables. 
-To assess whether multivariate patterns are preserved, synthpop provides metrics such as the Standardized Propensity Mean Squared Error (SPMSE).
+To assess whether multivariate patterns are preserved, synthpop provides metrics such as the Standardized Propensity Mean Squared Error ({doc}`../api_reference/plotting/S_pMSE`).
 
 ```python
 from synthpop.utility_metrics.spmse import pairwise_spmse
