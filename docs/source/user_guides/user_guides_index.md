@@ -5,9 +5,9 @@ If you are new to synthpop-py, we recommended starting with the [Getting Started
 
 The guides below provide more detailed explanations of specific topics:
 
-- **{doc}`1_introduction`** introduces synthetic data and its role in statistical disclosure control. It discusses the motivation for generating synthetic data, common use cases, and the balance between data utility and privacy.
+- **{doc}`1_introduction`** introduces synthetic data and its role in statistical disclosure control. It discusses the motivation for generating synthetic data, common use cases, and the terminology used throughout the package.
 
-- **{doc}`2_synthetic_data_generation`** describes the synthetic data generation process in synthpop-py. It introduces the synthesis workflow, the `Synthesiser` class, sequential synthesis, and the terminology used throughout the package.
+- **{doc}`2_synthetic_data_generation`** describes the synthetic data generation process in synthpop-py. It introduces the synthesis workflow, the `Synthesiser` class, sequential synthesis, and creating synthetic data.
 
 - **{doc}`3_synthesis_methods`** provides an overview of the available synthesis methods, explains when they are appropriate, and describes how they can be customised.
 
