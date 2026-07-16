@@ -37,7 +37,7 @@ for fig in plots:
     fig.show()
 ```
 
-### Multivariate Standardized Propensity Mean Squared Error (SPMSE)
+### Multivariate Standardized propensity Mean Squared Error (S_pMSE)
 Univariate comparisons evaluate variables individually, but they do not capture relationships between variables. 
 To assess whether multivariate patterns are preserved, synthpop-py provides metrics such as the Standardized propensity Mean Squared Error ({doc}`../api_reference/plotting/S_pMSE`).
 
