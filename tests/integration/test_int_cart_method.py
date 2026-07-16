@@ -327,9 +327,9 @@ def test_fitting_handles_all_missing_target(y):
 @pytest.mark.parametrize(
     "y, dtype",
     [
-        (pd.Series([None, None], name='c'), 'object'), # This should be changed after pull request 171
-        (pd.Series([np.nan, np.nan], name='c'), np.float32),
-        (pd.Series([pd.NA, pd.NA], name='c'), 'object')
+        (pd.Series([None, None], name='c', dtype='object'), 'object'),
+        (pd.Series([np.nan, np.nan], name='c', dtype=np.float64), np.float64),
+        (pd.Series([pd.NA, pd.NA], name='c',  dtype='string'), 'string')
     ]
 )
 def test_transform_handles_entire_nan_array(y, dtype):

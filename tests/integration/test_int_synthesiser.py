@@ -7,7 +7,7 @@ from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.synthesiser import Synthesiser
 
-from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations
+from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations, make_data_missing
 
 
 def test_synthesiser_correct_default_methods():
