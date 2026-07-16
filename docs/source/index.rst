@@ -80,7 +80,7 @@ synthpop-py documentation
 
       The reference guide contains a detailed description of the functions, modules, and objects included in synthpop-py. 
       It explains how specific methods work, and which parameters can be used. 
-      It assumes that you have a basic understanding of Synthpop's core concepts.
+      It assumes that you have a basic understanding of synthpop-py's core concepts.
 
       +++
 
