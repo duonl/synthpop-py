@@ -39,7 +39,7 @@ flowchart LR
     GEN --> J
 ```
 
-The synthesis procedure is intentionally sequential and each generated variable is conditioned on previously generated variables. Therefore, the **column order is a critical modelling parameter** and should be chosen carefully.
+The synthesis procedure is intentionally sequential and each generated variable is conditioned on previously generated variables. Therefore, the **column order is a critical modelling parameter** and should be chosen carefully. More information about how to choose the column order can be found in {ref}` section 2.2.4: Changing the column order <224-column-order>`.
 
 This design closely follows the original synthpop methodology while providing a modular and extensible Python implementation.
 
@@ -66,7 +66,8 @@ During initialisation ([`Synthesiser()`](../api_reference/synthesiser_class/synt
 
 - **`column_order`**  
   Defines the order in which variables are synthesised.  
-  This order is structurally important: each variable is generated conditional on previously generated variables.  
+  This order is structurally important: each variable is generated conditional on previously generated variables.
+  More information about how to choose the can be found in {ref}` section 2.2.4: Changing the column order <224-column-order>`.
   If not specified, the column order of the original dataset will be used.
 
 - **`default_syn_method`**  
@@ -119,6 +120,23 @@ Different variables can use different synthesis methods:
 ...     }
 ... )
 ```
+
+(224-column-order)=
+## 2.2.4. Changing the column order and impact
+Changing the synthesis order is most useful when:
+- some variables explain many other variables;
+- you observe poor preservation of important relationships;
+- you have domain knowledge about casual or predictive relationships between variables.
+
+For many datasets, the default column order may provide satisfactory results. However, adjusting the synthesis order is often one of the simplest ways to improve utility. A good synthesis order generally places variables that contain important information about other variables at the beginning of the sequence. This allows variables that are synthesised later in the sequence to be generated conditionally on these important predictors. This helps preserve relationships in the data.
+ 
+However, predictive strength is not the only consideration when choosing a sequence order. Other characteristics of variables can also influence the quality of a synthesis:
+ 
+- **Variables with many missing values** may provide less reliable information as predictors. Placing these variables later prevents incomplete information from being used to generate many other variables.
+- **Variables with many rare categories** can introduce uncertainty when used as predictors. Generating these variables later can reduce the propagation of errors.
+- **Variables that represent outcomes or summaries** are often better placed later because they can use information from the variables that contribute to them.
+ 
+There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE can help determine whether a certain order preserves important relationships.
 
 ---
 

@@ -11,7 +11,7 @@ The guides below provide more detailed explanations of specific topics:
 
 - **{doc}`3_synthesis_methods`** provides an overview of the available synthesis methods, explains when they are appropriate, and describes how they can be customised.
 
-- **{doc}`4_data_preparation`** explains how data are prepared before synthesis, including preprocessing, encoding categorical variables, and handling missing values.
+- **{doc}`4_data_preparation`** explains how data are prepared during synthesis, including preprocessing, encoding categorical variables, and handling missing values.
 
 - **{doc}`5_evaluating_utility`** discusses how to assess whether synthetic data preserve the statistical properties of the original dataset. It introduces the utility measures currently implemented in synthpop-py and provides guidance on interpreting the results.
 

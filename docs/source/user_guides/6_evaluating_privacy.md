@@ -37,9 +37,9 @@ Identity disclosure is more likely when:
 A common approach for evaluating identity disclosure is to measure how closely synthetic records match original records based on identifying attributes.
 
 ### 6.1.2. Attribute disclosure
-Attribute disclosure occurs when an third party learns sensitive information about an individual, even without identifying the exact record.
+Attribute disclosure occurs when a third party learns sensitive information about an individual, even without identifying the exact record.
 
-For example, if an individual is known to belong to a particular group and the synthetic data reveal that all individuals in that group share a sensitive attribute, an third party may infer information about the individual.
+For example, if an individual is known to belong to a particular group and the synthetic data reveal that all individuals in that group share a sensitive attribute, a third party may infer information about the individual.
 
 Attribute disclosure can occur when:
 -  Relationships between quasi-identifiers and sensitive attributes are preserved too strongly.

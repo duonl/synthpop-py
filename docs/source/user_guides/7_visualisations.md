@@ -130,7 +130,7 @@ The input is the pairwise S_pMSE table produced by
 ... )
 ```
 
-The underlying metric is the pairwise Standardised Propensity Mean Squared Error (S_pMSE), which measures differences between the joint distributions of pairs of variables in the original and synthetic datasets.
+The underlying metric is the pairwise Standardised propensity Mean Squared Error (S_pMSE), which measures differences between the joint distributions of pairs of variables in the original and synthetic datasets.
 
 For the complete function signature, including options for saving and
 rendering, see

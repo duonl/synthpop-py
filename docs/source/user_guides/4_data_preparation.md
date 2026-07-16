@@ -1,4 +1,4 @@
-# 4. Data preparation for synthesis
+# 4. Data preparation during synthesis
 Many synthesis methods in synthpop-py, most notably {class}`~synthpop.methods.cart_synth.CartMethod`, rely on machine learning models from `scikit-learn`. Because these models only accept numerical input, synthpop-py automatically prepares the data before fitting and generation.
 
 Before a synthesis method such as CART is fitted, synthpop-py prepares the predictor variables according to their data type.
