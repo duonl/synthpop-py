@@ -11,7 +11,7 @@ Synthpop-py requires:
 - Python 3.13 or later
 - `pip`
 
-We recommend installing Synthpop-py in a virtual environment to keep dependencies isolated from other Python projects.
+We recommend installing synthpop-py in a virtual environment to keep dependencies isolated from other Python projects.
 
 ## Create a virtual environment
 

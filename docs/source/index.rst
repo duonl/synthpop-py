@@ -15,7 +15,7 @@
    developer/developer_index
    about_us/about
 
-Synthpop documentation
+Synthpop-py documentation
 ======================
 
 **Version**: |release|
@@ -38,8 +38,8 @@ Synthpop documentation
       Getting started
       ^^^
 
-      New to Synthpop? Check out the getting started guide. 
-      It introduces the key concepts behind Synthpop and includes step-by-step installation instructions 
+      New to synthpop-py? Check out the getting started guide. 
+      It introduces the key concepts behind synthpop-py and includes step-by-step installation instructions 
       to help you begin creating synthetic datasets.
 
       +++
@@ -58,7 +58,7 @@ Synthpop documentation
       User guide
       ^^^
 
-      The user guide provides in-depth information on the key concepts of Synthpop, 
+      The user guide provides in-depth information on the key concepts of synthpop-py, 
       including useful background information, examples, and explanations 
       to help you understand how synthetic datasets are generated and used.
 
@@ -78,7 +78,7 @@ Synthpop documentation
       API reference
       ^^^
 
-      The reference guide contains a detailed description of the functions, modules, and objects included in Synthpop. 
+      The reference guide contains a detailed description of the functions, modules, and objects included in synthpop-py. 
       It explains how specific methods work, and which parameters can be used. 
       It assumes that you have a basic understanding of Synthpop's core concepts.
 
@@ -100,7 +100,7 @@ Synthpop documentation
 
       Saw a typo? Want to contribute to the codebase? 
       Help improve the documentation, add examples, or suggest new features? 
-      The Developer's guide will guide you through the process of improving Synthpop.
+      The developer's guide will guide you through the process of improving synthpop-py.
 
       +++
 
