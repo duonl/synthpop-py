@@ -77,8 +77,10 @@ def test_synthesiser_first_column_is_sampled_numeric():
     result_proportions = result["first_column"].value_counts(
         dropna=False, normalize=True)
 
-    assert np.abs(expected_proportions["1.1"] - result_proportions.iloc[0]) < 0.05
-    assert np.abs(expected_proportions["2"] - result_proportions.iloc[1]) < 0.05
+    assert np.abs(expected_proportions["1.1"] -
+                  result_proportions.iloc[0]) < 0.05
+    assert np.abs(expected_proportions["2"] -
+                  result_proportions.iloc[1]) < 0.05
     assert np.abs(
         expected_proportions["missing"] - result_proportions.iloc[2]) < 0.05
 
@@ -162,6 +164,7 @@ def test_synthesiser_preserves_cat_cat_relation():
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
 
+
 @pytest.mark.parametrize(
     "method",
     [
@@ -181,20 +184,33 @@ def test_synthesiser_preserves_datatypes(method):
     n_samples_orig = 1000
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
-    
+
     original_data["sixth"] = pd.Series(np.zeros(n_samples_orig), dtype='Int64')
+    original_data["seventh"] = pd.Series(
+        pd.Categorical(
+            ["medium"] * n_samples_orig,
+            categories=["low", "medium", "high"],
+            ordered=True,
+        )
+    )
 
     original_data = original_data.astype({
-    "second": "float32",
-    "fourth": "int64",
-    "fifth": "object"
-})
+        "second": "float32",
+        "fourth": "int64",
+        "fifth": "object"
+    })
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
 
     syn_df = synthesiser.fit(original_data).generate()
 
     assert all(syn_df.dtypes == original_data.dtypes)
+    assert list(syn_df["seventh"].cat.categories) == [
+        "low",
+        "medium",
+        "high",
+    ]
+    assert syn_df["seventh"].cat.ordered is True
 
 @pytest.mark.parametrize(
     "method",
@@ -215,16 +231,24 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
     n_samples_orig = 1000
     original_data, _, _ = simulate_realistic_dataset_correlations(
         n_samples=n_samples_orig)
-    
+
     original_data["sixth"] = pd.Series(np.zeros(n_samples_orig), dtype='Int64')
 
-    original_data = original_data.astype({
-    "second": "float32",
-    "fourth": "int64",
-    "fifth": "object"
-})
+    original_data["seventh"] = pd.Series(
+        pd.Categorical(
+            ["medium"] * n_samples_orig,
+            categories=["low", "medium", "high"],
+            ordered=True,
+        )
+    )
 
-    
+
+    original_data = original_data.astype({
+        "second": "float32",
+        "fourth": "int64",
+        "fifth": "object"
+    })
+
     original_data = make_data_missing(original_data)
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
@@ -232,7 +256,14 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
     syn_df = synthesiser.fit(original_data).generate()
 
     assert all(syn_df.dtypes == original_data.dtypes)
-    
+    assert list(syn_df["seventh"].cat.categories) == [
+        "low",
+        "medium",
+        "high",
+    ]
+    assert syn_df["seventh"].cat.ordered is True
+
+
 @pytest.mark.parametrize(
     "missing_value",
     [np.nan, None, pd.NA],
