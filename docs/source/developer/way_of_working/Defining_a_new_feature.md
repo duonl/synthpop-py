@@ -29,7 +29,7 @@ In the discussion that follows, the following points may be addressed:
 During this discussion, decisions will be made regarding the required functionality.
 These decisions are consolidated into a document called the functional description.
 
-The functional description defines the requirements for the feature and should remain independent of any specific programming language or implemenation details.
+The functional description defines the requirements for the feature and should remain independent of any specific programming language or implementation details.
 This document serves as the basis for the next phase.
 
 Based on this and the follow-up discussion, the product owner decides whether the feature will be included into the package.
