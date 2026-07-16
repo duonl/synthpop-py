@@ -14,7 +14,7 @@ Many examples build upon concepts introduces in the [**User Guide**](../user_gui
 your_first_synthetic_dataset.md
 reproducible_synthesis.md
 generating_a_larger_dataset.md
-choosing_a_synthesis_order.md
+changing_the_synthesis_order.md
 
 ```
 
