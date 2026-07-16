@@ -23,7 +23,6 @@ changing_the_synthesis_order.md
 :hidden:
 :caption: Parameters
 
-adjusting_column_order.md
 adjusting_parameters.md
 
 ```
