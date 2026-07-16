@@ -232,7 +232,6 @@ def test_fit_saves_input_dtypes(y):
 )
 def test_transform_returns_series(mocker, result, method):
     cart = CartMethod()
-    classifier = StubClassifier(result)
 
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
@@ -471,7 +470,7 @@ def test_transform_requires_fit_missing_attribute(missing_attr):
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
-    # ----- get_feature_names_out test -----
+# ----- get_feature_names_out test -----
 
 
 def test_get_feature_names_out_delegates():
@@ -487,7 +486,7 @@ def test_get_feature_names_out_raises_unfitted():
     with pytest.raises(NotFittedError):
         cart.get_feature_names_out()
 
-    # ----- clonability test -----
+# ----- clonability test -----
 
 
 def test_clone_works_and_fitted_cart_does_not_preserve_state():
