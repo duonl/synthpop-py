@@ -302,7 +302,7 @@ def plot_univariate_distributions(
     Using the default parameters:
         >>> import numpy as np
         >>> import pandas as pd
-        >>> from synthpop.plotting.plot import plot_univariate_distributions
+        >>> from synthpop.plotting import plot_univariate_distributions
         >>>
         >>> np.random.seed(42)
         >>>

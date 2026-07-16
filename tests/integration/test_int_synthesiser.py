@@ -1,13 +1,13 @@
-import string
-
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.exceptions import NotFittedError
 
-from synthpop.synthesiser import Synthesiser
 from synthpop.methods.cart_synth import CartMethod
-from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations
+from synthpop.methods.copy_synth import CopyMethod
+from synthpop.methods.sample_synth import SampleMethod
+from synthpop.synthesiser import Synthesiser
+
+from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations, make_data_missing
 
 
 def test_synthesiser_correct_default_methods():
@@ -53,6 +53,7 @@ def test_synthesiser_first_column_is_sampled_categorical():
     assert np.abs(
         expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
 
+
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
         '1.1': 1/2,
@@ -76,11 +77,12 @@ def test_synthesiser_first_column_is_sampled_numeric():
     result_proportions = result["first_column"].value_counts(
         dropna=False, normalize=True)
 
-    assert np.abs(expected_proportions["1.1"] - result_proportions[1.1]) < 0.05
-    assert np.abs(expected_proportions["2"] - result_proportions[2]) < 0.05
+    assert np.abs(expected_proportions["1.1"] -
+                  result_proportions.iloc[0]) < 0.05
+    assert np.abs(expected_proportions["2"] -
+                  result_proportions.iloc[1]) < 0.05
     assert np.abs(
-        expected_proportions["missing"] - result_proportions[np.nan]) < 0.05
-
+        expected_proportions["missing"] - result_proportions.iloc[2]) < 0.05
 
 
 def test_synthesiser_preserves_1D_statistics():
@@ -161,3 +163,142 @@ def test_synthesiser_preserves_cat_cat_relation():
     for col in obs_ct.columns:
         value = np.max(np.abs(obs_ct[col] - syn_ct[col]))
         assert value < 0.1
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        CopyMethod,
+        SampleMethod,
+        CartMethod
+    ]
+)
+def test_synthesiser_preserves_datatypes(method):
+    """
+    Reproduces bug 162, where synthesiser class returns object dtype in the synthetic data
+    while the original data is string datatype.
+
+    All columns should return their original datatype.
+    """
+
+    n_samples_orig = 1000
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+        n_samples=n_samples_orig)
+
+    original_data["sixth"] = pd.Series(np.zeros(n_samples_orig), dtype='Int64')
+    original_data["seventh"] = pd.Series(
+        pd.Categorical(
+            ["medium"] * n_samples_orig,
+            categories=["low", "medium", "high"],
+            ordered=True,
+        )
+    )
+
+    original_data = original_data.astype({
+        "second": "float32",
+        "fourth": "int64",
+        "fifth": "object"
+    })
+
+    synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+    assert all(syn_df.dtypes == original_data.dtypes)
+    assert list(syn_df["seventh"].cat.categories) == [
+        "low",
+        "medium",
+        "high",
+    ]
+    assert syn_df["seventh"].cat.ordered is True
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        CopyMethod,
+        SampleMethod,
+        CartMethod
+    ]
+)
+def test_synthesiser_preserves_datatypes_with_missing(method):
+    """
+    Reproduces bug 162, where synthesiser class returns object dtype in the synthetic data
+    while the original data is string datatype.
+
+    All columns should return their original datatype.
+    """
+
+    n_samples_orig = 1000
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+        n_samples=n_samples_orig)
+
+    original_data["sixth"] = pd.Series(np.zeros(n_samples_orig), dtype='Int64')
+
+    original_data["seventh"] = pd.Series(
+        pd.Categorical(
+            ["medium"] * n_samples_orig,
+            categories=["low", "medium", "high"],
+            ordered=True,
+        )
+    )
+
+
+    original_data = original_data.astype({
+        "second": "float32",
+        "fourth": "int64",
+        "fifth": "object"
+    })
+
+    original_data = make_data_missing(original_data)
+
+    synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
+
+    syn_df = synthesiser.fit(original_data).generate()
+
+    assert all(syn_df.dtypes == original_data.dtypes)
+    assert list(syn_df["seventh"].cat.categories) == [
+        "low",
+        "medium",
+        "high",
+    ]
+    assert syn_df["seventh"].cat.ordered is True
+
+
+@pytest.mark.parametrize(
+    "missing_value",
+    [np.nan, None, pd.NA],
+)
+def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
+    """
+    Regression test for bug 152. The CartMethod failed for a numerical array with only missing values, 
+    Missing values are masked. As such, fitting on an entire np.nan array is the same as fitting on an empty array.
+    This threw an error resulting in bug issue 152. A fix was implemented
+    """
+    df = pd.DataFrame(
+        {
+            "a": [1, None],
+            "b": [0, 0],
+            "c": [missing_value, missing_value]
+        }
+    )
+
+    special_syn_method = {
+        "a": SampleMethod(),
+        "b": CopyMethod(),
+        "c": CartMethod()
+    }
+
+    synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
+    fit = synth.fit(df)
+
+    assert isinstance(fit.models_['a'], SampleMethod)
+    assert isinstance(fit.models_['b'], CopyMethod)
+    assert isinstance(fit.models_['c'], CartMethod)
+
+    generated = fit.generate()
+
+    assert len(generated) == len(df)
+
+    assert df['b'].equals(generated['b'])
+
+    assert generated['c'].isna().all()
