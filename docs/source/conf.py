@@ -46,7 +46,7 @@ html_theme_options = {
         },
     ],
     "logo": {
-        "text": "Synthpop-py",
+        "text": "synthpop-py",
         "image_light": "_static/logo_light_theme.png",
         "image_dark": "_static/logo_dark_theme.png",
     }

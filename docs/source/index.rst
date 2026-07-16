@@ -15,7 +15,7 @@
    developer/developer_index
    about_us/about
 
-Synthpop-py documentation
+synthpop-py documentation
 ======================
 
 **Version**: |release|

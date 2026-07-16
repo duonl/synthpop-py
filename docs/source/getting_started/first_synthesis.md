@@ -17,7 +17,7 @@ The `fit()` step learns the relationships and distributions present in the origi
 
 ## Evaluate the synthetic data
 
-Synthetic data should be evaluated before it is used for analysis or shared with others. Synthpop provides tools to compare the synthetic dataset with the original data and assess how well important characteristics have been preserved.
+Synthetic data should be evaluated before it is used for analysis or shared with others. synthpop-py provides tools to compare the synthetic dataset with the original data and assess how well important characteristics have been preserved.
 
 ### Univariate distributions
 
@@ -39,7 +39,7 @@ for fig in plots:
 
 ### Multivariate Standardized Propensity Mean Squared Error (SPMSE)
 Univariate comparisons evaluate variables individually, but they do not capture relationships between variables. 
-To assess whether multivariate patterns are preserved, synthpop provides metrics such as the Standardized Propensity Mean Squared Error ({doc}`../api_reference/plotting/S_pMSE`).
+To assess whether multivariate patterns are preserved, synthpop-py provides metrics such as the Standardized propensity Mean Squared Error ({doc}`../api_reference/plotting/S_pMSE`).
 
 ```python
 from synthpop.utility_metrics.spmse import pairwise_spmse

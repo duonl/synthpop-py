@@ -6,7 +6,7 @@ For most users, the recommended installation method is through PyPI. If you want
 
 ## Requirements
 
-Synthpop-py requires:
+synthpop-py requires:
 
 - Python 3.13 or later
 - `pip`
