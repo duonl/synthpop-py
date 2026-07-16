@@ -21,7 +21,7 @@ Synthpop documentation
 **Version**: |release|
 
 **Useful links**:
-`Installation <https://synthpop-py.readthedocs.io/en/develop/installing/installing.html>`_ |
+[Installation](./getting_started/installation.md) _ |
 `Source Repository <https://github.com/duonl/synthpop-py/tree/main>`_ |
 `Issue Tracker <https://github.com/duonl/synthpop-py/issues>`_ |
 `Synthpop R Package <https://www.synthpop.org.uk/index.html>`_
