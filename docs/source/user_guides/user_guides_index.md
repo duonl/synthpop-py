@@ -1,7 +1,7 @@
 # User Guide
 Welcome to the **synthpop-py User Guide**. This guide provides a detailed introduction to the concepts, algorithms, and workflows used throughout the package. It explains how synthetic data are generated, how the available synthesis methods and preprocessing components work, and how to evaluate the utility and privacy of synthetic datasets.
 
-If you are new to synthpop-py, we recommended starting with the Getting Started guide (ADD LINK). It introduces the package, explains how to install it and walks through the generation of your first synthetic dataset.
+If you are new to synthpop-py, we recommended starting with the [Getting Started Guide](../getting_started/getting_started.md). It introduces the package, explains how to install it and walks through the generation of your first synthetic dataset.
 
 The guides below provide more detailed explanations of specific topics:
 

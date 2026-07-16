@@ -34,7 +34,7 @@ Datasets should be provided as a `pandas.DataFrame`, where rows represent observ
 
 Define the synthesis methods and optional parameters that control how synthetic data is generated.
 
-synthpop-py supports multiple synthesis approaches, allowing users to select methods that are appropriate for their dataset and application. See {doc}`../user_guides/user_guide2` (Placeholder - ADD LINK) for more information.
+synthpop-py supports multiple synthesis approaches, allowing users to select methods that are appropriate for their dataset and application. See [User Guide 2: Synthetic data generation](../user_guides/2_synthetic_data_generation.md) or [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md) for more information.
 
 ### 3. Generate synthetic data
 

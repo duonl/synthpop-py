@@ -164,7 +164,7 @@ S_pMSE has several limitations:
 
 ## 5.4. Improving utility
 
-Utility evaluation is not only used to assess synthetic data quality; it can also help identify ways to improve the synthesis process. When synthetic data do not preserve important characteristics of the original data, the synthesis configuration can often be adjusted and evaluated again.
+Utility evaluation is not only used to assess synthetic data quality; it can also help identify ways to improve the synthesis process. Utility metrics can help identify specific variables or variable pairs where relationships are poorly preserved. These variables may require changes to the synthesis order, preprocessing, or synthesis method. After adjusting the synthesis configuration, new data can be generated and evaluated again to see if utility has improved.
 
 Common approaches for improving utility include:
 
@@ -172,13 +172,13 @@ Common approaches for improving utility include:
   Because synthpop-py generates variables sequentially, the column order determines which variables are available as predictors for each synthesis model. Placing variables that contain important information about other variables earlier in the sequence can improve preservation of relationships. See {ref}`Guide 2.2.4: Changing the column order <224-column-order>`.
 
 - **Changing synthesis methods**  
-  Different synthesis methods make different assumptions and may perform better for different types of variables or datasets. Comparing methods can help identify an approach that better preserves important distributions or relationships.
+  Different synthesis methods make different assumptions and may perform better for different types of variables or datasets. Comparing methods can help identify an approach that better preserves important distributions or relationships. See [Guide 3: Synthesis methods](./3_synthesis_methods.md) for more information.
 
 - **Adjusting preprocessing settings**  
   The default preprocessing behaviour is designed to work well for many datasets, but advanced users may adjust components such as categorical encoding or missing value handling when specific data characteristics require it. See {ref}`Guide 4: Data preparation during synthesis <4-data-preparation>`.
 
 - **Inspecting variables with low utility**  
-  Utility metrics can help identify specific variables or variable pairs where relationships are poorly preserved. These variables may require changes to the synthesis order, preprocessing, or synthesis method.
+
 
 There is no single configuration that maximises utility for all datasets. Improving utility is therefore an iterative process: modify the synthesis approach, generate synthetic data again, and compare utility metrics against the intended analytical use case.
 
