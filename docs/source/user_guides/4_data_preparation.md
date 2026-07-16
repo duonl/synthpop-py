@@ -43,7 +43,7 @@ Unlike naive label encoding, synthpop-py uses target-informed encodings that inc
 
 [^1]: This is also a key difference from the original synthpop R implementation, which uses different approaches for handling categorical predictors. The encoding strategy used in synthpop-py can substantially improve computational performance and model fitting efficiency for some synthesis tasks.
 
-The encoder used depends on the target type:
+The encoder used depends on the target data type:
 | Target type | Default encoder |
 |-------------|-----------------|
 | Categorical | PCA Encoder |
@@ -145,7 +145,7 @@ This method produces a single numeric feature that captures the average relation
 ## 4.2. Handling missing values
 Missing values are handled explicitly during synthesis because standard decision tree implementations cannot train on missing target values. If missing target values are passed directly to `scikit-learn` trees, model fitting will fail with an exception. Therefore, missing targets must be transformed before fitting and reconstructed after synthesis.
 
-It is implemented via a missing value handling interface, which transforms data before and after synthesis. Synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target:
+It is implemented via a missing value handling interface, which transforms data before and after synthesis. synthpop-py uses two complementary strategies for missing value handling, depending on the data type of the target:
 - Categorical targets: missing values are treated as an additional category during synthesis. The synthesis model can therefore learn missingness as one of the possible target outcomes.
 - Numeric targets: missingness is modelled separately from the target value. A dedicated missing value predictor learns the probability that the target is missing, while the regression model is trained only on observed target values.
 

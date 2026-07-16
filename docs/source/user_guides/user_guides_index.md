@@ -1,5 +1,5 @@
 # User Guide
-Welcome to the **synthpop-py User Guide**. his guide provides a detailed introduction to the concepts, algorithms, and workflows used throughout the package. It explains how synthetic data are generated, how the available synthesis methods and preprocessing components work, and how to evaluate the utility and privacy of synthetic datasets.
+Welcome to the **synthpop-py User Guide**. This guide provides a detailed introduction to the concepts, algorithms, and workflows used throughout the package. It explains how synthetic data are generated, how the available synthesis methods and preprocessing components work, and how to evaluate the utility and privacy of synthetic datasets.
 
 If you are new to synthpop-py, we recommended starting with the Getting Started guide (ADD LINK). It introduces the package, explains how to install it and walks through the generation of your first synthetic dataset.
 
@@ -7,7 +7,7 @@ The guides below provide more detailed explanations of specific topics:
 
 - **{doc}`1_introduction`** introduces synthetic data and its role in statistical disclosure control. It discusses the motivation for generating synthetic data, common use cases, and the balance between data utility and privacy.
 
-- **{doc}`2_synthetic_data_generation`** describes the synthetic data generation process in synthpop-py. It introduces the synthesis workflow, the `Synthesiser`, sequential synthesis, and the terminology used throughout the package.
+- **{doc}`2_synthetic_data_generation`** describes the synthetic data generation process in synthpop-py. It introduces the synthesis workflow, the `Synthesiser` class, sequential synthesis, and the terminology used throughout the package.
 
 - **{doc}`3_synthesis_methods`** provides an overview of the available synthesis methods, explains when they are appropriate, and describes how they can be customised.
 

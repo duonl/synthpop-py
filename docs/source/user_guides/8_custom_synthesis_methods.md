@@ -99,7 +99,7 @@ The signature is:
 fit(
     X: pd.DataFrame | None,
     y: pd.Series
-) -> self
+) -> Self
 ```
 Where:
 - `X` contains original predictor columns that have already been synthesised during the sequential synthesis process (earlier columns in the column order);

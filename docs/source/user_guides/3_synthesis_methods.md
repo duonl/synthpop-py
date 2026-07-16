@@ -23,7 +23,7 @@ CART (Classification And Regression Trees) is the default synthesis method.
 >>> from synthpop.methods.cart_synth import CartMethod
 
 >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
->>> y = pd.Series([50, 60, 70], name='length')
+>>> y = pd.Series([50.0, 60.0, 70.0], dtype='float32', name='length')
 >>> method = CartMethod().fit(X, y)
 >>> method.transform(X)
 0    50.0

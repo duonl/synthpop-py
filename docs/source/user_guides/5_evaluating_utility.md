@@ -9,7 +9,7 @@ Utility evaluation should therefore be performed with respect to the intended us
 The current utility evaluation tools in synthpop-py focus on distributional similarity:
 - Univariate comparisons to evaluate whether individual variables have similar distributions.
 - Bivariate (pairwise) comparisons to evaluate whether relationships between pairs of variables are preserved.
-- The current quantitative metric for bivariate utility evaluation is the Standardised Propensity Mean Squared Error (S_pMSE).
+- The current quantitative metric for bivariate utility evaluation is the Standardised propensity Mean Squared Error (S_pMSE).
 
 ---
 
@@ -63,11 +63,11 @@ Examples of relationships that may be important include:
 
 Pairwise comparisons provide more information than univariate comparisons, because they evaluate whether the synthetic data maintain dependencies present in the original dataset.
 
-synthpop-py currently evaluates pairwise relationships using the Standardised Propensity Mean Squared Error (S_pMSE), implemented through {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
+synthpop-py currently evaluates pairwise relationships using the Standardised propensity Mean Squared Error (S_pMSE), implemented through {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
 
 (531-spmse)=
-### 5.3.1. Standardised Propensity Mean Squared Error (S_pMSE)
-The pairwise Standardised Propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original synthpop R implementation.
+### 5.3.1. Standardised propensity Mean Squared Error (S_pMSE)
+The pairwise Standardised propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original synthpop R implementation.
 
 [^1]: Joshua Snoke, Gillian M. Raab, Beata Nowok, Chris Dibben, Aleksandra Slavković (2018), *General and Specific Utility Measures for Synthetic Data*, in Journal of the Royal Statistical Society: Series A (Statistics in Society), Volume 181, Issue 3, Pages 663–688.
 
