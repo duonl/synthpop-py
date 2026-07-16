@@ -12,6 +12,7 @@ from synthpop.utils import str_dtype
 class StubRegressor(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
         self.transform_result = transform_result
+        self._all_missing = False
 
     def fit(self, X, y):
         self.fit_x = X
@@ -29,6 +30,7 @@ class StubRegressor(TransformerMixin, BaseEstimator):
 class StubClassifier(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
         self.transform_result = transform_result
+        self._all_missing = False
 
     def fit(self, X, y):
         self.fit_x = X
@@ -217,6 +219,8 @@ def test_fit_saves_input_dtypes(y):
 
 
 # ----- transform tests -----
+
+
 @pytest.mark.parametrize(
     ("result", "method"),
     [
@@ -227,8 +231,8 @@ def test_fit_saves_input_dtypes(y):
     ]
 )
 def test_transform_returns_series(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result),
-                      classifier=StubClassifier(result))
+    cart = CartMethod()
+    classifier = StubClassifier(result)
 
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
@@ -249,13 +253,15 @@ def test_transform_returns_series(mocker, result, method):
 
     out = cart.transform(X)
 
-    pd.testing.assert_frame_equal(mocked_X.call_args.args[0], X)
+    pd.testing.assert_frame_equal(
+        mocked_X.call_args.args[0],
+        X,
+    )
 
     assert isinstance(out, pd.Series)
     assert out.name == "target"
 
     pd.testing.assert_index_equal(out.index, X.index)
-
     np.testing.assert_array_equal(out.to_numpy(), result)
 
 
@@ -465,7 +471,7 @@ def test_transform_requires_fit_missing_attribute(missing_attr):
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
-# ----- get_feature_names_out test -----
+    # ----- get_feature_names_out test -----
 
 
 def test_get_feature_names_out_delegates():
@@ -481,7 +487,7 @@ def test_get_feature_names_out_raises_unfitted():
     with pytest.raises(NotFittedError):
         cart.get_feature_names_out()
 
-# ----- clonability test -----
+    # ----- clonability test -----
 
 
 def test_clone_works_and_fitted_cart_does_not_preserve_state():

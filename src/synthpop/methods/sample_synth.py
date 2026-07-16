@@ -96,7 +96,7 @@ class SampleMethod(BaseSynthMethod):
         n = len(X) if X is not None else self.n_samples_
         rng = RandomStateManager.create_rng(seed=self.random_state_)
         
-        sampled = synthpop.methods.tree_utils.sample_array(rng, self.counts_, self.values_, n)
+        sampled = synthpop.methods.tree_utils._sample_array(rng, self.counts_, self.values_, n)
 
         return pd.Series(sampled, name=self.target_name_)
         

@@ -2,25 +2,34 @@
 This module contains the CART method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
-from typing import Self, Dict, Any
+from typing import Any, Dict, Self
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn import clone
-from sklearn.base import BaseEstimator, TransformerMixin, check_is_fitted
+from sklearn.base import (
+    BaseEstimator,
+    TransformerMixin,
+    check_is_fitted,
+)
 from sklearn.decomposition import PCA
-from sklearn.tree import BaseDecisionTree, DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.exceptions import NotFittedError
+from sklearn.tree import (
+    BaseDecisionTree,
+    DecisionTreeClassifier,
+    DecisionTreeRegressor,
+)
 
 from synthpop import utils
-import synthpop.methods.tree_utils as tree_utils
 from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
     BaseMissingValueHandler,
     MissingValuePredictor,
-    ReplaceNoneWithValue
+    ReplaceMissingWithValue
 )
 from synthpop.methods import base_synth
+import synthpop.methods.tree_utils as tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 
@@ -77,6 +86,10 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         Fit to predict `y` using `X`
 
+        If the target consists entirely of missing values, 
+        the estimator records this state and returns without fitting a tree. 
+        Subsequent calls to transform() produce an all-missing output
+
         :param X: features to predict `y`.
         :param y: target to synthesise.
 
@@ -85,9 +98,14 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         self.target_name_ = getattr(y, "name", None)
         X_val, n_samples = utils.validate_2d_dict(X)
         y = utils.validate_1d_target(y, n_samples)
+        self._all_missing = False
 
         self.n_features_in_ = len(X.keys())
         self.feature_order_ = list(X.keys())
+
+        if pd.isna(y).all():
+            self._all_missing = True
+            return self
 
         self.encoders_ = {name: self._new_encoder().fit(value, y) for (
             name, value) in X_val.items() if not pd.api.types.is_numeric_dtype(value.dtype)}
@@ -96,12 +114,20 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         prepared_for_fit_X, prepared_y = self.missing_handler_.prepare_data_for_fit(
             X_val, y)
 
-        all_features_dict = {k: self.encoders_[k].transform(
-            v) if k in self.encoders_ else v for (k, v) in prepared_for_fit_X.items()}
+        all_features_dict = {
+            k: self.encoders_[k].transform(v)
+            if k in self.encoders_
+            else v
+            for (k, v) in prepared_for_fit_X.items()
+        }
         all_features = tree_utils.build_feature_matrix(
             all_features_dict, self.feature_order_)
 
-        self.tree_ = self._new_tree().fit(all_features, self._convert_y(prepared_y))
+        self.tree_ = tree_utils._fit_decision_tree_with_reachable_leaves(
+            decision_tree=self._new_tree(),
+            X=all_features,
+            y=self._convert_y(prepared_y)
+        )
 
         leaf_ids = self.tree_.apply(all_features)
 
@@ -111,13 +137,21 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
         """
-        Synthesise new column
+        Synthesise new column.
 
         :param X: features used to predict the target variable.
 
         :return: synthesised column.
 
         """
+
+        if not hasattr(self, '_all_missing'):
+            raise NotFittedError(
+                f"{self.__class__.__name__} instance is not fitted yet.")
+        elif self._all_missing:
+            n = len(next(iter(X.values()))) if X else 0
+            # method in child class will do correct dtype conversion
+            return np.full(n, np.nan)
 
         # Apply encoding, sample, apply (inverse) handling of missing values.
         check_is_fitted(
@@ -190,7 +224,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     """
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
-    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceNoneWithValue`
+    :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  :py:class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
 
     The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
@@ -234,7 +268,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         return PCAEncoder()
 
     def _get_missing_handling(self):
-        return ReplaceNoneWithValue()
+        return ReplaceMissingWithValue()
 
     def _get_tree(self):
         return DecisionTreeClassifier(min_samples_leaf=5,   # equivalent to minbucket in synthpop-r

@@ -2,12 +2,12 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from synthpop.data_processing.missing_value_handling import ReplaceNoneWithValue
+from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
 
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
 def test_round_trip():
-    replace_missing = ReplaceNoneWithValue()
+    replace_missing = ReplaceMissingWithValue()
     X = {"a":np.array(["a","b","c","c"], dtype=str_dtype)}
     y = np.array(["x","y",np.nan,"z"], dtype=str_dtype)
 
