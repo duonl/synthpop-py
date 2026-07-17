@@ -24,7 +24,7 @@ A recommended evaluation process starts with univariate distributions because th
 
 After validating individual variables, pairwise relationships can be assessed. Preserving relationships between variables is important because many analyses depend on associations rather than individual distributions alone.
 
-Evaluating utility can also extent to trivariate and multivariate distributions and relationships.
+Evaluating utility can also extend to trivariate and multivariate distributions and relationships.
 
 ---
 
