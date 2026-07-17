@@ -32,7 +32,7 @@ The synthesiser controls the complete synthesis process. During fitting, it lear
 
 At this stage, no synthetic data has been created yet. We have only configured the object that will perform the synthesis.
 
-More information about initialising the synthesiser can be found in User Guide 2.2 ADD LINK.
+More information about initialising the synthesiser can be found in {ref}`User Guide 2.2: The Synthesiser class <22-synthesiser-class>`.
 
 ## Fitting the synthesiser
 Next, we fit the synthesiser on the original dataset.
@@ -43,7 +43,7 @@ During fitting, synthpop-py analyses the variables in the dataset and estimates 
 
 The original data is not modified. Instead, the synthesiser stores the information needed to create new observations.
 
-More information about fitting the synthesiser can be found in User Guide 2.4 ADD LINK.
+More information about fitting the synthesiser can be found in {ref}`User Guide 2.4: Fitting the synthesiser <24-fitting-synthesiser>`.
 
 ## Generating synthetic data
 We can now generate a synthetic dataset.
@@ -66,7 +66,7 @@ The generated dataset has the same columns as the original dataset:
 
 The generated records are not copies of the original observations. Instead, they are newly generated values that aim to preserve the statistical properties and relationships present in the original data.
 
-More information about generating synthetic data can be found in User Guide 2.5 ADD LINK.
+More information about generating synthetic data can be found in {ref}`User Guide 2.5: Generating synthetic data <25-generating-synthetic-data>`.
 
 ## Evaluating the synthetic data
 ### Comparing individual variable distributions
@@ -87,7 +87,7 @@ Running the code above opens the plots interactively. You will see that the firs
 
 As you can see, the marginal distributions overlap mostly. There are some small differences, but generally speaking, the synthesiser reproduced the variable correctly.
 
-More information about plotting the univariate distributions can be found in User Guide 7.1 ADD LINK.
+More information about plotting the univariate distributions can be found in {ref}`User Guide 7.1: Univariate distribution visualisation <71-univariate-distribution-visualisation>`.
 
 ### Evaluating pairwise relationships with S_pMSE
 Another important aspect of utility is whether relationships between variables are preserved. `synthpop-py` provides the pairwise Standardised propensity Mean Squared Error (S_pMSE) metric ({func}`~synthpop.utility_metrics.spmse.pairwise_spmse`) for this purpose.
@@ -111,7 +111,7 @@ The output contains the S_pMSE values for each pair of variables:
 |  1 | age       | sex       |  0.92953 |
 |  2 | age       | bmi       |  1.38183 |
 
-Lower S_pMSE values indicate that the relationship between two variables is better preserved in the synthetic data. The interpretation of S_pMSE values and its limitations are explained in User Guide 5.3 ADD LINK.
+Lower S_pMSE values indicate that the relationship between two variables is better preserved in the synthetic data. The interpretation of S_pMSE values and its limitations are explained in {ref}`User Guide 5.3.1: S_pMSE <531-spmse>`.
 
 To make the results easier to inspect, we can visualise the S_pMSE values as a heatmap:
 ```python
@@ -122,7 +122,7 @@ plot_spmse(spmse)
 ![Heatmap of S_pMSE values](../images/spmse.png)
 These visualisations allow us to compare variables one by one. As seen in the plot, all S_pMSE values are below 3 which shows us that the synthetic and original data are not statistically distinguishable with respect to the relationship between two variables.
 
-More information about this visualisation and the interpretation can be found in User Guide 7.2 ADD LINK. 
+More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`. 
 
 ## Next steps
 Congratulations, you have created and evaluated your first synthetic dataset. Now it is time to find out how to make even better synthetic datasets. The next examples in this module explain how to make your synthesis reproducible, how to generate larger datasets and the importance of the synthesis order. The next module will go into more detail on more parameters to make your synthesis better.
