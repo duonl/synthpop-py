@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-The Standardised Propensity Mean Squared Error (S_pMSE) is a statistical utility measure used to quantify the similarity between an original dataset and a synthetic dataset. It evaluates how well the joint distributions of variable pairs are preserved in the synthetic data relative to the original data [1](references)
+The Standardised propensity Mean Squared Error (S_pMSE) is a statistical utility measure used to quantify the similarity between an original dataset and a synthetic dataset. It evaluates how well the joint distributions of variable pairs are preserved in the synthetic data relative to the original data [1](references)
 
 ## 2. Input and output
 

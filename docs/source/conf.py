@@ -27,6 +27,9 @@ exclude_patterns = []
 #html_theme = 'alabaster'
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+html_css_files = [
+    "synthpop.css",
+]
 
 html_theme_options = {
     "show_nav_level": 2,
@@ -43,17 +46,19 @@ html_theme_options = {
         },
     ],
     "logo": {
-        "text": "Synthpop-py",
-        "image_light": "_static/_static/logo_light_theme.png",
-        "image_dark": "_static/_static/logo_dark_theme.png",
+        "text": "synthpop-py",
+        "image_light": "_static/logo_light_theme.png",
+        "image_dark": "_static/logo_dark_theme.png",
     }
 }
 
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'sphinx_design',
     'myst_parser',
     'sphinxcontrib.mermaid',
+    "sphinx.ext.intersphinx",
 ]
 myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
 autodoc_member_order = "bysource"
@@ -65,4 +70,11 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',
     '.md': 'markdown',
+}
+
+intersphinx_mapping = {
+    "sklearn": (
+        "https://scikit-learn.org/stable/",
+        None,
+    ),
 }

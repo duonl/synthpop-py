@@ -97,7 +97,7 @@ class PCAEncoder(_BaseEncoder):
     Transforms categorical data to one or more numeric columns.
     The user can adjust the number of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
 
-    :param pca_transform: The pca transform used. The default value is :py:class:`sklearn.decomposition.PCA`. 
+    :param pca_transform: The pca transform used. The default value is {class}`sklearn.decomposition.PCA`. 
          See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principal components are computed and used.
 
     Examples
