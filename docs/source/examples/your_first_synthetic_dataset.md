@@ -1,6 +1,6 @@
 # Your first synthetic dataset
 
-Welcome to **synthpop-py**. In this example, we will walk you through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the diabetes dataset from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. For this example, the dataset only contains continuous variables.
+Welcome to synthpop-py. In this example, we will walk you through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the diabetes dataset from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. For this example, the dataset only contains continuous variables.
 
 ## Loading the data
 First, we load the dataset and convert it to a pandas DataFrame.
