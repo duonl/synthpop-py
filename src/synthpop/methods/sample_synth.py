@@ -61,6 +61,7 @@ class SampleMethod(BaseSynthMethod):
             raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
         self.target_name_ = y.name
         self.n_samples_ = len(y)
+        self.target_dtype_ = y.dtype
 
         value_counts = y.value_counts(dropna=False)
         self.values_ = value_counts.index.to_numpy()
@@ -90,6 +91,7 @@ class SampleMethod(BaseSynthMethod):
             or not hasattr(self, "target_name_")
             or not hasattr(self, "n_samples_")
             or not hasattr(self, "random_state_")
+            or not hasattr(self, "target_dtype_")
         ):
             raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
         
@@ -98,7 +100,7 @@ class SampleMethod(BaseSynthMethod):
         
         sampled = synthpop.methods.tree_utils._sample_array(rng, self.counts_, self.values_, n)
 
-        return pd.Series(sampled, name=self.target_name_)
+        return pd.Series(sampled, name=self.target_name_, dtype=self.target_dtype_)
         
     def get_feature_names_out(self, input_features=None) -> list[str]:
         if not hasattr(self, "target_name_"):
