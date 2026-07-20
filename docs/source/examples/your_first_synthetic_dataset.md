@@ -1,6 +1,6 @@
 # Your first synthetic dataset
 
-Welcome to **synthpop-py**. In this example, we will walk through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the diabetes dataset from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. The dataset only contains continuous variables for this example.
+Welcome to **synthpop-py**. In this example, we will walk you through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the diabetes dataset from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. For this example, the dataset only contains continuous variables.
 
 ## Loading the data
 First, we load the dataset and convert it to a pandas DataFrame.
@@ -39,7 +39,7 @@ Next, we fit the synthesiser on the original dataset.
 ```python
 synthesiser.fit(data)
 ```
-During fitting, synthpop-py analyses the variables in the dataset and estimates the relationships required for generating synthetic data.
+During fitting, synthpop-py analyses the variables and estimates the internal relationships between the data.
 
 The original data is not modified. Instead, the synthesiser stores the information needed to create new observations.
 
@@ -64,9 +64,9 @@ The generated dataset has the same columns as the original dataset:
 ****Congratulations, you have created your first synthetic dataset!****
 <img src="../images/tada_emoji.gif" width="25" style="vertical-align: middle;">
 
-The generated records are not copies of the original observations. Instead, they are newly generated values that aim to preserve the statistical properties and relationships present in the original data.
+The generated data are not copies of the original observations. Instead, they are newly generated values that aim to preserve the statistical properties and relationships present in the original data.
 
-More information about generating synthetic data can be found in {ref}`User Guide 2.5: Generating synthetic data <25-generating-synthetic-data>`.
+More information about generating synthetic data can be found in {ref}`User Guide 2.5: Generating synthetic data <25-generating-synthetic_data>`.
 
 ## Evaluating the synthetic data
 ### Comparing individual variable distributions
