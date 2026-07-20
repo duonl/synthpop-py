@@ -1,26 +1,22 @@
 """
-These test aim to show that the synthesis process is reproducible and deals correctly with randomness
+These tests aim to show that the synthesis process is
+reproducible and handles randomness correctly.
 """
-import pytest
-
 import numpy as np
-from sklearn.base import BaseEstimator, TransformerMixin
-
-from synthpop.methods.sample_synth import SampleMethod
-from synthpop.methods.tree_utils import LeafNodeSampler
-from synthpop.reproducibility import RandomStateManager
-import pandas as pd
-from synthpop.synthesiser import Synthesiser
 import pandas as pd
 import pytest
-import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 from synthpop.synthesiser import Synthesiser
-from tests.integration.data_generated_for_tests import get_test_data_classifier, get_test_data_regressor, simulate_realistic_dataset_correlations
+
+from tests.integration.data_generated_for_tests import (
+    get_test_data_classifier,
+    get_test_data_regressor,
+    simulate_realistic_dataset_correlations,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -43,8 +39,10 @@ class StandardTransformer(TransformerMixin, BaseEstimator):
     """
     This class implements randomness exactly as described in the developer docs.
     It simulates how components in this package should use random numbers.
-    The aim is to test that the goals set out in the functional descriptions regarding randomness are met.
+    The aim is to test that the goals set out in the functional descriptions
+    regarding randomness are met.
     """
+
 
     def __init__(self, random_state: int | None = None):
         self.random_state = random_state
@@ -63,25 +61,27 @@ class StandardTransformer(TransformerMixin, BaseEstimator):
 
 
 def test_standard_transformer_has_reproducible_transform_by_default():
-
     transformer = StandardTransformer()
     transformer.fit(X=0, y=0)
 
     result1 = transformer.transform(X=0)
     result2 = transformer.transform(X=0)
 
-    assert np.array_equal(
-        result1, result2), "StandardTransformer.transform is not reproducible by default"
+    assert np.array_equal(result1, result2), (
+        "StandardTransformer.transform is not reproducible by default"
+    )
 
     with RandomStateManager(seed=1000):
         result3 = transformer.transform(X=0)
 
     result4 = transformer.transform(X=0)
 
-    assert not np.array_equal(
-        result1, result3), "StandardTransformer.transform should have a different result if the seed has been changed."
-    assert np.array_equal(
-        result1, result4), "StandardTransformer.transform should have the same result after exiting the context block"
+    assert not np.array_equal(result1, result3), (
+        "StandardTransformer.transform should have a different result if the seed has been changed."
+    )
+    assert np.array_equal(result1, result4), (
+        "StandardTransformer.transform should have the same result after exiting the context block"
+    )
 
 
 def test_standard_transformer_independent_instances():
@@ -101,7 +101,6 @@ def test_standard_transformer_independent_instances():
 
 
 def test_standard_transformer_reproduces_when_setting_seed():
-
     seed = [1, 2, 3]
     RandomStateManager.set_root_seed(seed)
 
@@ -119,16 +118,23 @@ def test_standard_transformer_reproduces_when_setting_seed():
 
 def combined_regressor_and_classifier_test_data(seed=10):
     X_reg, y_reg = get_test_data_regressor(
-        seed=seed, with_cats=True, with_missing_features=True, with_missing_target=True)
+        seed=seed,
+        with_cats=True,
+        with_missing_features=True,
+        with_missing_target=True,
+    )
     X_clas, y_clas = get_test_data_classifier(
-        seed=seed, with_cats=True, with_missing_features=True, with_missing_target=True)
+        seed=seed,
+        with_cats=True,
+        with_missing_features=True,
+        with_missing_target=True,
+    )
 
     d_data = {}
 
     available_columns = sorted(set(X_reg) & set(X_clas))
 
     for i, k in enumerate(available_columns):
-
         if i % 2 == 0:
             d_data[k] = X_reg[k]
         else:
@@ -141,7 +147,6 @@ def combined_regressor_and_classifier_test_data(seed=10):
 
 
 def test_reproducibility_synthesis():
-
     obs = combined_regressor_and_classifier_test_data()
 
     synth = Synthesiser(random_seed=1)
@@ -150,9 +155,11 @@ def test_reproducibility_synthesis():
     syn1 = synth.generate(2000)
     syn2 = synth.generate(2000)
 
-    assert syn1.equals(
-        syn2), "generating 2 consecutive times did not produce the same synthetic dataset"
-
+    pd.testing.assert_frame_equal(
+        syn1,
+        syn2,
+        obj="generating 2 consecutive times did not produce the same synthetic dataset",
+    )
     synth2 = Synthesiser(random_seed=1)
     synth2.fit(obs)
 
@@ -161,14 +168,18 @@ def test_reproducibility_synthesis():
     for col in syn3.columns:
         syn3_is_nan_mask = pd.isna(syn3[col])
         syn2_is_nan_mask = pd.isna(syn2[col])
-        assert syn2_is_nan_mask.equals(
-            syn3_is_nan_mask), f"missingness not reproduced for column {col}"
-        assert (syn3[col][~syn3_is_nan_mask] == syn2[col]
-                [~syn2_is_nan_mask]).all(), f"column {col} not reproduced"
+        pd.testing.assert_series_equal(
+            syn2_is_nan_mask,
+            syn3_is_nan_mask,
+            obj=f"missingness not reproduced for column {col}",
+        )
+        assert (
+            syn3[col][~syn3_is_nan_mask]
+            == syn2[col][~syn2_is_nan_mask]
+        ).all(), f"column {col} not reproduced"
 
 
 def test_generate_independent_syn_datasets():
-
     obs = simulate_realistic_dataset_correlations(n_samples=1010)[0]
 
     synth = Synthesiser(random_seed=0)
@@ -194,13 +205,15 @@ def test_generate_override_seed_is_replayable():
     syn2 = synth.generate(random_seed=100)
     syn3 = synth.generate(random_seed=100)
 
-    assert syn2.equals(syn3)
+    pd.testing.assert_frame_equal(syn2, syn3)
     assert not syn2.equals(syn1)
 
 
 def test_sample_method_reproducible():
-
-    y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
+    y = pd.Series(
+        ["a"] * 3 + ["b"] * 5,
+        name="test_target",
+    )
     method = SampleMethod()
 
     method.fit(None, y)
@@ -208,17 +221,22 @@ def test_sample_method_reproducible():
     result1 = method.transform(None)
     result2 = method.transform(None)
 
-    assert result1.equals(result2)
+    pd.testing.assert_series_equal(result1, result2)
 
 
 def test_sample_method_explicit_seed_reproducible():
-
-    y = pd.Series(["a"]*3 + ["b"]*5, name="test_target")
+    y = pd.Series(
+        ["a"] * 3 + ["b"] * 5,
+        name="test_target",
+    )
 
     m1 = SampleMethod(random_state=123).fit(None, y)
     m2 = SampleMethod(random_state=123).fit(None, y)
 
-    assert m1.transform(None).equals(m2.transform(None))
+    pd.testing.assert_series_equal(
+        m1.transform(None),
+        m2.transform(None),
+    )
 
 
 def test_leafnode_sampler_sample_determinism_with_same_seed():
@@ -226,9 +244,17 @@ def test_leafnode_sampler_sample_determinism_with_same_seed():
     leaf_ids = np.array([10, 10, 20, 20])
 
     sampler1 = LeafNodeSampler(
-        random_state=41).fit_sampler(leaf_ids=leaf_ids, y=y)
+        random_state=41,
+    ).fit_sampler(
+        leaf_ids=leaf_ids,
+        y=y,
+    )
     sampler2 = LeafNodeSampler(
-        random_state=41).fit_sampler(leaf_ids=leaf_ids, y=y)
+        random_state=41,
+    ).fit_sampler(
+        leaf_ids=leaf_ids,
+        y=y,
+    )
 
     y1 = sampler1.sample_from_leaves(leaf_ids)
     y2 = sampler2.sample_from_leaves(leaf_ids)
