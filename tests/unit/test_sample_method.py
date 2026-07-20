@@ -10,7 +10,7 @@ from synthpop.methods.sample_synth import SampleMethod
 
 def make_fitted_model(values: list, counts: list, target_name="target", n_samples=3, seed=42, dtype=None):
     model = SampleMethod()
-    if dtype:
+    if not dtype:
         dtype = np.asarray(values).dtype
 
     model.values_ = np.asarray(values)
@@ -111,6 +111,11 @@ def test_transform_various_dtypes(y):
     X = pd.DataFrame({"X": range(10)})
     result = model.transform(X)
     assert result.dtype == model.target_dtype_
+    if isinstance(y.dtype, pd.CategoricalDtype):
+        assert y.cat.categories.equals(
+        result.cat.categories
+    )
+        assert y.cat.ordered == result.cat.ordered
 
 
 def test_transform_without_X_uses_training_size():

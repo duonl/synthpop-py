@@ -21,7 +21,7 @@ def make_data_missing(X, as_Series=False):
 
         values = [v if i % p != 1 else np.nan for i, v in enumerate(X[k])]
 
-        if pd.api.types.is_categorical_dtype(X[k].dtype):
+        if isinstance(X[k].dtype, pd.CategoricalDtype):
             X[k] = pd.Categorical(
                 values,
                 categories=X[k].cat.categories,

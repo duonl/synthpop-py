@@ -197,7 +197,7 @@ def test_synthesiser_preserves_datatypes(method):
     original_data = original_data.astype({
         "second": "float32",
         "third": "string",
-        "fourth": "Int64",
+        "fourth": "Float64",
         "fifth": "object"
     })
 

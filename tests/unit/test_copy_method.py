@@ -12,6 +12,7 @@ from synthpop.methods.copy_synth import CopyMethod
     "y", [
         pd.Series([1, pd.NA, 3], name="my_target"),  # integer
         pd.Series([1.1, 2.2, np.nan], name="my_target"),  # floats
+        pd.Series([1.1, 2.2, np.nan], name="my_target", dtype='Float64'),  # floats
         pd.Series(["a", "b", "c"], name="my_target", dtype="category"),  # categorical
         pd.Series(["a", "b", "c"], name="my_target", dtype="object"), # object
         pd.Series(["a", "b", "c"], name="my_target", dtype="string"),  # string
@@ -41,6 +42,7 @@ def test_fit_sets_name_when_none():
     "y, target_name, n_samples", [
         (pd.Series([1, pd.NA, 3]), "integer", 3),
         (pd.Series([1.1, 2.2, 3.3, np.nan]), "floats", 4),
+        (pd.Series([1.1, 2.2, 3.3, np.nan], dtype='Float64'), "floats", 3),  # floats
         (pd.Series(["a", "b", "c"], dtype="category"), "categorical", 3),
         (pd.Series(["a", "b", "c"], dtype="object"), "object", 3),
         (pd.Series(["a", "b", "c"], dtype="string"), "string", 3),
@@ -58,6 +60,11 @@ def test_transform_various_dtypes(y, target_name, n_samples):
     result = model.transform(None)
     expected = pd.Series(y.values, name=target_name, dtype=y.dtype)
     pd.testing.assert_series_equal(result, expected)
+    if isinstance(y.dtype, pd.CategoricalDtype):
+        assert result.cat.categories.equals(
+        expected.cat.categories
+    )
+        assert result.cat.ordered == expected.cat.ordered
 
 def test_transform_accepts_X():
     model = CopyMethod()
