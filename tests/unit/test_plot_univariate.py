@@ -2,22 +2,23 @@ import tempfile
 import webbrowser
 from pathlib import Path
 
-import pytest
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import pytest
 
 from synthpop.plotting.plot_univariate import (
-    plot_univariate_distributions,
-    _make_histograms,
-    _make_bars,
-    _plot_single_distribution,
     _build_html,
+    _make_bars,
+    _make_histograms,
+    _plot_single_distribution,
     _write_html,
+    plot_univariate_distributions,
 )
 
 
 # ----- _make_histograms tests -----
+
 
 def test_make_histograms_returns_histograms():
     orig = pd.Series([1, 2, 3, pd.NA])
@@ -33,6 +34,7 @@ def test_make_histograms_returns_histograms():
     assert syn_hist.x.tolist() == syn.dropna().tolist()
     assert syn_hist.name == "Synthetic"
 
+
 def test_make_histograms_corrects_bins_for_integer_data():
     orig = pd.Series([1, 2, 3])
     syn = pd.Series([4, 5, 6])
@@ -46,6 +48,7 @@ def test_make_histograms_corrects_bins_for_integer_data():
         assert histogram.xbins.size == 1
         assert histogram.histnorm == "probability density"
 
+
 def test_make_histograms_float_bin_logic(monkeypatch):
     orig = pd.Series([1.1, 2.2, 3.3])
     syn = pd.Series([4.4, 5.5, 6.6])
@@ -57,7 +60,7 @@ def test_make_histograms_float_bin_logic(monkeypatch):
     def fake_histogram_bin_edges(arr, bins):
         called["args"] = (arr, bins)
         return fake_bins
-    
+
     monkeypatch.setattr(
         np,
         "histogram_bin_edges",
@@ -76,8 +79,9 @@ def test_make_histograms_float_bin_logic(monkeypatch):
         assert histogram.xbins.end == fake_bins[-1]
         assert histogram.xbins.size == expected_bin_size
         assert histogram.histnorm == "probability density"
-    
+
     assert syn_hist.xbins == orig_hist.xbins
+
 
 @pytest.mark.parametrize(
     "orig, syn",
@@ -89,11 +93,12 @@ def test_make_histograms_float_bin_logic(monkeypatch):
 def test_make_histograms_removes_missing_data(orig, syn):
     orig_hist, syn_hist = _make_histograms(orig, syn)
 
-    all(not pd.isna(x) for x in orig_hist.x)
-    all(not pd.isna(x) for x in syn_hist.x)
+    assert all(not pd.isna(x) for x in orig_hist.x)
+    assert all(not pd.isna(x) for x in syn_hist.x)
 
 
 # ----- _make_bars tests -----
+
 
 def test_make_bars_aligns_categories_and_normalises():
     orig = pd.Series(["A", "A", "B"])
@@ -106,6 +111,7 @@ def test_make_bars_aligns_categories_and_normalises():
 
     assert pytest.approx(orig_bar.y) == [2/3, 1/3]
     assert pytest.approx(syn_bar.y) == [1/4, 3/4]
+
 
 def test_make_bars_handles_missing_values():
     orig = pd.Series(["A", pd.NA, "B"])
@@ -120,6 +126,7 @@ def test_make_bars_handles_missing_values():
     assert sum(orig_bar.customdata) == 3
     assert sum(syn_bar.customdata) == 3
 
+
 def test_make_bars_does_not_fail_with_categorical_dtype_and_missing_values():
     """
     Regression test for:
@@ -133,12 +140,17 @@ def test_make_bars_does_not_fail_with_categorical_dtype_and_missing_values():
     orig_bar, syn_bar = _make_bars(orig, syn)
 
     for bar in [orig_bar, syn_bar]:
-        assert isinstance(bar, go.Bar)  # basic sanity check: output must be go.Bar
-        assert '<MISSING>' in bar.x # ensure missing handling worked
-        assert pytest.approx(sum(bar.y)) == 1.0 # basic sanity check: densities should sum to 1
-        assert sum(bar.customdata) == 4 # should match row count including missing
+        # basic sanity check: output must be go.Bar
+        assert isinstance(bar, go.Bar)
+        assert '<MISSING>' in bar.x  # ensure missing handling worked
+        # basic sanity check: densities should sum to 1
+        assert pytest.approx(sum(bar.y)) == 1.0
+        # should match row count including missing
+        assert sum(bar.customdata) == 4
+
 
 # ----- _plot_single_distribution tests -----
+
 
 def test_plot_single_distribution_uses_histograms(monkeypatch):
     orig = pd.Series([1, 2, 3])
@@ -156,8 +168,10 @@ def test_plot_single_distribution_uses_histograms(monkeypatch):
         called["bars"] += 1
         return go.Bar(), go.Bar()
 
-    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_histograms", fake_hist)
-    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_bars", fake_bars)
+    monkeypatch.setattr(
+        "synthpop.plotting.plot_univariate._make_histograms", fake_hist)
+    monkeypatch.setattr(
+        "synthpop.plotting.plot_univariate._make_bars", fake_bars)
 
     fig = _plot_single_distribution(orig, syn, "age")
 
@@ -167,6 +181,7 @@ def test_plot_single_distribution_uses_histograms(monkeypatch):
 
     assert called["hist_args"][0].equals(orig)
     assert called["hist_args"][1].equals(syn)
+
 
 def test_plot_single_distribution_categorical_path(monkeypatch):
     orig = pd.Series(["A", "B"])
@@ -184,8 +199,10 @@ def test_plot_single_distribution_categorical_path(monkeypatch):
         called["bars"] += 1
         return go.Bar(), go.Bar()
 
-    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_histograms", fake_hist)
-    monkeypatch.setattr("synthpop.plotting.plot_univariate._make_bars", fake_bars)
+    monkeypatch.setattr(
+        "synthpop.plotting.plot_univariate._make_histograms", fake_hist)
+    monkeypatch.setattr(
+        "synthpop.plotting.plot_univariate._make_bars", fake_bars)
 
     fig = _plot_single_distribution(orig, syn, "sex")
 
@@ -195,6 +212,7 @@ def test_plot_single_distribution_categorical_path(monkeypatch):
 
     assert called["bar_args"][0].equals(orig)
     assert called["bar_args"][1].equals(syn)
+
 
 def test_plot_single_distribution_adds_annotation():
     orig = pd.Series([1, None, 2])
@@ -208,6 +226,7 @@ def test_plot_single_distribution_adds_annotation():
         "Missing values - Original: 1, Synthetic: 1"
     )
 
+
 def test_plot_single_distribution_uses_column_name_in_title():
     orig = pd.Series([1, 2, 3])
     syn = pd.Series([4, 5, 6])
@@ -215,6 +234,7 @@ def test_plot_single_distribution_uses_column_name_in_title():
     fig = _plot_single_distribution(orig, syn, "age")
 
     assert fig.layout.title.text == "Distribution comparison: age"
+
 
 def test_plot_single_distribution_numeric_layout():
     orig = pd.Series([1, 2, 3])
@@ -228,6 +248,7 @@ def test_plot_single_distribution_numeric_layout():
     assert fig.layout.legend.title.text == "Dataset"
     assert fig.layout.height == 500
 
+
 def test_plot_single_distribution_categorical_layout():
     orig = pd.Series(["A", "B"])
     syn = pd.Series(["A", "A"])
@@ -240,7 +261,9 @@ def test_plot_single_distribution_categorical_layout():
     assert fig.layout.legend.title.text == "Dataset"
     assert fig.layout.height == 500
 
+
 # ----- _build_html tests -----
+
 
 def test_build_html_uses_correct_to_html_arguments(monkeypatch):
     figs = [go.Figure(), go.Figure(), go.Figure()]
@@ -278,7 +301,9 @@ def test_build_html_uses_correct_to_html_arguments(monkeypatch):
         },
     ]
 
+
 # ----- _write_html tests -----
+
 
 def test_write_html_uses_named_tempfile(monkeypatch):
     captured = {}
@@ -317,6 +342,7 @@ def test_write_html_uses_named_tempfile(monkeypatch):
 
 
 # ----- plot_univariate_distribution tests -----
+
 
 @pytest.fixture
 def mocked_environment(monkeypatch):
@@ -363,6 +389,7 @@ def mocked_environment(monkeypatch):
 
     return state
 
+
 def test_orig_df_must_be_dataframe():
     with pytest.raises(ValueError, match="original data should be a pandas DataFrame"):
         plot_univariate_distributions(
@@ -370,6 +397,7 @@ def test_orig_df_must_be_dataframe():
             syn_df=pd.DataFrame({"x": [1, 2]}),
             save_path=None
         )
+
 
 def test_syn_df_must_be_dataframe():
     with pytest.raises(ValueError, match="synthetic data should be a pandas DataFrame"):
@@ -379,13 +407,15 @@ def test_syn_df_must_be_dataframe():
             save_path=None
         )
 
+
 def test_column_mismatch_raises():
     orig = pd.DataFrame({"a": [1, 2]})
     syn = pd.DataFrame({"b": [1, 2]})
 
     with pytest.raises(ValueError, match="datasets must have identical columns"):
         plot_univariate_distributions(orig, syn, None)
-    
+
+
 def test_output_is_go_figure():
     orig = pd.DataFrame({"a": [1, 2], "b": ["a", "b"]})
     syn = pd.DataFrame({"a": [1, 2], "b": ["a", "b"]})
@@ -395,6 +425,7 @@ def test_output_is_go_figure():
     assert isinstance(result, list)
     assert len(result) == len(orig.columns)
     assert all(isinstance(fig, go.Figure) for fig in result)
+
 
 def test_no_save_and_no_browser_when_non_interactive(mocked_environment):
     orig = pd.DataFrame({"x": [1, 2, 3]})
@@ -411,6 +442,7 @@ def test_no_save_and_no_browser_when_non_interactive(mocked_environment):
     assert len(mocked_environment["write_calls"]) == 0
     assert len(mocked_environment["tempfile_calls"]) == 0
     assert len(mocked_environment["browser_calls"]) == 0
+
 
 def test_save_and_no_browser_when_non_interactive(mocked_environment):
     orig = pd.DataFrame({"x": [1, 2, 3]})
@@ -435,6 +467,7 @@ def test_save_and_no_browser_when_non_interactive(mocked_environment):
     assert len(mocked_environment["tempfile_calls"]) == 0
     assert len(mocked_environment["browser_calls"]) == 0
 
+
 def test_save_and_browser_when_interactive(mocked_environment):
     orig = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
@@ -457,10 +490,11 @@ def test_save_and_browser_when_interactive(mocked_environment):
 
     assert len(mocked_environment["tempfile_calls"]) == 0
 
-    assert len(mocked_environment["browser_calls"]) == 1    
+    assert len(mocked_environment["browser_calls"]) == 1
     browser_args, _ = mocked_environment["browser_calls"][0]
     assert browser_args[0].endswith("univariate_distribution_comparison.html")
-    
+
+
 def test_browser_opens_when_interactive_without_save_location(mocked_environment):
     orig = pd.DataFrame({"x": [1, 2, 3]})
     syn = pd.DataFrame({"x": [1, 2, 3]})
@@ -476,7 +510,7 @@ def test_browser_opens_when_interactive_without_save_location(mocked_environment
     assert len(mocked_environment["write_calls"]) == 0
     assert len(mocked_environment["tempfile_calls"]) == 1
     assert mocked_environment["tempfile_html"] is not None
-    
+
     assert len(mocked_environment["browser_calls"]) == 1
     browser_args, _ = mocked_environment["browser_calls"][0]
     assert browser_args[0] == (
@@ -484,6 +518,7 @@ def test_browser_opens_when_interactive_without_save_location(mocked_environment
         .resolve()
         .as_uri()
     )
+
 
 def test_plot_univariate_distributions_flow(monkeypatch):
     orig = pd.DataFrame({"a": [1, 2], "b": ["1", "2"]})

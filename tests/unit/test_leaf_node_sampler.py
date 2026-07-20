@@ -5,6 +5,26 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.tree_utils import LeafNodeSampler
 
+
+# ----- stubs -----
+
+
+class StubRNG:
+    def __init__(self, values):
+        self.values = iter(values)
+
+    def integers(self, low, high, size=None):
+        if size is None:
+            v = next(self.values)
+            return low + (v % (high - low))
+
+        out = []
+        for _ in range(size):
+            v = next(self.values)
+            out.append(low + (v % (high - low)))
+        return np.array(out)
+
+
 # ----- fit sampler test cases -----
 
 
@@ -12,36 +32,52 @@ from synthpop.methods.tree_utils import LeafNodeSampler
     "leaf_ids, y, expected_map",
     [
         # --- numerical numpy arrays ---
-        (np.array([10, 10, 20, 20]), np.array([0, 0, 1, 1]),
-            {10: {0: 2}, 20: {1: 2}}),
-
+        (
+            np.array([10, 10, 20, 20]),
+            np.array([0, 0, 1, 1]),
+            {10: {0: 2}, 20: {1: 2}},
+        ),
         # --- lists ---
-        ([10, 10, 20], [0, 1, 1],
-            {10: {0: 1, 1: 1}, 20: {1: 1}}),
-
+        (
+            [10, 10, 20],
+            [0, 1, 1],
+            {10: {0: 1, 1: 1}, 20: {1: 1}},
+        ),
         # --- pandas Series ---
-        (pd.Series([10, 10, 20]), pd.Series([0, 1, 1]),
-            {10: {0: 1, 1: 1}, 20: {1: 1}}),
-
+        (
+            pd.Series([10, 10, 20]),
+            pd.Series([0, 1, 1]),
+            {10: {0: 1, 1: 1}, 20: {1: 1}},
+        ),
         # --- strings ---
-        (np.array([1, 1, 2]), np.array(["x", "z", "y"]),
-            {1: {"x": 1, "z": 1}, 2: {"y": 1}}),
-
-        (np.array([1, 1, 2]), np.array(["a", "a", "b"]),
-            {1: {"a": 2}, 2: {"b": 1}}),
-
+        (
+            np.array([1, 1, 2]),
+            np.array(["x", "z", "y"]),
+            {1: {"x": 1, "z": 1}, 2: {"y": 1}},
+        ),
+        (
+            np.array([1, 1, 2]),
+            np.array(["a", "a", "b"]),
+            {1: {"a": 2}, 2: {"b": 1}},
+        ),
         # --- mixed: None, np.nan, pd.NA ---
-        (np.array([10, 10, 20, 20]), np.array([None, np.nan, pd.NA, 1], dtype=object),
-            {10: {None: 1, np.nan: 1}, 20: {pd.NA: 1, 1: 1, }}),
-
+        (
+            np.array([10, 10, 20, 20]),
+            np.array([None, np.nan, pd.NA, 1], dtype=object),
+            {10: {None: 1, np.nan: 1}, 20: {pd.NA: 1, 1: 1}},
+        ),
         # --- mixed string and integer ---
-        ([1, 2, 1], np.array([1, "1", 1.0], dtype=object),
-            {1: {1: 2}, 2: {"1": 1}}),
-
-        # Single input
-        (np.array([10]), np.array([5]),
-            {10: {5: 1}}),
-
+        (
+            [1, 2, 1],
+            np.array([1, "1", 1.0], dtype=object),
+            {1: {1: 2}, 2: {"1": 1}},
+        ),
+        # --- single input ---
+        (
+            np.array([10]),
+            np.array([5]),
+            {10: {5: 1}},
+        ),
     ],
 )
 def test_fit_sampler_parametrized_inputs(leaf_ids, y, expected_map):
@@ -97,12 +133,13 @@ def test_fit_sampler_raises_non_empty():
 
 @pytest.mark.parametrize(
     "y_input, expected_dtype_check",
-    [(np.array([1, 2, 3], dtype=int), np.integer),
-     (np.array([1.0, 2.0, 3.0], dtype=float), float),
-     (np.array([True, False, True]), np.bool_),
-     (np.array(["a", "b", "c"]), np.str_),
-     (np.array([1, "a", 3], dtype=object), object),
-     ],
+    [
+        (np.array([1, 2, 3], dtype=int), np.integer),
+        (np.array([1.0, 2.0, 3.0], dtype=float), float),
+        (np.array([True, False, True]), np.bool_),
+        (np.array(["a", "b", "c"]), np.str_),
+        (np.array([1, "a", 3], dtype=object), object),
+    ],
 )
 def test_fit_sampler_sets_y_dtype_correctly(y_input, expected_dtype_check):
     sampler = LeafNodeSampler()
@@ -116,7 +153,9 @@ def test_fit_sampler_creates_seed_from_random_state_manager(mocker):
     X = np.array([10, 10, 20, 20])
     y = np.array([0, 0, 1, 1])
     mock_create_instance_seed = mocker.patch(
-        "synthpop.reproducibility.RandomStateManager.create_instance_seed", return_value=333)
+        "synthpop.reproducibility.RandomStateManager.create_instance_seed",
+        return_value=333
+    )
 
     sampler = LeafNodeSampler()
     sampler.fit_sampler(X, y)
@@ -129,7 +168,9 @@ def test_fit_sampler_does_not_create_seed_when_seed_is_given(mocker):
     X = np.array([10, 10, 20, 20])
     y = np.array([0, 0, 1, 1])
     mock_create_instance_seed = mocker.patch(
-        "synthpop.reproducibility.RandomStateManager.create_instance_seed", return_value=333)
+        "synthpop.reproducibility.RandomStateManager.create_instance_seed",
+        return_value=333
+    )
 
     sampler = LeafNodeSampler(random_state=123456)
     sampler.fit_sampler(X, y)
@@ -139,6 +180,8 @@ def test_fit_sampler_does_not_create_seed_when_seed_is_given(mocker):
 
 
 # ----- sample from leaves test cases -----
+
+
 def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32):
     """
     Helper to construct a minimally fitted sampler
@@ -153,9 +196,9 @@ def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32)
 @pytest.mark.parametrize(
     "leaf_ids",
     [
-        np.array([10, 10, 10]),                         # numpy numeric
-        [10, 10, 10],                                   # python list numeric
-        pd.Series([10, 10, 10]),                       # pandas Series numeric
+        np.array([10, 10, 10]),     # numpy numeric
+        [10, 10, 10],               # python list numeric
+        pd.Series([10, 10, 10]),    # pandas Series numeric
     ],
 )
 def test_sample_from_leaves_various_input_types(leaf_ids):
@@ -177,27 +220,13 @@ def test_sample_from_leaves_various_input_types(leaf_ids):
     assert y_syn.dtype == sampler._y_dtype
 
 
-class StubRNG:
-    def __init__(self, values):
-        self.values = iter(values)
-
-    def integers(self, low, high, size=None):
-        if size is None:
-            v = next(self.values)
-            return low + (v % (high - low))
-
-        out = []
-        for _ in range(size):
-            v = next(self.values)
-            out.append(low + (v % (high - low)))
-        return np.array(out)
-
-
 def test_sampling_deterministic_with_stub_rng(mocker):
     rng = StubRNG([0, 3, 1, 2])  # controlled indices
 
     mocker.patch(
-        "synthpop.reproducibility.RandomStateManager.create_rng", return_value=rng)
+        "synthpop.reproducibility.RandomStateManager.create_rng",
+        return_value=rng
+    )
 
     sampler = LeafNodeSampler()
     sampler._leaf_map = {10: {0: 3, 1: 1}}
@@ -214,8 +243,11 @@ def test_sampling_deterministic_with_stub_rng(mocker):
 @pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 def test_sample_from_leaves_each_missing_type(missing_value):
     leaf_ids = [10] * 100
-    y_dtype = float if (missing_value is not None and missing_value is not pd.NA and np.isnan(
-        missing_value)) else object
+    y_dtype = float if (
+        missing_value is not None
+        and missing_value is not pd.NA
+        and np.isnan(missing_value)
+    ) else object
 
     sampler = helper_make_sampler(
         leaf_map={10: {missing_value: 10, 1: 1}},
@@ -240,7 +272,7 @@ def test_sample_raises_empty_histogram():
     )
 
     with pytest.raises(ValueError, match="has an empty leaf map"):
-        y = sampler.sample_from_leaves([10])
+        sampler.sample_from_leaves([10])
 
 
 def test_sample_from_leaves_raises_unseen():
@@ -289,16 +321,23 @@ def test_sample_from_leaves_creates_rng(mocker):
 
     expected_rng = np.random.default_rng()
     mock_create_rng = mocker.patch(
-        "synthpop.reproducibility.RandomStateManager.create_rng", return_value=expected_rng)
+        "synthpop.reproducibility.RandomStateManager.create_rng",
+        return_value=expected_rng
+    )
     mock_sample_array = mocker.patch(
-        "synthpop.methods.tree_utils._sample_array", return_value=y)
+        "synthpop.methods.tree_utils._sample_array",
+        return_value=y
+    )
 
     sampler = helper_make_sampler(
         leaf_map=leaf_map, leaf_ids=leaf_ids, random_state=987)
     sampler.sample_from_leaves(leaf_ids)
 
     mock_create_rng.assert_called_once_with(987)
-    mock_sample_array.call_args_list[0][0] is expected_rng, "rng is not used to sample"
+    mock_sample_array.call_args_list[0][0] is expected_rng, (
+        "rng is not used to sample"
+    )
+
 
 # ----- clonability tests -----
 
