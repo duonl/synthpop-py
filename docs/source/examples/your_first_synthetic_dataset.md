@@ -125,4 +125,4 @@ These visualisations allow us to compare variables one by one. As seen in the pl
 More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`. 
 
 ## Next steps
-Congratulations, you have created and evaluated your first synthetic dataset. Now it is time to find out how to make even better synthetic datasets. The next examples in this module explain how to make your synthesis reproducible, how to generate larger datasets and the importance of the synthesis order. The next module will go into more detail on more parameters to make your synthesis better.
+Congratulations, you have created and evaluated your first synthetic dataset. Now it is time to find out how to make even better synthetic datasets. Check out the next examples in this module to discover how to [make your synthesis reproducible](./reproducible_synthesis.md), how to [generate larger datasets](./generating_a_larger_dataset.md) and the [importance of the synthesis order](./changing_the_synthesis_order.md). [Module 2](changing_the_default_method.md) will go into more detail on what synthesis methods are available.
