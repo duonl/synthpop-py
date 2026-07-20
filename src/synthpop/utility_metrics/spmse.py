@@ -60,16 +60,19 @@ def _preprocess_columns(o_df, s_df, max_bins):
 
         if o_is_numeric:
             combined = pd.concat([o_col, s_col])
-            _, bins = pd.cut(
+            binned = pd.qcut(
                 combined,
-                bins=max_bins,
-                retbins=True,
+                max_bins,
                 duplicates="drop",
             )
 
+            if len(binned.cat.categories) == 0: #Case if the entire column is a single number
+                binned = pd.cut(combined, bins=max_bins, duplicates="drop") #Linear binning does work, bins=1 would suffice, but keep bins=max_bins for consistency
+
+            bins = binned.cat.categories
             o_df[col] = _preprocessing_numeric(o_col, bins=bins)
             s_df[col] = _preprocessing_numeric(s_col, bins=bins)
-
+    
     return o_df, s_df
 
 

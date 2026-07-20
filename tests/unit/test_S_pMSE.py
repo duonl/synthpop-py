@@ -262,13 +262,28 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [50/72]
+                    "S_pMSE": [450/1944]
                 }
             ),
             3,
         ),
         # Check for three bins, same input as above. but number of bins will produce different output
-        # This test will produce a floating point error if pd.DataFrame.equals() is used
+        # This test will produce a floating point error if pd.DataFrame.equals() is used. Will produce binning [3,0,2]
+
+
+        (
+            pd.DataFrame({"c1": [0, 0, 1]}),
+            pd.DataFrame({"c1": [1, 2]}),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [175/72]
+                }
+            ),
+            3,
+        ),
+        # Check for three bins, an extra test that looks very similar but has different binning [2,2,1]
 
         (
             pd.DataFrame({"c1": [0, 1, 2]}),
@@ -445,7 +460,7 @@ def test_pairwise_spmse_extensive_output():
         {
             "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
             "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
-            "S_pMSE": [4/3, 8/3, 4/3, 3., 20/9, 0.]
+            "S_pMSE": [4/3, 8/3, 2., 3., 3., 4/3]
         }
     ).astype({"S_pMSE": np.float32})
 
