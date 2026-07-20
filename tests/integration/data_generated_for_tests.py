@@ -1,4 +1,3 @@
-import copy
 import string
 
 import pytest

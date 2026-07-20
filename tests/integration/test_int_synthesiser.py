@@ -197,8 +197,8 @@ def test_synthesiser_preserves_datatypes(method):
     original_data = original_data.astype({
         "second": "float32",
         "third": "string",
-        "fourth": "int64",
-        "fifth": "string"
+        "fourth": "Int64",
+        "fifth": "object"
     })
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
