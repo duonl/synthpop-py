@@ -8,12 +8,15 @@ from synthpop.methods.sample_synth import SampleMethod
 # ----- helpers -----
 
 
-def make_fitted_model(values: list, counts: list, target_name="target", n_samples=3, seed=42):
+def make_fitted_model(values: list, counts: list, target_name="target", n_samples=3, seed=42, dtype=None):
     model = SampleMethod()
+    if not dtype:
+        dtype = np.asarray(values).dtype
 
     model.values_ = np.asarray(values)
     model.counts_ = np.asarray(counts)
     model.target_name_ = target_name
+    model.target_dtype_ = dtype
     model.n_samples_ = n_samples
     model.random_state_ = seed
 
@@ -49,6 +52,7 @@ def test_fit_stores_distribution_and_metadata(y, expected_values, expected_count
 
     assert model.target_name_ == "my_target"
     assert model.n_samples_ == len(y)
+    assert model.target_dtype_ == y.dtype
     assert model.counts_.sum() == len(y), "Counts must sum to total number of samples"
 
     assert list(model.counts_) == expected_counts
@@ -86,6 +90,32 @@ def test_transform_output_shape_matches_X():
 
     assert len(result) == len(X)
     assert result.name == "target"
+
+@pytest.mark.parametrize(
+    "y", [
+        (pd.Series([1, pd.NA, 3], dtype='Int64')),
+        (pd.Series([1.1, 2.2, 3.3, np.nan], dtype=np.float64)),
+        (pd.Series(["a", "b", "c"], dtype="category")),
+        (pd.Series(["a", "b", "c"], dtype="object")),
+        (pd.Series(["a", "b", "c"], dtype="string")),
+        (pd.Series([None, False, True], dtype="boolean")),
+    ],
+)
+def test_transform_various_dtypes(y):
+    model = make_fitted_model(
+        values=y,
+        counts=[2, 3, 5],
+        dtype = y.dtype
+    )
+
+    X = pd.DataFrame({"X": range(10)})
+    result = model.transform(X)
+    assert result.dtype == model.target_dtype_
+    if isinstance(y.dtype, pd.CategoricalDtype):
+        assert y.cat.categories.equals(
+        result.cat.categories
+    )
+        assert y.cat.ordered == result.cat.ordered
 
 
 def test_transform_without_X_uses_training_size():
@@ -201,6 +231,33 @@ def test_transform_raises_unfitted():
     with pytest.raises(NotFittedError):
         model.transform(None)
 
+@pytest.mark.parametrize(
+    "missing_attr",
+    [
+        "values_",
+        "counts_",
+        "target_name_",
+        "target_dtype_",
+        "n_samples_",
+        "random_state_",
+    ],
+)
+def test_transform_raises_unfitted(missing_attr):
+    model = SampleMethod()
+
+    # Set all required fitted attributes
+    model.values_ = pd.Series([1, 2, 3])
+    model.counts_ = pd.Series([1, 2, 3])
+    model.n_samples_ = 3
+    model.target_name_ = "target"
+    model.target_dtype_ = "int64"
+    model.random_state_ = 333
+
+    # Remove one attribute
+    delattr(model, missing_attr)
+
+    with pytest.raises(NotFittedError):
+        model.transform(None)
 
 # ----- missing values tests -----
 

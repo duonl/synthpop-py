@@ -1,4 +1,3 @@
-import copy
 import string
 
 import pytest
@@ -9,7 +8,7 @@ from sklearn.datasets import make_classification, make_regression
 from synthpop.utils import str_dtype
 
 
-def make_data_missing(X):
+def make_data_missing(X, as_Series=False):
 
     # We need a pattern of missingness that is different for each column
     # The missingness pattern should not be too predictable.
@@ -21,18 +20,22 @@ def make_data_missing(X):
         p = (len(X.keys())-ik)
 
         values = [v if i % p != 1 else np.nan for i, v in enumerate(X[k])]
-        if pd.api.types.is_numeric_dtype(X[k].dtype):
-            X[k] = np.array(values)
 
-        elif pd.api.types.is_categorical_dtype(X[k].dtype):
+        if isinstance(X[k].dtype, pd.CategoricalDtype):
             X[k] = pd.Categorical(
                 values,
                 categories=X[k].cat.categories,
                 ordered=X[k].cat.ordered,
             )
-            
         else:
-            X[k] = np.array(values, dtype=str_dtype)
+            if as_Series: # For entire dataframe with many different datatypes
+                X[k] = pd.Series(values, dtype=X[k].dtype)
+
+            elif pd.api.types.is_numeric_dtype(X[k].dtype): # for internal TreeMethod datatypes
+                X[k] = np.array(values)
+
+            else:
+                X[k] = np.array(values, dtype=str_dtype)
 
     return X
 
