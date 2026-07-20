@@ -196,8 +196,9 @@ def test_synthesiser_preserves_datatypes(method):
 
     original_data = original_data.astype({
         "second": "float32",
+        "third": "string",
         "fourth": "int64",
-        "fifth": "object"
+        "fifth": "string"
     })
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
@@ -242,14 +243,14 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
         )
     )
 
-
     original_data = original_data.astype({
         "second": "float32",
-        "fourth": "int64",
+        "third": "string",
+        "fourth": "Float64",
         "fifth": "object"
     })
 
-    original_data = make_data_missing(original_data)
+    original_data = make_data_missing(original_data, as_Series=True)
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
 
