@@ -1,3 +1,4 @@
+(5-evaluating-utility)=
 # 5. Evaluating utility
 Synthetic data utility describes how well synthetic data preserve the statistical properties and analytical usefulness of the original data.
 

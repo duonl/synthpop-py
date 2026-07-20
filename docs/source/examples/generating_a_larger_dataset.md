@@ -89,10 +89,10 @@ plot_spmse(spmse, show_plot=True)
 ```
 The S_pMSE calculation also accounts for the different dataset sizes when comparing the pairwise relationship between variables.
 
-More information about evaluating utility can be found in [User Guide 5: Evaluating utility]() ADD LINK.
+More information about evaluating utility can be found in {ref}`User Guide 5: Evaluating utility <5-evaluating-utility>`. 
 
 ## Next steps
-Generating larger synthetic datasets is useful when a specific application requires more observations than are available in the original dataset. However, generating more records does not automatically improve the quality of the synthetic data. The quality depends on how well the synthesis process captures the important patterns and relationships present in the original data.
+Generating larger synthetic datasets is useful when a specific application requires more observations than are available in the original dataset. However, generating more data does not automatically improve the quality of the synthetic data. The quality depends on how well the synthesis process captures the important patterns and relationships present in the original data.
 
 When evaluating the synthetic dataset above, you may have noticed that some relationships between variables were not perfectly preserved. In particular, the S_pMSE values can indicate that some pairwise relationships differ between the original and synthetic datasets. This is expected: the default synthesis settings provide a good starting point, but they may not always be optimal for every dataset.
 

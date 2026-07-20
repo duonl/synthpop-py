@@ -3,7 +3,7 @@ In the previous example, we created our first synthetic dataset. You may have no
 ```python
 synthesiser = Synthesiser(random_seed=1)
 ```
-Without specifying a `random_seed`, if you run the same code again, you may notice that the generated synthetic dataset is different each time. This is expected. Synthetic data generation is a stochastic process: many synthesis methods involve randomness, in for example sampling.
+Without specifying a `random_seed`, if you run the same code again, you may notice that the generated synthetic dataset is different each time. This is expected. Synthetic data generation is a stochastic process: many synthesis methods involve randomness in, for example, sampling.
 
 Sometimes this is exactly what you want. However, when developing analyses, writing reports or collaborating with others, it is often useful to generate exactly the same synthetic dataset every time. This is called **reproducibility**.
 
@@ -124,7 +124,7 @@ synthetic_data_1.equals(synthetic_data_2)
 ```text
 True
 ```
-To create multiple reproducible synthetic dataset from the same fitted synthesiser, you can use a `random_seed` in the `generate()` function.
+To create multiple reproducible synthetic dataset from the same fitted synthesiser, you can use the `random_seed` parameter in the `generate()` function.
 ```python
 synthetic_data_3 = synthesiser.generate(random_seed=2)
 ```
@@ -135,7 +135,7 @@ synthetic_data_3.equals(synthetic_data_1)
 ```text
 False
 ```
-Removing the random seed will give you the first synthetic dataset again.
+Omitting the `random_seed` parameter will again provide you with the first synthetic dataset.
 ```python
 synthetic_data_4 = synthesiser.generate()
 
