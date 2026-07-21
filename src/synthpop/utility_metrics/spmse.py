@@ -7,18 +7,50 @@ from typing import Sequence
 import warnings
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
-from synthpop.utils import standardise_array_dtypes
+from synthpop.utils import str_dtype
 
 __all__ = ["pairwise_spmse"]
 
+def standardise_array_dtypes(X: pd.DataFrame)-> npt.NDArray:
+    """
+    Helper to standardise a 1D-array:
+    - float64 for numeric data
+    - `StringDType(na_object = np.nan)` for non-numeric data
+
+    Missing values are normalised to `np.nan`.
+    """
+
+    is_numeric = pd.api.types.is_numeric_dtype(np.asanyarray(X))
+    arr = np.asanyarray(X, dtype=object) #to avoid casting van np.nan to 'nan'
+
+    if arr.ndim not in (1, 2):
+        raise TypeError(f"Input must be a 1D or 2D array-like object, received {arr.ndim} instead.")
+
+    original_shape = arr.shape
+    flat = arr.reshape(-1)
+
+    if is_numeric:
+        result = np.array(
+            [v if not pd.isna(v) else np.nan for v in flat],
+            dtype=np.float64,
+        )
+
+    else:
+        result = np.array(
+            [v if not pd.isna(v) else np.nan for v in flat],
+            dtype=str_dtype,
+        )
+
+    return result.reshape(original_shape)
 
 def _preprocessing_numeric(
     column: pd.Series, bins: Sequence[float] | None = None
 ) -> pd.Series:
     """
-    Preprocess a numeric column for S_pMSE computation by discretising it into bins.
+    Preprocess a numeric column for S_pMSE computation by discretising it into left-closed bins.
 
     Numeric values are assigned to bin intervals using the provided bin edges.
     Missing values are preserved and are not modified.
@@ -28,9 +60,8 @@ def _preprocessing_numeric(
     """
 
     if column.notna().any():
-        binned_column = pd.cut(column, bins)
+        binned_column = pd.cut(column, bins, right=False)
         column = binned_column
-
     return column
 
 def _preprocess_columns(o_df, s_df, max_bins):
@@ -60,16 +91,26 @@ def _preprocess_columns(o_df, s_df, max_bins):
 
         if o_is_numeric:
             combined = pd.concat([o_col, s_col])
-            binned = pd.qcut(
+            print(combined.dtype)
+            _, bins = pd.qcut(
                 combined,
                 max_bins,
                 duplicates="drop",
+                retbins=True,
             )
 
-            if len(binned.cat.categories) == 0: #Case if the entire column is a single number
-                binned = pd.cut(combined, bins=max_bins, duplicates="drop") #Linear binning does work, bins=1 would suffice, but keep bins=max_bins for consistency
+            bins[-1] = np.nextafter(bins[-1], np.inf) #Similar to synthpop R we define a left closed interval. This makes sure the 
+            # highest value will also be in the final bin. This is directly implemented in R, but not in python.
+            
+            if len(bins) <4: # Equal to forming less than 3 groups in R: 
+                __, bins = pd.cut(
+                combined,
+                max_bins,
+                duplicates="drop",
+                retbins=True,
+                right=False,
+            ) #Linear equal binning
 
-            bins = binned.cat.categories
             o_df[col] = _preprocessing_numeric(o_col, bins=bins)
             s_df[col] = _preprocessing_numeric(s_col, bins=bins)
     
@@ -109,8 +150,12 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
     rescaled_differences = jf_syn.sub((n_s / n_o) * jf_or, fill_value=0)
 
     expected_frequency = jf_syn.add(jf_or, fill_value=0) * n_s / (n_o + n_s)
-    num_independent_combinations = len(expected_frequency.index)
 
+    print('rescaled', rescaled_differences)
+    print('expected', expected_frequency)
+
+    num_independent_combinations = len(expected_frequency.index)
+    print(num_independent_combinations-1)
     if num_independent_combinations > 1:
 
         spmse = (
@@ -118,6 +163,7 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
             / (num_independent_combinations - 1)
             * np.sum(np.power(rescaled_differences, 2) / expected_frequency)
         ).astype(np.float32)
+        print(np.sum(np.power(rescaled_differences, 2) / expected_frequency))
     else:  # number_independent_combinations=1
 
         spmse = np.float32(0.0)
@@ -209,7 +255,8 @@ def pairwise_spmse(
 
         jf_orig = _joint_frequencies(o_df, col1, col2)
         jf_syn = _joint_frequencies(s_df, col1, col2)
-
+        print('syn', jf_syn, col1, col2)
+        print('orig', jf_orig, col1, col2)
         full_index = jf_orig.index.union(jf_syn.index, sort=False)
         jf_orig = jf_orig.reindex(full_index, fill_value=0)
         jf_syn = jf_syn.reindex(full_index, fill_value=0)
