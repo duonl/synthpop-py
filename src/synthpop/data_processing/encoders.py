@@ -4,17 +4,17 @@ This module contains classes to encode categorical data to numeric data.
 """
 from typing import Self, Any
 
-import pandas as pd
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from sklearn import clone
 from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.utils.validation import check_is_fitted
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
+from sklearn.utils.validation import check_is_fitted
 
-from synthpop.utils import to_stringdtype_array
 from synthpop.reproducibility import RandomStateManager
+from synthpop.utils import _to_stringdtype_array
 
 
 class _BaseEncoder(TransformerMixin, BaseEstimator):
@@ -42,7 +42,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         :param x: an array of strings.
         :return: the 1-dimensional array of strings with one value for missing.
         """
-        arr = to_stringdtype_array(x)
+        arr = _to_stringdtype_array(x)
         return self.to_1d(arr)
 
     def _check_unseen_values(self, X_val: npt.NDArray) -> None:

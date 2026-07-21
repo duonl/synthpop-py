@@ -96,12 +96,12 @@ def test_fit_selects_correct_method(mocker, y_array, expected_type):
     y = pd.Series([1, 2, 3])
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value={"x": np.array([1, 2, 3], dtype=np.float32)},
     )
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.standardise_array_dtypes",
+        "synthpop.methods.cart_synth.utils._standardise_array_dtypes",
         return_value=y_array,
     )
 
@@ -121,12 +121,12 @@ def test_fit_passes_standardised_data_to_tree(mocker):
     y = pd.Series([4, 5, 6])
 
     mocked_X = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value=clean_X,
     )
 
     mocked_y = mocker.patch(
-        "synthpop.methods.cart_synth.utils.standardise_array_dtypes",
+        "synthpop.methods.cart_synth.utils._standardise_array_dtypes",
         return_value=clean_y,
     )
 
@@ -179,12 +179,12 @@ def test_fit_sets_fitted_attributes(mocker, y):
     clean_y = np.array([10, 20], dtype=np.float32)
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value=clean_X,
     )
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.standardise_array_dtypes",
+        "synthpop.methods.cart_synth.utils._standardise_array_dtypes",
         return_value=clean_y,
     )
 
@@ -262,7 +262,7 @@ def test_transform_returns_series(mocker, result, method):
     clean_X = {"a": np.array([1, 2])}
 
     mocked_X = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value=clean_X,
     )
 
@@ -310,7 +310,7 @@ def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
     cart.target_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value={"dummy": np.array([1, 2])},
     )
 
@@ -384,7 +384,7 @@ def test_transform_ignores_extra_columns(mocker, result, method):
     cart.target_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value={}
     )
 
