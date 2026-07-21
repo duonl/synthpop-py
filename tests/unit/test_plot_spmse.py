@@ -6,11 +6,11 @@ import pytest
 
 from synthpop.plotting.plot_spmse import (
     _categorise_spmse,
-    _make_matrix,
-    _make_text_matrix,
     _get_colour_scale,
     _make_heatmap,
-    plot_spmse
+    _make_matrix,
+    _make_text_matrix,
+    plot_spmse,
 )
 
 
@@ -20,8 +20,7 @@ def spmse_df():
         {
             "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
             "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
-            "S_pMSE":
-            [
+            "S_pMSE": [
                 0,
                 473842.48534952759345,
                 12.4598375983543,
@@ -35,10 +34,15 @@ def spmse_df():
 
 # ----- _categorise_spmse test -----
 
+
 @pytest.mark.parametrize(
     "binval, expected_val",
     [
-        (3, 1), (10, 2), (30, 3), (100, 4), (1000000, 5)
+        (3, 1),
+        (10, 2),
+        (30, 3),
+        (100, 4),
+        (1000000, 5),
     ],  # tests all boundary conditions
 )
 def test_categorise_spmse_correct_output(binval, expected_val, spmse_df):
@@ -55,7 +59,8 @@ def test_categorise_spmse_correct_output(binval, expected_val, spmse_df):
     expected = pd.Series([0, expected_val, 3, 2, 4, 1], name="category")
 
     pd.testing.assert_series_equal(
-        spmse["category"], expected
+        spmse["category"],
+        expected,
     )
 
 
@@ -97,7 +102,7 @@ def test_make_text_matrix_test():
     matrix = pd.DataFrame([
         [12.4598375983543, 46.485343962786234, 0.0001],
         [473842.48534952759345, 4.0, 46.485343962786234],
-        [0., 473842.48534952759345,  12.4598375983543]
+        [0., 473842.48534952759345, 12.4598375983543],
     ])
 
     matrix = _make_text_matrix(matrix)
@@ -106,8 +111,8 @@ def test_make_text_matrix_test():
         [
             ['12.46', '46.49', '0.0'],
             ['473842.49', '4.0', '46.49'],
-            ['CONSTANT VARIABLE', '473842.49', '12.46']
-        ]
+            ['CONSTANT VARIABLE', '473842.49', '12.46'],
+        ],
     )
 
     pd.testing.assert_frame_equal(output, matrix)
@@ -127,7 +132,7 @@ def test_get_colour_scale_structure():
         'rgb(255,247,188)',
         'rgb(254,227,145)',
         'rgb(254,196,79)',
-        'rgb(254,153,41)'
+        'rgb(254,153,41)',
     ]
 
     assert len(colour_scale) == 2 * len(colours)
@@ -142,13 +147,14 @@ def test_get_colour_scale_structure():
 
 # ----- _make_heatmap tests -----
 
+
 @pytest.fixture
 def heatmap_inputs():
     matrix = pd.DataFrame(
         [
             [3., 4., 1.],
             [5., 2., 4.],
-            [0., 5., 3.]
+            [0., 5., 3.],
         ],
         index=["c3", "c2", "c1"],
         columns=["c1", "c2", "c3"],
@@ -187,7 +193,7 @@ def heatmap_inputs():
         [0.6666666666666666, 'rgb(254,196,79)'],
         [0.8333333333333334, 'rgb(254,196,79)'],
         [0.8333333333333334, 'rgb(254,153,41)'],
-        [1.0, 'rgb(254,153,41)']
+        [1.0, 'rgb(254,153,41)'],
     ]
 
     return matrix, text_matrix, colour_scale, bins, bin_labels
@@ -323,6 +329,7 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
     assert "%{x}" in fig.data[0].hovertemplate
     assert "%{y}" in fig.data[0].hovertemplate
     assert "%{text}" in fig.data[0].hovertemplate
+
 
 # ----- plot_spmse tests -----
 

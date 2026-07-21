@@ -1,16 +1,24 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.sample_synth import SampleMethod
 
+
 # ----- helpers -----
 
 
-def make_fitted_model(values: list, counts: list, target_name="target", n_samples=3, seed=42, dtype=None):
+def make_fitted_model(
+    values: list,
+    counts: list,
+    target_name="target",
+    n_samples=3,
+    seed=42,
+    dtype=None,
+):
     model = SampleMethod()
-    if not dtype:
+    if dtype is None:
         dtype = np.asarray(values).dtype
 
     model.values_ = np.asarray(values)
@@ -21,6 +29,7 @@ def make_fitted_model(values: list, counts: list, target_name="target", n_sample
     model.random_state_ = seed
 
     return model
+
 
 # ----- fit tests -----
 
@@ -59,8 +68,10 @@ def test_fit_stores_distribution_and_metadata(y, expected_values, expected_count
     assert model.random_state_ == 333
 
     for model_value, expected_value in zip(model.values_, expected_values):
-        assert (pd.isna(model_value) and pd.isna(expected_value)
-                ) or model_value == expected_value, f"Mismatch: {model_value} != {expected_value}"
+        assert (
+            (pd.isna(model_value) and pd.isna(expected_value))
+            or model_value == expected_value
+        ), f"Mismatch: {model_value} != {expected_value}"
 
 
 def test_fit_stores_provided_seed():
@@ -76,13 +87,14 @@ def test_fit_sets_name_when_none():
 
     assert model.target_name_ is None
 
+
 # ----- transform tests -----
 
 
 def test_transform_output_shape_matches_X():
     model = make_fitted_model(
         values=[1, 2, 3],
-        counts=[2, 3, 5]
+        counts=[2, 3, 5],
     )
 
     X = pd.DataFrame({"X": range(10)})
@@ -91,9 +103,10 @@ def test_transform_output_shape_matches_X():
     assert len(result) == len(X)
     assert result.name == "target"
 
+
 @pytest.mark.parametrize(
     "y", [
-        (pd.Series([1, pd.NA, 3], dtype='Int64')),
+        (pd.Series([1, pd.NA, 3], dtype="Int64")),
         (pd.Series([1.1, 2.2, 3.3, np.nan], dtype=np.float64)),
         (pd.Series(["a", "b", "c"], dtype="category")),
         (pd.Series(["a", "b", "c"], dtype="object")),
@@ -105,7 +118,7 @@ def test_transform_various_dtypes(y):
     model = make_fitted_model(
         values=y,
         counts=[2, 3, 5],
-        dtype = y.dtype
+        dtype=y.dtype
     )
 
     X = pd.DataFrame({"X": range(10)})
@@ -113,8 +126,8 @@ def test_transform_various_dtypes(y):
     assert result.dtype == model.target_dtype_
     if isinstance(y.dtype, pd.CategoricalDtype):
         assert y.cat.categories.equals(
-        result.cat.categories
-    )
+            result.cat.categories
+        )
         assert y.cat.ordered == result.cat.ordered
 
 
@@ -122,7 +135,7 @@ def test_transform_without_X_uses_training_size():
     model = make_fitted_model(
         values=[1, 2, 3],
         counts=[2, 3, 5],
-        n_samples=10
+        n_samples=10,
     )
 
     result = model.transform(None)
@@ -147,15 +160,22 @@ def test_transform_values_within_observed_support():
 
 
 def test_transform_uses_random_state_manager(mocker):
-
     expected_rng = np.random.default_rng()
     expected_result = [6, 7, 67, 76]
     mock_create_rng = mocker.patch(
-        "synthpop.reproducibility.RandomStateManager.create_rng", return_value=expected_rng)
+        "synthpop.reproducibility.RandomStateManager.create_rng",
+        return_value=expected_rng,
+    )
     mock_sample_array = mocker.patch(
-        "synthpop.methods.tree_utils._sample_array", return_value=expected_result)
+        "synthpop.methods.tree_utils._sample_array",
+        return_value=expected_result,
+    )
     values = [1, 2, 3, np.nan]
-    model = make_fitted_model(values=values, counts=[1, 1, 1, 1], n_samples=4)
+    model = make_fitted_model(
+        values=values,
+        counts=[1, 1, 1, 1],
+        n_samples=4,
+    )
 
     model.random_state_ = 123456
 
@@ -163,7 +183,11 @@ def test_transform_uses_random_state_manager(mocker):
 
     mock_create_rng.assert_called_with(seed=123456)
     mock_sample_array.assert_called_with(
-        expected_rng, model.counts_, model.values_, 100)
+        expected_rng, 
+        model.counts_, 
+        model.values_, 
+        100,
+    )
     assert (result == expected_result).all()
 
 
@@ -225,12 +249,6 @@ def test_transform_approximate_distribution(values, counts):
             assert np.isclose(result[v], expected[v], atol=0.02)
 
 
-def test_transform_raises_unfitted():
-    model = SampleMethod()
-
-    with pytest.raises(NotFittedError):
-        model.transform(None)
-
 @pytest.mark.parametrize(
     "missing_attr",
     [
@@ -259,7 +277,9 @@ def test_transform_raises_unfitted(missing_attr):
     with pytest.raises(NotFittedError):
         model.transform(None)
 
+
 # ----- missing values tests -----
+
 
 def test_missing_values_all_types_are_sampled():
     values = [1, np.nan, None, 2]
@@ -274,6 +294,7 @@ def test_missing_values_all_types_are_sampled():
     non_missing_generated = result.dropna().unique()
 
     assert set(non_missing_generated).issubset(set(non_missing_original))
+
 
 # ----- feature names out tests -----
 

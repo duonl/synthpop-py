@@ -7,16 +7,21 @@ from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.synthesiser import Synthesiser
 
-from tests.integration.data_generated_for_tests import simulate_realistic_dataset_correlations, make_data_missing
+from tests.integration.data_generated_for_tests import (
+    simulate_realistic_dataset_correlations,
+    make_data_missing
+)
 
 
 def test_synthesiser_correct_default_methods():
     synth = Synthesiser(random_seed=2)
-    test_data = pd.DataFrame({
-        "a": [1, 2],
-        "b": [3, 4],
-        "c": [5, 6]
-    })
+    test_data = pd.DataFrame(
+        {
+            "a": [1, 2],
+            "b": [3, 4],
+            "c": [5, 6],
+        },
+    )
 
     synth.fit(test_data)
 
@@ -27,19 +32,23 @@ def test_synthesiser_correct_default_methods():
 
 def test_synthesiser_first_column_is_sampled_categorical():
     expected_proportions = {
-        "a": 1/2,
-        "b": 1/3,
-        "missing": 1/6
+        "a": 1 / 2,
+        "b": 1 / 3,
+        "missing": 1 / 6,
     }
 
     n_samples = 300
 
-    a_list = (["a"]*int(n_samples*expected_proportions["a"]))
-    b_list = (["b"]*int(n_samples*expected_proportions["b"]))
-    missing_list = ([np.nan]*int(n_samples*expected_proportions["missing"]))
-    test_data = pd.DataFrame({
-        "first_column": a_list + b_list+missing_list
-    })
+    a_list = (["a"] * int(n_samples * expected_proportions["a"]))
+    b_list = (["b"] * int(n_samples * expected_proportions["b"]))
+    missing_list = [
+        np.nan
+    ] * int(n_samples * expected_proportions["missing"])
+    test_data = pd.DataFrame(
+        {
+            "first_column": a_list + b_list + missing_list,
+        },
+    )
 
     synth = Synthesiser(random_seed=2)
 
@@ -56,19 +65,22 @@ def test_synthesiser_first_column_is_sampled_categorical():
 
 def test_synthesiser_first_column_is_sampled_numeric():
     expected_proportions = {
-        '1.1': 1/2,
-        '2': 1/3,
-        "missing": 1/6
+        '1.1': 1 / 2,
+        '2': 1 / 3,
+        "missing": 1 / 6,
     }
 
     n_samples = 3000
 
-    one_list = ([1.1]*int(n_samples*expected_proportions["1.1"]))
-    two_list = ([2]*int(n_samples*expected_proportions["2"]))
-    missing_list = ([np.nan]*int(n_samples*expected_proportions["missing"]))
-    test_data = pd.DataFrame({
-        "first_column": one_list + two_list+missing_list
-    })
+    one_list = ([1.1] * int(n_samples * expected_proportions["1.1"]))
+    two_list = ([2] * int(n_samples * expected_proportions["2"]))
+    missing_list = ([np.nan] * int(n_samples *
+                    expected_proportions["missing"]))
+    test_data = pd.DataFrame(
+        {
+            "first_column": one_list + two_list + missing_list,
+        },
+    )
 
     synth = Synthesiser(random_seed=2)
 
@@ -85,17 +97,22 @@ def test_synthesiser_first_column_is_sampled_numeric():
         expected_proportions["missing"] - result_proportions.iloc[2]) < 0.05
 
 
-def test_synthesiser_preserves_1D_statistics():
+def test_synthesiser_preserves_1d_statistics():
     """
-    The aim of this test is to see if the means and univariate distributions are not wildly different.
+    The aim of this test is to see if the means and univariate distributions
+    are not wildly different.
     The goal is not to test that the synthetic data has a certain utility.
-    The goal is to test that the synthetic data is reasonable. Benchmarking for utility should happen in other tests.
+    The goal is to test that the synthetic data is reasonable.
+    Benchmarking for utility should happen in other tests.
     """
 
     n_samples_orig = 5000
     n_samples_synthetic = 6000
-    original_data, index_num, index_cat = simulate_realistic_dataset_correlations(
-        n_samples=n_samples_orig)
+    original_data, index_num, index_cat = (
+        simulate_realistic_dataset_correlations(
+        n_samples=n_samples_orig,
+        )
+    )
     synthesiser = Synthesiser(random_seed=74125)
 
     syn_df = synthesiser.fit(original_data).generate(n=n_samples_synthetic)
@@ -107,9 +124,10 @@ def test_synthesiser_preserves_1D_statistics():
         synthetic_mean = syn_df[num_col].mean()
 
         assert np.abs(
-            original_mean-synthetic_mean) > 1e-3, "original and synthetic are too close"
-        assert np.abs(original_mean-synthetic_mean) / \
-            original_mean < 0.05, "original and synthetic are too different"
+            original_mean - synthetic_mean) > 1e-3, "original and synthetic are too close"
+        assert (
+            np.abs(original_mean - synthetic_mean) / original_mean < 0.05
+         ), "original and synthetic are too different"
 
     for cat_col in index_cat:
         original_dist = original_data[cat_col].value_counts(
@@ -145,7 +163,7 @@ def test_synthesiser_preserves_cat_num_relation():
 
     syn_means = syn_df.groupby("third")["fourth"].mean()
     obs_means = original_data.groupby("third")["fourth"].mean()
-    assert np.max(np.abs(syn_means - obs_means))/max(obs_means) < 0.05
+    assert np.max(np.abs(syn_means - obs_means)) / max(obs_means) < 0.05
 
 
 def test_synthesiser_preserves_cat_cat_relation():
@@ -170,12 +188,13 @@ def test_synthesiser_preserves_cat_cat_relation():
     [
         CopyMethod,
         SampleMethod,
-        CartMethod
+        CartMethod,
     ]
 )
 def test_synthesiser_preserves_datatypes(method):
     """
-    Reproduces bug 162, where synthesiser class returns object dtype in the synthetic data
+    Reproduces bug 162, where synthesiser class returns 
+    object dtype in the synthetic data
     while the original data is string datatype.
 
     All columns should return their original datatype.
@@ -198,7 +217,7 @@ def test_synthesiser_preserves_datatypes(method):
         "second": "float32",
         "third": "string",
         "fourth": "Float64",
-        "fifth": "object"
+        "fifth": "object",
     })
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
@@ -213,12 +232,13 @@ def test_synthesiser_preserves_datatypes(method):
     ]
     assert syn_df["seventh"].cat.ordered is True
 
+
 @pytest.mark.parametrize(
     "method",
     [
         CopyMethod,
         SampleMethod,
-        CartMethod
+        CartMethod,
     ]
 )
 def test_synthesiser_preserves_datatypes_with_missing(method):
@@ -247,10 +267,10 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
         "second": "float32",
         "third": "string",
         "fourth": "Float64",
-        "fifth": "object"
+        "fifth": "object",
     })
 
-    original_data = make_data_missing(original_data, as_Series=True)
+    original_data = make_data_missing(original_data, as_series=True)
 
     synthesiser = Synthesiser(default_syn_method=method(), random_seed=74124)
 
@@ -271,25 +291,30 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
 )
 def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
     """
-    Regression test for bug 152. The CartMethod failed for a numerical array with only missing values, 
-    Missing values are masked. As such, fitting on an entire np.nan array is the same as fitting on an empty array.
+    Regression test for bug 152. The CartMethod failed for a
+    numerical array with only missing values, 
+    Missing values are masked. As such, fitting on an entire 
+    np.nan array is the same as fitting on an empty array.
     This threw an error resulting in bug issue 152. A fix was implemented
     """
     df = pd.DataFrame(
         {
             "a": [1, None],
             "b": [0, 0],
-            "c": [missing_value, missing_value]
+            "c": [missing_value, missing_value],
         }
     )
 
     special_syn_method = {
         "a": SampleMethod(),
         "b": CopyMethod(),
-        "c": CartMethod()
+        "c": CartMethod(),
     }
 
-    synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
+    synth = Synthesiser(
+        random_seed=2,
+        special_syn_method=special_syn_method
+    )
     fit = synth.fit(df)
 
     assert isinstance(fit.models_['a'], SampleMethod)
@@ -300,6 +325,9 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     assert len(generated) == len(df)
 
-    assert df['b'].equals(generated['b'])
+    pd.testing.assert_series_equal(
+        df["b"],
+        generated["b"],
+    )
 
     assert generated['c'].isna().all()
