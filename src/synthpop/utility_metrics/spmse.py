@@ -14,7 +14,7 @@ from synthpop.utils import str_dtype
 
 __all__ = ["pairwise_spmse"]
 
-def standardise_array_dtypes(X: pd.DataFrame)-> npt.NDArray:
+def _standardise_array_dtypes(X: pd.DataFrame)-> npt.NDArray:
     """
     Helper to standardise a 1D-array:
     - float64 for numeric data
@@ -64,6 +64,51 @@ def _preprocessing_numeric(
         column = binned_column
     return column
 
+def _get_numeric_bins(
+    column: pd.Series,
+    max_bins: int,
+) -> np.ndarray:
+    """
+    Determine bin edges for discretising a numeric column.
+
+    Quantile-based bins are preferred. If they produce fewer than three
+    occupied bins, equal-width bins are used instead.
+    """
+
+    _, bins = pd.qcut(
+        column,
+        q=max_bins,
+        duplicates="drop",
+        retbins=True,
+    )
+
+    #Check for filled bins
+    if pd.isna(bins).all():
+        occupied_bins = 0
+
+    else:
+        occupied_bins = pd.cut(
+            column,
+            bins=bins,
+            include_lowest=True,
+            right=False,
+        ).nunique(dropna=True)
+
+    #If less than 3 bins are filled, define a linear binning
+    if occupied_bins < 3:
+        _, bins = pd.cut(
+            column,
+            bins=max_bins,
+            duplicates="drop",
+            retbins=True,
+            right=False,
+        )
+
+    # Ensure the maximum value falls into the final left-closed interval.
+    bins[-1] = np.nextafter(bins[-1], np.inf)
+
+    return bins
+
 def _preprocess_columns(o_df, s_df, max_bins):
     """
     Preprocess the original and synthetic dataframes prior to S_pMSE calculation.
@@ -77,8 +122,8 @@ def _preprocess_columns(o_df, s_df, max_bins):
     """
 
     for col in o_df.columns:
-        o_col = pd.Series(standardise_array_dtypes(o_df[col]), index=o_df.index)
-        s_col = pd.Series(standardise_array_dtypes(s_df[col]), index=s_df.index)
+        o_col = pd.Series(_standardise_array_dtypes(o_df[col]), index=o_df.index)
+        s_col = pd.Series(_standardise_array_dtypes(s_df[col]), index=s_df.index)
 
         o_is_numeric = pd.api.types.is_numeric_dtype(o_col)
         s_is_numeric = pd.api.types.is_numeric_dtype(s_col)
@@ -91,25 +136,7 @@ def _preprocess_columns(o_df, s_df, max_bins):
 
         if o_is_numeric:
             combined = pd.concat([o_col, s_col])
-            print(combined.dtype)
-            _, bins = pd.qcut(
-                combined,
-                max_bins,
-                duplicates="drop",
-                retbins=True,
-            )
-
-            bins[-1] = np.nextafter(bins[-1], np.inf) #Similar to synthpop R we define a left closed interval. This makes sure the 
-            # highest value will also be in the final bin. This is directly implemented in R, but not in python.
-            
-            if len(bins) <4: # Equal to forming less than 3 groups in R: 
-                __, bins = pd.cut(
-                combined,
-                max_bins,
-                duplicates="drop",
-                retbins=True,
-                right=False,
-            ) #Linear equal binning
+            bins = _get_numeric_bins(combined, max_bins)
 
             o_df[col] = _preprocessing_numeric(o_col, bins=bins)
             s_df[col] = _preprocessing_numeric(s_col, bins=bins)

@@ -248,7 +248,7 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [450/1944]
+                    "S_pMSE": [25/18]
                 }
             ),
             2,
@@ -262,7 +262,7 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [450/1944]
+                    "S_pMSE": [25/36]
                 }
             ),
             3,
@@ -460,7 +460,7 @@ def test_pairwise_spmse_extensive_output():
         {
             "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
             "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
-            "S_pMSE": [4/3, 8/3, 2., 3., 3., 4/3]
+            "S_pMSE": [4/3, 8/3, 4/3., 3., 20/9, 0.]
         }
     ).astype({"S_pMSE": np.float32})
 
