@@ -580,39 +580,39 @@ def test_plot_univariate_distributions_flow(monkeypatch):
     assert captured["browser_input"] == fake_path.resolve().as_uri()
     assert result == [fake_fig, fake_fig]
 
-def test_visual():
-    orig_df = pd.DataFrame(
-        {
-            "age": np.random.normal(50, 10, 1000),
-            "children": np.random.poisson(2, 1000),
-            "sex": np.random.choice(
-                ["Male", "Female"],
-                size=1000,
-                p=[0.45, 0.55],
-            ),
-        }
-    )
+# def test_visual(): #For review to visually check
+#     orig_df = pd.DataFrame(
+#         {
+#             "age": np.random.normal(50, 10, 1000),
+#             "children": np.random.poisson(2, 1000),
+#             "sex": np.random.choice(
+#                 ["Male", "Female"],
+#                 size=1000,
+#                 p=[0.45, 0.55],
+#             ),
+#         }
+#     )
 
-    syn_df = pd.DataFrame(
-        {
-            "age": np.random.normal(52, 12, 1000),
-            "children": np.random.poisson(3, 1000),
-            "sex": np.random.choice(
-                ["Male", "Female"],
-                size=1000,
-                p=[0.40, 0.60],
-            ),
-        }
-    )
+#     syn_df = pd.DataFrame(
+#         {
+#             "age": np.random.normal(52, 12, 1000),
+#             "children": np.random.poisson(3, 1000),
+#             "sex": np.random.choice(
+#                 ["Male", "Female"],
+#                 size=1000,
+#                 p=[0.40, 0.60],
+#             ),
+#         }
+#     )
 
-    orig_df.loc[:50, "age"] = np.nan  # add missing
-    syn_df.loc[:30, "age"] = np.nan
+#     orig_df.loc[:50, "age"] = np.nan  # add missing
+#     syn_df.loc[:30, "age"] = np.nan
 
-    plots = plot_univariate_distributions(
-        orig_df=orig_df,
-        syn_df=syn_df,
-        save_path=None,
-        interactive=False,
-    )
-    for fig in plots:
-        fig.show()
+#     plots = plot_univariate_distributions(
+#         orig_df=orig_df,
+#         syn_df=syn_df,
+#         save_path=None,
+#         interactive=False,
+#     )
+#     for fig in plots:
+#         fig.show()
