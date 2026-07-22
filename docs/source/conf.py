@@ -60,7 +60,12 @@ extensions = [
     'sphinxcontrib.mermaid',
     "sphinx.ext.intersphinx",
 ]
-myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "tasklist",
+    "attrs_image",
+]
 autodoc_member_order = "bysource"
 
 autodoc_typehints = "description"
