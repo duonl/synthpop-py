@@ -1,6 +1,6 @@
 # Your first synthetic dataset
 
-Welcome to synthpop-py. In this example, we will walk you through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the diabetes dataset from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. For this example, the dataset only contains continuous variables.
+Welcome to synthpop-py. In this example, we will walk you through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the [diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. This dataset only contains continuous variables.
 
 ## Loading the data
 First, we load the dataset and convert it to a pandas DataFrame.
@@ -41,6 +41,8 @@ synthesiser.fit(data)
 ```
 During fitting, synthpop-py analyses the variables and estimates the internal relationships between the data.
 
+There are various synthesis methods. The standard method is Classification and Regression Trees (CART). The different methods and how to use them will be explained in detail in the [Synthesis methods example module](changing_the_default_method.md). More information can be found in [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
+
 The original data is not modified. Instead, the synthesiser stores the information needed to create new observations.
 
 More information about fitting the synthesiser can be found in {ref}`User Guide 2.4: Fitting the synthesiser <24-fitting-synthesiser>`.
@@ -62,7 +64,7 @@ The generated dataset has the same columns as the original dataset:
 |  2 | -0.0817979  | -0.0446416 | -0.0816528  | -0.0400989  | -0.0455994 | -0.0370128 |  0.0339135 | -0.0394934  | -0.0891334 | -0.092204  |       72 |
 
 ****Congratulations, you have created your first synthetic dataset!****
-<img src="../images/tada_emoji.gif" width="25" style="vertical-align: middle;">
+![Tada](../images/tada_emoji.gif){width=25px}
 
 The generated data are not copies of the original observations. Instead, they are newly generated values that aim to preserve the statistical properties and relationships present in the original data.
 
@@ -70,7 +72,7 @@ More information about generating synthetic data can be found in {ref}`User Guid
 
 ## Evaluating the synthetic data
 ### Comparing individual variable distributions
-Creating synthetic data is only the first step. A synthetic dataset should also be evaluated to determine whether it is useful for its intended purpose.
+Creating synthetic data is only the first step. A synthetic dataset should also be evaluated to determine whether it is useful for its intended purpose. This step is called utility evaluation. Utility describes how well synthetic data preserve the statistical properties and analytical usefulness of the original data.
 
 An important part of utility evaluation is checking whether individual variables have similar distributions in the original and synthetic datasets. The function {func}`~synthpop.plotting.plot_univariate.plot_univariate_distributions` creates histograms and bar plots that show you the marginal distributions of individual variables.
 ```python
@@ -117,7 +119,7 @@ To make the results easier to inspect, we can visualise the S_pMSE values as a h
 ```python
 from synthpop.plotting.plot_spmse import plot_spmse
 
-plot_spmse(spmse)
+plot = plot_spmse(spmse)
 ```
 ![Heatmap of S_pMSE values](../images/spmse.png)
 These visualisations allow us to compare variables one by one. As seen in the plot, all S_pMSE values are below 3 which shows us that the synthetic and original data are not statistically distinguishable with respect to the relationship between two variables.
@@ -125,4 +127,4 @@ These visualisations allow us to compare variables one by one. As seen in the pl
 More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`. 
 
 ## Next steps
-Congratulations, you have created and evaluated your first synthetic dataset. Now it is time to find out how to make even better synthetic datasets. Check out the next examples in this module to discover how to [make your synthesis reproducible](./reproducible_synthesis.md), how to [generate larger datasets](./generating_a_larger_dataset.md) and the [importance of the synthesis order](./changing_the_synthesis_order.md). [Module 2](changing_the_default_method.md) will go into more detail on what synthesis methods are available.
+Congratulations, you have created and evaluated your first synthetic dataset. Check out the next examples in this module to discover how to [make your synthesis reproducible](./reproducible_synthesis.md), how to [generate larger datasets](./generating_a_larger_dataset.md) and the [importance of the synthesis order](./changing_the_synthesis_order.md). [Module 2](changing_the_default_method.md) will go into more detail on what synthesis methods are available.

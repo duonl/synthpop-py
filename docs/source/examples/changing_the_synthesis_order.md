@@ -1,5 +1,12 @@
 # Changing the synthesis order
-In the previous example, we generated a synthetic version of the Iris dataset containing 5000 observations. When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were not preserved as well as others.
+In the previous example, we generated a synthetic version of the Iris dataset containing 5000 observations. 
+```warning
+The Iris dataset contains only 150 observation, which is small for training and evaluating a synthetic data model. The 5000 synthetic observations generated in this example do not increase the amount of information available to learn the underlying data distribution. As a result, the utility results shown here should be interpreted as illustrative rather than representative of the performance that may be obtained on larger datasets.
+
+We use the Iris dataset because it is a simple, well-known, and readily available dataset that makes it easy to demonstrate the effect of changing the synthesis order without introducing unnecessary complexity.
+```
+
+When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were not preserved as well as others.
 ![S_pMSE heatmap of the Iris dataset](../images/iris_dataset_spmse.png)
 
 Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Several pairwise relationships have relatively large S_pMSE values, indicating that these relationships are not preserved as well in the synthetic data. For example, the relationships involving `petal width (cm)` have S_pMSE values greater than 30, while several others fall between 10 and 30.
@@ -27,13 +34,12 @@ Index([
     ],                                              
       dtype='str')
 ```
-This is equivalent to creating the synthesiser as:
+If the synthesiser is created with the default parameters, no `column_order` is specified and the original column order is used.
 ```python
 from synthpop.synthesiser import Synthesiser
 
 synthesiser = Synthesiser(random_seed=1)
 ```
-No `column_order` is specified, so the original column order is used.
 
 ## Why does the synthesis order matter?
 synthpop-py generates variables **sequentially**.
@@ -63,7 +69,7 @@ However, predictive strength is not the only consideration when choosing an orde
 
 There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE can help determine whether the chosen order better preserves important relationships.
 
-More information about the sequential synthesis procedure is available in User Guide ADD LINK.
+More information about the sequential synthesis procedure is available in [User Guide 2: Synthetic data generation](../user_guides/2_synthetic_data_generation.md).
 
 ## Choosing a different order
 As shown by the S_pMSE heatmap above, several pairwise relationships were not preserved well. In particular, the relationships involving the petal measurements and the target variable have relatively high S_pMSE values. This indicates that the synthetic dataset does not reproduce these relationships as well as desired.
@@ -106,7 +112,7 @@ from synthpop.plotting import plot_spmse
 
 spmse_new = pairwise_spmse(data, synthetic_data_new)
 
-plot_spmse(spmse_new)
+plot = plot_spmse(spmse_new)
 ```
 ![S_pMSE heatmap of Iris dataset with new column order](../images/iris_dataset_spmse_2.png)
 The new heatmap shows that changing the synthesis order improved several important relationships. In particular, the relationships between the target variable and the petal measurements have much lower S_pMSE values compared with the original synthesis order.

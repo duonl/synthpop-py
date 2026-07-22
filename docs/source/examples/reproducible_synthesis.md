@@ -105,8 +105,6 @@ Using a random seed is recommended when you want reproducible results, for examp
 - sharing analyses with colleagues;
 - running automated tests.
 
-If the results do not need to be reproducible, you may choose to omit the random seed so that each synthesis produces a different synthetic dataset. However, it is recommended to set a random seed.
-
 ## Reproducibility and multiple synthetic datasets
 Sometimes you may want several different synthetic datasets from the same fitted synthesiser, for example to quantify the variability introduced by the synthesis process.
 
