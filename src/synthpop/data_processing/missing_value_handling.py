@@ -290,14 +290,19 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     --------
     >>> import numpy as np
     >>> from synthpop.data_processing import ReplaceMissingWithValue
+    >>>
     >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+    >>>
     >>> replace_missing = ReplaceMissingWithValue()
     >>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+    >>>
     >>> x_res
     array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))
+    >>>
     >>> y_res
     array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
+    >>>
     >>> replace_missing.post_synth_transform(x_res, y_res)
     array(['x', 'y', nan, 'z'], dtype=StringDType(na_object=nan))
     """
