@@ -516,6 +516,7 @@ def test_pairwise_spmse_no_division_by_zero():
 
 # ------------Binning tests ---------------
 
+
 @pytest.mark.parametrize(
     "column,max_bins,expected_n_bins",
     [
