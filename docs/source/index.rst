@@ -16,7 +16,7 @@
    about_us/about
 
 synthpop-py documentation
-======================
+===========================
 
 **Version**: |release|
 
