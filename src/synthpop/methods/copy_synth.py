@@ -62,6 +62,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
         self.y_ = y.copy()
         self.target_name_ = y.name
         self.n_samples_ = len(y)
+        self.target_dtype_ = y.dtype
 
         # for sklearn compatibility
         if X is not None:
@@ -81,6 +82,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
             not hasattr(self, "y_")
             or not hasattr(self, "target_name_")
             or not hasattr(self, "n_samples_")
+            or not hasattr(self, "target_dtype_")
         ):
             raise NotFittedError("CopyMethod is not fitted. Call `fit` first.")
         
@@ -88,7 +90,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
             if len(X) != self.n_samples_:
                 raise ValueError(f"Row mismatch: expected {self.n_samples_}, got {len(X)}.")
         
-        return pd.Series(self.y_.values, name=self.target_name_)
+        return pd.Series(self.y_.values, name=self.target_name_, dtype=self.target_dtype_)
     
     def get_feature_names_out(self, input_features=None) -> list[str]:
         if not hasattr(self, "target_name_"):
