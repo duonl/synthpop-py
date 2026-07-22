@@ -14,20 +14,27 @@ from synthpop.utils import str_dtype
 
 __all__ = ["pairwise_spmse"]
 
-def _standardise_array_dtypes(X: pd.DataFrame)-> npt.NDArray:
+
+def _standardise_array_dtypes(X: pd.DataFrame) -> npt.NDArray:
     """
     Helper to standardise a 1D-array:
     - float64 for numeric data
     - `StringDType(na_object = np.nan)` for non-numeric data
 
     Missing values are normalised to `np.nan`.
+
+    The numerical dtype differs from the utils.standardise_array_dtypes, which returns float32.
+
+    :param X: 1D array to standardise 
     """
 
     is_numeric = pd.api.types.is_numeric_dtype(np.asanyarray(X))
-    arr = np.asanyarray(X, dtype=object) #to avoid casting van np.nan to 'nan'
+    # to avoid casting van np.nan to 'nan'
+    arr = np.asanyarray(X, dtype=object)
 
     if arr.ndim not in (1, 2):
-        raise TypeError(f"Input must be a 1D or 2D array-like object, received {arr.ndim} instead.")
+        raise TypeError(
+            f"Input must be a 1D or 2D array-like object, received {arr.ndim} instead.")
 
     original_shape = arr.shape
     flat = arr.reshape(-1)
@@ -46,8 +53,9 @@ def _standardise_array_dtypes(X: pd.DataFrame)-> npt.NDArray:
 
     return result.reshape(original_shape)
 
-def _preprocessing_numeric(
-    column: pd.Series, bins: Sequence[float] | None = None
+
+def _categorise_numeric(
+    column: pd.Series, bins: Sequence[float]
 ) -> pd.Series:
     """
     Preprocess a numeric column for S_pMSE computation by discretising it into left-closed bins.
@@ -56,7 +64,7 @@ def _preprocessing_numeric(
     Missing values are preserved and are not modified.
 
     :param column: Numeric column to be discretised.
-    :param bins: Bin edges used for discretisation. If `None`, no binning is applied.
+    :param bins: Bin edges used for discretisation.
     """
 
     if column.notna().any():
@@ -64,15 +72,21 @@ def _preprocessing_numeric(
         column = binned_column
     return column
 
+
 def _get_numeric_bins(
-    column: pd.Series,
-    max_bins: int,
+    column: pd.Series, max_bins: int,
 ) -> np.ndarray:
     """
-    Determine bin edges for discretising a numeric column.
+    Determine bin edges for discretising a numeric column for S_pMSE computation.
 
-    Quantile-based bins are preferred. If they produce fewer than three
-    occupied bins, equal-width bins are used instead.
+    Quantile-based binning is used by default and the preferred method. 
+    If fewer than three bins contain data, equal-width binning is used instead. 
+    For consistency with synthpop-R, bins are defined to be left-closed.
+    The upper edge of the final bin is adjusted so that the maximum value 
+    is included in the last left-closed interval.
+
+    :param column: Numeric column used to determine the bin edges.
+    :param max_bins: Maximum number of bins to generate.
     """
 
     _, bins = pd.qcut(
@@ -82,7 +96,7 @@ def _get_numeric_bins(
         retbins=True,
     )
 
-    #Check for filled bins
+    # Check for filled bins
     if pd.isna(bins).all():
         occupied_bins = 0
 
@@ -94,7 +108,7 @@ def _get_numeric_bins(
             right=False,
         ).nunique(dropna=True)
 
-    #If less than 3 bins are filled, define a linear binning
+    # If less than 3 bins are filled, define a linear binning
     if occupied_bins < 3:
         _, bins = pd.cut(
             column,
@@ -109,7 +123,10 @@ def _get_numeric_bins(
 
     return bins
 
-def _preprocess_columns(o_df, s_df, max_bins):
+
+def _preprocess_columns(
+        o_df: pd.DataFrame, s_df: pd.DataFrame, max_bins: int
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Preprocess the original and synthetic dataframes prior to S_pMSE calculation.
 
@@ -122,8 +139,10 @@ def _preprocess_columns(o_df, s_df, max_bins):
     """
 
     for col in o_df.columns:
-        o_col = pd.Series(_standardise_array_dtypes(o_df[col]), index=o_df.index)
-        s_col = pd.Series(_standardise_array_dtypes(s_df[col]), index=s_df.index)
+        o_col = pd.Series(_standardise_array_dtypes(
+            o_df[col]), index=o_df.index)
+        s_col = pd.Series(_standardise_array_dtypes(
+            s_df[col]), index=s_df.index)
 
         o_is_numeric = pd.api.types.is_numeric_dtype(o_col)
         s_is_numeric = pd.api.types.is_numeric_dtype(s_col)
@@ -138,9 +157,9 @@ def _preprocess_columns(o_df, s_df, max_bins):
             combined = pd.concat([o_col, s_col])
             bins = _get_numeric_bins(combined, max_bins)
 
-            o_df[col] = _preprocessing_numeric(o_col, bins=bins)
-            s_df[col] = _preprocessing_numeric(s_col, bins=bins)
-    
+            o_df[col] = _categorise_numeric(o_col, bins=bins)
+            s_df[col] = _categorise_numeric(s_col, bins=bins)
+
     return o_df, s_df
 
 
@@ -164,6 +183,7 @@ def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str) -> pd.Series:
 
     return jf
 
+
 def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.float32:
     """
     Calculates the S_pSME for a combination of two columns from the joint frequency tables
@@ -178,11 +198,8 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
 
     expected_frequency = jf_syn.add(jf_or, fill_value=0) * n_s / (n_o + n_s)
 
-    print('rescaled', rescaled_differences)
-    print('expected', expected_frequency)
-
     num_independent_combinations = len(expected_frequency.index)
-    print(num_independent_combinations-1)
+
     if num_independent_combinations > 1:
 
         spmse = (
@@ -190,7 +207,7 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
             / (num_independent_combinations - 1)
             * np.sum(np.power(rescaled_differences, 2) / expected_frequency)
         ).astype(np.float32)
-        print(np.sum(np.power(rescaled_differences, 2) / expected_frequency))
+
     else:  # number_independent_combinations=1
 
         spmse = np.float32(0.0)
@@ -211,6 +228,7 @@ def pairwise_spmse(
 
     The metric compares the preservation of pairwise joint distributions between corresponding variables in both datasets.
     Numeric variables are discretised into at most `max_bins` bins using bin edges derived jointly from the original and synthetic dataset.
+    The preferred method of binning is based on quantiles, however if the data is heavily skewed linear binning is applied.
     Categorical and string variables are used directly.
     Missing values are standardised to np.nan and included in the frequency calculations as a separate level.
 
@@ -251,7 +269,8 @@ def pairwise_spmse(
     n_s = len(syn_df.index)
 
     if n_o == 0 or n_s == 0:
-        raise ValueError("Both the original and synthetic dataframe must be non-empty.")
+        raise ValueError(
+            "Both the original and synthetic dataframe must be non-empty.")
 
     if not orig_df.columns.is_unique or not syn_df.columns.is_unique:
         raise ValueError(
@@ -282,9 +301,9 @@ def pairwise_spmse(
 
         jf_orig = _joint_frequencies(o_df, col1, col2)
         jf_syn = _joint_frequencies(s_df, col1, col2)
-        print('syn', jf_syn, col1, col2)
-        print('orig', jf_orig, col1, col2)
+
         full_index = jf_orig.index.union(jf_syn.index, sort=False)
+
         jf_orig = jf_orig.reindex(full_index, fill_value=0)
         jf_syn = jf_syn.reindex(full_index, fill_value=0)
 
