@@ -17,7 +17,7 @@ class SampleMethod(BaseSynthMethod):
 
     Examples
     --------
-        >>> from synthpop.methods.sample_synth import SampleMethod
+        >>> from synthpop.methods import SampleMethod
         >>> import pandas as pd
         >>> y = pd.Series(["a", "b", "c"], name="target_column")
         >>>
@@ -31,7 +31,7 @@ class SampleMethod(BaseSynthMethod):
         2             b
 
     Without X:
-        >>> from synthpop.methods.sample_synth import SampleMethod
+        >>> from synthpop.methods import SampleMethod
         >>> import pandas as pd
         >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
         >>>

@@ -146,7 +146,7 @@ def pairwise_spmse(
     Example:
     --------
     >>> import pandas as pd
-    >>> from synthpop.utility_metrics.spmse import pairwise_spmse
+    >>> from synthpop.utility_metrics import pairwise_spmse
     >>>
     >>> orig_data = pd.DataFrame({
     ...     "sex": ["M", "M", "F"],

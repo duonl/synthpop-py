@@ -81,7 +81,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     Examples
     --------
-    >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+    >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np
     >>>
     >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -123,7 +123,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         Examples
         --------
-        >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+        >>> from synthpop.data_processing import MissingValuePredictor
         >>> import numpy as np
         >>>
         >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -203,7 +203,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         Examples
         --------
-        >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+        >>> from synthpop.data_processing import MissingValuePredictor
         >>> import numpy as np
         >>>
         >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -289,7 +289,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     Examples
     --------
     >>> import numpy as np
-    >>> from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
+    >>> from synthpop.data_processing import ReplaceMissingWithValue
     >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>> replace_missing = ReplaceMissingWithValue()

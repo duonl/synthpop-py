@@ -15,7 +15,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
     Examples
     --------
-        >>> from synthpop.methods.copy_synth import CopyMethod
+        >>> from synthpop.methods import CopyMethod
         >>> import pandas as pd
         >>> 
         >>> X = pd.DataFrame({"X": [1, 2, 3]})
@@ -31,7 +31,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
         2             c
 
     Without X:
-        >>> from synthpop.methods.copy_synth import CopyMethod
+        >>> from synthpop.methods import CopyMethod
         >>> import pandas as pd
         >>> 
         >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")

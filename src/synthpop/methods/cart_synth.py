@@ -233,7 +233,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
-        >>> from synthpop.methods.cart_synth import TreeClassifierMethod
+        >>> from synthpop.methods import TreeClassifierMethod
         >>> import numpy as np
         >>> from synthpop.utils import str_dtype
         >>>
@@ -296,7 +296,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     Examples
     --------
-        >>> from synthpop.methods.cart_synth import TreeRegressorMethod
+        >>> from synthpop.methods import TreeRegressorMethod
         >>> import numpy as np
         >>> from synthpop.utils import str_dtype
         >>>
@@ -373,7 +373,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     Examples
     --------
     >>> import pandas as pd
-    >>> from synthpop.methods.cart_synth import CartMethod
+    >>> from synthpop.methods import CartMethod
     >>>
     >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
     >>> y_num = pd.Series([50, 60, 70], name='length', dtype='float32')
@@ -508,9 +508,9 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
 
     Examples
     --------
-    >>> from synthpop.methods.cart_synth import CartMethod
-    >>> from synthpop.methods.cart_synth import tune_cart
-    >>> from synthpop.synthesiser import Synthesiser
+    >>> from synthpop.methods import CartMethod
+    >>> from synthpop.methods import tune_cart
+    >>> from synthpop import Synthesiser
     >>> import pandas as pd
     >>> data = pd.DataFrame({"a": [1], "b": [2]})
     >>> synth = Synthesiser(random_seed=10,
