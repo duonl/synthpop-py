@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from synthpop.utility_metrics.spmse import pairwise_spmse
+from synthpop.utility_metrics.spmse import pairwise_spmse, _get_numeric_bins
 
 
 @pytest.mark.parametrize(
@@ -513,3 +513,60 @@ def test_pairwise_spmse_no_division_by_zero():
     output = pairwise_spmse(orig_df, syn_df, max_bins=3)
 
     assert np.isfinite(output['S_pMSE']).all()
+
+# ------------Binning tests ---------------
+
+@pytest.mark.parametrize(
+    "column,max_bins,expected_n_bins",
+    [
+        (pd.Series([0, 1, 2, 3]), 2, 2),
+        (pd.Series([0, 1, 2, 3]), 3, 3),
+        (pd.Series(range(10)), 5, 5),
+    ],
+)
+def test_get_numeric_bins_number_of_bins(column, max_bins, expected_n_bins):
+
+    bins = _get_numeric_bins(column, max_bins)
+
+    # n bins corresponds to n+1 edges
+    assert len(bins) == expected_n_bins + 1
+
+
+def test_get_numeric_bins_to_equal_binning():
+
+    # qcut collapses to two occupied bins because only two unique values exist.
+    column = pd.Series([0] * 50 + [1] * 50, dtype=np.float64)
+
+    bins = _get_numeric_bins(column, max_bins=5)
+
+    # Equal-width bins are equally spaced.
+    widths = np.diff(bins)
+
+    np.testing.assert_allclose(widths, widths[0], rtol=1e-2)
+
+
+def test_get_numeric_bins_ignores_missing_values_as_bin():
+
+    column = pd.Series([0, 1, 2, np.nan, 3, np.nan])
+
+    bins = _get_numeric_bins(column, max_bins=3)
+
+    cut = pd.cut(column, bins=bins, right=False)
+
+    assert cut.isna().sum() == 2
+
+
+def test_get_numeric_bins_extends_right_edge():
+
+    column = pd.Series([0, 1, 2, 3])
+
+    bins = _get_numeric_bins(column, max_bins=3)
+
+    # Maximum value should lie inside the last left-closed interval.
+    cut = pd.cut(column, bins=bins, right=False)
+
+    assert not pd.isna(cut.iloc[-1])
+
+    # Final edge should be strictly larger than the maximum.
+    assert bins[-1] > column.max()
+    assert bins[0] == column.min()
