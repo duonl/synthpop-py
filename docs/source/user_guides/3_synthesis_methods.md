@@ -20,7 +20,7 @@ Available synthesis methods are:
 
 CART (Classification And Regression Trees) is the default synthesis method. 
 ```python
->>> from synthpop.methods.cart_synth import CartMethod
+>>> from synthpop.methods import CartMethod
 
 >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
 >>> y = pd.Series([50.0, 60.0, 70.0], dtype='float32', name='length')
@@ -164,7 +164,7 @@ The most flexible approach is to construct a {class}`~synthpop.methods.cart_synt
 ```
 For common tuning options, synthpop-py provides the convenience function {func}`~synthpop.methods.cart_synth.tune_cart`, which applies the same configuration consistently to all tree-based components:
 ```python
->>> from synthpop.methods.cart_synth import tune_cart
+>>> from synthpop.methods import tune_cart
 
 >>> tuned_cart = tune_cart(n_leaves=10, n_components=1)
 ```
@@ -182,7 +182,7 @@ Currently `tune_cart` supports the following parameters:
 
 The {class}`~synthpop.methods.sample_synth.SampleMethod` generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
 ```python
->>> from synthpop.methods.sample_synth import SampleMethod
+>>> from synthpop.methods import SampleMethod
 
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = SampleMethod(random_state=10).fit(None, y)
@@ -239,7 +239,7 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
 The {class}`~synthpop.methods.copy_synth.CopyMethod` deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.
 ```python
->>> from synthpop.methods.copy_synth import CopyMethod
+>>> from synthpop.methods import CopyMethod
 
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)

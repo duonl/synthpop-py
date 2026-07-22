@@ -50,7 +50,7 @@ This design closely follows the original synthpop methodology while providing a 
 The central interface in synthpop-py is the {class}`~synthpop.synthesiser.Synthesiser` class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
 
 ```python
->>> from synthpop.synthesiser import Synthesiser
+>>> from synthpop import Synthesiser
 
 >>> synth = Synthesiser(random_seed=42)
 >>> synth.fit(df)

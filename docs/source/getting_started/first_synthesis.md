@@ -24,7 +24,7 @@ Synthetic data should be evaluated before it is used for analysis or shared with
 A first check is to compare {doc}`../api_reference/plotting/Univariate` of individual variables in the original and synthetic dataset. 
 
 ```python
-from synthpop.plotting.plot import plot_univariate_distributions
+from synthpop.plotting import plot_univariate_distributions
 
 plots = plot_univariate_distributions(
     orig_df=orig_df,
@@ -42,7 +42,7 @@ Univariate comparisons evaluate variables individually, but they do not capture 
 To assess whether multivariate patterns are preserved, synthpop-py provides metrics such as the Standardized propensity Mean Squared Error ({doc}`../api_reference/plotting/S_pMSE`).
 
 ```python
-from synthpop.utility_metrics.spmse import pairwise_spmse
+from synthpop.utility_metrics import pairwise_spmse
 from synthpop.plotting import plot_spmse
 
 spmse = pairwise_spmse(orig_df, syn_df)

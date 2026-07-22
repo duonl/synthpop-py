@@ -1,12 +1,18 @@
-def test_read_in_synthesiser_functions_all_():
-    import synthpop as synthpop
+# --------- __init__ files for users ---------
+
+def test_read_in_synthpop_all_():
+    import synthpop
 
     assert synthpop.__all__ == [
-        "Synthesiser",
+        "data_processing",
+        "methods",
+        "plotting",
+        "utility_metrics",
+        "Synthesiser"
     ]
 
     assert callable(synthpop.Synthesiser)
-
+    assert synthpop.__version__ == "1.0.0"
 
 def test_read_in_plotting_functions_all_():
     import synthpop.plotting as plotting
@@ -36,6 +42,7 @@ def test_read_in_methods_functions_all_():
     assert methods.__all__ == [
         "CopyMethod",
         "SampleMethod",
+        "BaseSynthMethod",
         "CartMethod",
         "tune_cart",
         "TreeRegressorMethod",
