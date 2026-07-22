@@ -39,8 +39,18 @@ def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
 
     matrix = df.pivot(index="column1", columns="column2", values=value_string)
     matrix = matrix.combine_first(matrix.T)
+    # matrix = matrix.rename_axis(index=None, columns=None)
+    # # invert s.t. the diagonal goes from upper-left to lower-right
+    # return matrix.iloc[::-1]
+    variables = sorted(set(matrix.index) | set(matrix.columns))
+
+    matrix = matrix.reindex(
+        index=variables,
+        columns=variables,
+    )
+
     matrix = matrix.rename_axis(index=None, columns=None)
-    # invert s.t. the diagonal goes from upper-left to lower-right
+
     return matrix.iloc[::-1]
 
 
@@ -57,6 +67,12 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
     return: NxN matrix
     """
     text_matrix = matrix.round(2).astype(str)
+
+    text_matrix = text_matrix.mask(
+        matrix.isna(),
+        "MISSING",
+    )
+
     text_matrix = text_matrix.mask(matrix == 0, "CONSTANT VARIABLE")
 
     return text_matrix
@@ -67,7 +83,7 @@ def _get_colour_scale() -> list:
     Helper function to obtain the discrete colour scale used for the S_pMSE bins.
     """
 
-    colours = ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
+    colours = ['rgb(225,225,225)']+['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
 
     n = len(colours)
     colour_scale = []
@@ -114,10 +130,10 @@ def _make_heatmap(
             ),
             colorscale=colour_scale,
             zmin=0,
-            zmax=len(bins),
+            zmax=len(bin_labels),
             colorbar=dict(
                 tickmode="array",
-                tickvals=np.array(range(len(bins)))+0.5,
+                tickvals=np.array(range(len(bin_labels)))+0.5, 
                 ticktext=bin_labels,
                 title="S_pMSE bins",
                 outlinecolor="black",
@@ -214,18 +230,19 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
 
     bins = [0, 3, 10, 30, 100, np.inf]
     bin_labels = [
-        "CONSTANT VARIABLE", "(0,3]", "(3,10]",
+        "MISSING", "CONSTANT VARIABLE", "(0,3]", "(3,10]",
         "(10,30]", "(30,100]", '(100,+)'
     ]
 
     # pairwise_spmse does not return nan
     spmse = _categorise_spmse(spmse, bins)
 
-    matrix = _make_matrix(spmse, "category")
     matrix_orig = _make_matrix(spmse, "S_pMSE")
-
     text_matrix = _make_text_matrix(matrix_orig)
 
+    matrix = _make_matrix(spmse, "category")
+    matrix +=1
+    matrix = matrix.fillna(0)
     colour_scale = _get_colour_scale()
 
     fig = _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels)
