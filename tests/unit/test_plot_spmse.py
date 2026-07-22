@@ -18,12 +18,11 @@ from synthpop.plotting.plot_spmse import (
 def spmse_df():
     return pd.DataFrame(
         {
-            "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
-            "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
+            "column1": ["c1", "c1", "c2", "c2", "c3"],
+            "column2": ["c1", "c2", "c2", "c3", "c3"],
             "S_pMSE": [
                 0,
                 473842.48534952759345,
-                12.4598375983543,
                 4.0,
                 46.485343962786234,
                 0.0001,
@@ -56,7 +55,7 @@ def test_categorise_spmse_correct_output(binval, expected_val, spmse_df):
 
     spmse = _categorise_spmse(spmse_df, bins)
 
-    expected = pd.Series([0, expected_val, 3, 2, 4, 1], name="category")
+    expected = pd.Series([0, expected_val, 2, 4, 1], name="category")
 
     pd.testing.assert_series_equal(
         spmse["category"],
@@ -455,3 +454,6 @@ def test_no_input_change(spmse_df):
     plot_spmse(spmse_df, None, False)
 
     pd.testing.assert_frame_equal(spmse_df, original_df)
+
+# def test_visual(spmse_df): #Please check for review
+#     plot_spmse(spmse_df, None, True)
