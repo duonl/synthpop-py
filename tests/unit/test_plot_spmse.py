@@ -100,18 +100,20 @@ def test_make_text_matrix_test():
     Test that checks the text matrix
     """
     matrix = pd.DataFrame([
-        [12.4598375983543, 46.485343962786234, 0.0001],
-        [473842.48534952759345, 4.0, 46.485343962786234],
-        [0., 473842.48534952759345, 12.4598375983543],
+        [np.nan, 0., 1.0, 46.485343962786234],
+        [0., 0., 3.0000001, np.nan],
+        [2.9999999, 9., 46.432222523765427, 10534.],
+        [56., np.nan, 473842.49323234233, 8.]
     ])
 
     matrix = _make_text_matrix(matrix)
 
     output = pd.DataFrame(
         [
-            ['12.46', '46.49', '0.0'],
-            ['473842.49', '4.0', '46.49'],
-            ['CONSTANT VARIABLE', '473842.49', '12.46'],
+            ["MISSING", "CONSTANT VARIABLE", "1.0", "46.49"],
+            ["CONSTANT VARIABLE", "CONSTANT VARIABLE", "3.0", "MISSING"],
+            ["3.0", "9.0", "46.43", "10534.0"],
+            ["56.0", "MISSING", "473842.49", "8.0"],
         ],
     )
 
@@ -126,14 +128,14 @@ def test_get_colour_scale_structure():
     """
     colour_scale = _get_colour_scale()
 
-    colours = [
-        'rgb(255,255,255)',
-        'rgb(255,255,229)',
-        'rgb(255,247,188)',
-        'rgb(254,227,145)',
-        'rgb(254,196,79)',
-        'rgb(254,153,41)',
-    ]
+    colours = ['rgb(225,225,225)',
+               'rgb(255,255,255)',
+               'rgb(255,255,229)',
+               'rgb(255,247,188)',
+               'rgb(254,227,145)',
+               'rgb(254,196,79)',
+               'rgb(254,153,41)',
+               ]
 
     assert len(colour_scale) == 2 * len(colours)
 
@@ -152,19 +154,21 @@ def test_get_colour_scale_structure():
 def heatmap_inputs():
     matrix = pd.DataFrame(
         [
-            [3., 4., 1.],
-            [5., 2., 4.],
-            [0., 5., 3.],
+            [0., 1., 2., 4.],
+            [1., 1., 3., 0.],
+            [2., 3., 5., 6.],
+            [4., 0., 6., 3.],
         ],
-        index=["c3", "c2", "c1"],
-        columns=["c1", "c2", "c3"],
+        index=["c4", "c3", "c2", "c1"],
+        columns=["c1", "c2", "c3", "c4"],
     )
 
     text_matrix = pd.DataFrame(
         [
-            ["12.46", "46.49", "0.0"],
-            ["473842.49", "4.0", "46.49"],
-            ["CONSTANT VARIABLE", "473842.49", "12.46"],
+            ["MISSING", "CONSTANT VARIABLE", "1.0", "46,49"],
+            ["CONSTANT VARIABLE", "CONSTANT VARIABLE", "3.00", "MISSING"],
+            ["3", "9.", "46,34", "104534"],
+            ["56", "MISSING", "473842.49", "8"],
         ],
         index=matrix.index,
         columns=matrix.columns,
@@ -172,30 +176,30 @@ def heatmap_inputs():
 
     bins = [0, 3, 10, 30, 100, np.inf]
 
-    bin_labels = [
-        "CONSTANT VARIABLE",
-        "(0,3]",
-        "(3,10]",
-        "(10,30]",
-        "(30,100]",
-        "(100,+)",
-    ]
+    bin_labels = ["MISSING",
+                  "CONSTANT VARIABLE",
+                  "(0,3]",
+                  "(3,10]",
+                  "(10,30]",
+                  "(30,100]",
+                  "(100,+)",
+                  ]
 
     colour_scale = [
-        [0.0, 'rgb(255,255,255)'],
-        [0.16666666666666666, 'rgb(255,255,255)'],
-        [0.16666666666666666, 'rgb(255,255,229)'],
-        [0.3333333333333333, 'rgb(255,255,229)'],
-        [0.3333333333333333, 'rgb(255,247,188)'],
-        [0.5, 'rgb(255,247,188)'],
-        [0.5, 'rgb(254,227,145)'],
-        [0.6666666666666666, 'rgb(254,227,145)'],
-        [0.6666666666666666, 'rgb(254,196,79)'],
-        [0.8333333333333334, 'rgb(254,196,79)'],
-        [0.8333333333333334, 'rgb(254,153,41)'],
-        [1.0, 'rgb(254,153,41)'],
-    ]
-
+        [0.0, 'rgb(225,225,225)'],
+        [0.14285714285714285, 'rgb(225,225,225)'],
+        [0.14285714285714285, 'rgb(255,255,255)'],
+        [0.2857142857142857, 'rgb(255,255,255)'],
+        [0.2857142857142857, 'rgb(255,255,229)'],
+        [0.42857142857142855, 'rgb(255,255,229)'],
+        [0.42857142857142855, 'rgb(255,247,188)'],
+        [0.5714285714285714, 'rgb(255,247,188)'],
+        [0.5714285714285714, 'rgb(254,227,145)'],
+        [0.7142857142857143, 'rgb(254,227,145)'],
+        [0.7142857142857143, 'rgb(254,196,79)'],
+        [0.8571428571428571, 'rgb(254,196,79)'],
+        [0.8571428571428571, 'rgb(254,153,41)'],
+        [1.0, 'rgb(254,153,41)']]
     return matrix, text_matrix, colour_scale, bins, bin_labels
 
 
@@ -234,7 +238,7 @@ def test_make_heatmap_data(heatmap_inputs):
     heatmap = fig.data[0]
 
     assert heatmap.type == "heatmap"
-    assert np.shape(heatmap.z) == (3, 3)
+    assert np.shape(heatmap.z) == (4, 4)
 
     np.testing.assert_array_equal(heatmap.z, matrix.values)
     np.testing.assert_array_equal(heatmap.x, matrix.columns)
@@ -287,7 +291,7 @@ def test_make_heatmap_colourbar(heatmap_inputs):
 
     np.testing.assert_array_equal(
         colorbar.tickvals,
-        np.arange(len(bins)) + 0.5,
+        np.arange(len(bin_labels)) + 0.5,
     )
 
     assert colorbar.title.text == "S_pMSE bins"

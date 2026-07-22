@@ -39,9 +39,8 @@ def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
 
     matrix = df.pivot(index="column1", columns="column2", values=value_string)
     matrix = matrix.combine_first(matrix.T)
-    # matrix = matrix.rename_axis(index=None, columns=None)
-    # # invert s.t. the diagonal goes from upper-left to lower-right
-    # return matrix.iloc[::-1]
+
+    #Required in most cases if the diagonal is not stored. As (X,Y) = (Y,X) one column can be missed in both column1 and column2
     variables = sorted(set(matrix.index) | set(matrix.columns))
 
     matrix = matrix.reindex(
@@ -106,7 +105,7 @@ def _make_heatmap(
     :param matrix: pandas DataFrame of the categorised S_pMSE
     :param text_matrix: pandas DataFrame of the same shape as ``matrix``
         containing the text displayed in each heatmap cell (e.g. rounded
-        values or "CONSTANT VARIABLE").
+        values, "CONSTANT VARIABLE" or "MISSING" for unpresent combinations).
     :param colour_scale: Plotly-compatible colour scale applied to the heatmap.
     :param bins: Sequence of bin edges used to categorise the S_pMSE values.
     :param bin_labels: Labels corresponding to the bins, displayed on the
