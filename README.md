@@ -83,7 +83,7 @@ The package is not currently designed for unstructured data such as free text, i
 
 synthpop-py currently provides the following synthesis methods:
 
-* **CART** — the default sequential modelling method;
+* **CART** — A Classification and Regression Trees method, the default sequential modelling method;
 * **Sampling** — a sampling-based synthesis method; and
 * **Copying** — a copying-based method.
 
@@ -103,9 +103,9 @@ Privacy evaluation functionality is planned for future development. Until then, 
 
 For more information about synthetic data evaluation, see the documentation.
 
-## Relationship to `synthpop`
+## Relationship to `synthpop R package`
 
-synthpop-py is based on the ideas and methodology of the established [`synthpop` R package](https://www.synthpop.org.uk/), which provides a widely used framework for generating synthetic tabular data through sequential modelling.
+synthpop-py is based on the core concepts of the established [`synthpop` R package](https://www.synthpop.org.uk/), which provides a widely used framework for generating synthetic tabular data through sequential modelling.
 
 The sequential modelling approach synthesises variables one at a time, using previously synthesised variables as predictors for subsequent variables. This allows statistical relationships between variables in the original data to be incorporated into the generated synthetic data.
 
