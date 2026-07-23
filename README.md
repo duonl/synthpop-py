@@ -30,9 +30,17 @@ The original data is provided as a `pandas.DataFrame`. The `Synthesiser` learns 
 For a complete introduction to preparing data, configuring synthesis, generating synthetic datasets, and evaluating the results, see the [Getting Started guide](https://synthpop-py.readthedocs.io/en/develop/getting_started/getting_started.html).
 
 ## Installation
+### Requirements
 
-synthpop-py requires **Python 3.13 or later**.
+synthpop-py requires:
+- **Python 3.13 or later**
+- **pandas 3.0.2 or later**
+- **scikit-learn 1.8.0 or later**
+- **plotly 6.5.2 or later**
 
+The runtime dependencies are installed when installing synthpop-py from PyPI
+
+### Install from PyPi
 The recommended installation method is through PyPI:
 
 ```bash
