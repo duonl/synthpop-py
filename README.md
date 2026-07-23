@@ -4,6 +4,8 @@
 
 Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to original or sensitive data is restricted. synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations. Properly synthesised data does not have any row-to-row relationships to the original data. As such, it may be considered non-personal data in the concept of privacy laws such as the GDPR.
 
+However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods and settings used, and the intended use and sharing context of the synthetic data.
+
 > **Project status**: synthpop-py is currently under active development and the project is working towards its `1.0.0` release
 
 ## Quick start
@@ -115,7 +117,7 @@ The two packages are related but are not currently feature-equivalent. The origi
 
 The development of synthpop-py has been undertaken with approval from, and in cooperation with, the authors of the original `synthpop` R package.
 
-For background on the methodology and the use of `synthpop`, see the references below.
+For background on the methodology and the use of `synthpop`, see the {ref}`references <readme-references>` below.
 
 ## Limitations and responsible use
 
@@ -172,6 +174,7 @@ synthpop-py is currently developed by a team of employees of the **Dutch Ministr
 
 The project builds on the methodology and ideas of the original [`synthpop` R package](https://www.synthpop.org.uk/) and is developed with approval from, and in cooperation with, its original authors.
 
+(readme-references)=
 ### References
 
 For background on the utility and application of synthetic data and the `synthpop` methodology, see:
