@@ -105,7 +105,7 @@ Privacy evaluation functionality is planned for future development. Until then, 
 
 For more information about synthetic data evaluation, see the documentation.
 
-## Relationship to `synthpop R package`
+## Relationship to the `synthpop` R package
 
 synthpop-py is based on the core concepts of the established [`synthpop` R package](https://www.synthpop.org.uk/), which provides a widely used framework for generating synthetic tabular data through sequential modelling.
 
@@ -117,7 +117,7 @@ The two packages are related but are not currently feature-equivalent. The origi
 
 The development of synthpop-py has been undertaken with approval from, and in cooperation with, the authors of the original `synthpop` R package.
 
-For background on the methodology and the use of `synthpop`, see the {ref}`references <readme-references>` below.
+For background on the methodology and the use of `synthpop`, see the references below.
 
 ## Limitations and responsible use
 
@@ -174,7 +174,6 @@ synthpop-py is currently developed by a team of employees of the **Dutch Ministr
 
 The project builds on the methodology and ideas of the original [`synthpop` R package](https://www.synthpop.org.uk/) and is developed with approval from, and in cooperation with, its original authors.
 
-(readme-references)=
 ### References
 
 For background on the utility and application of synthetic data and the `synthpop` methodology, see:
