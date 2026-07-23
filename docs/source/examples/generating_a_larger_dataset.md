@@ -1,4 +1,4 @@
-# Generating a larger synthetic dataset
+# Generate a larger synthetic dataset
 In the previous examples, we generated a synthetic dataset with the same number of rows as the original dataset. However, synthetic datasets do not need to have the same size as the original data.
 
 One advantage of synthetic data is that we can generate more records than were available in the original dataset. This can be useful when testing analysis pipelines, developing software or creating datasets for simulation studies.
