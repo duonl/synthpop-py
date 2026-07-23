@@ -64,7 +64,7 @@ myst_enable_extensions = [
     "dollarmath",
     "amsmath",
     "tasklist",
-    "attrs_image",
+    "attrs_inline",
 ]
 autodoc_member_order = "bysource"
 
@@ -80,6 +80,6 @@ source_suffix = {
 intersphinx_mapping = {
     "sklearn": (
         "https://scikit-learn.org/stable/",
-        None,
+        "https://scikit-learn.org/stable/objects.inv",
     ),
 }
