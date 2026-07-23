@@ -233,23 +233,23 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
-        >>> from synthpop.methods import TreeClassifierMethod
-        >>> import numpy as np
-        >>> from synthpop.utils import str_dtype
-        >>>
-        >>> X = {
-        ...         "column1":np.array([1.1, 2.2]),
-        ...         "column2":np.array([1.4, 1.2]),
-        ...         "column3":np.array(["a", "b"], dtype=str_dtype)
-        ...         }
-        >>> y = np.array(["x", "y"], dtype=str_dtype)
-        >>>
-        >>> tree_method = TreeClassifierMethod()
-        >>> tree_method.fit(X, y)
-        TreeClassifierMethod()
-        >>>
-        >>> tree_method.transform(X)
-        array(['x', 'y'], dtype=StringDType(na_object=nan))
+    >>> from synthpop.methods import TreeClassifierMethod
+    >>> import numpy as np
+    >>> from synthpop.utils import str_dtype
+    >>>
+    >>> X = {
+    ...         "column1":np.array([1.1, 2.2]),
+    ...         "column2":np.array([1.4, 1.2]),
+    ...         "column3":np.array(["a", "b"], dtype=str_dtype)
+    ...         }
+    >>> y = np.array(["x", "y"], dtype=str_dtype)
+    >>>
+    >>> tree_method = TreeClassifierMethod()
+    >>> tree_method.fit(X, y)
+    TreeClassifierMethod()
+    >>>
+    >>> tree_method.transform(X)
+    array(['x', 'y'], dtype=StringDType(na_object=nan))
 
     """
 
@@ -296,23 +296,23 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     Examples
     --------
-        >>> from synthpop.methods import TreeRegressorMethod
-        >>> import numpy as np
-        >>> from synthpop.utils import str_dtype
-        >>>
-        >>> X = {
-        ...         "column1":np.array([1.1, 2.2]),
-        ...         "column2":np.array([1.4, 1.2]),
-        ...         "column3":np.array(["a", "b"], dtype=str_dtype)
-        ...         }
-        >>> y = np.array([1, 2], dtype=np.float32)
-        >>>
-        >>> tree_method = TreeRegressorMethod()
-        >>> tree_method.fit(X, y)
-        TreeRegressorMethod()
-        >>>
-        >>> tree_method.transform(X)
-        array([1., 2.], dtype=float32)
+    >>> from synthpop.methods import TreeRegressorMethod
+    >>> import numpy as np
+    >>> from synthpop.utils import str_dtype
+    >>>
+    >>> X = {
+    ...         "column1":np.array([1.1, 2.2]),
+    ...         "column2":np.array([1.4, 1.2]),
+    ...         "column3":np.array(["a", "b"], dtype=str_dtype)
+    ...         }
+    >>> y = np.array([1, 2], dtype=np.float32)
+    >>>
+    >>> tree_method = TreeRegressorMethod()
+    >>> tree_method.fit(X, y)
+    TreeRegressorMethod()
+    >>>
+    >>> tree_method.transform(X)
+    array([1., 2.], dtype=float32)
 
     """
 
@@ -508,8 +508,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
 
     Examples
     --------
-    >>> from synthpop.methods import CartMethod
-    >>> from synthpop.methods import tune_cart
+    >>> from synthpop.methods import CartMethod, tune_cart
     >>> from synthpop import Synthesiser
     >>> import pandas as pd
     >>> data = pd.DataFrame({"a": [1], "b": [2]})

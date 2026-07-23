@@ -4,9 +4,9 @@ This module contains classes for different strategies for handling missing value
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Self
 
-import pandas as pd
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from sklearn.base import TransformerMixin, clone
 from sklearn.exceptions import NotFittedError
 from sklearn.tree import DecisionTreeClassifier

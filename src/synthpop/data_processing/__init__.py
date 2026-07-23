@@ -4,6 +4,6 @@ from .missing_value_handling import MissingValuePredictor, ReplaceMissingWithVal
 __all__ = [
     "PCAEncoder",
     "MeanEncoder",
-"MissingValuePredictor",
-"ReplaceMissingWithValue",
+    "MissingValuePredictor",
+    "ReplaceMissingWithValue",
 ]

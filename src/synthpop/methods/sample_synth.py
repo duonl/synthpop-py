@@ -17,32 +17,33 @@ class SampleMethod(BaseSynthMethod):
 
     Examples
     --------
-        >>> from synthpop.methods import SampleMethod
-        >>> import pandas as pd
-        >>> y = pd.Series(["a", "b", "c"], name="target_column")
-        >>>
-        >>> model = SampleMethod()
-        >>> model.fit(X, y)
-        SampleMethod()
-        >>> model.transform(X)
-        target_column
-        0             a
-        1             c
-        2             b
+    >>> from synthpop.methods import SampleMethod
+    >>> import pandas as pd
+    >>> y = pd.Series(["a", "b", "c"], name="target_column")
+    >>>
+    >>> model = SampleMethod()
+    >>> model.fit(X, y)
+    SampleMethod()
+    >>> model.transform(X)
+    target_column
+    0             a
+    1             c
+    2             b
 
     Without X:
-        >>> from synthpop.methods import SampleMethod
-        >>> import pandas as pd
-        >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
-        >>>
-        >>> model = SampleMethod(random_state=10)
-        >>> model.fit(None, y)
-        SampleMethod(random_state=10)
-        >>> model.transform(None)
-        new_target_column
-        0              <NA>
-        1              <NA>
-        2                 1
+
+    >>> from synthpop.methods import SampleMethod
+    >>> import pandas as pd
+    >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
+    >>>
+    >>> model = SampleMethod(random_state=10)
+    >>> model.fit(None, y)
+    SampleMethod(random_state=10)
+    >>> model.transform(None)
+    new_target_column
+    0              <NA>
+    1              <NA>
+    2                 1
     """
 
     def __init__(self, random_state: int | None = None) -> None:
