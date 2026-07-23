@@ -1,6 +1,6 @@
 # Changing the synthesis order
 In the previous example, we generated a synthetic version of the Iris dataset containing 5000 observations. 
-```warning
+```{warning}
 The Iris dataset contains only 150 observation, which is small for training and evaluating a synthetic data model. The 5000 synthetic observations generated in this example do not increase the amount of information available to learn the underlying data distribution. As a result, the utility results shown here should be interpreted as illustrative rather than representative of the performance that may be obtained on larger datasets.
 
 We use the Iris dataset because it is a simple, well-known, and readily available dataset that makes it easy to demonstrate the effect of changing the synthesis order without introducing unnecessary complexity.

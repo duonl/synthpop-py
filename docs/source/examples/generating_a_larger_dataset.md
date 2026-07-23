@@ -27,7 +27,7 @@ The first three rows of the dataset are:
 |  2 |                 4.7 |                3.2 |                 1.3 |                0.2 | setosa   |     
 
 The dataset contains measurements of iris flowers. The target column describes the flower species and is a categorical variable. In total, the dataset has 150 rows.
-```warning
+```{warning}
 The Iris dataset contains only 150 observation, which is small for training and evaluating a synthetic data model. 
 
 We use the Iris dataset because it is a simple, well-known, and readily available dataset that makes it easy to demonstrate the effect of changing the synthesis order without introducing unnecessary complexity.
