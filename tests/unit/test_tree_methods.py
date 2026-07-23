@@ -250,16 +250,16 @@ def apply_result(missing_handling):
 
 @pytest.fixture(autouse=True)
 def stub_build_feature_matrix(request, monkeypatch):
-    # The test should not use the real implementation of build_feature_matrix.
+    # The test should not use the real implementation of _build_feature_matrix.
     # The test should use a stub of that function instead.
-    # There is one exception to this: the standard tests of sklearn do need the real build_feature_matrix.
+    # There is one exception to this: the standard tests of sklearn do need the real _build_feature_matrix.
 
     # setting autouse=True causes this fixture to be used in every test.
     # to enable the exception, we check for the 'noautofixt' mark.
     if "noautofixt" in request.keywords:
         return
 
-    # We need to import tree utils here so that we can replace build_feature_matrix with our stub.
+    # We need to import tree utils here so that we can replace _build_feature_matrix with our stub.
     from synthpop.methods import tree_utils
 
     # We define the stub
@@ -267,7 +267,7 @@ def stub_build_feature_matrix(request, monkeypatch):
         return get_exp_feature_matrix()
 
     # and use monkey patching to replace the method with the stub.
-    monkeypatch.setattr(tree_utils, "build_feature_matrix",
+    monkeypatch.setattr(tree_utils, "_build_feature_matrix",
                         stub_build_feature_matrix)
 
 
@@ -282,12 +282,12 @@ def stub_validate_dict(request, monkeypatch):
     if "noautofixt" in request.keywords:
         return
 
-    # We need to import tree utils here so that we can replace build_feature_matrix with our stub.
+    # We need to import tree utils here so that we can replace _build_feature_matrix with our stub.
     from synthpop import utils
 
     # and use monkey patching to replace the method with the stub.
-    monkeypatch.setattr(utils, "validate_2d_dict", lambda X: (X, 42))
-    monkeypatch.setattr(utils, "validate_1d_target", lambda y, n_samples: y)
+    monkeypatch.setattr(utils, "_validate_2d_dict", lambda X: (X, 42))
+    monkeypatch.setattr(utils, "_validate_1d_target", lambda y, n_samples: y)
 
 
 # ----- fit tests -----
@@ -298,8 +298,8 @@ def stub_validate_dict(request, monkeypatch):
 def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
     from synthpop import utils
 
-    X_spy = mocker.spy(utils, "validate_2d_dict")
-    y_spy = mocker.spy(utils, "validate_1d_target")
+    X_spy = mocker.spy(utils, "_validate_2d_dict")
+    y_spy = mocker.spy(utils, "_validate_1d_target")
 
     tree_method.fit(X, y)
 
@@ -372,7 +372,7 @@ def test_fit_sets_order(X, y, tree_method):
 def test_fit_build_feature_matrix(X, y, index_cat, tree_method, mocker):
     from synthpop.methods import tree_utils
 
-    spy = mocker.spy(tree_utils, "build_feature_matrix")
+    spy = mocker.spy(tree_utils, "_build_feature_matrix")
 
     tree_method.fit(X, y)
     X_exp = {
@@ -559,7 +559,7 @@ def test_transform_encodes_data(X, index_cat, fitted_tree):
 def test_transform_build_feature_matrix(X, index_cat, fitted_tree, mocker):
     from synthpop.methods import tree_utils
 
-    spy = mocker.spy(tree_utils, "build_feature_matrix")
+    spy = mocker.spy(tree_utils, "_build_feature_matrix")
     tree_method = fitted_tree
 
     # we need to verify that the feature order seen when fitting is used.
