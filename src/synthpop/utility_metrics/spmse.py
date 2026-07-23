@@ -15,7 +15,7 @@ from synthpop.utils import str_dtype
 __all__ = ["pairwise_spmse"]
 
 
-def _standardise_array_dtypes(X: pd.DataFrame) -> npt.NDArray:
+def _standardise_spmse_dtype(X: pd.DataFrame) -> npt.NDArray:
     """
     Helper to standardise a 1D-array:
     - float64 for numeric data
@@ -186,7 +186,7 @@ def _joint_frequencies(df: pd.DataFrame, col1: str, col2: str) -> pd.Series:
 
 def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.float32:
     """
-    Calculates the S_pSME for a combination of two columns from the joint frequency tables
+    Calculates the S_pMSE for a combination of two columns from the joint frequency tables
 
     :param jf_or: Original dataset joint frequency table
     :param jf_syn: Synthetic dataset joint frequency table
@@ -279,10 +279,10 @@ def pairwise_spmse(
 
     if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError(
-            "Original and synthetic dataframes must have the same shape and column names."
+            "Original and synthetic dataframes must have the same column names."
         )
 
-    if max_bins < 1 or not isinstance(max_bins, int):
+    if not isinstance(max_bins, int) or isinstance(max_bins, bool) or max_bins < 1:
         raise ValueError(
             "The number of bins should be an integer with value of at least 1."
         )
