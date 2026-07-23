@@ -1,10 +1,10 @@
 # Synthpop-py
 
-**synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the methodology and ideas of the established [`synthpop` R package](https://www.synthpop.org.uk/), while providing a modern python interface and software architecture designed for usability, reproducibility, maintainability and extensibility.
+**synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the established [`synthpop` R package](https://www.synthpop.org.uk/), but provides a modern python interface and software architecture specifically designed for usability, reproducibility, maintainability and extensibility.
 
 Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to original or sensitive data is restricted. synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations. Properly synthesised data does not have any row-to-row relationships to the original data. As such, it may be considered non-personal data in the concept of privacy laws such as the GDPR.
 
-However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods and settings used, and the intended use and sharing context of the synthetic data.
+However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods, the settings used, the intended use and sharing context of the synthetic data.
 
 > **Project status**: synthpop-py is currently under active development and the project is working towards its `1.0.0` release
 
@@ -27,7 +27,7 @@ synth.fit(orig_df)
 syn_df = synth.generate()
 ```
 
-The original data is provided as a `pandas.DataFrame`. The `Synthesiser` learns the required synthesis models when `fit()` is called, after which `generate()` creates a new synthetic dataset. It is possible to generate a dataset with a different number of observations than the original data.
+The original data should always be provided as a `pandas.DataFrame`. The `Synthesiser` learns the data patterns using a synthesis model when `fit()` is called, after which `generate()` creates a new synthetic dataset. It is possible to generate a dataset with a different number of observations than the original data.
 
 For a complete introduction to preparing data, configuring synthesis, generating synthetic datasets, and evaluating the results, see the [Getting Started guide](https://synthpop-py.readthedocs.io/en/develop/getting_started/getting_started.html).
 
@@ -79,7 +79,7 @@ synthpop-py is designed for structured tabular datasets. It currently supports:
 * ordinal variables; and
 * missing values.
 
-The package is not currently designed for unstructured data such as free text, images, or audio, or for time-series data.
+The package is not currently designed for unstructured data such as free text, images, audio, or time-series data.
 
 ### Synthesis methods
 
@@ -132,7 +132,7 @@ The privacy and utility of a synthetic dataset depend on factors including:
 
 Users are responsible for evaluating whether generated synthetic data is suitable for their intended purpose and whether it meets applicable privacy, security, legal, and regulatory requirements.
 
-In particular, synthpop-py does not currently provide formal privacy guarantees such as differential privacy. Users should therefore not interpret the use of synthetic data as, by itself, providing a guarantee that individuals in the original data cannot be identified or that sensitive information cannot be inferred.
+In particular, synthpop-py does not currently provide formal privacy guarantees such as differential privacy. Users should therefore not assume that the use of synthetic data alone guarantees that individuals in the original data cannot be identified or that sensitive information cannot be inferred.
 
 Synthetic data should also be evaluated for utility. A synthetic dataset that provides strong privacy protection may not preserve the statistical characteristics required for a particular analysis, while a highly useful synthetic dataset may retain patterns that increase disclosure risk.
 
