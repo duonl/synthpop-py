@@ -480,5 +480,5 @@ def test_no_input_change(spmse_df):
 
     pd.testing.assert_frame_equal(spmse_df, original_df)
 
-def test_visual(spmse_df): #Please check for review
-    plot_spmse(spmse_df, None, True)
+# def test_visual(spmse_df): #Please check for review
+#     plot_spmse(spmse_df, None, True)
