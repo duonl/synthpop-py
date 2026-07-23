@@ -4,7 +4,7 @@
 
 Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to original or sensitive data is restricted. synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations. Properly synthesised data does not have any row-to-row relationships to the original data. As such, it may be considered non-personal data in the concept of privacy laws such as the GDPR.
 
-However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods, the settings used, the intended use and sharing context of the synthetic data.
+However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods, the settings used, and the intended use and sharing context of the synthetic data.
 
 > **Project status**: synthpop-py is currently under active development and the project is working towards its `1.0.0` release
 
