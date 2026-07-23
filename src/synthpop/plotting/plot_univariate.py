@@ -10,6 +10,9 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.io import to_html
 
+original_colour = "#004488"
+synthetic_colour = "#DDAA33"
+
 def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.Histogram]:
     
     orig_non_missing = orig.dropna()
@@ -59,6 +62,7 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
         histnorm="probability density",
         xbins=xbins,
         opacity=0.6,
+        marker_color = original_colour,
     )
 
     syn_hist = go.Histogram(
@@ -67,6 +71,7 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
         histnorm="probability density",
         xbins=xbins,
         opacity=0.6,
+        marker_color = synthetic_colour,
     )
 
     return orig_hist, syn_hist
@@ -101,6 +106,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
         x=levels,
         y=orig_density,
         name="Original",
+        marker_color = original_colour,
         customdata=[
             int(
                 (orig_str.fillna("<MISSING>") == level).sum()
@@ -119,6 +125,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
         x=levels,
         y=syn_density,
         name="Synthetic",
+        marker_color = synthetic_colour,
         customdata=[
             int(
                 (syn_str.fillna("<MISSING>") == level).sum()
