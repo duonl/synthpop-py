@@ -103,7 +103,7 @@ figures = plot_univariate_distributions(
 ```
 These plots allow you to visually inspect whether the distributions of individual variables are similar between the original and synthetic datasets. You can also expand your evaluation to reviewing the pairwise relationships of variables using the {ref}`S_pMSE metric <531-spmse>`.
 
-For a complete introduction to evaluating synthetic data, including univariate distribution visualisation and the pairwise S_pMSE metric, continue qith the [Your first synthetic data example](../examples/your_first_synthetic_dataset.md) in the Examples module. This is the same workflow you have just followed, but the example goes further into evaluating the quality and utility of the generated data.
+For a complete introduction to evaluating synthetic data, including univariate distribution visualisation and the pairwise S_pMSE metric, continue with the [Your first synthetic data example](../examples/your_first_synthetic_dataset.md) in the Examples module. This is the same workflow you have just followed, but the example goes further into evaluating the quality and utility of the generated data.
 
 ## Next steps
 Congratulations, you have created and evaluated your first synthetic dataset. The next step is to explore the [Examples module](../examples/examples_index.md). The first example, [**Your first synthetic dataset**](../examples/your_first_synthetic_dataset.md) covers the same workflow as this guide and expands on it with a more detailed evaluation of the synthetic data.
