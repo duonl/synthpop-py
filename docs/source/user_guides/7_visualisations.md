@@ -154,7 +154,8 @@ The interpretation of S_pmSE values depends on characteristics such as dataset s
 | 10–30 | The relationship between the two variables differs between the synthetic and original data, but the relationships are still of a similar order of magnitude. A small proportion of variable pairs may fall within this range. Verification of these relationships is recommended. |
 | 30–100 | There is a substantial difference in the relationship between the two variables in the synthetic and original data. The relationship may still be partially preserved, but verification is essential for variable pairs in this range. |
 | >100 | The synthetic data has not adequately captured the relationship between the two variables. The synthetic relationship should not be considered reliable without further investigation. |
-| Constant variable | The S_pMSE cannot be meaningfully interpreted because the combination of the two variables is constant. The statistic is undefined for this case and is represented separately in the visualisation. |
+| Constant variable | The S_pMSE cannot be meaningfully interpreted because both variables are constant, or because the synthetic and original datasets have a one-to-one relation for the given variable pair. In these cases, the S_pMSE is expected to be 0 and should be displayed separately in the visualization. |
+| Undefined | The S_pMSE for the given variable pair is not available in the input dataset and is therefore considered undefined. |
 
 The heatmap groups S_pMSE values into these ranges to make patterns easier to identify.
 
