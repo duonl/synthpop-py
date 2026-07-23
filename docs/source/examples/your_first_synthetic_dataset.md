@@ -1,6 +1,6 @@
 # Your first synthetic dataset
 
-Welcome to synthpop-py. In this example, we will walk you through the complete workflow of creating a synthetic dataset. We will start with an existing dataset. For this example, we use the [diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. This dataset only contains continuous variables.
+Welcome to synthpop-py. In this example, you'll learn the complete workflow for creating a synthetic dataset. We begin with an existing dataset: the [diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from `scikit-learn`. This dataset contains measurements from diabetes patients and a target variable representing disease progression. This dataset only contains continuous variables.
 
 ## Loading the data
 First, we load the dataset and convert it to a pandas DataFrame.
@@ -19,7 +19,7 @@ The first three rows of the dataset are:
 |  1 | -0.00188202 | -0.0446416 | -0.0514741 | -0.0263275  | -0.00844872 | -0.0191633 |  0.0744116 | -0.0394934  | -0.0683315  | -0.092204  |       75 |
 |  2 |  0.0852989  |  0.0506801 |  0.0444512 | -0.00567042 | -0.0455995  | -0.0341945 | -0.0323559 | -0.00259226 |  0.00286131 | -0.0259303 |      141 |
 
-Each row represents one observation in the original dataset. Our goal is generate a new dataset with the same structure, but containing synthetic records instead of the original records.
+Each row represents one observation in the original dataset. Our goal is generate a new dataset with the same structure, but containing synthetic data instead of the original data.
 
 ## Creating a synthesiser
 Now we create a {class}`~synthpop.synthesiser.Synthesiser` object.
@@ -28,14 +28,14 @@ from synthpop.synthesiser import Synthesiser
 
 synthesiser = Synthesiser(random_seed=1)
 ```
-The synthesiser controls the complete synthesis process. During fitting, it learns patterns from the original data, such as relationships between variables and the distributions of individual columns.
+The Synthesiser controls the complete synthesis process. During fitting, it learns patterns from the original data, such as relationships between variables and the distributions of individual columns.
 
 At this stage, no synthetic data has been created yet. We have only configured the object that will perform the synthesis.
 
-More information about initialising the synthesiser can be found in {ref}`User Guide 2.2: The Synthesiser class <22-synthesiser-class>`.
+More information about initialising the Synthesiser can be found in {ref}`User Guide 2.2: The Synthesiser class <22-synthesiser-class>`.
 
-## Fitting the synthesiser
-Next, we fit the synthesiser on the original dataset.
+## Fitting the Synthesiser
+Next, we fit the Synthesiser on the original dataset.
 ```python
 synthesiser.fit(data)
 ```
@@ -43,9 +43,9 @@ During fitting, synthpop-py analyses the variables and estimates the internal re
 
 There are various synthesis methods. The standard method is Classification and Regression Trees (CART). The different methods and how to use them will be explained in detail in the [Synthesis methods example module](changing_the_default_method.md). More information can be found in [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
-The original data is not modified. Instead, the synthesiser stores the information needed to create new observations.
+The original data is not modified. Instead, the Synthesiser stores the information needed to create new observations.
 
-More information about fitting the synthesiser can be found in {ref}`User Guide 2.4: Fitting the synthesiser <24-fitting-synthesiser>`.
+More information about fitting the Synthesiser can be found in {ref}`User Guide 2.4: Fitting the synthesiser <24-fitting-synthesiser>`.
 
 ## Generating synthetic data
 We can now generate a synthetic dataset.
@@ -122,7 +122,7 @@ from synthpop.plotting.plot_spmse import plot_spmse
 plot = plot_spmse(spmse)
 ```
 ![Heatmap of S_pMSE values](../images/spmse.png)
-These visualisations allow us to compare variables one by one. As seen in the plot, all S_pMSE values are below 3 which shows us that the synthetic and original data are not statistically distinguishable with respect to the relationship between two variables.
+These visualisations allow us to compare variables one by one. As seen in the plot, all S_pMSE values are below 3 which suggests that there is no statistical significant difference between the synthetic and original dataset with respect to the relationship between pairs of variables.
 
 More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`. 
 

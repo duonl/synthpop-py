@@ -33,7 +33,7 @@ The Iris dataset contains only 150 observation, which is small for training and 
 We use the Iris dataset because it is a simple, well-known, and readily available dataset that makes it easy to demonstrate the effect of changing the synthesis order without introducing unnecessary complexity.
 ```
 
-## Creating and fitting the synthesiser
+## Creating and fitting the Synthesiser
 First, we create and fit the synthesiser like we've done in previous examples.
 ```python
 from synthpop.synthesiser import Synthesiser

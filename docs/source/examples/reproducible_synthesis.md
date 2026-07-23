@@ -1,14 +1,14 @@
-# Making your synthesis reproducible
-In the previous example, we created our first synthetic dataset. You may have noticed that we created the synthesiser using the `random_seed` parameter:
+# Make your synthesis reproducible
+In the previous example, we created our first synthetic dataset. You may have noticed that we created the Synthesiser using the `random_seed` parameter:
 ```python
 synthesiser = Synthesiser(random_seed=1)
 ```
-Without specifying a `random_seed`, if you run the same code again, you may notice that the generated synthetic dataset is different each time. This is expected. Synthetic data generation is a stochastic process: many synthesis methods involve randomness in, for example, sampling.
+Without specifying a `random_seed`, if you run the same code again, you may notice that the generated synthetic dataset is different each time. This is expected. synthetic data generation is a stochastic process: many synthesis methods involve randomness in, for example, sampling.
 
 Sometimes this is exactly what you want. However, when developing analyses, writing reports or collaborating with others, it is often useful to generate exactly the same synthetic dataset every time. This is called **reproducibility**.
 
-## Generating two synthetic datasets
-Let's start by fitting a synthesiser without specifying a random seed.
+## Generate two synthetic datasets
+Let's start by fitting a Synthesiser without specifying a random seed.
 ```python
 from sklearn.datasets import load_diabetes
 from synthpop.synthesiser import Synthesiser
@@ -21,7 +21,7 @@ synthesiser.fit(data)
 synthetic_data_1 = synthesiser.generate()
 synthetic_data_2 = synthesiser.generate()
 ```
-Both datasets were generated from the same fitted synthesiser, but they are not identical.
+Both datasets were generated from the same fitted Synthesiser, but they are not identical.
 
 **Note**: the results below may vary from yours as they are not reproducible.
 ```python
@@ -72,21 +72,21 @@ synthetic_data_2.describe()
 | max   |   0.0961965   |   0.0506801  |   0.137143   |   0.125158   |   0.153914    |   0.155887   |   0.159089   |   0.185234   |   0.133597   |   0.135612    |  341     |   
 
 ## Setting a random seed
-To obtain reproducible results, specify the `random_seed` parameter when creating the synthesiser.
+To obtain reproducible results, specify the `random_seed` parameter when creating the Synthesiser.
 ```python
-synthesiser = Synthesiser(random_seed=1)
+synthesiser_1 = Synthesiser(random_seed=1)
 
-synthesiser.fit(data)
+synthesiser_1.fit(data)
 
-synthetic_data_1 = synthesiser.generate()
+synthetic_data_1 = synthesiser_1.generate()
 ```
-Now create a **new** synthesiser with the same random seed.
+Now create a **new** Synthesiser with the same random seed.
 ```python
-synthesiser = Synthesiser(random_seed=1)
+synthesiser_2 = Synthesiser(random_seed=1)
 
-synthesiser.fit(data)
+synthesiser_2.fit(data)
 
-synthetic_data_2 = synthesiser.generate()
+synthetic_data_2 = synthesiser_2.generate()
 ```
 Both datasets are now identical.
 ```python
@@ -106,7 +106,7 @@ Using a random seed is recommended when you want reproducible results, for examp
 - running automated tests.
 
 ## Reproducibility and multiple synthetic datasets
-Sometimes you may want several different synthetic datasets from the same fitted synthesiser, for example to quantify the variability introduced by the synthesis process.
+Sometimes you may want several different synthetic datasets from the same fitted Synthesiser, for example to quantify the variability introduced by the synthesis process.
 
 However, if a random seed is provided, you cannot simply call `generate()` multiple times as we saw in the first code block of this page.
 ```python
