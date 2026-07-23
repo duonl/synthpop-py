@@ -1,29 +1,20 @@
 # Examples
 
-This is where we would explain examples, etc.
+This section contains practical examples demonstrating how to use **synthpop-py** for generating and evaluating synthetic data. The examples range from basic workflows for first-time users to more advanced customisation and extension of the synthesis process.
 
-Here I explain [Regular Use](regular_use.md).
+If you are new to synthpop-py, we recommend starting with the [**Your first synthesis**](your_first_synthetic_dataset.md) example module before exploring alternative synthesis methods, parameter tuning and custom components. We also recommend reading the [**Getting started guide**](../getting_started/getting_started.md) before working through the examples.
 
-But what if I want to [adjust the column order](adjusting_column_order.md)
-...
-
+Many examples build upon concepts introduces in the [**User Guide**](../user_guides/user_guides_index.md). Where appropriate, links are provided to the relevant sections for more detailed explanations of the underlying methods and algorithms.
 
 ```{toctree}
 :maxdepth: 1
 :hidden:
-:caption: Basics
+:caption: Your first synthesis
 
-regular_use.md
-
-```
-
-```{toctree}
-:maxdepth: 1
-:hidden:
-:caption: Parameters
-
-adjusting_column_order.md
-adjusting_parameters.md
+your_first_synthetic_dataset.md
+reproducible_synthesis.md
+generating_a_larger_dataset.md
+changing_the_synthesis_order.md
 
 ```
 
@@ -32,8 +23,18 @@ adjusting_parameters.md
 :hidden:
 :caption: Synthesis methods
 
+changing_the_default_method.md
+using_different_methods_for_different_columns.md
+
+```
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: Configuring CART
+
+tune_cart_function.md
 alternative_encoder.md
-copy_column.md
 
 ```
 
@@ -43,7 +44,6 @@ copy_column.md
 :caption: Custom synthesis
 
 custom_encoder.md
-custom_numeric.md
 custom_synth.md
 
 ```

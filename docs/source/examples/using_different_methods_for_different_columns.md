@@ -1,4 +1,4 @@
-# Copy columns
+# Using different methods for different columns
 
 ## Copy the first column
 
