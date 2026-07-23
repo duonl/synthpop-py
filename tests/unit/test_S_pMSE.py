@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
 from synthpop.utility_metrics.spmse import pairwise_spmse
@@ -8,52 +8,57 @@ from synthpop.utility_metrics.spmse import pairwise_spmse
 @pytest.mark.parametrize(
     "orig_df, syn_df, max_bins, error",
     [
-
         (
-            pd.DataFrame([[1, 2], [3, 4]]), pd.DataFrame(
-                [[1, 2, 3], [4, 5, 6]]), 25, "must have the same shape and column names."
-        ),
-        # Check for unequal number of columns
-
+            pd.DataFrame([[1, 2], [3, 4]]),
+            pd.DataFrame([[1, 2, 3], [4, 5, 6]]),
+            25,
+            "must have the same shape and column names.",
+        ),  # Check for unequal number of columns
         (
-            pd.DataFrame({"A": [10], "B": [20]}), pd.DataFrame(
-                {"A": [10], "C": [20]}), 25, "must have the same shape and column names."
-        ),
-        # Check column names not equal
-
+            pd.DataFrame({"A": [10], "B": [20]}),
+            pd.DataFrame({"A": [10], "C": [20]}),
+            25,
+            "must have the same shape and column names.",
+        ),  # Check column names not equal
         (
-            pd.DataFrame([[10, 20]], columns=["A", "A"]), pd.DataFrame(
-                [[10, 20]], columns=["A", "A"]), 35, "must have unique column names."
-        ),
-        # Check for multiple columns having the same name
-
+            pd.DataFrame([[10, 20]], columns=["A", "A"]),
+            pd.DataFrame([[10, 20]], columns=["A", "A"]),
+            35,
+            "must have unique column names.",
+        ),  # Check for multiple columns having the same name
         (
-            [], [], 12, "both be a pandas DataFrame"
-        ),
-        # Check for non pandas dataframes
-
+            [],
+            [],
+            12,
+            "both be a pandas DataFrame",
+        ),  # Check for non pandas dataframes
         (
-            pd.DataFrame([0]), pd.DataFrame([0]),
-            25., "with value of at least 1."
-        ),
-        # Check if max_bins is not an integer
-
+            pd.DataFrame([0]),
+            pd.DataFrame([0]),
+            25.,
+            "with value of at least 1.",
+        ),  # Check if max_bins is not an integer
         (
-            pd.DataFrame([0]), pd.DataFrame([0]), -
-            12, "with value of at least 1."
-        ),
-        # Check for negative bins
-
+            pd.DataFrame([0]),
+            pd.DataFrame([0]),
+            -12,
+            "with value of at least 1.",
+        ),  # Check for negative bins
         (
-            pd.DataFrame(), pd.DataFrame(), 35,
-            "dataframe must be non-empty"
-        ),
-        # Check empty DataFrames
-
-    ]
+            pd.DataFrame(),
+            pd.DataFrame(),
+            35,
+            "dataframe must be non-empty",
+        ),  # Check empty DataFrames
+        (
+            pd.DataFrame({"c1": [0, 0, 0, 0]}), 
+            pd.DataFrame({"c1": ['0', '0', '0', '0']}),
+            35,
+            "c1 must be either numeric or non-numeric",
+        ),  # Avoids problems when pandas.cut is applied to non-numeric columns.
+    ],
 )
 def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
-
     with pytest.raises(ValueError, match=error):
         pairwise_spmse(orig_df, syn_df, max_bins)
 
@@ -61,7 +66,6 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
 @pytest.mark.parametrize(
     "orig_df, syn_df, expected",
     [
-
         (
             pd.DataFrame({"c1": [1, 3], "c2": [2, 4]}),
             pd.DataFrame({"c1": [1, 3], "c2": [2, 4]}),
@@ -69,12 +73,10 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["c1", "c1", "c2"],
                     "column2": ["c1", "c2", "c2"],
-                    "S_pMSE": [0.0, 0.0, 0.0]
+                    "S_pMSE": [0.0, 0.0, 0.0],
                 }
             ),
-        ),
-        # S_pMSE should all be zero as the original_dataset = the synthetic_dataset
-
+        ),  # S_pMSE should all be zero as the original_dataset = the synthetic_dataset
         (
             pd.DataFrame(
                 {"sex": ["M", "M", "F"], "income": [50000, 50000, 60000]}),
@@ -84,12 +86,10 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["sex", "sex", "income"],
                     "column2": ["sex", "income", "income"],
-                    "S_pMSE": [4/3, 8/3, 4/3]
+                    "S_pMSE": [4 / 3, 8 / 3, 4 / 3],
                 }
             ),
-        ),
-        # A non-zero answer to the S_pMSE, calculated by hand. Also this is the example in the docstrings
-
+        ),  # A non-zero answer to the S_pMSE, calculated by hand. Also this is the example in the docstrings
         (
             pd.DataFrame({"c1": ["a", "a", "b"], "c2": [0, 0, 1]}),
             pd.DataFrame({"c2": [1, 0, 1], "c1": ["a", "b", "b"]}),
@@ -97,12 +97,10 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["c1", "c1", "c2"],
                     "column2": ["c1", "c2", "c2"],
-                    "S_pMSE": [4/3, 8/3, 4/3]
+                    "S_pMSE": [4 / 3, 8 / 3, 4 / 3],
                 }
             ),
-        ),
-        # A non-zero answer to the S_pMSE, calculated by hand, with different column order
-
+        ),  # A non-zero answer to the S_pMSE, calculated by hand, with different column order
         (
             pd.DataFrame({"c1": ['a', 'b', 'c']}),
             pd.DataFrame({"c1": ['b', 'c']}),
@@ -110,25 +108,21 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [50/72]
+                    "S_pMSE": [50 / 72],
                 }
             ),
-        ),
-        # Check spmse if not every value of the original dataset is represented in the synthetic dataset
-
+        ),  # Check spmse if not every value of the original dataset is represented in the synthetic dataset
         (
-            pd.DataFrame({"c1": [0, 0, 0, 1]}),
-            pd.DataFrame({"c1": [0, 1]}),
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='object'),
+            pd.DataFrame({"c1": [0, 1]}, dtype='object'),
             pd.DataFrame(
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # A one-dimensional input with different number of rows
-
+        ),  # A one-dimensional input with different number of rows
         (
             pd.DataFrame({"c1": ['a', 'a', 'a', 'b']}, dtype='category'),
             pd.DataFrame({"c1": ['a', 'b']}, dtype='category'),
@@ -136,12 +130,10 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # A one-dimensional input with different number of rows using datatype category
-
+        ),  # A one-dimensional input with different number of rows using datatype category
         (
             pd.DataFrame({"c1": [True, True, True, False]}),
             pd.DataFrame({"c1": [True, False]}),
@@ -149,12 +141,10 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # A one-dimensional input with boolean datatype
-
+        ),  # A one-dimensional input with boolean datatype
         (
             pd.DataFrame({"c1": [0., 0., 0., 0.]}),
             pd.DataFrame({"c1": [0., 0., 0., 0.]}),
@@ -162,15 +152,65 @@ def test_pairwise_spmse_raises_wrong_inputs(orig_df, syn_df, max_bins, error):
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [0.]
+                    "S_pMSE": [0.],
                 }
             ),
-        ),
-        # Data where every value will fall into the same bin
-    ]
+        ),  # Data where every value will fall into the same bin
+        # The case below came to light at bugfix 153, where it was shown that different
+        # datatypes can cause the S_pMSE to break.
+        # This is fixed using a standardisation. Splitting numeric and non-numeric
+        (
+            pd.DataFrame({"c1": ['a', 'a', 'a', 'b']}, dtype='object'),
+            pd.DataFrame({"c1": ['a', 'b']}, dtype='string'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9 / 16],
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+        (
+            pd.DataFrame({"c1": ['a', 'b', 'c']}, dtype='category'),
+            pd.DataFrame({"c1": ['b', 'c']}, dtype='string'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [50 / 72],
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+        (
+            pd.DataFrame({"c1": [0, 0, 0, 1]}, dtype='int'),
+            pd.DataFrame({"c1": [0, 1]}, dtype='float'),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9 / 16],
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+        (
+            pd.DataFrame({"c1": pd.Categorical(
+                [0, 0, 0, 1], categories=[0, 1])}),
+            pd.DataFrame({"c1": pd.Categorical([0, 1], categories=[0, 1, 2])}),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
+                    "S_pMSE": [9 / 16],
+                }
+            ),
+        ),  # Case where the synthesised data has a different datatype
+    ],
 )
-def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
-
+def test_pairwise_spmse_input_shapes_and_types(
+    orig_df: pd.DataFrame,
+    syn_df: pd.DataFrame,
+    expected: pd.DataFrame
+):
     output = pairwise_spmse(orig_df, syn_df)
     expected['S_pMSE'] = expected['S_pMSE'].astype(
         np.float32)  # Output should be float32
@@ -183,7 +223,6 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
 @pytest.mark.parametrize(
     "orig_df, syn_df, expected, max_bins",
     [
-
         (
             pd.DataFrame({"c1": [0, 1, 2]}),
             pd.DataFrame({"c1": [1, 2]}),
@@ -191,13 +230,11 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [450/1944]
+                    "S_pMSE": [450 / 1944],
                 }
             ),
             2,
-        ),
-        # Check for two bins
-
+        ),  # Check for two bins
         (
             pd.DataFrame({"c1": [0, 1, 2]}),
             pd.DataFrame({"c1": [1, 2]}),
@@ -205,14 +242,11 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [50/72]
+                    "S_pMSE": [50 / 72],
                 }
             ),
             3,
-        ),
-        # Check for three bins, same input as above. but number of bins will produce different output
-        # This test will produce a floating point error if pd.DataFrame.equals() is used
-
+        ),  # Check for three bins, same input as above. but number of bins will produce different output
         (
             pd.DataFrame({"c1": [0, 1, 2]}),
             pd.DataFrame({"c1": [1, 2]}),
@@ -220,16 +254,20 @@ def test_pairwise_spmse_input_shapes_and_types(orig_df: pd.DataFrame, syn_df: pd
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [50/72]
+                    "S_pMSE": [50 / 72],
                 }
             ),
             1000,
-        ),
-        # Check for high number of bins
-    ]
+        ), # Check for high number of bins
+        # This test will produce a floating point error if pd.DataFrame.equals() is used
+    ],
 )
-def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame, max_bins: int):
-
+def test_pairwise_spmse_bin_sizes(
+    orig_df: pd.DataFrame,
+    syn_df: pd.DataFrame,
+    expected: pd.DataFrame,
+    max_bins: int
+):
     output = pairwise_spmse(orig_df, syn_df, max_bins=max_bins)
     expected['S_pMSE'] = expected['S_pMSE'].astype(
         np.float32)  # Output should be float32
@@ -241,7 +279,6 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
 @pytest.mark.parametrize(
     "orig_df, syn_df, expected",
     [
-
         (
             pd.DataFrame({"c1": ['nan', 'nan', 'nan', np.nan]}),
             pd.DataFrame({"c1": ['nan', np.nan]}),
@@ -249,12 +286,10 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # Check missing value handling, np.nan+strings that spell nan (str DataFrame)
-
+        ), # Check missing value handling, np.nan+strings that spell nan (str DataFrame)
         (
             pd.DataFrame({"c1": [np.nan, np.nan, np.nan, 'nan']}),
             pd.DataFrame({"c1": [np.nan, 'nan']}),
@@ -262,12 +297,10 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # Check missing value handling, Multiple occurrences of nan
-
+        ),  # Check missing value handling, Multiple occurrences of nan
         (
             pd.DataFrame({"c1": [0, 0, 0, np.nan]}),
             pd.DataFrame({"c1": [0, np.nan]}),
@@ -275,12 +308,10 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # Check missing value handling, np.nan+integers (float DataFrame)
-
+        ),  # Check missing value handling, np.nan+integers (float DataFrame)
         (
             pd.DataFrame({"c1": ['a', 'a', 'a', pd.NA]}),
             pd.DataFrame({"c1": ['a', pd.NA]}),
@@ -288,12 +319,10 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [9/16]
+                    "S_pMSE": [9 / 16],
                 }
             ),
-        ),
-        # Check missing value handling, (str + pd.NA)
-
+        ),  # Check missing value handling, (str + pd.NA)
         (
             pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}),
             pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}),
@@ -301,12 +330,10 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [0.]
+                    "S_pMSE": [0.],
                 }
             ),
-        ),
-        # Full nan bin
-
+        ),  # Full nan bin
         (
             pd.DataFrame({"c1": [pd.NA, pd.NA, pd.NA, pd.NA]}),
             pd.DataFrame({"c1": [None, None, None, None, None]}),
@@ -314,14 +341,17 @@ def test_pairwise_spmse_binsizes(orig_df: pd.DataFrame, syn_df: pd.DataFrame, ex
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [0.]
+                    "S_pMSE": [0.],
                 }
             ),
-        ),
-    ]  # Full nan bin, checks pd.NA and None
+        ),  # Full nan bin, checks pd.NA and None
+    ],
 )
-def test_pairwise_spmse_missing_value_handling(orig_df: pd.DataFrame, syn_df: pd.DataFrame, expected: pd.DataFrame):
-
+def test_pairwise_spmse_missing_value_handling(
+    orig_df: pd.DataFrame,
+    syn_df: pd.DataFrame,
+    expected: pd.DataFrame
+):
     output = pairwise_spmse(orig_df, syn_df, max_bins=25)
     expected['S_pMSE'] = expected['S_pMSE'].astype(
         np.float32)  # Output should be float32
@@ -330,7 +360,6 @@ def test_pairwise_spmse_missing_value_handling(orig_df: pd.DataFrame, syn_df: pd
 
 
 def test_pairwise_spmse_expected_frequency_warning():
-
     orig_df = pd.DataFrame({'c1': [0, 0]})
     syn_df = pd.DataFrame({'c1': [0, 0, 0, 0]})
     expected = pd.DataFrame(
@@ -372,15 +401,15 @@ def test_pairwise_spmse_extensive_output():
         {
             "c1": [1, 0, np.nan],
             "c2": ['a', pd.NA, 'c'],
-            "c3": [6, 7, 3]
+            "c3": [6, 7, 3],
         }
     )
 
     syn_df = pd.DataFrame(
         {
-            "c2": [pd.NA, pd.NA, pd.NA],
+            "c2": pd.Series([pd.NA, pd.NA, pd.NA], dtype='str'),
             "c3": [6, 3, 6],
-            "c1": [np.nan, np.nan, 0]
+            "c1": [np.nan, np.nan, 0],
         }
     )
 
@@ -388,7 +417,7 @@ def test_pairwise_spmse_extensive_output():
         {
             "column1": ["c1", "c1", "c1", "c2", "c2", "c3"],
             "column2": ["c1", "c2", "c3", "c2", "c3", "c3"],
-            "S_pMSE": [4/3, 8/3, 4/3, 3., 20/9, 0.]
+            "S_pMSE": [4 / 3, 8 / 3, 4 / 3, 3., 20 / 9, 0.],
         }
     ).astype({"S_pMSE": np.float32})
 
@@ -411,14 +440,14 @@ def test_pairwise_spmse_symmetry():
 
 
 def test_pairwise_spmse_scaling_invariance_on_identical_distributions():
-    orig_df1 = pd.DataFrame({"c1": [1, 3], "c2": ['a', 'b']})
-    syn_df1 = pd.DataFrame({"c1": [1, 3], "c2": ['a', 'b']})
+    orig_df1 = pd.DataFrame({"c1": [1, 3], "c2": ["a", "b"]})
+    syn_df1 = pd.DataFrame({"c1": [1, 3], "c2": ["a", "b"]})
 
     expected = pd.DataFrame(
         {
             "column1": ["c1", "c1", "c2"],
             "column2": ["c1", "c2", "c2"],
-            "S_pMSE": [0.0, 0.0, 0.0]
+            "S_pMSE": [0.0, 0.0, 0.0],
         }
     ).astype({"S_pMSE": np.float32})
 
@@ -435,8 +464,8 @@ def test_pairwise_spmse_scaling_invariance_on_identical_distributions():
 
 
 def test_pairwise_spmse_no_division_by_zero():
-    orig_df = pd.DataFrame({"c1": ["a"]*1001+['b']})
-    syn_df = pd.DataFrame({"c1": ["a"]+['b']*1001})
+    orig_df = pd.DataFrame({"c1": ["a"] * 1001 + ["b"]})
+    syn_df = pd.DataFrame({"c1": ["a"] + ["b"] * 1001})
 
     output = pairwise_spmse(orig_df, syn_df, max_bins=3)
 

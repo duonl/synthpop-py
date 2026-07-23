@@ -1,8 +1,17 @@
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
-from synthpop.methods.cart_synth import CartMethod, TreeRegressorMethod, TreeClassifierMethod
+from synthpop.methods.cart_synth import (
+    CartMethod,
+    TreeClassifierMethod,
+    TreeRegressorMethod,
+)
+from synthpop.utils import str_dtype
+
+# This imports an auto-use fixture to set the seed,
+# in order to make the test reproducible.
+from tests.integration.make_int_test_reproducible import control_random_state_manager
 
 
 def test_numeric_target_uses_regressor():
@@ -27,10 +36,13 @@ def test_numeric_target_uses_regressor():
     assert len(out) == len(X)
     assert out.name == "target"
 
+
 def test_string_target_uses_classifier():
     X = pd.DataFrame(
-        {"age": [20, 30, 40, 50],
-         "letter": ["A", "B", "C", "A"]}
+        {
+            "age": [20, 30, 40, 50],
+            "letter": ["A", "B", "C", "A"],
+        }
     )
 
     y = pd.Series(["A", "B", "A", "B"], name="group")
@@ -45,6 +57,7 @@ def test_string_target_uses_classifier():
     assert isinstance(out, pd.Series)
     assert len(out) == len(X)
     assert out.name == "group"
+
 
 def test_dirty_dataframe_roundtrip():
     X = pd.DataFrame(
@@ -67,8 +80,8 @@ def test_dirty_dataframe_roundtrip():
             ),
             "cat_col": pd.Series(
                 pd.Categorical(
-                    ["x", "y", "x", "z"]
-                )
+                    ["x", "y", "x", "z"],
+                ),
             ),
         }
     )
@@ -83,6 +96,7 @@ def test_dirty_dataframe_roundtrip():
     assert isinstance(out, pd.Series)
     assert len(out) == len(X)
     assert out.name == "target"
+
 
 def test_transform_accepts_reordered_columns():
     X_fit = pd.DataFrame(
@@ -105,6 +119,7 @@ def test_transform_accepts_reordered_columns():
     assert len(out) == len(X_transform)
     assert out.name == "target"
 
+
 def test_transform_accepts_extra_columns():
     X_fit = pd.DataFrame(
         {
@@ -113,7 +128,10 @@ def test_transform_accepts_extra_columns():
         }
     )
 
-    y = pd.Series([10.0, 20.0, 30.0, 40.0], name="target")
+    y = pd.Series(
+        [10.0, 20.0, 30.0, 40.0],
+        name="target"
+    )
 
     cart = CartMethod()
     cart.fit(X_fit, y)
@@ -127,16 +145,21 @@ def test_transform_accepts_extra_columns():
 
     assert len(out) == len(X_transform)
 
+
 def test_transform_preserves_index_and_name():
     X = pd.DataFrame(
         {
             "a": [1, 2, 3],
             "b": ["x", "y", "z"],
-         },
+        },
         index=["row1", "row2", "row3"],
     )
 
-    y = pd.Series([10.0, 20.0, 30.0], index=["row1", "row2", "row3"], name="salary")
+    y = pd.Series(
+        [10.0, 20.0, 30.0],
+        index=["row1", "row2", "row3"],
+        name="salary",
+    )
 
     cart = CartMethod()
     cart.fit(X, y)
@@ -150,6 +173,7 @@ def test_transform_preserves_index_and_name():
 
     assert out.name == "salary"
 
+
 def test_fit_sets_all_fitted_attributes():
     X = pd.DataFrame(
         {
@@ -161,12 +185,12 @@ def test_fit_sets_all_fitted_attributes():
     y = pd.Series([10.0, 20.0], name="target")
 
     cart = CartMethod()
-
     cart.fit(X, y)
 
     assert cart.feature_names_in_ == ["a", "b"]
     assert cart.target_name_ == "target"
     assert isinstance(cart.method_, TreeRegressorMethod)
+
 
 @pytest.mark.parametrize(
     "y",
@@ -180,14 +204,17 @@ def test_fit_sets_all_fitted_attributes():
 )
 def test_numeric_target_dtypes_dispatch_to_regressor(y):
     X = pd.DataFrame(
-        {"x1": [1, 2, 3, 4],
-         "x2": ["y", "n", "n", "y"]}
+        {
+            "x1": [1, 2, 3, 4],
+            "x2": ["y", "n", "n", "y"],
+        }
     )
 
     cart = CartMethod()
     cart.fit(X, y)
 
     assert isinstance(cart.method_, TreeRegressorMethod)
+
 
 @pytest.mark.parametrize(
     "y",
@@ -199,14 +226,17 @@ def test_numeric_target_dtypes_dispatch_to_regressor(y):
 )
 def test_non_numeric_target_dtypes_dispatch_to_classifier(y):
     X = pd.DataFrame(
-        {"x1": [1, 2, 3, 4],
-         "x2": ["hello", "world", "hello", "world"]}
+        {
+            "x1": [1, 2, 3, 4],
+            "x2": ["hello", "world", "hello", "world"],
+        }
     )
 
     cart = CartMethod()
     cart.fit(X, y)
 
     assert isinstance(cart.method_, TreeClassifierMethod)
+
 
 def test_fit_transform_with_missing_values_in_predictors():
     X = pd.DataFrame(
@@ -225,13 +255,13 @@ def test_fit_transform_with_missing_values_in_predictors():
             ),
             "category_col": pd.Series(
                 pd.Categorical(
-                    ["x", np.nan, "x", "y"]
-                )
+                    ["x", np.nan, "x", "y"],
+                ),
             ),
         }
     )
 
-    y = pd.Series([10.0, 20.0, 30.0, 40.0], name="target",)
+    y = pd.Series([10.0, 20.0, 30.0, 40.0], name="target")
 
     cart = CartMethod()
     cart.fit(X, y)
@@ -239,6 +269,7 @@ def test_fit_transform_with_missing_values_in_predictors():
     out = cart.transform(X)
 
     assert len(out) == len(X)
+
 
 @pytest.mark.parametrize(
     "y",
@@ -251,8 +282,10 @@ def test_fit_transform_with_missing_values_in_predictors():
 )
 def test_fit_transform_with_missing_values_in_target(y):
     X = pd.DataFrame(
-        {"x1": [1, 2, 3, 4]*100,
-         "x2": ["a", "b", "y", "z"]*100}
+        {
+            "x1": [1, 2, 3, 4] * 100,
+            "x2": ["a", "b", "y", "z"] * 100,
+        }
     )
 
     cart = CartMethod()
@@ -262,3 +295,89 @@ def test_fit_transform_with_missing_values_in_target(y):
 
     assert len(out) == len(y)
     assert out.isna().sum() > 0
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.int64),
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.float64),
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.float32),
+        pd.Series([1, 2, 3, 4], name='target', dtype="Int64"),
+        pd.Series([1.1, 2.2, 3.3, 4.4], name='target', dtype="Float32"),
+
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="str"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="string"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype=str_dtype),
+
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="object"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="category"),
+
+        pd.Series([True, False, True, False], name='target', dtype="boolean"),
+        pd.Series([True, False, True, False], name='target', dtype=np.bool_),
+    ],
+)
+def test_cart_preserves_target_dtype_end_to_end(y):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+            "group": ["a", "a", "b", "b"],
+        }
+    )
+
+    cart = CartMethod()
+    cart.fit(X, y)
+    result = cart.transform(X)
+
+    assert result.dtype == y.dtype
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([None, None], name='c'),
+        pd.Series([np.nan, np.nan], name='c'),
+        pd.Series([pd.NA, pd.NA], name='c'),
+    ],
+)
+def test_fitting_handles_all_missing_target(y):
+    cart = CartMethod()
+
+    X = pd.DataFrame(
+        {
+            "a": [1, 2],
+            "b": [3, 4],
+        },
+    )
+
+    res = cart.fit(X, y)
+    assert res.method_._all_missing
+    assert res.target_name_ == 'c'
+
+
+@pytest.mark.parametrize(
+    "y, dtype",
+    [
+        (pd.Series([None, None], name='c', dtype='object'), 'object'),
+        (pd.Series([np.nan, np.nan], name='c', dtype=np.float64), np.float64),
+        (pd.Series([pd.NA, pd.NA], name='c',  dtype='string'), 'string'),
+    ],
+)
+def test_transform_handles_entire_nan_array(y, dtype):
+    cart = CartMethod()
+
+    X = pd.DataFrame(
+        {
+            "a": [1, 2],
+            "b": [3, 4],
+        },
+    )
+
+    res = cart.fit(X, y)
+    
+    out = res.transform(X)
+
+    assert len(out) == len(y)
+    assert pd.isna(out).all()
+    assert out.name == "c"
+    assert out.dtype == dtype

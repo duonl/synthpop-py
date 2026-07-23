@@ -4,11 +4,11 @@ Synthesis method that samples from the target column.
 from typing import Self
 
 import pandas as pd
-import numpy as np
 from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod
-from synthpop.methods.tree_utils import sample_array
+import synthpop.methods.tree_utils 
+from synthpop.reproducibility import RandomStateManager
 
 
 class SampleMethod(BaseSynthMethod):
@@ -61,13 +61,16 @@ class SampleMethod(BaseSynthMethod):
             raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
         self.target_name_ = y.name
         self.n_samples_ = len(y)
+        self.target_dtype_ = y.dtype
 
         value_counts = y.value_counts(dropna=False)
         self.values_ = value_counts.index.to_numpy()
         self.counts_ = value_counts.to_numpy()
 
-        self._seed = 42 if self.random_state is None else self.random_state
-        self.random_state_ = np.random.default_rng(self._seed)
+        if self.random_state is None:
+            self.random_state_ = RandomStateManager.create_instance_seed()
+        else:
+            self.random_state_ = self.random_state
 
         if X is not None:
             self.feature_names_in_ = getattr(X, "columns", None)
@@ -88,14 +91,16 @@ class SampleMethod(BaseSynthMethod):
             or not hasattr(self, "target_name_")
             or not hasattr(self, "n_samples_")
             or not hasattr(self, "random_state_")
+            or not hasattr(self, "target_dtype_")
         ):
             raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
         
         n = len(X) if X is not None else self.n_samples_
+        rng = RandomStateManager.create_rng(seed=self.random_state_)
         
-        sampled = sample_array(self.random_state_, self.counts_, self.values_, n)
+        sampled = synthpop.methods.tree_utils._sample_array(rng, self.counts_, self.values_, n)
 
-        return pd.Series(sampled, name=self.target_name_)
+        return pd.Series(sampled, name=self.target_name_, dtype=self.target_dtype_)
         
     def get_feature_names_out(self, input_features=None) -> list[str]:
         if not hasattr(self, "target_name_"):

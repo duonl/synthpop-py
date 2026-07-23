@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Synthpop'
-copyright = '2025, Betty, Annelies, Erina'
-author = 'Betty, Annelies, Erina'
+copyright = '2026, Betty, Annelies, Erina, Cas'
+author = 'Betty, Annelies, Erina, Cas'
 release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
@@ -25,17 +25,50 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 #html_theme = 'alabaster'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+html_css_files = [
+    "synthpop.css",
+]
+
+html_theme_options = {
+    "show_nav_level": 2,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/duonl/synthpop-py",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "Email",
+            "url": "mailto:synthetische.data@duo.nl",
+            "icon": "fa-solid fa-envelope",
+        },
+    ],
+    "logo": {
+        "text": "synthpop-py",
+        "image_light": "_static/logo_light_theme.png",
+        "image_dark": "_static/logo_dark_theme.png",
+    }
+}
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx_design',
     'myst_parser',
-    "sphinxcontrib.mermaid",
+    'sphinxcontrib.mermaid',
+    "sphinx.ext.intersphinx",
 ]
-myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
-autodoc_typehints = "both"
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "tasklist",
+    "attrs_inline",
+]
 autodoc_member_order = "bysource"
+
+autodoc_typehints = "description"
 
 autodoc_mock_imports = ['plotly', 'typing_extensions',]
 source_suffix = {
@@ -44,3 +77,9 @@ source_suffix = {
     '.md': 'markdown',
 }
 
+intersphinx_mapping = {
+    "sklearn": (
+        "https://scikit-learn.org/stable/",
+        "https://scikit-learn.org/stable/objects.inv",
+    ),
+}

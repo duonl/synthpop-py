@@ -10,15 +10,16 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
+import synthpop.reproducibility 
 
 
 class Synthesiser:
     """
     Delegates synthesis tasks to the appropriate synthesis method classes. 
 
-    :param random_seed: seed for randomness.
+    :param random_seed: A seed for randomness that makes both model fitting and data generation reproducible.
     :param column_order: list of variable names or list of indexes to define the order in which the columns will be synthesised. Default is the column order of the original dataset.
-    :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartSynth. 
+    :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartMethod. 
     :param special_syn_method: Dictionary of special synthesis method per variable. If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynth objects. By default, there is no special synthesis method.
 
     Examples
@@ -64,7 +65,7 @@ class Synthesiser:
 
     """
 
-    def __init__(self, random_seed: int,
+    def __init__(self, random_seed: int | None = None,
                  column_order: list[str] | list[int] | None = None,
                  default_syn_method: BaseSynthMethod | None = None,
                  special_syn_method: Dict[str, BaseSynthMethod] | None = None,
@@ -73,6 +74,7 @@ class Synthesiser:
         self.default_syn_method = default_syn_method
         self.column_order = column_order
         self.special_syn_method = special_syn_method
+        self.random_seed = random_seed
 
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
@@ -105,10 +107,12 @@ class Synthesiser:
         If the variable name is found in keys of ``special_syn_method``, its corresponding value is the object used to synthesise that variable. The `fit` method of that object will be called.
         Otherwise, we use the object defined in ``default_syn_method``.
 
-        :param X: An original dataset on which to fit the synthesiser.
+        :param X: The original dataset used to fit the synthesiser.
 
         :return: Fitted synthesiser.
         """
+
+        
 
         if not isinstance(X, pd.DataFrame):
             raise ValueError(
@@ -146,28 +150,29 @@ class Synthesiser:
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
-        for i, y in enumerate(self.column_order_):
+        with synthpop.reproducibility.RandomStateManager(seed=self.random_seed):
+            for i, y in enumerate(self.column_order_):
 
-            if i == 0:
-                predictors = pd.DataFrame(
-                    {"init": np.zeros(X.shape[0], dtype=int)})
-            else:
-                predictors = X[self.column_order_[0:i]]
+                if i == 0:
+                    predictors = pd.DataFrame(
+                        {"init": np.zeros(X.shape[0], dtype=int)})
+                else:
+                    predictors = X[self.column_order_[0:i]]
 
-            model = self._get_model(y)
+                model = self._get_model(y)
 
-            self.models_[self.column_order_[i]] = model.fit(predictors, X[y])
+                self.models_[self.column_order_[i]] = model.fit(predictors, X[y])
 
         return self
 
-    def generate(self, n: int | None = None, random_seed: int = 42) -> pd.DataFrame:
+    def generate(self, n: int | None = None, random_seed: int|None =None) -> pd.DataFrame:
         """
         Generate a synthetic dataset of ``n`` rows. 
 
         This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in `fit`.
 
-        :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows than the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
-        :param random_seed: Random seed generator. Default is 42. 
+        :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows as the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
+        :param random_seed: A seed for randomness that overrides the generation seed without refitting the synthesiser.
 
         :return: Synthetic dataset
         """
@@ -184,13 +189,22 @@ class Synthesiser:
         else:
             n_syn_rows = n
 
-        for i, y in enumerate(self.column_order_):
 
-            if i == 0:
-                pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
-            else:
-                pred = result
+        
+        if random_seed is None:
+            seed_to_use = self.random_seed
+        else:
+            seed_to_use = random_seed
 
-            new_syn_column = self.models_[y].transform(X=pred)
-            result[new_syn_column.name] = new_syn_column
+
+        with synthpop.reproducibility.RandomStateManager(seed=seed_to_use):
+            for i, y in enumerate(self.column_order_):
+
+                if i == 0:
+                    pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
+                else:
+                    pred = result
+
+                new_syn_column = self.models_[y].transform(X=pred)
+                result[new_syn_column.name] = new_syn_column
         return result

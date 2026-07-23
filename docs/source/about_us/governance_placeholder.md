@@ -1,0 +1,2 @@
+```{include} ../../../GOVERNANCE.md
+```

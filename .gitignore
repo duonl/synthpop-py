@@ -1,4 +1,5 @@
 *.pyc
+*.pyc.*
 /docs/api reference/
 /docs/build/
 /dist/
@@ -9,3 +10,5 @@
 classes.dot
 pyproject.toml
 tests/unit/__pycache__/
+src/*.svg
+src/*.png

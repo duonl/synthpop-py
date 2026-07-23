@@ -4,12 +4,14 @@
     "python.testing.pytestArgs": [
                 "./src/",
                 "./tests/",
-                "--cov=./src/",
+                // "--cov=./src/",
             ],
             "cSpell.words": [
                 "BDFL",
                 "crosstab",
                 "docstrings",
                 "setdiff"
-            ]
+            ],
+            "python-envs.defaultEnvManager": "ms-python.python:poetry",
+            "python-envs.defaultPackageManager": "ms-python.python:poetry"
 }

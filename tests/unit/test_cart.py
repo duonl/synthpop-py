@@ -1,6 +1,6 @@
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.exceptions import NotFittedError
 
@@ -9,9 +9,12 @@ from synthpop.utils import str_dtype
 
 
 # ----- stubs and fixtures -----
+
+
 class StubRegressor(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
         self.transform_result = transform_result
+        self._all_missing = False
 
     def fit(self, X, y):
         self.fit_x = X
@@ -21,14 +24,15 @@ class StubRegressor(TransformerMixin, BaseEstimator):
     def transform(self, X):
         self.transform_x = X
         return self.transform_result
-    
+
     def get_feature_names_out(self, input_features=None):
         return ["fake_output"]
-    
+
 
 class StubClassifier(TransformerMixin, BaseEstimator):
     def __init__(self, transform_result=None):
         self.transform_result = transform_result
+        self._all_missing = False
 
     def fit(self, X, y):
         self.fit_x = X
@@ -38,18 +42,35 @@ class StubClassifier(TransformerMixin, BaseEstimator):
     def transform(self, X):
         self.transform_x = X
         return self.transform_result
-    
+
     def get_feature_names_out(self, input_features=None):
         return ["fake_output"]
 
 
 # ----- fit tests -----
+
+
 @pytest.mark.parametrize(
-    ("X", "y", "expected", "message"),
+    "X, y, expected, message",
     [
-        ({}, pd.Series([1]), TypeError, "X must be a pandas DataFrame"),
-        (pd.DataFrame({"a": [1]}), [1], TypeError, "y must be a pandas Series"),
-        (pd.DataFrame({"a": [1, 2]}), pd.Series([1]), ValueError, "X and y must contain the same number of samples"),
+        (
+            {},
+            pd.Series([1]),
+            TypeError,
+            "X must be a pandas DataFrame",
+        ),
+        (
+            pd.DataFrame({"a": [1]}),
+            [1],
+            TypeError,
+            "y must be a pandas Series",
+        ),
+        (
+            pd.DataFrame({"a": [1, 2]}),
+            pd.Series([1]),
+            ValueError,
+            "X and y must contain the same number of samples",
+        ),
     ],
 )
 def test_fit_validates_inputs(X, y, expected, message):
@@ -58,8 +79,9 @@ def test_fit_validates_inputs(X, y, expected, message):
     with pytest.raises(expected, match=message):
         cart.fit(X, y)
 
+
 @pytest.mark.parametrize(
-    ("y_array", "expected_type"),
+    "y_array, expected_type",
     [
         (np.array([1, 2, 3], dtype=np.float32), StubRegressor),
         (np.array(["a", "b", "c"], dtype=str_dtype), StubClassifier),
@@ -74,12 +96,12 @@ def test_fit_selects_correct_method(mocker, y_array, expected_type):
     y = pd.Series([1, 2, 3])
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value={"x": np.array([1, 2, 3], dtype=np.float32)},
     )
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.standardise_array_dtypes",
+        "synthpop.methods.cart_synth.utils._standardise_array_dtypes",
         return_value=y_array,
     )
 
@@ -87,6 +109,7 @@ def test_fit_selects_correct_method(mocker, y_array, expected_type):
 
     assert isinstance(cart.method_, expected_type)
     assert np.array_equal(cart.method_.fit_y, y_array)
+
 
 def test_fit_passes_standardised_data_to_tree(mocker):
     clean_X = {"a": np.array([1, 2, 3], dtype=np.float32)}
@@ -98,12 +121,12 @@ def test_fit_passes_standardised_data_to_tree(mocker):
     y = pd.Series([4, 5, 6])
 
     mocked_X = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value=clean_X,
     )
 
     mocked_y = mocker.patch(
-        "synthpop.methods.cart_synth.utils.standardise_array_dtypes",
+        "synthpop.methods.cart_synth.utils._standardise_array_dtypes",
         return_value=clean_y,
     )
 
@@ -115,8 +138,9 @@ def test_fit_passes_standardised_data_to_tree(mocker):
     assert cart.method_.fit_x is clean_X
     assert cart.method_.fit_y is clean_y
 
+
 @pytest.mark.parametrize(
-    ("y", "expected_type"),
+    "y, expected_type",
     [
         (pd.Series([1.0, 2.0]), StubRegressor),
         (pd.Series(["a", "b"]), StubClassifier),
@@ -132,11 +156,12 @@ def test_fit_clones_methods(y, expected_type):
     cart.fit(X, y)
 
     assert isinstance(cart.method_, expected_type)
-    
+
     if expected_type is StubRegressor:
         assert cart.method_ is not regressor
     else:
         assert cart.method_ is not classifier
+
 
 @pytest.mark.parametrize(
     "y",
@@ -154,12 +179,12 @@ def test_fit_sets_fitted_attributes(mocker, y):
     clean_y = np.array([10, 20], dtype=np.float32)
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value=clean_X,
     )
 
     mocker.patch(
-        "synthpop.methods.cart_synth.utils.standardise_array_dtypes",
+        "synthpop.methods.cart_synth.utils._standardise_array_dtypes",
         return_value=clean_y,
     )
 
@@ -178,25 +203,66 @@ def test_fit_sets_fitted_attributes(mocker, y):
     assert cart.method_.fit_x is clean_X
     assert cart.method_.fit_y is clean_y
 
-# ----- transform tests -----
+    assert cart.target_dtype_ == y.dtype
+
+
 @pytest.mark.parametrize(
-    ("result", "method"),
+    "y",
     [
-        (pd.Series([10, 20]), StubRegressor(transform_result=np.array([10, 20]))),
-        (pd.Series(["a", "b"]), StubClassifier(transform_result=np.array(["a", "b"]))),
-    ]
+        (pd.Series([1.0, 2.0], dtype=np.int64)),
+        (pd.Series([1.0, 2.0], dtype=np.float64)),
+        (pd.Series([1.0, 2.0], dtype=np.float32)),
+        (pd.Series([1, None], dtype="Int64")),
+        (pd.Series([1.0, 2.0], dtype="Float32")),
+
+        (pd.Series(["a", "b"], dtype=str_dtype)),
+        (pd.Series(["a", "b"], dtype='str')),
+        (pd.Series(["a", "b"], dtype="string")),
+
+        (pd.Series(["a", "b"], dtype='object')),
+        (pd.Series(["a", "b"], dtype="category")),
+
+        (pd.Series([True, None], dtype=np.bool_)),
+        (pd.Series([True, None], dtype="boolean")),
+    ],
+)
+def test_fit_saves_input_dtypes(y):
+    cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
+
+    X = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+
+    cart.fit(X, y)
+    assert y.dtype == cart.target_dtype_
+
+
+# ----- transform tests -----
+
+
+@pytest.mark.parametrize(
+    "result, method",
+    [
+        (
+            pd.Series([10, 20]),
+            StubRegressor(transform_result=np.array([10, 20])),
+        ),
+        (
+            pd.Series(["a", "b"]),
+            StubClassifier(transform_result=np.array(["a", "b"])),
+        ),
+    ],
 )
 def test_transform_returns_series(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result), classifier=StubClassifier(result))
+    cart = CartMethod()
 
     cart.feature_names_in_ = ["a"]
     cart.target_name_ = "target"
     cart.method_ = method
+    cart.target_dtype_ = result.dtype
 
     clean_X = {"a": np.array([1, 2])}
 
     mocked_X = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value=clean_X,
     )
 
@@ -207,31 +273,44 @@ def test_transform_returns_series(mocker, result, method):
 
     out = cart.transform(X)
 
-    pd.testing.assert_frame_equal(mocked_X.call_args.args[0], X)
+    pd.testing.assert_frame_equal(
+        mocked_X.call_args.args[0],
+        X,
+    )
 
     assert isinstance(out, pd.Series)
     assert out.name == "target"
 
     pd.testing.assert_index_equal(out.index, X.index)
-
     np.testing.assert_array_equal(out.to_numpy(), result)
 
+
 @pytest.mark.parametrize(
-    ("result", "method"),
+    "result, method",
     [
-        (pd.Series([10, 20]), StubRegressor(transform_result=np.array([10, 20]))),
-        (pd.Series(["a", "b"]), StubClassifier(transform_result=np.array(["a", "b"]))),
-    ]
+        (
+            pd.Series([10, 20]),
+            StubRegressor(transform_result=np.array([10, 20])),
+        ),
+        (
+            pd.Series(["a", "b"]),
+            StubClassifier(transform_result=np.array(["a", "b"])),
+        ),
+    ],
 )
 def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result), classifier=StubClassifier(result))
+    cart = CartMethod(
+        regressor=StubRegressor(result),
+        classifier=StubClassifier(result),
+    )
 
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "synthetic_target"
+    cart.target_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value={"dummy": np.array([1, 2])},
     )
 
@@ -262,12 +341,14 @@ def test_transform_preserves_metadata_and_feature_order(mocker, result, method):
         result,
     )
 
+
 def test_transform_rejects_missing_columns():
     cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
 
     cart.method_ = StubRegressor()
     cart.feature_names_in_ = ["a", "b"]
     cart.target_name_ = "y"
+    cart.target_dtype_ = np.float32  # arbitrary
 
     X = pd.DataFrame({"a": [1]})
 
@@ -277,22 +358,33 @@ def test_transform_rejects_missing_columns():
     ):
         cart.transform(X)
 
+
 @pytest.mark.parametrize(
-    ("result", "method"),
+    "result, method",
     [
-        (pd.Series([10, 20]), StubRegressor(transform_result=np.array([10, 20]))),
-        (pd.Series(["a", "b"]), StubClassifier(transform_result=np.array(["a", "b"]))),
-    ]
+        (
+            pd.Series([10, 20]),
+            StubRegressor(transform_result=np.array([10, 20])),
+        ),
+        (
+            pd.Series(["a", "b"]),
+            StubClassifier(transform_result=np.array(["a", "b"])),
+        ),
+    ],
 )
 def test_transform_ignores_extra_columns(mocker, result, method):
-    cart = CartMethod(regressor=StubRegressor(result), classifier=StubClassifier(result))
+    cart = CartMethod(
+        regressor=StubRegressor(result),
+        classifier=StubClassifier(result),
+    )
 
     cart.method_ = method
     cart.feature_names_in_ = ["b", "a"]
     cart.target_name_ = "target"
+    cart.target_dtype_ = result.dtype
 
     mocked_standardise = mocker.patch(
-        "synthpop.methods.cart_synth.utils.to_standardised_array_dict",
+        "synthpop.methods.cart_synth.utils._to_standardised_array_dict",
         return_value={}
     )
 
@@ -314,17 +406,130 @@ def test_transform_ignores_extra_columns(mocker, result, method):
         X[["b", "a"]],
     )
 
-def test_transform_requires_fit():
+
+@pytest.mark.parametrize(
+    "y, method",
+    [
+        (
+            pd.Series([10, 20], dtype=np.int64),
+            StubRegressor(transform_result=np.array(
+                [10, 20], dtype=np.float32)),
+        ),
+        (
+            pd.Series([10, 20], dtype=np.float64),
+            StubRegressor(transform_result=np.array(
+                [10, 20], dtype=np.float32)),
+        ),
+        (
+            pd.Series([10, 20], dtype=np.float32),
+            StubRegressor(transform_result=np.array(
+                [10, 20], dtype=np.float32)),
+        ),
+        (
+            pd.Series(["a", "b"], dtype='str'),
+            StubClassifier(transform_result=np.array(
+                ["a", "b"], dtype=str_dtype)),
+        ),
+        (
+            pd.Series(["a", "b"], dtype='object'),
+            StubClassifier(transform_result=np.array(
+                ["a", "b"], dtype=str_dtype)),
+        ),
+    ],
+)
+def test_transform_outputs_same_dtype_as_target(y, method):
+    cart = CartMethod(regressor=StubRegressor(), classifier=StubClassifier())
+
+    cart.method_ = method
+    cart.feature_names_in_ = ["b", "a"]
+    cart.target_name_ = "target"
+    cart.target_dtype_ = y.dtype
+
+    X = pd.DataFrame(
+        {
+            "a": [1, 2],
+            "b": [3, 4],
+        }
+    )
+
+    out = cart.transform(X)
+    assert y.dtype == out.dtype
+
+
+def test_cart_preserves_categorical_dtype_and_categories():
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+        }
+    )
+
+    y = pd.Series(
+        ["low", "medium", "high", "medium"],
+        dtype=pd.CategoricalDtype(
+            categories=["low", "medium", "high"],
+            ordered=True,
+        ),
+        name="risk",
+    )
+
+    classifier = StubClassifier(
+        transform_result=np.array(
+            ["medium", "high", "medium", "high"]
+        )
+    )
+
+    cart = CartMethod(
+        classifier=classifier,
+        regressor=StubRegressor(),
+    )
+
+    cart.fit(X, y)
+
+    result = cart.transform(X)
+
+    expected_dtype = y.dtype
+
+    assert result.dtype == expected_dtype
+    assert result.cat.categories.equals(
+        expected_dtype.categories
+    )
+    assert result.cat.ordered == expected_dtype.ordered
+
+
+@pytest.mark.parametrize(
+    "missing_attr",
+    [
+        "method_",
+        "feature_names_in_",
+        "target_name_",
+        "target_dtype_",
+    ],
+)
+def test_transform_requires_fit_missing_attribute(missing_attr):
     cart = CartMethod()
+
+    # Set all required fitted attributes
+    cart.method_ = StubClassifier()
+    cart.feature_names_in_ = ["a"]
+    cart.target_name_ = "target"
+    cart.target_dtype_ = "str"
+
+    # Remove one attribute
+    delattr(cart, missing_attr)
+
     with pytest.raises(NotFittedError):
         cart.transform(pd.DataFrame({"a": [1]}))
 
+
 # ----- get_feature_names_out test -----
+
+
 def test_get_feature_names_out_delegates():
     cart = CartMethod()
     cart.method_ = StubRegressor()
 
     assert cart.get_feature_names_out() == ["fake_output"]
+
 
 def test_get_feature_names_out_raises_unfitted():
     cart = CartMethod()
@@ -332,7 +537,10 @@ def test_get_feature_names_out_raises_unfitted():
     with pytest.raises(NotFittedError):
         cart.get_feature_names_out()
 
+
 # ----- clonability test -----
+
+
 def test_clone_works_and_fitted_cart_does_not_preserve_state():
     X = pd.DataFrame({"a": [1]})
     y = pd.Series([1])
@@ -342,7 +550,12 @@ def test_clone_works_and_fitted_cart_does_not_preserve_state():
     cloned = clone(cart)
 
     # Fitted attributes should NOT be copied, original remains intact
-    for attr in ["method_", "feature_names_in_", "target_name_"]:
+    for attr in [
+        "method_",
+        "feature_names_in_",
+        "target_name_",
+        "target_dtype_",
+    ]:
         assert not hasattr(cloned, attr)
         assert hasattr(cart, attr)
     assert hasattr(cloned, "regressor")

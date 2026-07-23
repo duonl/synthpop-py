@@ -5,20 +5,21 @@ from typing import Dict
 
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
-def to_stringdtype_array(x):
+def _to_stringdtype_array(x):
     if isinstance(x,list):
         return np.array(x,dtype=str_dtype)
     return x.astype(str_dtype,copy=False)
 
 
-def validate_stringdtype_array(x):
+def _validate_stringdtype_array(x):
     if not isinstance(x.dtype, np.dtypes.StringDType):
         raise TypeError(f"Expected StringDType array, received {x.dtype}.")
     
     if x.dtype.na_object is not np.nan:
         raise TypeError(f"Expected StringDtype with na_object=np.nan, received {x.dtype.na_object}.")
 
-def to_2d_array(x: npt.NDArray) -> npt.NDArray:
+
+def _to_2d_array(x: npt.NDArray) -> npt.NDArray:
     if x.ndim == 1:
         return x.reshape(-1, 1)
    
@@ -28,7 +29,7 @@ def to_2d_array(x: npt.NDArray) -> npt.NDArray:
     return x
 
  
-def validate_2d_dict(X: Dict[str, npt.NDArray]) -> tuple[Dict[str, npt.NDArray], int]:
+def _validate_2d_dict(X: Dict[str, npt.NDArray]) -> tuple[Dict[str, npt.NDArray], int]:
         """
         Minimal validation for dict-based tabular data.
         :return: validated dictionary and number of samples.
@@ -42,7 +43,7 @@ def validate_2d_dict(X: Dict[str, npt.NDArray]) -> tuple[Dict[str, npt.NDArray],
         n_samples = None
 
         for key, value in X.items():
-            arr = to_2d_array(value)
+            arr = _to_2d_array(value)
             if arr.shape[1] != 1:
                 raise ValueError(f"Column '{key}' must contain exactly one column. Received shape {arr.shape}.")           
 
@@ -53,14 +54,14 @@ def validate_2d_dict(X: Dict[str, npt.NDArray]) -> tuple[Dict[str, npt.NDArray],
                 raise ValueError(f"All columns in X must contain the same number of samples. Expected {n_samples}, received {len(arr)} for '{key}'.")
 
             if not pd.api.types.is_numeric_dtype(arr.dtype):
-                validate_stringdtype_array(arr)
+                _validate_stringdtype_array(arr)
 
             X_out[key] = arr
 
         return X_out, n_samples
 
 
-def validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
+def _validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
     """
     Helper function to validate a 1-dimensional target array. 2D arrays with one column will be reshaped.
     Used in the missing value predictor.
@@ -81,11 +82,12 @@ def validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
             raise ValueError(f"X and y contain a different number of samples: {n_samples} != {y.shape[0]}.")
 
     if not pd.api.types.is_numeric_dtype(y.dtype):
-        validate_stringdtype_array(y)
+        _validate_stringdtype_array(y)
 
     return y
 
-def standardise_array_dtypes(X: npt.ArrayLike)-> npt.NDArray:
+
+def _standardise_array_dtypes(X: npt.ArrayLike)-> npt.NDArray:
     """
     Helper to standardise a 1D or 2D array-like object to either:
     - float32 for numeric data
@@ -117,7 +119,7 @@ def standardise_array_dtypes(X: npt.ArrayLike)-> npt.NDArray:
 
     return result.reshape(original_shape)
 
-def to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
+def _to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
     """
     Helper to ensure that X is a dictionary of arrays with dtype `np.float32` or `StringDType(na_object = np.nan)`.
     Input can be a pandas DataFrame or a dictionary.
@@ -127,4 +129,4 @@ def to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
     else:
         data = X
     
-    return {key: standardise_array_dtypes(value) for key, value in data.items()}
+    return {key: _standardise_array_dtypes(value) for key, value in data.items()}
