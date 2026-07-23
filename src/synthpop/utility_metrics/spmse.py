@@ -139,10 +139,14 @@ def _preprocess_columns(
     """
 
     for col in o_df.columns:
-        o_col = pd.Series(_standardise_spmse_dtype(
-            o_df[col]), index=o_df.index)
-        s_col = pd.Series(_standardise_spmse_dtype(
-            s_df[col]), index=s_df.index)
+        o_col = pd.Series(
+            _standardise_spmse_dtype(o_df[col]),
+            index=o_df.index,
+        )
+        s_col = pd.Series(
+            _standardise_spmse_dtype(s_df[col]),
+            index=s_df.index,
+        )
 
         o_is_numeric = pd.api.types.is_numeric_dtype(o_col)
         s_is_numeric = pd.api.types.is_numeric_dtype(s_col)
@@ -270,7 +274,8 @@ def pairwise_spmse(
 
     if n_o == 0 or n_s == 0:
         raise ValueError(
-            "Both the original and synthetic dataframe must be non-empty.")
+            "Both the original and synthetic dataframe must be non-empty."
+        )
 
     if not orig_df.columns.is_unique or not syn_df.columns.is_unique:
         raise ValueError(
@@ -279,7 +284,7 @@ def pairwise_spmse(
 
     if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError(
-            "Original and synthetic dataframes must have " \
+            "Original and synthetic dataframes must have "
             "the same number of columns with identical column names."
         )
 
