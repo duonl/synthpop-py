@@ -69,7 +69,7 @@ synthpop-py currently evaluates pairwise relationships using the Standardised pr
 ### 5.3.1. Standardised propensity Mean Squared Error (S_pMSE)
 The pairwise Standardised propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original synthpop R implementation.
 
-[^1]: Joshua Snoke, Gillian M. Raab, Beata Nowok, Chris Dibben, Aleksandra Slavković (2018), *General and Specific Utility Measures for Synthetic Data*, in Journal of the Royal Statistical Society: Series A (Statistics in Society), Volume 181, Issue 3, Pages 663–688.
+[^1]: Snoke, J., Raab, G.M., Nowok, B., Dibben, C., Slavković, A. (2018). *General and Specific Utility Measures for Synthetic Data*. Journal of the Royal Statistical Society: Series A (Statistics in Society), 181(3), 663–688. https://doi.org/10.1111/rssa.12358
 
 For each pair of variables, S_pMSE compares the observed frequencies in the original dataset with those in the synthetic dataset. Missing values are included in the computation and are treated as an additional category. Consequently, S_pMSE evaluates both the preservation of observed values and the preservation of missingness patterns.
 ```python
