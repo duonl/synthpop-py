@@ -3,7 +3,7 @@ In the previous example, we created our first synthetic dataset. You may have no
 ```python
 synthesiser = Synthesiser(random_seed=1)
 ```
-Without specifying a `random_seed`, if you run the same code again, you may notice that the generated synthetic dataset is different each time. This is expected. synthetic data generation is a stochastic process: many synthesis methods involve randomness in, for example, sampling.
+Without specifying a `random_seed`, if you run the same code again, you may notice that the generated synthetic dataset is different each time. This is expected. Synthetic data generation is a stochastic process: many synthesis methods involve randomness in, for example, sampling.
 
 Sometimes this is exactly what you want. However, when developing analyses, writing reports or collaborating with others, it is often useful to generate exactly the same synthetic dataset every time. This is called **reproducibility**.
 

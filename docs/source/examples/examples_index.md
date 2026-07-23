@@ -2,7 +2,7 @@
 
 This section contains practical examples demonstrating how to use **synthpop-py** for generating and evaluating synthetic data. The examples range from basic workflows for first-time users to more advanced customisation and extension of the synthesis process.
 
-If you are new to synthpop-py, we recommend starting with the [**Your first synthesis**](your_first_synthetic_dataset.md) example module before exploring alternative synthesis methods, parameter tuning and custom components. We also recommend reading the [**Getting started guide**](../getting_started/getting_started.md) that the example module is part of.
+If you are new to synthpop-py, we recommend starting with the [**Your first synthesis**](your_first_synthetic_dataset.md) example module before exploring alternative synthesis methods, parameter tuning and custom components. We also recommend reading the [**Getting started guide**](../getting_started/getting_started.md) before working through the examples.
 
 Many examples build upon concepts introduces in the [**User Guide**](../user_guides/user_guides_index.md). Where appropriate, links are provided to the relevant sections for more detailed explanations of the underlying methods and algorithms.
 

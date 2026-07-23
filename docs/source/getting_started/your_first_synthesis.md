@@ -1,16 +1,18 @@
 # Your first synthetic dataset
 
-Welcome to synthpop-py. In this example, you'll learn the complete workflow for creating a synthetic dataset. We begin with an existing dataset: the [diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from `scikit-learn` and walk through the basic workflow:
+In this guide, you'll create your first synthetic dataset with synthpop-py. We'll use the [diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from `scikit-learn` and walk through the basic workflow:
 1. Load the original data.
 2. Create a `Synthesiser`.
 3. Fit the Synthesiser to the original data.
 4. Generate synthetic data.
-5. Evaluate the utility of the synthetic data by comparing marginal distributions and pairwise relationships.
+5. Perform a basic comparison of the original and synthetic data.
+
+This example introduces the core workflow. For a more detailed example, including utility evaluation with univariate distributions and S_pMSE, see the [**Your first synthetic dataset**](../examples/your_first_synthetic_dataset.md) example in the [Examples module](../examples/examples_index.md). The example there follows the same workflow as this guide, but explores the evaluation of the synthetic data in more detail.
 
 ## Loading the data
 We begin with an existing dataset. The diabetes dataset contains measurements from diabetes patients and a target variable representing disease progression. The dataset contains only continuous variables.
 
-First, we load the dataset and convert it to a pandas DataFrame.
+First, load the dataset and convert it to a pandas DataFrame:
 ```python
 from sklearn.datasets import load_diabetes
 
@@ -48,7 +50,7 @@ synthesiser.fit(data)
 ```
 During fitting, synthpop-py analyses the variables and estimates the internal relationships between the data.
 
-The default synthesis method is Classification and Regression Trees (CART). synthpop-py supports several synthesis methods, which can be configured and combined in different ways. These methods are covered in more detail in the [Synthesis methods examples](changing_the_default_method.md) and [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
+The default synthesis method is Classification and Regression Trees (CART). synthpop-py supports several synthesis methods, which can be configured and combined in different ways. These methods are covered in more detail in the [Synthesis methods examples](../examples/changing_the_default_method.md) and [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
 The original data is not modified. Instead, the Synthesiser stores the information needed to create new observations.
 
@@ -77,11 +79,19 @@ The generated data are not copies of the original observations. Instead, they ar
 
 More information about generating synthetic data can be found in {ref}`User Guide 2.5: Generating synthetic data <25-generating-synthetic_data>`.
 
-## Evaluating the synthetic data
-### Comparing individual variable distributions
-Creating synthetic data is only the first step. A synthetic dataset should also be evaluated to determine whether it is useful for its intended purpose. This step is called utility evaluation. Utility describes how well synthetic data preserve the statistical properties and analytical usefulness of the original data.
+## A first look at the synthetic data
+Creating synthetic data is only the first step. It is important to evaluate whether the synthetic data are suitable for their intended purpose.
 
-An important part of utility evaluation is checking whether individual variables have similar distributions in the original and synthetic datasets. The function {func}`~synthpop.plotting.plot_univariate.plot_univariate_distributions` creates histograms and bar plots that show you the marginal distributions of individual variables.
+A simple first check is to compare the original and synthetic datasets. For example, you can compare summary statistics:
+```python
+data.describe()
+```
+and:
+```
+synthetic_data.describe()
+```
+
+You can also compare individual variable distributions. For example, the following function creates visualisations of the  marginal distributions of the variables:
 ```python
 from synthpop.plotting.plot_univariate import plot_univariate_distributions
 
@@ -91,53 +101,17 @@ figures = plot_univariate_distributions(
     interactive=True # this automatically opens the plots in your default browser to scroll through
 )
 ```
-Running the code above opens the plots interactively. You will see that the first plot looks like:
-![Univariate distributions of "age"](../images/age_distribution.png)
+These plots allow you to visually inspect whether the distributions of individual variables are similar between the original and synthetic datasets. You can also expand your evaluation to reviewing the pairwise relationships of variables using the {ref}`S_pMSE metric <531-spmse>`.
 
-As you can see, the marginal distributions overlap mostly. There are some small differences, but generally speaking, the synthesiser reproduced the variable correctly.
-
-More information about plotting the univariate distributions can be found in {ref}`User Guide 7.1: Univariate distribution visualisation <71-univariate-distribution-visualisation>`.
-
-### Evaluating pairwise relationships with S_pMSE
-Another important aspect of utility is whether relationships between variables are preserved. `synthpop-py` provides the pairwise Standardised propensity Mean Squared Error (S_pMSE) metric ({func}`~synthpop.utility_metrics.spmse.pairwise_spmse`) for this purpose.
-
-```python
-from synthpop.utility_metrics.spmse import pairwise_spmse
-
-spmse = pairwise_spmse(
-    orig_df=data,
-    syn_df=synthetic_data
-)
-
-spmse.head(3)
-```
-
-The output contains the S_pMSE values for each pair of variables:
-
-|    | column1   | column2   |   S_pMSE |
-|---:|:----------|:----------|---------:|
-|  0 | age       | age       |  1.02676 |
-|  1 | age       | sex       |  0.92953 |
-|  2 | age       | bmi       |  1.38183 |
-
-Lower S_pMSE values indicate that the relationship between two variables is better preserved in the synthetic data. The interpretation of S_pMSE values and its limitations are explained in {ref}`User Guide 5.3.1: S_pMSE <531-spmse>`.
-
-To make the results easier to inspect, we can visualise the S_pMSE values as a heatmap:
-```python
-from synthpop.plotting.plot_spmse import plot_spmse
-
-plot = plot_spmse(spmse)
-```
-![Heatmap of S_pMSE values](../images/spmse.png)
-These visualisations allow us to compare variables one by one. As seen in the plot, all S_pMSE values are below 3 which suggests that there is no statistical significant difference between the synthetic and original dataset with respect to the relationship between pairs of variables.
-
-More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`. 
+For a complete introduction to evaluating synthetic data, including univariate distribution visualisation and the pairwise S_pMSE metric, continue qith the [Your first synthetic data example](../examples/your_first_synthetic_dataset.md) in the Examples module. This is the same workflow you have just followed, but the example goes further into evaluating the quality and utility of the generated data.
 
 ## Next steps
-Congratulations, you have created and evaluated your first synthetic dataset. 
-Check out the next examples in this module to discover:
-- [how to make your synthesis reproducible](./reproducible_synthesis.md);
-- [how to generate larger datasets](./generating_a_larger_dataset.md); and
-- [the importance of the synthesis order](./changing_the_synthesis_order.md). 
+Congratulations, you have created and evaluated your first synthetic dataset. The next step is to explore the [Examples module](../examples/examples_index.md). The first example, [**Your first synthetic dataset**](../examples/your_first_synthetic_dataset.md) covers the same workflow as this guide and expands on it with a more detailed evaluation of the synthetic data.
 
-[The next module](changing_the_default_method.md) will teach you how to use different synthesis methods.
+After that, you can explore examples covering:
+- [making your synthesis reproducible](../examples/reproducible_synthesis.md);
+- [generating larger datasets](../examples/generating_a_larger_dataset.md);
+- [changing the synthesis order](../examples/changing_the_synthesis_order.md); and
+- [using different synthesis methods](../examples/changing_the_default_method.md).
+
+For a broader overview of the available examples, see the [Examples module](../examples/examples_index.md).
