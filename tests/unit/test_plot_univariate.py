@@ -29,10 +29,12 @@ def test_make_histograms_returns_histograms():
     assert isinstance(orig_hist, go.Histogram)
     assert orig_hist.x.tolist() == orig.dropna().tolist()
     assert orig_hist.name == "Original"
+    assert orig_hist.marker.color == '#004488'
 
     assert isinstance(syn_hist, go.Histogram)
     assert syn_hist.x.tolist() == syn.dropna().tolist()
     assert syn_hist.name == "Synthetic"
+    assert syn_hist.marker.color == '#DDAA33'
 
 
 def test_make_histograms_corrects_bins_for_integer_data():
@@ -577,3 +579,40 @@ def test_plot_univariate_distributions_flow(monkeypatch):
     assert captured["html_input"] == fake_html
     assert captured["browser_input"] == fake_path.resolve().as_uri()
     assert result == [fake_fig, fake_fig]
+
+# def test_visual(): #For review to visually check
+#     orig_df = pd.DataFrame(
+#         {
+#             "age": np.random.normal(50, 10, 1000),
+#             "children": np.random.poisson(2, 1000),
+#             "sex": np.random.choice(
+#                 ["Male", "Female"],
+#                 size=1000,
+#                 p=[0.45, 0.55],
+#             ),
+#         }
+#     )
+
+#     syn_df = pd.DataFrame(
+#         {
+#             "age": np.random.normal(52, 12, 1000),
+#             "children": np.random.poisson(3, 1000),
+#             "sex": np.random.choice(
+#                 ["Male", "Female"],
+#                 size=1000,
+#                 p=[0.40, 0.60],
+#             ),
+#         }
+#     )
+
+#     orig_df.loc[:50, "age"] = np.nan  # add missing
+#     syn_df.loc[:30, "age"] = np.nan
+
+#     plots = plot_univariate_distributions(
+#         orig_df=orig_df,
+#         syn_df=syn_df,
+#         save_path=None,
+#         interactive=False,
+#     )
+#     for fig in plots:
+#         fig.show()

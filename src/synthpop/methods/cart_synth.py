@@ -96,8 +96,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         self.target_name_ = getattr(y, "name", None)
-        X_val, n_samples = utils.validate_2d_dict(X)
-        y = utils.validate_1d_target(y, n_samples)
+        X_val, n_samples = utils._validate_2d_dict(X)
+        y = utils._validate_1d_target(y, n_samples)
         self._all_missing = False
 
         self.n_features_in_ = len(X.keys())
@@ -120,7 +120,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             else v
             for (k, v) in prepared_for_fit_X.items()
         }
-        all_features = tree_utils.build_feature_matrix(
+        all_features = tree_utils._build_feature_matrix(
             all_features_dict, self.feature_order_)
 
         self.tree_ = tree_utils._fit_decision_tree_with_reachable_leaves(
@@ -165,7 +165,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
             ],
         )
 
-        X_val, _ = utils.validate_2d_dict(X)
+        X_val, _ = utils._validate_2d_dict(X)
 
         n_features_given = len(X.keys())
         if n_features_given != self.n_features_in_:
@@ -175,7 +175,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         all_features_dict = {k: self.encoders_[k].transform(
             v) if k in self.encoders_ else v for (k, v) in X_val.items()}
 
-        all_features = tree_utils.build_feature_matrix(
+        all_features = tree_utils._build_feature_matrix(
             all_features_dict, self.feature_order_)
         leaf_ids = self.tree_.apply(all_features)
 
@@ -438,8 +438,8 @@ class CartMethod(base_synth.BaseSynthMethod):
         self.target_name_ = y.name
         self.target_dtype_ = y.dtype
 
-        X_dict = utils.to_standardised_array_dict(X)
-        y_array = utils.standardise_array_dtypes(y)
+        X_dict = utils._to_standardised_array_dict(X)
+        y_array = utils._standardise_array_dtypes(y)
 
         if pd.api.types.is_numeric_dtype(y_array.dtype):
             self.method_ = self._new_regressor()
@@ -478,7 +478,7 @@ class CartMethod(base_synth.BaseSynthMethod):
             raise ValueError(f"X is missing required columns: {missing_cols}.")
 
         # preserve original feature ordering used during fit
-        X_dict = utils.to_standardised_array_dict(X[self.feature_names_in_])
+        X_dict = utils._to_standardised_array_dict(X[self.feature_names_in_])
 
         result = self.method_.transform(X_dict)
 

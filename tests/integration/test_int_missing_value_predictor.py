@@ -5,7 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
-from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
+from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
 from synthpop.utils import str_dtype
 
 # This imports an auto-use fixture to set the seed,
@@ -79,7 +79,7 @@ def test_tree_sampler_integration(predictor):
         for col in predictor.feature_order_
     }
 
-    X_matrix = build_feature_matrix(X_encoded, predictor.feature_order_)
+    X_matrix = _build_feature_matrix(X_encoded, predictor.feature_order_)
 
     leaf_ids = predictor.tree_.apply(X_matrix)
 
@@ -146,7 +146,7 @@ def test_encoded_values_are_numeric(predictor):
         for col in predictor.feature_order_
     }
 
-    X_matrix = build_feature_matrix(X_encoded, predictor.feature_order_)
+    X_matrix = _build_feature_matrix(X_encoded, predictor.feature_order_)
 
     assert np.issubdtype(X_matrix.dtype, np.floating)
 
@@ -174,7 +174,7 @@ def test_feature_order_controls_matrix_construction(predictor):
         for col in predictor.feature_order_
     }
 
-    X_matrix = build_feature_matrix(X_encoded, predictor.feature_order_)
+    X_matrix = _build_feature_matrix(X_encoded, predictor.feature_order_)
 
     assert np.array_equal(X_matrix[:, 0], np.array([10, 20, 30, 40]))
     assert np.array_equal(X_matrix[:, 1], np.array([1, 2, 3, 4]))
@@ -198,6 +198,6 @@ def test_feature_matrix_dtype_is_float32(predictor):
         for col in predictor.feature_order_
     }
 
-    X_matrix = build_feature_matrix(X_encoded, predictor.feature_order_)
+    X_matrix = _build_feature_matrix(X_encoded, predictor.feature_order_)
 
     assert X_matrix.dtype == np.float32

@@ -50,11 +50,11 @@ python -m pip install synthpop-py
 
 Check that synthpop-py can be imported successfully:
 ```bash
-python -c "import synthpop-py"
+python -c "import synthpop"
 ```
 Or start Python:
 ```python
-import synthpop-py
+import synthpop
 ```
 If no errors occurs, synthpop-py has been installed successfully.
 

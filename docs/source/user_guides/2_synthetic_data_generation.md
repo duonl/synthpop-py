@@ -44,7 +44,7 @@ The synthesis procedure is intentionally sequential and each generated variable 
 This design closely follows the original synthpop methodology while providing a modular and extensible Python implementation.
 
 ---
-
+(22-synthesiser-class)=
 ## 2.2. The Synthesiser class
 
 The central interface in synthpop-py is the {class}`~synthpop.synthesiser.Synthesiser` class. It provides the main interface for configuring synthesis methods, fitting models on observed data and generating synthetic datasets.
@@ -155,7 +155,7 @@ Missing value handling is integrated into the synthesis methods and is applied a
 Preprocessing, including encoding and missing value handling, is described in more detail in [Guide 4: Data preparation](4_data_preparation.md).
 
 ---
-
+(24-fitting-synthesiser)=
 ## 2.4. Fitting the synthesiser
 
 The {func}`~synthpop.synthesiser.Synthesiser.fit` method learns a sequence of predictive models from the original dataset.
@@ -183,7 +183,7 @@ P(X_j \mid X_1, \dots, X_{j-1})
 All preceding variables are used as predictors by default. In a future release, users may be able to select specific predictors for a target variable.
 
 ---
-
+(25-generating-synthetic_data)=
 ## 2.5. Generating synthetic data
 
 Once fitted, synthetic data with `n` rows can be generated using:

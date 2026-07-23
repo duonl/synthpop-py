@@ -9,7 +9,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from synthpop.utils import standardise_array_dtypes
+from synthpop.utils import _standardise_array_dtypes
 
 __all__ = ["pairwise_spmse"]
 
@@ -46,8 +46,8 @@ def _preprocess_columns(o_df, s_df, max_bins):
     """
 
     for col in o_df.columns:
-        o_col = pd.Series(standardise_array_dtypes(o_df[col]), index=o_df.index)
-        s_col = pd.Series(standardise_array_dtypes(s_df[col]), index=s_df.index)
+        o_col = pd.Series(_standardise_array_dtypes(o_df[col]), index=o_df.index)
+        s_col = pd.Series(_standardise_array_dtypes(s_df[col]), index=s_df.index)
 
         o_is_numeric = pd.api.types.is_numeric_dtype(o_col)
         s_is_numeric = pd.api.types.is_numeric_dtype(s_col)

@@ -13,9 +13,9 @@ from sklearn.tree import DecisionTreeClassifier
 
 from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods import tree_utils
-from synthpop.methods.tree_utils import LeafNodeSampler, build_feature_matrix
+from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
 from synthpop.reproducibility import RandomStateManager
-from synthpop.utils import validate_2d_dict, validate_1d_target
+from synthpop.utils import _validate_1d_target, _validate_2d_dict
 
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
@@ -138,8 +138,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         """
         # input validation
-        X_val, n_samples = validate_2d_dict(X)
-        y_val = validate_1d_target(y, n_samples)
+        X_val, n_samples = _validate_2d_dict(X)
+        y_val = _validate_1d_target(y, n_samples)
 
         self.feature_order_ = list(X_val.keys())
 
@@ -170,7 +170,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
             X_encoded[col] = np.asarray(transformed)
 
-        X_matrix = build_feature_matrix(
+        X_matrix = _build_feature_matrix(
             X_encoded, feature_order=self.feature_order_)
 
         if not self._all_missing and not self._none_missing:
@@ -233,8 +233,8 @@ class MissingValuePredictor(BaseMissingValueHandler):
         if self._none_missing:
             return y
 
-        X_val, n_samples = validate_2d_dict(X)
-        y_val = validate_1d_target(y, n_samples)
+        X_val, n_samples = _validate_2d_dict(X)
+        y_val = _validate_1d_target(y, n_samples)
 
         X_encoded = {}
 
@@ -248,7 +248,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
             X_encoded[col] = np.asarray(transformed)
 
-        X_matrix = build_feature_matrix(
+        X_matrix = _build_feature_matrix(
             X_encoded, feature_order=self.feature_order_)
 
         leaf_ids = self.tree_.apply(X_matrix)
@@ -322,7 +322,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         """
 
         n_samples = X[next(iter(X))].shape[0]
-        y_val = validate_1d_target(y.copy(), n_samples)
+        y_val = _validate_1d_target(y.copy(), n_samples)
 
         missing_mask = pd.isna(y_val)
 
@@ -344,7 +344,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """
 
-        y_val = validate_1d_target(y.copy(), None)
+        y_val = _validate_1d_target(y.copy(), None)
 
         y_val[y_val == self.missing_marker] = np.nan
 

@@ -1,8 +1,8 @@
+(5-evaluating-utility)=
 # 5. Evaluating utility
 Synthetic data utility describes how well synthetic data preserve the statistical properties and analytical usefulness of the original data.
 
-A synthetic dataset with high utility should resemble the original dataset in important aspects, such as marginal distributions, relationships between variables, and patterns relevant for downstream analyses. However, utility is application dependent: a dataset intended for exploratory analysis may require different utility properties than a dataset intended for training machine
-learning models or estimating statistical quantities.
+A synthetic dataset with high utility should resemble the original dataset in important aspects, such as marginal distributions, relationships between variables, and patterns relevant for downstream analyses. However, utility is application dependent: a dataset intended for exploratory analysis may require different utility properties than a dataset intended for training machine learning models or estimating statistical quantities.
 
 Utility evaluation should therefore be performed with respect to the intended use case. No single metric captures all aspects of synthetic data quality, and multiple complementary evaluations are recommended.
 
@@ -20,11 +20,11 @@ A typical workflow for evaluating utility is:
 3. Evaluate how pairwise (bivariate) relationships between variables.
 4. Interpret the results in relation to the intended use case.
 
-A recommended evaluation process starts with univariate distributions because these provide a basic check that individual variables are reproduces correctly. If variables have substantially different marginal distributions, further relationship-based evaluations are unlikely to be meaningful.
+A recommended evaluation process starts with univariate distributions because these provide a basic check that individual variables are reproduced correctly. If variables have substantially different marginal distributions, further relationship-based evaluations are unlikely to be meaningful.
 
 After validating individual variables, pairwise relationships can be assessed. Preserving relationships between variables is important because many analyses depend on associations rather than individual distributions alone.
 
-Evaluating utility can also extent to trivariate and multivariate distributions and relationships.
+Evaluating utility can also extend to trivariate and multivariate distributions and relationships.
 
 ---
 
