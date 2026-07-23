@@ -15,7 +15,7 @@ from synthpop.utils import str_dtype
 __all__ = ["pairwise_spmse"]
 
 
-def _standardise_spmse_dtype(X: pd.DataFrame) -> npt.NDArray:
+def _standardise_spmse_dtype(X: pd.Series) -> npt.NDArray:
     """
     Helper to standardise a 1D-array:
     - float64 for numeric data
@@ -125,7 +125,7 @@ def _get_numeric_bins(
 
 
 def _preprocess_columns(
-        o_df: pd.DataFrame, s_df: pd.DataFrame, max_bins: int
+    o_df: pd.DataFrame, s_df: pd.DataFrame, max_bins: int
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Preprocess the original and synthetic dataframes prior to S_pMSE calculation.
@@ -139,9 +139,9 @@ def _preprocess_columns(
     """
 
     for col in o_df.columns:
-        o_col = pd.Series(_standardise_array_dtypes(
+        o_col = pd.Series(_standardise_spmse_dtype(
             o_df[col]), index=o_df.index)
-        s_col = pd.Series(_standardise_array_dtypes(
+        s_col = pd.Series(_standardise_spmse_dtype(
             s_df[col]), index=s_df.index)
 
         o_is_numeric = pd.api.types.is_numeric_dtype(o_col)
@@ -279,7 +279,8 @@ def pairwise_spmse(
 
     if set(orig_df.columns) != set(syn_df.columns):
         raise ValueError(
-            "Original and synthetic dataframes must have the same column names."
+            "Original and synthetic dataframes must have " \
+            "the same number of columns with identical column names."
         )
 
     if not isinstance(max_bins, int) or isinstance(max_bins, bool) or max_bins < 1:
