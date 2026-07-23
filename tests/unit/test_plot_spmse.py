@@ -86,7 +86,15 @@ def test_make_matrix_creates_symmetric_matrix():
          [1.0, 2.0, 3.0]],
         index=["C", "B", "A"],
         columns=["A", "B", "C"],
-    )
+expected = pd.DataFrame(
+[
+[3.0, 5.0, 6.0],
+[2.0, 4.0, 5.0],
+[1.0, 2.0, 3.0],
+],
+index=["C", "B", "A"],
+columns=["A", "B", "C"],
+)
 
     pd.testing.assert_frame_equal(result, expected)
 
@@ -102,7 +110,7 @@ def test_make_text_matrix_test():
         [np.nan, 0., 1.0, 46.485343962786234],
         [0., 0., 3.0000001, np.nan],
         [2.9999999, 9., 46.432222523765427, 10534.],
-        [56., np.nan, 473842.49323234233, 8.]
+        [56., np.nan, 473842.49323234233, 8.],
     ])
 
     matrix = _make_text_matrix(matrix)
@@ -127,7 +135,8 @@ def test_get_colour_scale_structure():
     """
     colour_scale = _get_colour_scale()
 
-    colours = ['rgb(225,225,225)',
+    colours = [
+    'rgb(225,225,225)',
                'rgb(255,255,255)',
                'rgb(255,255,229)',
                'rgb(255,247,188)',
@@ -175,7 +184,8 @@ def heatmap_inputs():
 
     bins = [0, 3, 10, 30, 100, np.inf]
 
-    bin_labels = ["MISSING",
+    bin_labels = [
+    "MISSING",
                   "CONSTANT VARIABLE",
                   "(0,3]",
                   "(3,10]",
@@ -198,7 +208,8 @@ def heatmap_inputs():
         [0.7142857142857143, 'rgb(254,196,79)'],
         [0.8571428571428571, 'rgb(254,196,79)'],
         [0.8571428571428571, 'rgb(254,153,41)'],
-        [1.0, 'rgb(254,153,41)']]
+        [1.0, 'rgb(254,153,41)'],
+        ]
     return matrix, text_matrix, colour_scale, bins, bin_labels
 
 
@@ -346,7 +357,7 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
                     "column1": ["c1"],
                     "column2": [2],
                     "column3": ["c3"],
-                    "column4": [2]
+                    "column4": [2],
                 }
             ),
             "the columns ['column1', 'column2', 'S_pMSE']"
@@ -357,7 +368,7 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "spmse": [1.0]
+                    "spmse": [1.0],
                 }
             ),
             "the columns ['column1', 'column2', 'S_pMSE']"
@@ -368,10 +379,10 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
-                    "S_pMSE": [np.nan]
+                    "S_pMSE": [np.nan],
                 },
             ),
-            "The S_pMSE dataframe must not contain missing value"
+            "The S_pMSE dataframe must not contain missing values"
         ),  # contains nan
 
         (
@@ -382,7 +393,7 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
 )
 def test_input_errors(df, match):
     """
-    Test that invalid column names raise a ValueError.
+    Test that invalid input raise a ValueError.
     """
 
     with pytest.raises(ValueError, match=re.escape(match)):

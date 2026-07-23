@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 def _categorise_spmse(spmse: pd.DataFrame, bins: Sequence[float]) -> pd.DataFrame:
@@ -34,13 +35,14 @@ def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     :param value_string: either S_pMSE (matrix for text in figure)
     or category (matrix for colour in figure)
 
-    return: NxN matrix
+    return: an NxN matrix
     """
 
     matrix = df.pivot(index="column1", columns="column2", values=value_string)
     matrix = matrix.combine_first(matrix.T)
 
-    #Required in most cases if the diagonal is not stored. As (X,Y) = (Y,X) one column can be missed in both column1 and column2
+    # Ensure variables present on only one axis are included in both axes.
+    # This is required when the diagonal is not stored.
     variables = sorted(set(matrix.index) | set(matrix.columns))
 
     matrix = matrix.reindex(
@@ -78,11 +80,11 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
 
 
 def _get_colour_scale() -> list:
-    """"
+    """
     Helper function to obtain the discrete colour scale used for the S_pMSE bins.
     """
 
-    colours = ['rgb(225,225,225)']+['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
+    colours = ['rgb(225,225,225)'] + ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
 
     n = len(colours)
     colour_scale = []
@@ -132,7 +134,7 @@ def _make_heatmap(
             zmax=len(bin_labels),
             colorbar=dict(
                 tickmode="array",
-                tickvals=np.array(range(len(bin_labels)))+0.5, 
+                tickvals=np.array(range(len(bin_labels))) + 0.5,
                 ticktext=bin_labels,
                 title="S_pMSE bins",
                 outlinecolor="black",
