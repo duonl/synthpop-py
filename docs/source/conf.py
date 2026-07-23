@@ -60,7 +60,12 @@ extensions = [
     'sphinxcontrib.mermaid',
     "sphinx.ext.intersphinx",
 ]
-myst_enable_extensions = ["dollarmath", "amsmath","tasklist"]
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "tasklist",
+    "attrs_inline",
+]
 autodoc_member_order = "bysource"
 
 autodoc_typehints = "description"
@@ -75,6 +80,6 @@ source_suffix = {
 intersphinx_mapping = {
     "sklearn": (
         "https://scikit-learn.org/stable/",
-        None,
+        "https://scikit-learn.org/stable/objects.inv",
     ),
 }

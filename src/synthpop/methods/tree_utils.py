@@ -293,7 +293,7 @@ class LeafNodeSampler:
         return self.__class__(random_state=self.random_state)
 
 
-def build_feature_matrix(X: dict[str, npt.NDArray], feature_order: list[str]) -> npt.NDArray:
+def _build_feature_matrix(X: dict[str, npt.NDArray], feature_order: list[str]) -> npt.NDArray:
 
     if len(set(X.keys()) - set(feature_order)) > 0:
         raise ValueError(
