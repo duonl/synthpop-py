@@ -13,7 +13,7 @@ synthpop-py currently provides the framework for synthetic data generation but d
 ## 6.1. Privacy risks
 Privacy risks in synthetic data are commonly divided into three main categories[^1]:
 
-[^1]: Zhe Si Yu (2025), *Synthetic Data Disclosure Risk Assessment: A Literature Review*, in *Proceedings of Statistics Canada Symposium 2024: The Future of Official Statistics*, Statistics Canada International Symposium Series: Proceedings, Issue 2025001.
+[^1]: Yu, Z.S. (2025). *Synthetic Data Disclosure Risk Assessment: A Literature Review*. In Proceedings of Statistics Canada Symposium 2024: The Future of Official Statistics, Statistics Canada International Symposium Series: Proceedings, 2025001. https://www150.statcan.gc.ca/n1/pub/11-522-x/2025001/article/00016-eng.pdf
 
 | Risk type | Main question | Information revealed
 | --- | --- | --- |
