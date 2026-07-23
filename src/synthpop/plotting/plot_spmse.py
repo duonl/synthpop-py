@@ -7,7 +7,6 @@ from typing import Sequence
 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -71,7 +70,7 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
 
     text_matrix = text_matrix.mask(
         matrix.isna(),
-        "MISSING",
+        "UNDEFINED",
     )
 
     text_matrix = text_matrix.mask(matrix == 0, "CONSTANT VARIABLE")
@@ -98,8 +97,10 @@ def _get_colour_scale() -> list:
 
 
 def _make_heatmap(
-        matrix: pd.DataFrame, text_matrix: pd.DataFrame,
-        colour_scale: list, bins: Sequence[float], bin_labels: Sequence[str]
+        matrix: pd.DataFrame, 
+        text_matrix: pd.DataFrame,
+        colour_scale: list, 
+        bin_labels: Sequence[str]
 )-> go.Figure:
     """
     Generate an interactive Plotly heatmap of the categorised S_pMSE matrix.
@@ -107,7 +108,7 @@ def _make_heatmap(
     :param matrix: pandas DataFrame of the categorised S_pMSE
     :param text_matrix: pandas DataFrame of the same shape as ``matrix``
         containing the text displayed in each heatmap cell (e.g. rounded
-        values, "CONSTANT VARIABLE" or "MISSING" for unpresent combinations).
+        values, "CONSTANT VARIABLE" or "UNDEFINED" for unpresent combinations).
     :param colour_scale: Plotly-compatible colour scale applied to the heatmap.
     :param bins: Sequence of bin edges used to categorise the S_pMSE values.
     :param bin_labels: Labels corresponding to the bins, displayed on the
@@ -231,7 +232,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
 
     bins = [0, 3, 10, 30, 100, np.inf]
     bin_labels = [
-        "MISSING", "CONSTANT VARIABLE", "(0,3]", "(3,10]",
+        "UNDEFINED", "CONSTANT VARIABLE", "(0,3]", "(3,10]",
         "(10,30]", "(30,100]", '(100,+)'
     ]
 
@@ -242,11 +243,17 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     text_matrix = _make_text_matrix(matrix_orig)
 
     matrix = _make_matrix(spmse, "category")
-    matrix +=1
+    matrix += 1
     matrix = matrix.fillna(0)
+    
+    # Make matrix gives back the categories corresponding to the bins
+    # Reserve category 0 for undefined or UNDEFINED pairwise combinations
+    # Category 1 then represents constant variables (S_pMSE == 0)
+    # Category 2 then becomes the (0, 3] bin, and so on
+    
     colour_scale = _get_colour_scale()
 
-    fig = _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels)
+    fig = _make_heatmap(matrix, text_matrix, colour_scale, bin_labels)
 
     if save_path:
 

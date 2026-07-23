@@ -2,6 +2,7 @@ import re
 
 import numpy as np
 import pandas as pd
+from plotly.graph_objects import Figure
 import pytest
 
 from synthpop.plotting.plot_spmse import (
@@ -37,6 +38,7 @@ def spmse_df():
 @pytest.mark.parametrize(
     "binval, expected_val",
     [
+        (0, 0),
         (3, 1),
         (10, 2),
         (30, 3),
@@ -46,7 +48,8 @@ def spmse_df():
 )
 def test_categorise_spmse_correct_output(binval, expected_val, spmse_df):
     """
-    Test that checks if the S_pMSE is correctly binned
+    Test that checks if the S_pMSE is correctly binned.
+    This does not include the += 1 as required by correcting for missing columns
     """
     bins = [0, 3, 10, 30, 100, np.inf]
 
@@ -81,23 +84,45 @@ def test_make_matrix_creates_symmetric_matrix():
     result = _make_matrix(df)
 
     expected = pd.DataFrame(
-        [[3.0, 5.0, 6.0],
-         [2.0, 4.0, 5.0],
-         [1.0, 2.0, 3.0]],
+        [
+            [3.0, 5.0, 6.0],
+            [2.0, 4.0, 5.0],
+            [1.0, 2.0, 3.0]
+        ],
         index=["C", "B", "A"],
         columns=["A", "B", "C"],
-expected = pd.DataFrame(
-[
-[3.0, 5.0, 6.0],
-[2.0, 4.0, 5.0],
-[1.0, 2.0, 3.0],
-],
-index=["C", "B", "A"],
-columns=["A", "B", "C"],
-)
+    )
 
     pd.testing.assert_frame_equal(result, expected)
 
+def test_make_matrix_reindexes_missing_axis_labels():
+    """
+    Test that variables appearing on only one axis are added to both
+    the index and columns, and that the returned matrix has its rows
+    reversed.
+    """
+
+    df = pd.DataFrame(
+        {
+            "column1": ["A", "A"],
+            "column2": ["B", "C"],
+            "S_pMSE": [1.0, 2.0],
+        }
+    )
+
+    result = _make_matrix(df)
+
+    expected = pd.DataFrame(
+        [
+            [2.0, np.nan, np.nan],
+            [1.0, np.nan, np.nan],
+            [np.nan, 1.0, 2.0],      
+        ],
+        index=["C", "B", "A"],
+        columns=["A", "B", "C"],
+    )
+
+    pd.testing.assert_frame_equal(result, expected)
 
 # ----- _make_text_matrix tests -----
 
@@ -117,10 +142,10 @@ def test_make_text_matrix_test():
 
     output = pd.DataFrame(
         [
-            ["MISSING", "CONSTANT VARIABLE", "1.0", "46.49"],
-            ["CONSTANT VARIABLE", "CONSTANT VARIABLE", "3.0", "MISSING"],
+            ["UNDEFINED", "CONSTANT VARIABLE", "1.0", "46.49"],
+            ["CONSTANT VARIABLE", "CONSTANT VARIABLE", "3.0", "UNDEFINED"],
             ["3.0", "9.0", "46.43", "10534.0"],
-            ["56.0", "MISSING", "473842.49", "8.0"],
+            ["56.0", "UNDEFINED", "473842.49", "8.0"],
         ],
     )
 
@@ -136,14 +161,14 @@ def test_get_colour_scale_structure():
     colour_scale = _get_colour_scale()
 
     colours = [
-    'rgb(225,225,225)',
-               'rgb(255,255,255)',
-               'rgb(255,255,229)',
-               'rgb(255,247,188)',
-               'rgb(254,227,145)',
-               'rgb(254,196,79)',
-               'rgb(254,153,41)',
-               ]
+        'rgb(225,225,225)',
+        'rgb(255,255,255)',
+        'rgb(255,255,229)',
+        'rgb(255,247,188)',
+        'rgb(254,227,145)',
+        'rgb(254,196,79)',
+        'rgb(254,153,41)',
+    ]
 
     assert len(colour_scale) == 2 * len(colours)
 
@@ -173,26 +198,24 @@ def heatmap_inputs():
 
     text_matrix = pd.DataFrame(
         [
-            ["MISSING", "CONSTANT VARIABLE", "1.0", "46,49"],
-            ["CONSTANT VARIABLE", "CONSTANT VARIABLE", "3.00", "MISSING"],
+            ["UNDEFINED", "CONSTANT VARIABLE", "1.0", "46,49"],
+            ["CONSTANT VARIABLE", "CONSTANT VARIABLE", "3.00", "UNDEFINED"],
             ["3", "9.", "46,34", "104534"],
-            ["56", "MISSING", "473842.49", "8"],
+            ["56", "UNDEFINED", "473842.49", "8"],
         ],
         index=matrix.index,
         columns=matrix.columns,
     )
 
-    bins = [0, 3, 10, 30, 100, np.inf]
-
     bin_labels = [
-    "MISSING",
-                  "CONSTANT VARIABLE",
-                  "(0,3]",
-                  "(3,10]",
-                  "(10,30]",
-                  "(30,100]",
-                  "(100,+)",
-                  ]
+        "UNDEFINED",
+        "CONSTANT VARIABLE",
+        "(0,3]",
+        "(3,10]",
+        "(10,30]",
+        "(30,100]",
+        "(100,+)",
+    ]
 
     colour_scale = [
         [0.0, 'rgb(225,225,225)'],
@@ -209,21 +232,20 @@ def heatmap_inputs():
         [0.8571428571428571, 'rgb(254,196,79)'],
         [0.8571428571428571, 'rgb(254,153,41)'],
         [1.0, 'rgb(254,153,41)'],
-        ]
-    return matrix, text_matrix, colour_scale, bins, bin_labels
+    ]
+    return matrix, text_matrix, colour_scale, bin_labels
 
 
 def test_make_heatmap_returns_figure(heatmap_inputs):
     """
     Test if a plotly figure is returned
     """
-    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
         colour_scale,
-        bins,
         bin_labels,
     )
 
@@ -235,13 +257,12 @@ def test_make_heatmap_data(heatmap_inputs):
     Test that the heatmap contains the expected data.
     """
 
-    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
         colour_scale,
-        bins,
         bin_labels,
     )
 
@@ -261,13 +282,12 @@ def test_make_heatmap_layout(heatmap_inputs):
     Test that the layout is configured correctly.
     """
 
-    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
         colour_scale,
-        bins,
         bin_labels,
     )
 
@@ -285,13 +305,12 @@ def test_make_heatmap_colourbar(heatmap_inputs):
     Test that the colourbar is configured correctly.
     """
 
-    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
         colour_scale,
-        bins,
         bin_labels,
     )
 
@@ -312,13 +331,12 @@ def test_make_heatmap_colour_scale(heatmap_inputs):
     Test that the expected colour scale is used.
     """
 
-    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
         colour_scale,
-        bins,
         bin_labels,
     )
 
@@ -330,13 +348,12 @@ def test_make_heatmap_hovertemplate(heatmap_inputs):
     Test that the expected hover template is used.
     """
 
-    matrix, text_matrix, colour_scale, bins, bin_labels = heatmap_inputs
+    matrix, text_matrix, colour_scale, bin_labels = heatmap_inputs
 
     fig = _make_heatmap(
         matrix,
         text_matrix,
         colour_scale,
-        bins,
         bin_labels,
     )
 
@@ -411,7 +428,6 @@ def test_save_image(monkeypatch, tmp_path, spmse_df):
         nonlocal called
         called = True
 
-    from plotly.graph_objects import Figure
     monkeypatch.setattr(
         Figure, "write_image", fake_write_image)
 
@@ -431,7 +447,6 @@ def test_show_not_called(monkeypatch, spmse_df):
         nonlocal called
         called = True
 
-    from plotly.graph_objects import Figure
     monkeypatch.setattr(Figure, "show", fake_show)
 
     plot_spmse(spmse_df, None, False)
@@ -449,7 +464,6 @@ def test_show_called(monkeypatch, spmse_df):
         nonlocal called
         called = True
 
-    from plotly.graph_objects import Figure
     monkeypatch.setattr(Figure, "show", fake_show)
 
     plot_spmse(spmse_df, None, True)
@@ -466,5 +480,5 @@ def test_no_input_change(spmse_df):
 
     pd.testing.assert_frame_equal(spmse_df, original_df)
 
-# def test_visual(spmse_df): #Please check for review
-#     plot_spmse(spmse_df, None, True)
+def test_visual(spmse_df): #Please check for review
+    plot_spmse(spmse_df, None, True)
