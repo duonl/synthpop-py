@@ -53,7 +53,7 @@ You can verify the installation by importing the package:
 import synthpop
 ```
 
-For installation in a virtual environment, installation from source, and troubleshooting, see the [Installation documentation](https://synthpop-py.readthedocs.io/en/latest/).
+For installation in a virtual environment, installation from source, and troubleshooting, see the [Installation documentation](https://synthpop-py.readthedocs.io/en/latest/getting_started/installation.html).
 
 ## Documentation
 
@@ -158,7 +158,7 @@ The project roadmap will continue to evolve based on user feedback and the needs
 
 synthpop-py is intended to be an open-source project, and contributions are welcome.
 
-For information about contributing to the project, setting up a development environment, and the development workflow, see the project's [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [developer documentation](https://synthpop-py.readthedocs.io/en/latest/developer/developer_index.html).
+For information about contributing to the project, setting up a development environment, and the development workflow, see the project's [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer documentation](https://synthpop-py.readthedocs.io/en/latest/developer/developer_index.html).
 
 ## License
 
