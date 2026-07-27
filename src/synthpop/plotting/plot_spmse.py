@@ -247,7 +247,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     matrix = matrix.fillna(0)
     
     # Make matrix gives back the categories corresponding to the bins
-    # Reserve category 0 for undefined or UNDEFINED pairwise combinations
+    # Reserve category 0 for UNDEFINED pairwise combinations
     # Category 1 then represents constant variables (S_pMSE == 0)
     # Category 2 then becomes the (0, 3] bin, and so on
     
