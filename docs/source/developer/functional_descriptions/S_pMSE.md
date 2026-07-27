@@ -26,7 +26,8 @@ The computation of S_pMSE for a given pair of variables $(X, Y)$ (from the origi
 
 For each variable pair $(X, Y)$:
 - If a variable is numeric, it is discretised into at most $\text{max\_bins}$ bins.
-    The bins are defined as left-closed and are, where possible, based on quantiles. 
+    For each numeric variable, bin edges are determined from the pooled values of the original and synthetic datasets. 
+    The same bin edges are are defined as left-closed and are, where possible, based on quantiles for both datasets. 
     If the data are highly skewed such that fewer than three occupied quantile bins can be formed, equal-width (linear) binning is used instead.
 - Missing values are all normalised to the same missing value (i.e., `NumPy.nan`)
 

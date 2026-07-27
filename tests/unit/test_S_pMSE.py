@@ -281,6 +281,18 @@ def test_pairwise_spmse_input_shapes_and_types(
                 {
                     "column1": ["c1"],
                     "column2": ["c1"],
+                    "S_pMSE": [0.],
+                }
+            ),
+            1,
+        ),
+        (
+            pd.DataFrame({"c1": [0, 1, 2]}),
+            pd.DataFrame({"c1": [1, 2]}),
+            pd.DataFrame(
+                {
+                    "column1": ["c1"],
+                    "column2": ["c1"],
                     "S_pMSE": [25 / 18],
                 }
             ),
@@ -396,8 +408,10 @@ def test_pairwise_spmse_binsizes(
         ),
         # Check missing value handling, (str + pd.NA)
         (
-            pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}, dtype=np.float64),
-            pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}, dtype=np.float64),
+            pd.DataFrame(
+                {"c1": [np.nan, np.nan, np.nan, np.nan]}, dtype=np.float64),
+            pd.DataFrame(
+                {"c1": [np.nan, np.nan, np.nan, np.nan]}, dtype=np.float64),
             pd.DataFrame(
                 {
                     "column1": ["c1"],

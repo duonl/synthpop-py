@@ -225,6 +225,7 @@ def _calc_spmse(
             f"thus only one category combination has positive expected frequency. "
             f"The statistic is undefined and returns 0 for variable pair: {jf_syn.name}",
             UserWarning,
+            stacklevel=2,
         )
 
     return spmse
