@@ -396,8 +396,8 @@ def test_pairwise_spmse_binsizes(
         ),
         # Check missing value handling, (str + pd.NA)
         (
-            pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}),
-            pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}),
+            pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}, dtype=np.float64),
+            pd.DataFrame({"c1": [np.nan, np.nan, np.nan, np.nan]}, dtype=np.float64),
             pd.DataFrame(
                 {
                     "column1": ["c1"],
