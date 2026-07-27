@@ -39,7 +39,7 @@ Examples of aspects that can be inspected include:
 
 Univariate distributions can typically be inspected visually. synthpop-py provides the {func}`~synthpop.utility_metrics.plot_univariate.plot_univariate_distributions` visualisation function for comparing distributions (see {ref}`Guide 7.1: Univariate distribution visualisations <71-univariate-distribution-visualisation>`). These visualisations allow users to inspect whether synthetic variables reproduce important characteristics of the original data.
 ```python
->>> from synthpop.plotting.plot_univariate import plot_univariate_distributions
+>>> from synthpop.plotting import plot_univariate_distributions
 
 >>> plot_univariate_distributions(original_data, synthetic_data)
 ```
@@ -69,11 +69,11 @@ synthpop-py currently evaluates pairwise relationships using the Standardised pr
 ### 5.3.1. Standardised propensity Mean Squared Error (S_pMSE)
 The pairwise Standardised propensity Mean Squared Error (S_pMSE) is a statistical measure that quantifies differences between pairwise joint distributions in an original and synthetic dataset[^1]. This metric is also used in the original synthpop R implementation.
 
-[^1]: Joshua Snoke, Gillian M. Raab, Beata Nowok, Chris Dibben, Aleksandra Slavković (2018), *General and Specific Utility Measures for Synthetic Data*, in Journal of the Royal Statistical Society: Series A (Statistics in Society), Volume 181, Issue 3, Pages 663–688.
+[^1]: Snoke, J., Raab, G.M., Nowok, B., Dibben, C., Slavković, A. (2018). *General and Specific Utility Measures for Synthetic Data*. Journal of the Royal Statistical Society: Series A (Statistics in Society), 181(3), 663–688. https://doi.org/10.1111/rssa.12358
 
 For each pair of variables, S_pMSE compares the observed frequencies in the original dataset with those in the synthetic dataset. Missing values are included in the computation and are treated as an additional category. Consequently, S_pMSE evaluates both the preservation of observed values and the preservation of missingness patterns.
 ```python
->>> from synthpop.utility_metrics.spmse import pairwise_spmse
+>>> from synthpop.utility_metrics import pairwise_spmse
 
 >>> scores = pairwise_spmse(original_data, synthetic_data)
 >>> scores.head()

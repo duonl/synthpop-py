@@ -25,7 +25,7 @@ class Synthesiser:
     Examples
     --------
         >>> import pandas as pd
-        >>> from synthpop.synthesiser import Synthesiser
+        >>> from synthpop import Synthesiser
         >>> data = pd.DataFrame({
         ...     "first column":[1,2,3,2,1,3],
         ...     "second column":["a","a","b","c","b","c"],
