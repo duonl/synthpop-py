@@ -216,8 +216,9 @@ def _calc_spmse(jf_or: pd.Series, jf_syn: pd.Series, n_o: int, n_s: int) -> np.f
 
         spmse = np.float32(0.0)
         warnings.warn(
-            f"Both variables are constant and equal; "
-            f"the statistic is undefined. Return 0 for variable pair: {jf_syn.name}",
+            f"Both variables are constant and equal, "
+            f"thus only one category combination has positive expected frequency."
+            f"The statistic is undefined and returns 0 for variable pair: {jf_syn.name}",
             UserWarning,
         )
 
