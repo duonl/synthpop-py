@@ -4,9 +4,9 @@ This module contains classes for different strategies for handling missing value
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Self
 
-import pandas as pd
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from sklearn.base import TransformerMixin, clone
 from sklearn.exceptions import NotFittedError
 from sklearn.tree import DecisionTreeClassifier
@@ -81,7 +81,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     Examples
     --------
-    >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+    >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np
     >>>
     >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -123,7 +123,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         Examples
         --------
-        >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+        >>> from synthpop.data_processing import MissingValuePredictor
         >>> import numpy as np
         >>>
         >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -203,7 +203,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         Examples
         --------
-        >>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+        >>> from synthpop.data_processing import MissingValuePredictor
         >>> import numpy as np
         >>>
         >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -289,15 +289,20 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     Examples
     --------
     >>> import numpy as np
-    >>> from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
+    >>> from synthpop.data_processing import ReplaceMissingWithValue
+    >>>
     >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+    >>>
     >>> replace_missing = ReplaceMissingWithValue()
     >>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+    >>>
     >>> x_res
     array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))
+    >>>
     >>> y_res
     array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
+    >>>
     >>> replace_missing.post_synth_transform(x_res, y_res)
     array(['x', 'y', nan, 'z'], dtype=StringDType(na_object=nan))
     """

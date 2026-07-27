@@ -17,7 +17,7 @@ Small differences between original and synthetic data are expected because synth
 ## 7.1. Univariate distribution visualisation
 The univariate distribution visualisation compares each variable in the original and synthetic datasets independently. It is generated using {func}`~synthpop.plotting.plot_univariate.plot_univariate_distributions`.
 ```python
->>> from synthpop.plotting.plot_univariate import plot_univariate_distributions
+>>> from synthpop.plotting import plot_univariate_distributions
 
 >>>> plots = plot_univariate_distributions(
 ...     original_data, 
@@ -118,7 +118,7 @@ The S_pMSE heatmap provides a visual representation of pairwise utility evaluati
 The input is the pairwise S_pMSE table produced by
 {func}`~synthpop.utility_metrics.spmse.pairwise_spmse`.
 ```python
->>> from synthpop.utility_metrics.spmse import pairwise_spmse
+>>> from synthpop.utility_metrics import pairwise_spmse
 >>> from synthpop.plotting import plot_spmse
 
 >>> spmse = pairwise_spmse(original_data, synthetic_data)

@@ -156,7 +156,7 @@ A minimal custom synthesis method can be defined as:
 from typing import Self
 import pandas as pd
 
-from synthpop.methods.base_synth import BaseSynthMethod
+from synthpop.methods import BaseSynthMethod
 
 
 class CustomSynth(BaseSynthMethod):

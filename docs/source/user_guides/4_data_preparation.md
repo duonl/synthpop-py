@@ -53,7 +53,7 @@ The encoder used depends on the target data type:
 ### 4.1.1. PCA encoding
 The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components <431_choosing_pca>`.
 ```python
->>> from synthpop.data_processing.encoders import PCAEncoder
+>>> from synthpop.data_processing import PCAEncoder
 
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array(["x", "x", "y", "z", "w"])
@@ -116,7 +116,7 @@ The number of components $k$ is chosen such that a desired fraction of variance 
 ### 4.1.2. Mean encoding
 The {class}`~synthpop.data_processing.encoders.MeanEncoder` method is used for numeric targets. Each category is replaced by the average target value observed for that category.
 ```python
->>> from synthpop.data_processing.encoders import MeanEncoder
+>>> from synthpop.data_processing import MeanEncoder
 
 >>> X = np.array(["a", "a", "b", "b", "c"])
 >>> y = np.array([1, 0, 2, 0, 3])
@@ -155,7 +155,7 @@ This separation allows synthpop-py to reproduce both the generated values and th
 ### 4.2.1. Treating missing as category
 For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
 ```python
->>> from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
+>>> from synthpop.data_processing import ReplaceMissingWithValue
 
 >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
 >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
@@ -191,7 +191,7 @@ This method ensures that trees never see missing values in targets which they ca
 ### 4.2.2. Predicting missing values
 For numeric targets, missing values are treated probabilistically using {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
 ```python
->>> from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+>>> from synthpop.data_processing import MissingValuePredictor
 
 >>> X = {"num": np.array([25, 30, 35, 40])}
 >>> y = np.array([1.0, np.nan, 3.0, np.nan])
