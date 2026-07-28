@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -272,9 +274,11 @@ def test_tree_method_raises_on_rare_category(method,y):
         "column": np.array(feature,dtype=str_dtype)
     }
 
-    result = method.fit_transform(X,y)
+    with pytest.raises(ValueError,match=re.escape("found categorical value that occurs less times than 5. This poses a risk of undesirable attribute disclosure. see <LINK>")):
+        result = method.fit_transform(X,y)
 
-    assert int(result[3]) !=y[3], "attribute disclosure for sample 3"
+        #this assertion should not be reached when #156 is done.
+        assert int(result[3]) !=y[3], "attribute disclosure for sample 3"
 
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
 def test_order_of_input_dict_does_not_change_output(method, X, y):
