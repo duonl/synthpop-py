@@ -83,7 +83,8 @@ def _get_colour_scale() -> list:
     Helper function to obtain the discrete colour scale used for the S_pMSE bins.
     """
 
-    colours = ['rgb(225, 225, 225)'] + ['rgb(255, 255, 255)'] + px.colors.sequential.YlOrBr[:5]
+    colours = ['rgb(225, 225, 225)'] + ['rgb(255, 255, 255)'] + \
+        px.colors.sequential.YlOrBr[:5]
 
     n = len(colours)
     colour_scale = []
@@ -97,11 +98,11 @@ def _get_colour_scale() -> list:
 
 
 def _make_heatmap(
-        matrix: pd.DataFrame, 
+        matrix: pd.DataFrame,
         text_matrix: pd.DataFrame,
-        colour_scale: list, 
+        colour_scale: list,
         bin_labels: Sequence[str]
-)-> go.Figure:
+) -> go.Figure:
     """
     Generate an interactive Plotly heatmap of the categorised S_pMSE matrix.
 
@@ -216,7 +217,8 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     """
 
     if not isinstance(spmse, pd.DataFrame):
-        raise ValueError(f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead.")
+        raise ValueError(
+            f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead.")
 
     if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
 
@@ -245,12 +247,12 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     matrix = _make_matrix(spmse, "category")
     matrix += 1
     matrix = matrix.fillna(0)
-    
+
     # Make matrix gives back the categories corresponding to the bins
     # Reserve category 0 for UNDEFINED pairwise combinations
     # Category 1 then represents constant variables (S_pMSE == 0)
     # Category 2 then becomes the (0, 3] bin, and so on
-    
+
     colour_scale = _get_colour_scale()
 
     fig = _make_heatmap(matrix, text_matrix, colour_scale, bin_labels)
