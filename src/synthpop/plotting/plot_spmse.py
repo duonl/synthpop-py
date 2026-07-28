@@ -64,7 +64,7 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
 
     :param matrix: NxN numpy matrix
 
-    return: NxN matrix
+    return: an NxN matrix
     """
     text_matrix = matrix.round(2).astype(str)
 
