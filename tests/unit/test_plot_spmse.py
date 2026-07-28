@@ -95,6 +95,7 @@ def test_make_matrix_creates_symmetric_matrix():
 
     pd.testing.assert_frame_equal(result, expected)
 
+
 def test_make_matrix_reindexes_missing_axis_labels():
     """
     Test that variables appearing on only one axis are added to both
@@ -116,7 +117,7 @@ def test_make_matrix_reindexes_missing_axis_labels():
         [
             [2.0, np.nan, np.nan],
             [1.0, np.nan, np.nan],
-            [np.nan, 1.0, 2.0],      
+            [np.nan, 1.0, 2.0],
         ],
         index=["C", "B", "A"],
         columns=["A", "B", "C"],
@@ -162,9 +163,9 @@ def test_get_colour_scale_structure():
 
     colours = [
         'rgb(225, 225, 225)',
-'rgb(255, 255, 255)',
-'rgb(255, 255, 229)',
-'rgb(255, 247, 188)',
+        'rgb(255, 255, 255)',
+        'rgb(255, 255, 229)',
+        'rgb(255, 247, 188)',
         'rgb(254,227,145)',
         'rgb(254,196,79)',
         'rgb(254,153,41)',
