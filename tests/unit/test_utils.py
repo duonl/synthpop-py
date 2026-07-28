@@ -1,8 +1,11 @@
+import re
+
 import pytest
 import numpy as np
 import pandas as pd
 
 from synthpop.utils import (
+    _raise_on_rare_value,
     str_dtype,
     _validate_stringdtype_array,
     _validate_1d_target,
@@ -348,3 +351,30 @@ def test_to_standardised_array_dict_with_numpy_inputs():
 
     assert result["num"].dtype == np.float32
     assert result["cat"].dtype == str_dtype
+
+# ----- array_has_rare_value -----
+
+# TODO: what todo with missing?
+
+
+@pytest.mark.parametrize("x, threshold", [
+    (["a"], 5),  # one row, so unique value by definition
+    ((["a"]*5)+["b"]*6, 5),  # number of occurrences exactly equal to threshold
+    ((["a"]*5)+["b"]*6, 7),  # number of occurrences strictly lower than threshold
+])
+def test_array_has_rare_value_positive_cases(x, threshold):
+    x_in = np.array(x, dtype=str_dtype)
+
+    with pytest.raises(ValueError, match=re.escape(f"found categorical value that occurs less times than {threshold}. This poses a risk of undesirable attribute disclosure. see <LINK>")):
+        _raise_on_rare_value(x_in, threshold)
+
+
+@pytest.mark.parametrize("x, threshold", [
+    (["a"]*5, 4),  # just above threshold
+    # number of occurrences strictly higher than threshold
+    ((["a"]*7)+["b"]*10, 5),
+])
+def test_array_has_rare_value_negative_cases(x, threshold):
+    x_in = np.array(x, dtype=str_dtype)
+
+    assert _raise_on_rare_value(x_in, threshold) is None
