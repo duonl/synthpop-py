@@ -12,3 +12,4 @@ pyproject.toml
 tests/unit/__pycache__/
 src/*.svg
 src/*.png
+/.ipynb_checkpoints

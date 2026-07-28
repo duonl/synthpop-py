@@ -54,4 +54,7 @@ The guides below provide more detailed explanations of specific topics:
 :maxdepth: 2
 8_custom_synthesis_methods.md
 ```
-
+```{toctree}
+maxdepth: 2
+privacy_issue.ipynb
+```
