@@ -9,6 +9,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.exceptions import NotFittedError
 
+import synthpop
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
 from synthpop.methods.cart_synth import (
     _AbstractTreeMethod,
@@ -187,6 +188,11 @@ def mock_fit_decision_tree(mocker,):
         "synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves", return_value=StubTree())
 
 
+@pytest.fixture(autouse=True)
+def mock_raise_on_rare_value(mocker):
+    mocker.patch("synthpop.utils._raise_on_rare_value")
+
+
 def assert_dict_array_equal(expected, actual):
     for k, v in expected.items():
         assert np.array_equal(
@@ -307,6 +313,45 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
     y_spy.assert_called_once_with(
         y, 42
     )  # 42 is the hardcoded n_samples value of the validate_dict_x stub
+
+
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_raises_on_rare_values_default(X, y, index_cat, tree_method,):
+    tree_method.fit(X, y)
+
+    for cat_col in index_cat:
+
+        # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
+        actual_calls = synthpop.utils._raise_on_rare_value.call_args_list
+        matching_calls = np.array([(args["x"] == (X[cat_col])).all() & (
+            args["rare_threshold"] == 5) for (_, args) in actual_calls])
+        assert len(matching_calls[matching_calls]) == 1, "_raise_on_rare_value not called"
+        # assert_any_call(x=X[cat_col],rare_threshold=5)
+
+    assert len(index_cat) == synthpop.utils._raise_on_rare_value.call_count
+
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_raises_on_rare_values_other_threshold(X, y, index_cat, tree_method,):
+    tree_method.rare_value_threshold = 10
+    tree_method.fit(X, y)
+
+    for cat_col in index_cat:
+
+        # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
+        actual_calls = synthpop.utils._raise_on_rare_value.call_args_list
+        matching_calls = np.array([(args["x"] == (X[cat_col])).all() & (
+            args["rare_threshold"] == 10) for (_, args) in actual_calls])
+        assert len(matching_calls[matching_calls]) == 1, "_raise_on_rare_value not called"
+        # assert_any_call(x=X[cat_col],rare_threshold=5)
+
+    assert len(index_cat) == synthpop.utils._raise_on_rare_value.call_count
+
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_raises_on_rare_values_not_called_when_disabled(X, y, index_cat, tree_method,):
+    tree_method.rare_value_threshold = None
+    tree_method.fit(X, y)
+
+    assert 0 == synthpop.utils._raise_on_rare_value.call_count
 
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())

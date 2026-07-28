@@ -55,6 +55,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def __init__(
         self,
         *,
+        rare_value_threshold: int | None = 5,
         tree: BaseDecisionTree | None = None,
         encoder: TransformerMixin | None = None,
         missing_handler: BaseMissingValueHandler | None = None,
@@ -65,6 +66,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         self.missing_handler = missing_handler
         self.tree_sampler = tree_sampler
         self.tree = tree
+        self.rare_value_threshold = rare_value_threshold
 
     def _new_encoder(self):
         return clone(self.encoder) if self.encoder is not None else self._get_encoder()
@@ -96,7 +98,12 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         self.target_name_ = getattr(y, "name", None)
+        if self.rare_value_threshold is not None:
+            for key in X:
+                if not pd.api.types.is_numeric_dtype(X[key].dtype):
+                    utils._raise_on_rare_value(x=X[key], rare_threshold=self.rare_value_threshold)
         X_val, n_samples = utils._validate_2d_dict(X)
+
         y = utils._validate_1d_target(y, n_samples)
         self._all_missing = False
 
@@ -256,12 +263,13 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     def __init__(
             self,
             *,
+            rare_value_threshold: int | None = 5,
             tree=None,
             encoder=None,
             missing_handler=None,
             tree_sampler=None
     ) -> None:
-        super().__init__(encoder=encoder, missing_handler=missing_handler,
+        super().__init__(rare_value_threshold=rare_value_threshold,encoder=encoder, missing_handler=missing_handler,
                          tree_sampler=tree_sampler, tree=tree)
 
     def _get_encoder(self):
@@ -319,12 +327,13 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def __init__(
             self,
             *,
+            rare_value_threshold: int | None = 5,
             tree=None,
             encoder=None,
             missing_handler=None,
             tree_sampler=None
     ) -> None:
-        super().__init__(encoder=encoder, missing_handler=missing_handler,
+        super().__init__(rare_value_threshold=rare_value_threshold,encoder=encoder, missing_handler=missing_handler,
                          tree_sampler=tree_sampler, tree=tree)
 
     def _get_encoder(self):
