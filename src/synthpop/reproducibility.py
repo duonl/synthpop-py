@@ -120,7 +120,7 @@ class RandomStateManager:
         if isinstance(root_seed, (list, tuple, np.ndarray)):
             entropy = [*root_seed, seed]
         else:
-           entropy = [root_seed, seed]
+            entropy = [root_seed, seed]
         
         return np.random.default_rng(entropy)
 
