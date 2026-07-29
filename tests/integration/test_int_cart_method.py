@@ -503,4 +503,5 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
 
     cart_different_missing_handling.fit(X, y)
     out_different_missing_handling = cart_standard.transform(X)
-    pd.testing.assert_series_equal(out_standard, out_different_missing_handling)
+    pd.testing.assert_series_equal(
+        out_standard, out_different_missing_handling)
