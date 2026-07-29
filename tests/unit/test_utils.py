@@ -354,13 +354,13 @@ def test_to_standardised_array_dict_with_numpy_inputs():
 
 # ----- array_has_rare_value -----
 
-# TODO: what todo with missing?
-
 
 @pytest.mark.parametrize("x, threshold", [
     (["a"], 5),  # one row, so unique value by definition
     ((["a"]*5)+["b"]*6, 5),  # number of occurrences exactly equal to threshold
     ((["a"]*5)+["b"]*6, 7),  # number of occurrences strictly lower than threshold
+    (([np.nan]*5)+["b"]*6, 5),  # number of occurrences exactly equal to threshold, with missing values.
+    (([np.nan]*5)+["b"]*6, 7),  # number of occurrences strictly lower than threshold, with missing values
 ])
 def test_array_has_rare_value_positive_cases(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
@@ -373,6 +373,9 @@ def test_array_has_rare_value_positive_cases(x, threshold):
     (["a"]*5, 4),  # just above threshold
     # number of occurrences strictly higher than threshold
     ((["a"]*7)+["b"]*10, 5),
+    ([np.nan]*5, 4),  # just above threshold, with nan
+        # number of occurrences strictly higher than threshold, with nan
+    (([np.nan]*7)+["b"]*10, 5),
 ])
 def test_array_has_rare_value_negative_cases(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
