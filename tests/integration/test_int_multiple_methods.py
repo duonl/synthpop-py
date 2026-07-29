@@ -7,14 +7,6 @@ from synthpop.methods.cart_synth import CartMethod
 from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.sample_synth import SampleMethod
 
-"""
-Ideeen voor mezelf: CopyMethod foutmelding generate(n= niet input), 
-geef ook aan dat t in CopyMethod is
-
-CopyMethod accepteert wel pd.NA en output dat. CART niet. Inconsistent?
-
-""" 
-
 @pytest.mark.parametrize(
     "test_data",
     [
@@ -89,12 +81,12 @@ def test_multiple_synthesis_methods(test_data):
     generated = fit.generate()
 
     assert test_data['b'].equals(generated['b'])
-    test_data['c'] = test_data['c'].replace({pd.NA: np.nan})
+    expected_nan_values = test_data["c"].fillna(np.nan)
     # CART-method always outputs np.nan, but accepts pd.NA
 
-    for col in test_data.columns:
-        assert test_data[col].isin(generated[col]).all()
-
+    assert test_data['a'].isin(generated['a']).all()
+    assert test_data['b'].isin(generated['b']).all()
+    assert expected_nan_values.isin(generated['c']).all()
 
 def test_copy_break():
     """Test if CopyMethod still produces an error if n != len(initial_dataset)"""

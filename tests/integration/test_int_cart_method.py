@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from synthpop.data_processing.missing_value_handling import (
+    MissingValuePredictor,
+    ReplaceMissingWithValue
+)
 from synthpop.methods.cart_synth import (
     CartMethod,
     TreeClassifierMethod,
@@ -374,10 +378,129 @@ def test_transform_handles_entire_nan_array(y, dtype):
     )
 
     res = cart.fit(X, y)
-    
+
     out = res.transform(X)
 
     assert len(out) == len(y)
     assert pd.isna(out).all()
     assert out.name == "c"
     assert out.dtype == dtype
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([1.1, 2.2, np.nan, 4.4], dtype=np.float64, name="target"),
+        pd.Series([1, 2, np.nan, 4], dtype="Float64", name="target"),
+    ]
+)
+def test_regressor_method_and_replace_missing_with_value(y):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+            "income": [1000.0, 2000.0, 3000.0, 4000.0],
+            "blood type": ["A", "O", "AB", "O"],
+        }
+    )
+
+    cart = CartMethod(
+        regressor=TreeRegressorMethod(
+            tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
+        )
+    )
+
+    cart.fit(X, y)
+
+    assert isinstance(cart.method_.missing_handler_, ReplaceMissingWithValue)
+    assert cart.method_.missing_handler_.missing_marker == -8
+
+    out = cart.transform(X)
+
+    assert isinstance(out, pd.Series)
+    assert len(out) == len(X)
+    assert out.name == "target"
+
+
+@pytest.mark.parametrize(
+    "y, none_missing",
+    [
+        (pd.Series(['a', 'b', np.nan, 'c'], dtype=str, name="target"), False),
+        (pd.Series(['a', 'b', 'N.a.N', 'c'], dtype=str, name="target"), True),
+        (pd.Series(['a', 'b', np.nan, 'c'],
+         dtype=object, name="target"), False),
+    ]
+)
+def test_classifier_method_and_replace_missing_with_value(y, none_missing):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+            "income": [1000.0, 2000.0, 3000.0, 4000.0],
+            "blood type": ["A", "O", "AB", "O"],
+        }
+    )
+
+    cart = CartMethod(
+        classifier=TreeClassifierMethod(
+            tree=None, missing_handler=MissingValuePredictor()
+        )
+    )
+
+    cart.fit(X, y)
+
+    assert isinstance(cart.method_.missing_handler_, MissingValuePredictor)
+    assert not cart.method_.missing_handler_._all_missing
+    assert cart.method_.missing_handler_._none_missing == none_missing
+
+    out = cart.transform(X)
+
+    assert isinstance(out, pd.Series)
+    assert len(out) == len(X)
+    assert out.name == "target"
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.int64),
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.float64),
+        pd.Series([1, 2, 3, 4], name='target', dtype=np.float32),
+        pd.Series([1, 2, 3, 4], name='target', dtype="Int64"),
+        pd.Series([1.1, 2.2, 3.3, 4.4], name='target', dtype="Float32"),
+
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="str"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="string"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype=str_dtype),
+
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="object"),
+        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="category"),
+
+        pd.Series([True, False, True, False], name='target', dtype="boolean"),
+        pd.Series([True, False, True, False], name='target', dtype=np.bool_),
+    ],
+)
+def test_missing_handler_does_not_mutate_output_no_missing(y):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50],
+            "income": [1000.0, 2000.0, 3000.0, 4000.0],
+            "blood type": ["A", "O", "AB", "O"],
+        }
+    )
+    cart_standard = CartMethod()
+
+    cart_standard.fit(X, y)
+    out_standard = cart_standard.transform(X)
+
+    cart_different_missing_handling = CartMethod(
+        regressor=TreeRegressorMethod(
+            tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
+        ),
+
+        classifier=TreeClassifierMethod(
+            tree=None, missing_handler=MissingValuePredictor()
+        )
+    )
+
+    cart_different_missing_handling.fit(X, y)
+    out_different_missing_handling = cart_standard.transform(X)
+    pd.testing.assert_series_equal(out_standard, out_different_missing_handling)
