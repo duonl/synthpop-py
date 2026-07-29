@@ -233,6 +233,9 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param rare_value_threshold: threshold for when a categorical value is considered "rare". \
+                If set to `None`, the check is disabled. \
+                If set to an integer, categorical values that occur less than that value are considered rare.
 
     The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
     Missing values will always be represented with `np.nan`.
@@ -297,6 +300,9 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param rare_value_threshold: threshold for when a categorical value is considered "rare". \
+            If set to `None`, the check is disabled. \
+            If set to an integer, categorical values that occur less than that value are considered rare.
 
     The output will always be a numpy array. The output will always have np.float32 as dtype.
     Missing values will always be represented with `np.nan`.
@@ -503,7 +509,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         return self.method_.get_feature_names_out(input_features)
 
 
-def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> CartMethod:
+def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, enable_rare_categories_check: bool =True, rare_categories_threshold: int | None = None) -> CartMethod:
     """
     Shortcut to set parameters of the CartMethod.
 
@@ -511,7 +517,13 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
         See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
     :param n_components: sets the number of principal components used in encoding in the classifier. \
-        For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components. For integers => 1, it is the number of principal components. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
+        For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
+        For integers => 1, it is the number of principal components.\
+        See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
+    :param enable_rare_categories_check: Enable or disable checking for rare categories. This is to prevent undesirable attribute disclosure. Enabled by default.
+    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
+        If set to `None`, it uses the same value as `n_leaves`. \
+        If set to an integer, categorical values that occur less than that value are considered rare. 
 
     :return: a CartMethod object with the parameters consistently applied.
 
@@ -526,8 +538,17 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
     ... special_syn_method={"b": tune_cart(n_leaves=20)})
 
     """
+
+    if not enable_rare_categories_check:
+        effective_categories_threshold = None
+    elif rare_categories_threshold is None:
+        effective_categories_threshold = n_leaves
+    else:
+        effective_categories_threshold = rare_categories_threshold
+
     return CartMethod(
         regressor=TreeRegressorMethod(
+            rare_value_threshold=effective_categories_threshold,
             tree=DecisionTreeRegressor(
                 min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
                 min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
@@ -537,6 +558,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Car
             )
         ),
         classifier=TreeClassifierMethod(
+            rare_value_threshold=effective_categories_threshold,
             tree=DecisionTreeClassifier(
                 min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
                 min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
