@@ -48,3 +48,10 @@ custom_synth.md
 
 ```
 
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: Privacy caveats
+
+privacy_issue.ipynb
+```

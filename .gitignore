@@ -13,3 +13,4 @@ tests/unit/__pycache__/
 src/*.svg
 src/*.png
 /.ipynb_checkpoints
+docs/source/examples/.ipynb_checkpoints/
