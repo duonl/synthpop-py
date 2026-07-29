@@ -109,7 +109,7 @@ figures = plot_univariate_distributions(
 ```
 
 Running the code above opens the plots interactively. You will see that the first plot looks like:
-![Univariate distributions of ](../images/age_distribution.png)
+![Univariate distributions of "age"](../images/age_distribution.png)
 
 As you can see, the marginal distributions overlap mostly. There are some small differences, but generally speaking, the synthesiser reproduced the variable correctly.
 
