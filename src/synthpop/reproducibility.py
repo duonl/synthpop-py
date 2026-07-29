@@ -115,7 +115,10 @@ class RandomStateManager:
 
         # default_rng uses seed sequences internally
         # so the easiest and safest way to combine is to pass a list of seeds.
-        return np.random.default_rng([cls._root_seed, seed])
+        if isinstance(cls._root_seed, (list, tuple, np.ndarray)):
+            return np.random.default_rng([*cls._root_seed, seed])
+        else:
+            return np.random.default_rng([cls._root_seed, seed])
 
     def __init__(self, seed: int) -> None:
         self.new_seed = seed

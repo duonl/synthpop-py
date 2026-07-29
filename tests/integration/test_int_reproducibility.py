@@ -43,7 +43,6 @@ class StandardTransformer(TransformerMixin, BaseEstimator):
     regarding randomness are met.
     """
 
-
     def __init__(self, random_state: int | None = None):
         self.random_state = random_state
 
@@ -100,8 +99,15 @@ def test_standard_transformer_independent_instances():
     assert np.array_equal(result2, transformer2.transform(X=0))
 
 
-def test_standard_transformer_reproduces_when_setting_seed():
-    seed = [1, 2, 3]
+@pytest.mark.parametrize(
+    "seed",
+    [
+        [1, 2, 3],
+        (1, 2, 3),
+        np.array([1, 2, 3]),
+    ]
+)  # Test different arraylike objects
+def test_standard_transformer_reproduces_when_setting_seed(seed):
     RandomStateManager.set_root_seed(seed)
 
     transformer1 = StandardTransformer()
