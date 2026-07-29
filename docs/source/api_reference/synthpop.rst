@@ -33,7 +33,6 @@ Here we can explain some stuff about the API reference
    synthesis_methods/CART
    synthesis_methods/Copy
    synthesis_methods/Sample
-   synthesis_methods/XGB
 
 .. toctree::
    :maxdepth: 4
