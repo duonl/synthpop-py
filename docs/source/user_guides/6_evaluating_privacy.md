@@ -48,6 +48,32 @@ Attribute disclosure can occur when:
 
 Preventing attribute disclosure requires considering not only whether individual records can be identified, but also whether sensitive information can be inferred from preserved statistical relationships.
 
+#### 6.1.2.1 Rare categories and overfitting
+
+Rare categories can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, synthesis models may be able to reproduce relationships for those rare values too accurately.
+
+This can occur when a synthesis model overfits the original data. For example, suppose a categorical predictor contains a unique value for every observation. A classification model may be able to split the data into groups of arbitrary size that contain only a single target value. When synthetic values are subsequently sampled from these groups, there may be little or no randomness in the generated values. As a result, the relationship between the predictor and target can be reproduced almost exactly.
+
+This is particularly relevant when rare categories are associated with sensitive attributes. If a rare category identifies a small group of individuals and the relationship between that category and a sensitive variable is preserved too accurately, the synthetic data may allow a third party to infer sensitive information about members of that group. This is a form of attribute disclosure.
+
+For example, consider a dataset containing a categorical variable that identifies a small group and a sensitive variable describing a characteristic of that group. If the synthesis model learns a deterministic relationship between the two variables, the synthetic dataset may reproduce that relationship even though the individual records themselves are not directly copied. A person with external knowledge about the group could then use the synthetic data to infer the sensitive characteristic.
+
+Generally, the risk can be increased by:
+
+* categorical variables with many rare or unique categories;
+* small subgroups with little variation in sensitive attributes;
+* strong or deterministic relationships between quasi-identifiers and sensitive variables;
+* synthesis models that overfit small groups; and
+* synthesis methods that reproduce original relationships with little or no added uncertainty.
+
+Rare categories should therefore be considered when assessing the privacy of synthetic datasets. In particular, users should examine whether small or rare groups are represented in the synthetic data and whether sensitive attributes associated with those groups are reproduced too accurately.
+
+This risk is not limited to a particular synthesis method. It depends on the interaction between the characteristics of the original data, the synthesis model and the synthesis configuration. A model that performs well on common categories may still overfit rare categories or small subgroups.
+
+A synthetic dataset should therefore not be assumed to be private simply because individual records are not explicitly copied. Privacy evaluation should also consider whether the synthesis process has preserved relationships within rare groups in a way that could reveal sensitive information.
+
+For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce target values, see ([`Risk of losing privacy with rare categories`](../examples/privacy_issue.ipynb))
+
 ### 6.1.3. Membership disclosure
 Membership disclosure occurs when a third party can determine whether a particular individual was included in the original dataset.
 
