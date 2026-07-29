@@ -72,7 +72,7 @@ This risk is not limited to a particular synthesis method. It depends on the int
 
 A synthetic dataset should therefore not be assumed to be private simply because individual records are not explicitly copied. Privacy evaluation should also consider whether the synthesis process has preserved relationships within rare groups in a way that could reveal sensitive information.
 
-For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce target values, see ([`Risk of losing privacy with rare categories`](../examples/privacy_issue.ipynb))
+For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce target values, see the [`Risk of losing privacy with rare categories example`](../examples/privacy_issue.ipynb).
 
 ### 6.1.3. Membership disclosure
 Membership disclosure occurs when a third party can determine whether a particular individual was included in the original dataset.
