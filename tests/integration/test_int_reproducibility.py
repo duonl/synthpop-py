@@ -107,7 +107,7 @@ def test_standard_transformer_independent_instances():
         np.array([1, 2, 3]),
     ]
 )  # Test different arraylike objects
-def test_standard_transformer_reproduces_when_setting_seed(seed):
+def test_standard_transformer_reproduces_with_arraylike_root_seed(seed):
     RandomStateManager.set_root_seed(seed)
 
     transformer1 = StandardTransformer()
