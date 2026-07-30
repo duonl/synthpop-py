@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 from sklearn import clone
 from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.utils.estimator_checks import parametrize_with_checks
+from sklearn.utils.estimator_checks import check_estimator
 from sklearn.exceptions import NotFittedError
 
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
@@ -426,12 +426,14 @@ def test_fit_tree_is_applied(X, y, index_cat, tree_method):
 def test_fit_sampler_fit(X, y, index_cat, tree_method):
     tree_method.fit(X, y)
 
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,
-                          tree_method.tree_.apply_result), (
+    assert np.array_equal(
+        tree_method.tree_sampler_.fit_sampler_leaf_ids,
+        tree_method.tree_.apply_result), (
         "input of the sampler must be the output of the tree"
     )
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,
-                          tree_method.missing_handler_.prepared_for_fit_result[1])
+    assert np.array_equal(
+        tree_method.tree_sampler_.fit_sampler_y,
+        tree_method.missing_handler_.prepared_for_fit_result[1])
     assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
 
@@ -745,15 +747,8 @@ def ndarray_to_dict(a):
     return a
 
 
-@parametrize_with_checks(
-    [TreeClassifierMethod(), TreeRegressorMethod()],
-    legacy=False,
-    expected_failed_checks=lambda x: {
-        "check_fit_score_takes_y": "tests with a score component"
-    },
-)
 @pytest.mark.noautofixt
-def test_TreeMethod_is_sklearn_compatible(estimator, check):
+def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
     # sklearn provides valuable tests.
     # Those tests assume that the input is a numpy array.
     # The tree methods assume that the input is a dictionary.
@@ -763,7 +758,44 @@ def test_TreeMethod_is_sklearn_compatible(estimator, check):
 
     # The solution is that a class is constructed in each sklearn test.
     # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
-    class EstimatorWrap(estimator.__class__):
+    estimator = TreeClassifierMethod
+    
+    class EstimatorWrap(estimator):
+
+        def __sklearn_tags__(self):
+            tags = super().__sklearn_tags__()
+            tags.input_tags.two_d_array = True
+            return tags
+
+        def fit(self, X, y):
+            return super().fit(ndarray_to_dict(X), str(y))
+
+        def transform(self, X):
+            return super().transform(ndarray_to_dict(X))
+
+    # This is needed to change the datatype of the estimator to the child class.
+    # estimator.__class__ = EstimatorWrap
+    wrapped = EstimatorWrap(**estimator().get_params())
+
+    test_results = check_estimator(wrapped,
+                    legacy=False,
+                    expected_failed_checks={
+                        "check_fit_score_takes_y": "tests with a score component"
+                    },
+                    on_fail='raise')
+
+
+@pytest.mark.noautofixt
+def test_TreeMethod_is_sklearn_TreeRegressor_compatible():
+
+    estimator = TreeRegressorMethod
+
+    class EstimatorWrap(estimator):
+        def __sklearn_tags__(self):
+            tags = super().__sklearn_tags__()
+            tags.input_tags.two_d_array = True
+            return tags
+
         def fit(self, X, y):
             return super().fit(ndarray_to_dict(X), y)
 
@@ -772,9 +804,15 @@ def test_TreeMethod_is_sklearn_compatible(estimator, check):
 
     # This is needed to change the datatype of the estimator to the child class.
     # estimator.__class__ = EstimatorWrap
-    wrapped = EstimatorWrap(**estimator.get_params())
+    wrapped = EstimatorWrap(**estimator().get_params())
 
-    check(wrapped)
+    test_results = check_estimator(wrapped,
+                    legacy=False,
+                    expected_failed_checks={
+                        "check_fit_score_takes_y": "tests with a score component"
+                    },
+                    on_fail='raise')
+
 
 
 def test_to_fixed_length_string_array():
