@@ -768,7 +768,7 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
             return tags
 
         def fit(self, X, y):
-            return super().fit(ndarray_to_dict(X), str(y))
+            return super().fit(ndarray_to_dict(X), y)
 
         def transform(self, X):
             return super().transform(ndarray_to_dict(X))
