@@ -104,7 +104,7 @@ class RandomStateManager:
         Same root seed + same seed => RNGs with identical random streams.
         This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
         However, `RandomStateManager.create_rng(seed=3) is
-        RandomStateManager.create_rng(seed=3) ` would evaluate to `False`
+        RandomStateManager.create_rng(seed=3) ` would evaluate to `False`.
 
         In other words, this method creates replay RNGs.
 
