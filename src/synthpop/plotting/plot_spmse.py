@@ -158,7 +158,7 @@ def _make_heatmap(
     return fig
 
 
-def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = True) -> go.Figure:
+def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = False) -> go.Figure:
     """
     Create a heatmap visualisation of pairwise S_pMSE values.
 
@@ -181,7 +181,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
         directory. The directory is created if it does not already exist (including)
         parent directories). If `None` (default), no permanent output file is created.
     :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. 
-        Default is `True`. In headless environments this parameter should be set to `False`.
+        Default is `False`. In headless environments this parameter should be set to `False`.
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
         bin-based colouring and S_pMSE values in the bins.
