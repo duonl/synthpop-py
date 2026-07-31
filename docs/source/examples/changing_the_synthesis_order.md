@@ -3,9 +3,9 @@
 In the previous example, we generated a synthetic version of the Titanic dataset containing 5000 observations.
 
 When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
-![S_pMSE heatmap of the Titanic dataset](../images/iris_dataset_spmse.png) UPDATE AFTER PULL
+![S_pMSE heatmap of the Titanic dataset](../images/titanic_spmse_1.png) UPDATE AFTER PULL
 
-Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. More relationships are well preserved, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced well in the synthetic dataset.
+Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Most relationships are preserved well, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced as well as desired.
 
 This does not necessarily mean that the synthesiser performed poorly. Instead, it suggests that the default synthesis settings are not optimal for this dataset.
 
@@ -92,7 +92,7 @@ More information about the sequential synthesis procedure is available in [User 
 
 Looking at the original S_pMSE heatmap, many of the largest values involve `fare`. For example, the relationships between `fare` and `survived`, `pclass`, `class`, `adult_male` and `alone` all have considerably larger S_pMSE values than most other pairs.
 
-A simple strategy is therefore to move `fare` to the end of the synthesis order. This allows the model for `fare` to use very other variable as a predictor while leaving the order of the remaining variables unchanged.
+A simple strategy is therefore to move `fare` to the end of the synthesis order. Since variables are synthesised sequentially, moving `fare` to the end of the synthesis order allows its synthesis model to use all other variables as predictors. This additional information may help preserve relationships involving `fare`.
 
 We can specify the synthesis order using the `column_order` parameter.
 
@@ -147,14 +147,14 @@ spmse_new = pairwise_spmse(data, synthetic_data_new)
 plot_new = plot_spmse(spmse_new, show_plot=True)
 ```
 
-![S_pMSE heatmap of Titanic dataset with new column order](../images/iris_dataset_spmse_2.png)
-The new heatmap shows that changing the synthesis order improved several relationships involving `fare`. For example, the S_pMSE value between `fare` and `survived` decreased from approximately XX to XX, while the relationship between `fare` and `pclass` decreases from approximately XX to XX.
+![S_pMSE heatmap of Titanic dataset with new column order](../images/titanic_spmse_2.png)
+The new heatmap shows that changing the synthesis order improved several relationships involving `fare`. For example, the S_pMSE value between `fare` and `survived` decreased from approximately 53 to 41, while the relationship between `fare` and `pclass` decreases from approximately 54 to 37.
 
-The improvement is encouraging, but `fare` is still involved in many of the largest S_pMSE values. In addition, the updated heatmap reveals that relationships involving `embark_town` are now among the least well preserved.
+The improvement is encouraging, but `fare` is still involved in many of the largest S_pMSE values. In addition, the updated heatmap reveals that some relationships involving `embark_town` are now less preserved.
 
 This illustrates an important point: changing the synthesis order is rarely a one-shot optimisation. Instead, it is often useful to make a small change, evaluate the result, and then decide on the next refinement.
 
-# Trying another synthesis order
+## Trying another synthesis order
 For the next step, we see what happens if we move `embark_town` to the end of the synthesis order as well. Since `fare` has already been moved, we place `embark_town` after `fare`, allowing it to use every other variable, including `fare`, as predictors.
 ```python
 synthesiser = Synthesiser(
@@ -186,8 +186,12 @@ spmse_final = pairwise_spmse(data, synthetic_data_final)
 
 plot_final = plot_spmse(spmse_final, show_plot=True)
 ```
-FIGURE
-The resulting heatmap shows another improvement. Relationships involving `embark_town` are better preserved, and many of the relationships involving `fare` improve further. 
+![S_pMSE heatmap of Titanic dataset with another column order](../images/titanic_spmse_3.png)
+The resulting heatmap shows another improvement. All relationships involving `embark_town` are better preserved. 
+
+Interestingly, moving `embark_town` after `fare` also improves the relationships involving `fare`. For example, the S_pMSE value for the relationship between `fare` and `survived` originally was approximately 53 and is now 19. For `fare` and `pclass` it was 54 and now is 17. This suggests that using `embark_town` as a predictor for `fare` was not beneficial for this dataset. More generally, adding predictors does not always improve a synthesis model. Variables that contain little useful information or introduce additional noise can sometimes reduce synthesis quality.
+
+While there is still room for improvement, this example has demonstrated how changing the synthesis order can make a big impact on the quality of the synthesis. Rather than searching for a perfect synthesis order from the outset, it is often more effective to refine the order iteratively: inspect the utility metrics, identify variables involved in poorly preserved relationships, adjust the order, and evaluate again.
 
 ## When should you change the synthesis order?
 
@@ -197,7 +201,7 @@ Changing the synthesis order is most useful when:
 
 - some variables explain many other variables;
 - you observe poor preservation of important relationships;
-- you have domain knowledge about casual or predictive relationships between variables.
+- you have domain knowledge about causal or predictive relationships between variables.
 
 For many datasets, the default column order provides satisfactory results. However, adjusting the synthesis order is often one of the simplest ways to improve utility. As seen in this example, a good synthesis order allows variables that are difficult to synthesise to use as many informative predictors as possible. Utility metrics such as S_pMSE can help identify these variables, but other characteristics can also influence an appropriate order.
 

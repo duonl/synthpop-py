@@ -126,7 +126,7 @@ Different variables can use different synthesis methods:
 Changing the synthesis order is most useful when:
 - some variables explain many other variables;
 - you observe poor preservation of important relationships;
-- you have domain knowledge about casual or predictive relationships between variables.
+- you have domain knowledge about causal or predictive relationships between variables.
 
 For many datasets, the default column order may provide satisfactory results. However, adjusting the column order is often one of the simplest ways to improve utility. A good synthesis order often allows variables that are difficult to synthesise to use as many informative predictors as possible. One way to identify such variables is to inspect the S_pMSE heatmap. Utility metrics such as {ref}`S_pMSE <531-spmse>` can help identify these variables, but other characteristics can also influence an appropriate order.
 
