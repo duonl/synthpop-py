@@ -3,7 +3,7 @@
 In the previous example, we generated a synthetic version of the Titanic dataset containing 5000 observations.
 
 When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
-![S_pMSE heatmap of the Titanic dataset](../images/titanic_spmse_1.png) UPDATE AFTER PULL
+![S_pMSE heatmap of the Titanic dataset](../images/titanic_spmse_1.png)
 
 Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Most relationships are preserved well, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced as well as desired.
 
