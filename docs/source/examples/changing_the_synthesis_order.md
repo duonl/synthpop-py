@@ -1,17 +1,11 @@
 # Change the synthesis order
 
-In the previous example, we generated a synthetic version of the Iris dataset containing 5000 observations.
+In the previous example, we generated a synthetic version of the Titanic dataset containing 5000 observations.
 
-```{warning}
-The Iris dataset contains only 150 observation, which is small for training and evaluating a synthetic data model. The 5000 synthetic observations generated in this example do not increase the amount of information available to learn the underlying data distribution. As a result, the utility results shown here should be interpreted as illustrative rather than representative of the performance that may be obtained on larger datasets.
+When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
+![S_pMSE heatmap of the Titanic dataset](../images/iris_dataset_spmse.png) UPDATE AFTER PULL
 
-We use the Iris dataset because it is a simple, well-known, and readily available dataset that makes it easy to demonstrate the effect of changing the synthesis order without introducing unnecessary complexity.
-```
-
-When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were not preserved as well as others.
-![S_pMSE heatmap of the Iris dataset](../images/iris_dataset_spmse.png)
-
-Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Several pairwise relationships have relatively large S_pMSE values, indicating that these relationships are not preserved as well in the synthetic data. For example, the relationships involving `petal width (cm)` have S_pMSE values greater than 30, while several others fall between 10 and 30.
+Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. More relationships are well preserved, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced well in the synthetic dataset.
 
 This does not necessarily mean that the synthesiser performed poorly. Instead, it suggests that the default synthesis settings are not optimal for this dataset.
 
@@ -31,19 +25,28 @@ data.columns
 
 ```text
 Index([
-    'sepal length (cm)', 
-    'sepal width (cm)', 
-    'petal length (cm)',             
-    'petal width (cm)', 
-    'target'
-    ],                                            
-      dtype='str')
+    'survived',
+    'pclass',
+    'sex',
+    'age',
+    'sibsp',
+    'parch',
+    'fare',
+    'embarked',
+    'class',
+    'who',
+    'adult_male',
+    'deck',
+    'embark_town',
+    'alive',
+    'alone',
+    ], dtype='str')
 ```
 
 If the synthesiser is created with the default parameters, no `column_order` is specified and the original column order is used.
 
 ```python
-from synthpop.synthesiser import Synthesiser
+from synthpop import Synthesiser
 
 synthesiser = Synthesiser(random_seed=1)
 ```
@@ -58,24 +61,28 @@ For example, with the default order,
 
 ```{mermaid}
 flowchart TB
-    A["sepal length (cm)"]
-    B["sepal width (cm)"]
-    C["petal length (cm)"]
-    D["petal width (cm)"]
-    E["target"]
-    A-->B-->C-->D-->E
+    A["survived"]
+    B["pclass"]
+    C["sex"]
+    D["age"]
+    E["sibsp"]
+    F["parch"]
+    G["fare"]
+    H["embarked"]
+    I["class"]
+    J["who"]
+    K["adult_male"]
+    L["deck"]
+    M["embark_town"]
+    N["alive"]
+    O["alone"]
+
+    A-->B-->C-->D-->E-->F-->G-->H-->I-->J-->K-->L-->M-->N-->O
 ```
 
-the model for `target` can use all four measurements as predictors. However, the model for `petal width (cm)` cannot use `target`, because `target` has not yet been synthesised.
+the model for `alone` can use all fourteen measurements as predictors. However, the model for `alive` cannot use `alone`, because `alone` has not yet been synthesised. Every variable can only use the variables before it in the synthesis order as predictors. Variables generated later therefore have access to more information than variables generated earlier.
 
-A good synthesis order generally places variables that contain important information about other variables earlier in the sequence. This allows later variables to be generated conditional on these important predictors, helping preserve relationships in the data.
-
-However, predictive strength is not the only consideration when choosing an order. Other characteristics of variables can also influence the quality of synthesis:
-
-- **Variables that strongly explain other variables** are often useful to place early. For example, in the Iris dataset, the species (`target`) largely determines the distributions of petal measurements. Generating the target first allows petal variables to be generated conditional on species.
-- **Variables with many missing values** may provide less reliable information as predictors. Placing these variables later prevents incomplete information from being used to generate many other variables.
-- **Variables with many rare categories** can introduce uncertainty when used as predictors. Generating these variables later can reduce the propagation of errors.
-- **Variables that represent outcomes or summaries** are often better placed later because they can use information from the variables that contribute to them.
+A good synthesis order often allows variables that are difficult to synthesise to use as many informative predictors as possible. One way to identify such variables is to inspect the S_pMSE heatmap. Variables that consistently appear in pairwise relationships with large S_pMSE values may benefit from being moved later in the synthesis order.
 
 There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE can help determine whether the chosen order better preserves important relationships.
 
@@ -83,11 +90,9 @@ More information about the sequential synthesis procedure is available in [User 
 
 ## Choosing a different order
 
-As shown by the S_pMSE heatmap above, several pairwise relationships were not preserved well. In particular, the relationships involving the petal measurements and the target variable have relatively high S_pMSE values. This indicates that the synthetic dataset does not reproduce these relationships as well as desired.
+Looking at the original S_pMSE heatmap, many of the largest values involve `fare`. For example, the relationships between `fare` and `survived`, `pclass`, `class`, `adult_male` and `alone` all have considerably larger S_pMSE values than most other pairs.
 
-For the Iris dataset, the `target` variable represents the iris species. This variable strongly determines the distributions of the other measurements, especially the petal measurements. For example, different species have clearly different petal length and petal width distributions. However, in the default synthesis order, the target variable is generated last, meaning that the other variables are synthesised without using species information.
-
-To improve the preservation of these relationships, we change the synthesis order so that the target variable is generated first. We also place the petal measurements directly after the target variable, allowing them to be generated conditional on species. The sepal measurements are placed later because they have weaker relationships with the target variable and can benefit from having the petal measurements available as predictors.
+A simple strategy is therefore to move `fare` to the end of the synthesis order. This allows the model for `fare` to use very other variable as a predictor while leaving the order of the remaining variables unchanged.
 
 We can specify the synthesis order using the `column_order` parameter.
 
@@ -95,11 +100,21 @@ We can specify the synthesis order using the `column_order` parameter.
 synthesiser = Synthesiser(
     random_seed=1,
     column_order=[
-        "target",
-        "petal length (cm)",
-        "petal width (cm)",
-        "sepal length (cm)",
-        "sepal width (cm)",
+        "survived",
+        "pclass",
+        "sex",
+        "age",
+        "sibsp",
+        "parch",
+        "embarked",
+        "class",
+        "who",
+        "adult_male",
+        "deck",
+        "embark_town",
+        "alive",
+        "alone",
+        "fare",
     ],
 )
 
@@ -113,7 +128,7 @@ Instead of variable names, the synthesis order can also be specified using colum
 ```python
 synthesiser = Synthesiser(
     random_seed=1,
-    column_order=[4, 2, 3, 0, 1],
+    column_order=[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 6],
 )
 ```
 
@@ -121,27 +136,62 @@ Both approaches produce the same synthesis order.
 
 ## Evaluating the new synthesis order
 
-After changing the synthesis order, we generate a new synthetic dataset and calculate the S_pMSE values again.
+After changing the synthesis order, we now calculate the S_pMSE values again.
 
 ```python
-from synthpop.utility_metrics.spmse import pairwise_spmse
+from synthpop.utility_metrics import pairwise_spmse
 from synthpop.plotting import plot_spmse
 
 spmse_new = pairwise_spmse(data, synthetic_data_new)
 
-plot = plot_spmse(spmse_new, show_plot=True)
+plot_new = plot_spmse(spmse_new, show_plot=True)
 ```
 
-![S_pMSE heatmap of Iris dataset with new column order](../images/iris_dataset_spmse_2.png)
-The new heatmap shows that changing the synthesis order improved several important relationships. In particular, the relationships between the target variable and the petal measurements have much lower S_pMSE values compared with the original synthesis order.
+![S_pMSE heatmap of Titanic dataset with new column order](../images/iris_dataset_spmse_2.png)
+The new heatmap shows that changing the synthesis order improved several relationships involving `fare`. For example, the S_pMSE value between `fare` and `survived` decreased from approximately XX to XX, while the relationship between `fare` and `pclass` decreases from approximately XX to XX.
 
-This improvement is expected because the target variable represents the iris species, which strongly determines the distributions of the petal measurements. By generating the target first, the petal measurements can now be generated conditional on species.
+The improvement is encouraging, but `fare` is still involved in many of the largest S_pMSE values. In addition, the updated heatmap reveals that relationships involving `embark_town` are now among the least well preserved.
 
-However, the new synthesis order does not improve every relationship. Some relationships between sepal variables have higher S_pMSE values than before. This illustrates that there is no universally optimal synthesis order: changing the order changes which variables are available as predictors during each synthesis step.
+This illustrates an important point: changing the synthesis order is rarely a one-shot optimisation. Instead, it is often useful to make a small change, evaluate the result, and then decide on the next refinement.
 
-When choosing a synthesis order, it is therefore important to consider the structure of the dataset and the relationships that are most important for the intended use case. Utility metrics such as S_pMSE can help compare different choices.
+# Trying another synthesis order
+For the next step, we see what happens if we move `embark_town` to the end of the synthesis order as well. Since `fare` has already been moved, we place `embark_town` after `fare`, allowing it to use every other variable, including `fare`, as predictors.
+```python
+synthesiser = Synthesiser(
+    random_seed=1,
+    column_order=[
+        'survived',
+        'pclass',
+        'sex',
+        'age',
+        'sibsp',
+        'parch',
+        'embarked',
+        'class',
+        'who',
+        'adult_male',
+        'deck',
+        'alive',
+        'alone',
+        'fare',
+        'embark_town',
+    ],
+)
+
+synthesiser.fit(data)
+
+synthetic_data_final = synthesiser.generate(n=5000)
+
+spmse_final = pairwise_spmse(data, synthetic_data_final)
+
+plot_final = plot_spmse(spmse_final, show_plot=True)
+```
+FIGURE
+The resulting heatmap shows another improvement. Relationships involving `embark_town` are better preserved, and many of the relationships involving `fare` improve further. 
 
 ## When should you change the synthesis order?
+
+The Titanic example demonstrates one practical approach: use the S_pMSE heatmap to identify variables involved in poorly preserved relationships and iteratively adjust the synthesis order. However, utility metrics are not the only source of information.
 
 Changing the synthesis order is most useful when:
 
@@ -149,7 +199,14 @@ Changing the synthesis order is most useful when:
 - you observe poor preservation of important relationships;
 - you have domain knowledge about casual or predictive relationships between variables.
 
-For many datasets, the default column order may provide satisfactory results. However, adjusting the synthesis order is often one of the simplest ways to improve utility.
+For many datasets, the default column order provides satisfactory results. However, adjusting the synthesis order is often one of the simplest ways to improve utility. As seen in this example, a good synthesis order allows variables that are difficult to synthesise to use as many informative predictors as possible. Utility metrics such as S_pMSE can help identify these variables, but other characteristics can also influence an appropriate order.
+
+For example:
+- **Variables with many missing values** may provide less reliable information as predictors. Placing these variables later prevents incomplete information from influencing many other variables.
+- **Variables with many (rare) categories**  can introduce uncertainty when used as predictors. Generating these variables later can reduce the propagation of errors.
+- **Variables that represent outcomes or summaries** are often better placed later because they can use information from the variables that contribute to them.
+
+There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE helps determine whether a particular order better preserves the relationships that matter for your application.
 
 ## Next steps
 

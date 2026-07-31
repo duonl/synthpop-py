@@ -128,15 +128,14 @@ Changing the synthesis order is most useful when:
 - you observe poor preservation of important relationships;
 - you have domain knowledge about casual or predictive relationships between variables.
 
-For many datasets, the default column order may provide satisfactory results. However, adjusting the column order is often one of the simplest ways to improve utility. A good synthesis order generally places variables that contain important information about other variables at the beginning of the sequence. This allows variables that are synthesised later in the sequence to be generated conditionally on these important predictors. This helps preserve relationships in the data.
- 
-However, predictive strength is not the only consideration when choosing a sequence order. Other characteristics of variables can also influence the quality of a synthesis:
- 
-- **Variables with many missing values** may provide less reliable information as predictors. Placing these variables later prevents incomplete information from being used to generate many other variables.
-- **Variables with many rare categories** can introduce uncertainty when used as predictors. Generating these variables later can reduce the propagation of errors.
+For many datasets, the default column order may provide satisfactory results. However, adjusting the column order is often one of the simplest ways to improve utility. A good synthesis order often allows variables that are difficult to synthesise to use as many informative predictors as possible. One way to identify such variables is to inspect the S_pMSE heatmap. Utility metrics such as {ref}`S_pMSE <531-spmse>` can help identify these variables, but other characteristics can also influence an appropriate order.
+
+For example: 
+- **Variables with many missing values** may provide less reliable information as predictors. Placing these variables later prevents incomplete information from influencing many other variables.
+- **Variables with many (rare) categories**  can introduce uncertainty when used as predictors. Generating these variables later can reduce the propagation of errors.
 - **Variables that represent outcomes or summaries** are often better placed later because they can use information from the variables that contribute to them.
  
-There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE ([Guide 5: Evaluating utility](./5_evaluating_utility.md)) can help determine whether a certain order preserves important relationships.
+There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE (see [Guide 5: Evaluating utility](./5_evaluating_utility.md)) can help determine whether a certain order preserves important relationships.
 
 ---
 
