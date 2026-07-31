@@ -57,7 +57,7 @@ class RandomStateManager:
     """
 
     @classmethod
-    def set_root_seed(cls, seed: int | List[int]|np.ndarray | None):
+    def set_root_seed(cls, seed: int | Sequence[int] | npt.NDArray[np.integer] | None):
         """
         Set the root seed.
         The intended usage is within the Synthesiser class.
@@ -103,7 +103,8 @@ class RandomStateManager:
         Creates a new instance of an RNG with a fixed initial state.
         Same root seed + same seed => RNGs with identical random streams.
         This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
-        However, `RandomStateManager.create_rng(seed=3) is RandomStateManager.create_rng(seed=3) ` would evaluate to `False`
+        However, `RandomStateManager.create_rng(seed=3) is
+        RandomStateManager.create_rng(seed=3) ` would evaluate to `False`.
 
         In other words, this method creates replay RNGs.
 
@@ -115,7 +116,13 @@ class RandomStateManager:
 
         # default_rng uses seed sequences internally
         # so the easiest and safest way to combine is to pass a list of seeds.
-        return np.random.default_rng([cls._root_seed, seed])
+        root_seed = cls._root_seed
+        if isinstance(root_seed, (list, tuple, np.ndarray)):
+            entropy = [*root_seed, seed]
+        else:
+            entropy = [root_seed, seed]
+        
+        return np.random.default_rng(entropy)
 
     def __init__(self, seed: int) -> None:
         self.new_seed = seed
