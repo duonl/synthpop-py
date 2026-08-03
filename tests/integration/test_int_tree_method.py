@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -259,6 +261,7 @@ def test_output_is_not_a_copy_unique_data():
     result = method.fit_transform(X, y)
 
     assert not np.array_equal(y, result)
+
 
 
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
