@@ -56,11 +56,9 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx_design',
-    "myst_nb",
-    #'myst_parser',
+    'myst_parser',
     'sphinxcontrib.mermaid',
     "sphinx.ext.intersphinx",
-    
 ]
 myst_enable_extensions = [
     "dollarmath",
@@ -76,9 +74,7 @@ autodoc_mock_imports = ['plotly', 'typing_extensions',]
 source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',
-    #'.md': 'markdown',
-    '.ipynb': 'myst-nb',
-    '.myst': 'myst-nb',
+    '.md': 'markdown',
 }
 
 intersphinx_mapping = {
