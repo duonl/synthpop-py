@@ -388,8 +388,8 @@ def test_transform_handles_entire_nan_array(y, dtype):
 
 @pytest.mark.parametrize(" y", [
     (np.array(
-        ["a", "b", "c", "d", "e"]*6, dtype=str_dtype)),
-    (np.array([1, 2, 3, 4, 5]*6))
+        ["a", "b", "c", "d", "e"] * 6, dtype=str_dtype)),
+    (np.array([1, 2, 3, 4, 5] * 6))
 ])
 def test_cart_method_raises_on_rare_category(y):
     """
