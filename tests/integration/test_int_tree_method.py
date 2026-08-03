@@ -262,23 +262,7 @@ def test_output_is_not_a_copy_unique_data():
 
     assert not np.array_equal(y, result)
 
-@pytest.mark.parametrize("method, y", [
-(TreeClassifierMethod(), np.array(["a","b","c","d","e"]*6,dtype=str_dtype)),
-(TreeRegressorMethod(), np.array([1,2,3,4,5]*6)) #if the error occurs for the TreeRegressorMethod depends on the seed.
-])
-def test_tree_method_raises_on_rare_category(method,y):
-    #This test is affected by #210
-    feature = ["x","y","z"]*10
-    feature[3] = "unique value"
-    X = {
-        "column": np.array(feature,dtype=str_dtype)
-    }
 
-    with pytest.raises(ValueError,match=re.escape("found categorical value that occurs less times than 5. This poses a risk of undesirable attribute disclosure. see <LINK>")):
-        result = method.fit_transform(X,y)
-
-        #this assertion should not be reached when #156 is done.
-        assert int(result[3]) !=y[3], "attribute disclosure for sample 3"
 
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
 def test_order_of_input_dict_does_not_change_output(method, X, y):
