@@ -53,5 +53,5 @@ custom_synth.md
 :hidden:
 :caption: Privacy caveats
 
-privacy_issue.ipynb
+rare_categories.md
 ```
