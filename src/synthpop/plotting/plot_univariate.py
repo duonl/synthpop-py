@@ -149,7 +149,7 @@ def _plot_single_distribution(orig: pd.Series, syn: pd.Series, column: str) -> g
     orig_missing = int(orig.isna().sum())
     syn_missing = int(syn.isna().sum())
 
-    if pd.api.types.is_numeric_dtype(orig):
+    if pd.api.types.is_numeric_dtype(orig) and not pd.api.types.is_bool_dtype(orig):
 
         orig_hist, syn_hist = _make_histograms(orig, syn)
 

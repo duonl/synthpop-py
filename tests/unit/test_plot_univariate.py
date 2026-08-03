@@ -17,6 +17,86 @@ from synthpop.plotting.plot_univariate import (
 )
 
 
+# ----- fixtures -----
+
+
+@pytest.fixture  # used in the _plot_single_distribution tests
+def distribution_builder_spies(monkeypatch):
+    calls = {
+        "hist": 0,
+        "bars": 0,
+        "hist_args": None,
+        "bar_args": None,
+    }
+
+    def spy_histograms(orig, syn):
+        calls["hist"] += 1
+        calls["hist_args"] = (orig, syn)
+        return go.Histogram(), go.Histogram()
+
+    def spy_bars(orig, syn):
+        calls["bars"] += 1
+        calls["bar_args"] = (orig, syn)
+        return go.Bar(), go.Bar()
+
+    monkeypatch.setattr(
+        "synthpop.plotting.plot_univariate._make_histograms",
+        spy_histograms,
+    )
+    monkeypatch.setattr(
+        "synthpop.plotting.plot_univariate._make_bars",
+        spy_bars,
+    )
+
+    return calls
+
+
+@pytest.fixture  # used in plot_univariate_distribution tests
+def mocked_environment(monkeypatch):
+    state = {
+        "mkdir_calls": [],
+        "write_calls": [],
+        "written_html": None,
+        "browser_calls": [],
+        "tempfile_calls": [],
+        "tempfile_html": None,
+    }
+
+    def fake_mkdir(*args, **kwargs):
+        state["mkdir_calls"].append((args, kwargs))
+
+    def fake_write_text(self, text, *args, **kwargs):
+        state["write_calls"].append((self, text))
+        state["written_html"] = text
+
+    def fake_browser_open(*args, **kwargs):
+        state["browser_calls"].append((args, kwargs))
+
+    class FakeTempFile:
+        name = "/fake/temp/univariate_distribution_comparison.html"
+
+        def write(self, text):
+            state["tempfile_html"] = text
+
+        def __enter__(self):
+            state["tempfile_calls"].append(True)
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            return False
+
+    monkeypatch.setattr(Path, "mkdir", fake_mkdir)
+    monkeypatch.setattr(Path, "write_text", fake_write_text)
+    monkeypatch.setattr(webbrowser, "open", fake_browser_open)
+    monkeypatch.setattr(
+        tempfile,
+        "NamedTemporaryFile",
+        lambda *args, **kwargs: FakeTempFile(),
+    )
+
+    return state
+
+
 # ----- _make_histograms tests -----
 
 
@@ -154,66 +234,36 @@ def test_make_bars_does_not_fail_with_categorical_dtype_and_missing_values():
 # ----- _plot_single_distribution tests -----
 
 
-def test_plot_single_distribution_uses_histograms(monkeypatch):
+def test_plot_single_distribution_uses_histograms(
+    distribution_builder_spies
+):
     orig = pd.Series([1, 2, 3])
     syn = pd.Series([4, 5, 6])
 
-    called = {"hist": 0, "bars": 0, "hist_args": None, "bar_args": None}
-
-    def fake_hist(orig, syn):
-        called["hist_args"] = (orig, syn)
-        called["hist"] += 1
-        return go.Histogram(), go.Histogram()
-
-    def fake_bars(orig, syn):
-        called["bar_args"] = (orig, syn)
-        called["bars"] += 1
-        return go.Bar(), go.Bar()
-
-    monkeypatch.setattr(
-        "synthpop.plotting.plot_univariate._make_histograms", fake_hist)
-    monkeypatch.setattr(
-        "synthpop.plotting.plot_univariate._make_bars", fake_bars)
-
     fig = _plot_single_distribution(orig, syn, "age")
 
-    assert called["hist"] == 1
-    assert called["bars"] == 0
+    assert distribution_builder_spies["hist"] == 1
+    assert distribution_builder_spies["bars"] == 0
     assert len(fig.data) == 2
 
-    assert called["hist_args"][0].equals(orig)
-    assert called["hist_args"][1].equals(syn)
+    assert distribution_builder_spies["hist_args"][0].equals(orig)
+    assert distribution_builder_spies["hist_args"][1].equals(syn)
 
 
-def test_plot_single_distribution_categorical_path(monkeypatch):
+def test_plot_single_distribution_categorical_path(
+        distribution_builder_spies
+):
     orig = pd.Series(["A", "B"])
     syn = pd.Series(["A", "A"])
 
-    called = {"hist": 0, "bars": 0, "hist_args": None, "bar_args": None}
-
-    def fake_hist(orig, syn):
-        called["hist_args"] = (orig, syn)
-        called["hist"] += 1
-        return go.Histogram(), go.Histogram()
-
-    def fake_bars(orig, syn):
-        called["bar_args"] = (orig, syn)
-        called["bars"] += 1
-        return go.Bar(), go.Bar()
-
-    monkeypatch.setattr(
-        "synthpop.plotting.plot_univariate._make_histograms", fake_hist)
-    monkeypatch.setattr(
-        "synthpop.plotting.plot_univariate._make_bars", fake_bars)
-
     fig = _plot_single_distribution(orig, syn, "sex")
 
-    assert called["bars"] == 1
-    assert called["hist"] == 0
+    assert distribution_builder_spies["bars"] == 1
+    assert distribution_builder_spies["hist"] == 0
     assert len(fig.data) == 2
 
-    assert called["bar_args"][0].equals(orig)
-    assert called["bar_args"][1].equals(syn)
+    assert distribution_builder_spies["bar_args"][0].equals(orig)
+    assert distribution_builder_spies["bar_args"][1].equals(syn)
 
 
 def test_plot_single_distribution_adds_annotation():
@@ -262,6 +312,26 @@ def test_plot_single_distribution_categorical_layout():
     assert fig.layout.yaxis.title.text == "Density"
     assert fig.layout.legend.title.text == "Dataset"
     assert fig.layout.height == 500
+
+
+def test_plot_single_distribution_treats_bool_categorical(
+    distribution_builder_spies
+):
+    """
+    Regression test for issue #217. Booleans got plotted as numeric.
+    This resulted in only the '1' values being plotted and not the zeros.
+    """
+    orig = pd.Series([1, 0], dtype='bool')
+    syn = pd.Series([0, 1], dtype='bool')
+
+    fig = _plot_single_distribution(orig, syn, "female")
+
+    assert distribution_builder_spies["bars"] == 1
+    assert distribution_builder_spies["hist"] == 0
+    assert len(fig.data) == 2
+
+    assert distribution_builder_spies["bar_args"][0].equals(orig)
+    assert distribution_builder_spies["bar_args"][1].equals(syn)
 
 
 # ----- _build_html tests -----
@@ -344,52 +414,6 @@ def test_write_html_uses_named_tempfile(monkeypatch):
 
 
 # ----- plot_univariate_distribution tests -----
-
-
-@pytest.fixture
-def mocked_environment(monkeypatch):
-    state = {
-        "mkdir_calls": [],
-        "write_calls": [],
-        "written_html": None,
-        "browser_calls": [],
-        "tempfile_calls": [],
-        "tempfile_html": None,
-    }
-
-    def fake_mkdir(*args, **kwargs):
-        state["mkdir_calls"].append((args, kwargs))
-
-    def fake_write_text(self, text, *args, **kwargs):
-        state["write_calls"].append((self, text))
-        state["written_html"] = text
-
-    def fake_browser_open(*args, **kwargs):
-        state["browser_calls"].append((args, kwargs))
-
-    class FakeTempFile:
-        name = "/fake/temp/univariate_distribution_comparison.html"
-
-        def write(self, text):
-            state["tempfile_html"] = text
-
-        def __enter__(self):
-            state["tempfile_calls"].append(True)
-            return self
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            return False
-
-    monkeypatch.setattr(Path, "mkdir", fake_mkdir)
-    monkeypatch.setattr(Path, "write_text", fake_write_text)
-    monkeypatch.setattr(webbrowser, "open", fake_browser_open)
-    monkeypatch.setattr(
-        tempfile,
-        "NamedTemporaryFile",
-        lambda *args, **kwargs: FakeTempFile(),
-    )
-
-    return state
 
 
 def test_orig_df_must_be_dataframe():
