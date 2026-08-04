@@ -365,9 +365,17 @@ def test_to_standardised_array_dict_with_numpy_inputs():
 def test_array_has_rare_value_positive_cases(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
 
-    with pytest.raises(ValueError, match=re.escape(f"found categorical value that occurs less times than {threshold}. This poses a risk of undesirable attribute disclosure. see <LINK>")):
-        _raise_on_rare_value(x_in, threshold)
+    with pytest.raises(ValueError, match=re.escape(f"Categorical predictor column_with_thresold{threshold} contains a category occurring fewer than {threshold} times. \
+                                                   This may allow the CART method to copy target values for small groups, \
+                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+        _raise_on_rare_value(x_in, threshold,name = f"column_with_thresold{threshold}")
 
+def test_raise_on_rare_value_no_name():
+    x_in = np.array(["a"], dtype=str_dtype)
+    with pytest.raises(ValueError, match=re.escape(f"Categorical unnamed predictor  contains a category occurring fewer than 2 times. \
+                                                   This may allow the CART method to copy target values for small groups, \
+                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+        _raise_on_rare_value(x_in, 2,name = None)
 
 @pytest.mark.parametrize("x, threshold", [
     (["a"]*5, 4),  # just above threshold
@@ -380,4 +388,4 @@ def test_array_has_rare_value_positive_cases(x, threshold):
 def test_array_has_rare_value_negative_cases(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
 
-    assert _raise_on_rare_value(x_in, threshold) is None
+    assert _raise_on_rare_value(x_in, threshold,name="some_name") is None

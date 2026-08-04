@@ -144,12 +144,20 @@ def _to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
     return {key: _standardise_array_dtypes(value) for key, value in data.items()}
 
 
-def _raise_on_rare_value(x: npt.NDArray, rare_threshold: int):
+def _raise_on_rare_value(x: npt.NDArray, rare_threshold: int,name:str|None):
 
     values, count = np.unique(x, return_counts=True)
     n_nan = np.sum(np.isnan(x))
 
+    if name is None:
+        unnamed= "unnamed "
+        name = "" 
+    else:
+        unnamed = ""
+        
+
     if (count <= rare_threshold).any() or (n_nan <= rare_threshold and n_nan >0):
-        raise ValueError(
-            f"found categorical value that occurs less times than {rare_threshold}. This poses a risk of undesirable attribute disclosure. see <LINK>")
+        raise ValueError(f"Categorical {unnamed}predictor {name} contains a category occurring fewer than {rare_threshold} times. \
+                                                   This may allow the CART method to copy target values for small groups, \
+                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")
     return

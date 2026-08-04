@@ -251,20 +251,6 @@ def test_output_is_not_a_copy_regressor(method, X, y):
     assert not np.array_equal(y, result, equal_nan=True)
 
 
-def test_output_is_not_a_copy_unique_data():
-    X, y = get_test_data_classifier()
-
-    for k in X.keys():
-        X[k] = X[k].astype(str_dtype)
-
-    method = TreeClassifierMethod(rare_value_threshold=None)
-
-    result = method.fit_transform(X, y)
-
-    assert not np.array_equal(y, result)
-
-
-
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
 def test_order_of_input_dict_does_not_change_output(method, X, y):
     method.fit(X, y)

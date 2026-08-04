@@ -101,7 +101,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         if self.rare_value_threshold is not None:
             for key in X:
                 if not pd.api.types.is_numeric_dtype(X[key].dtype):
-                    utils._raise_on_rare_value(x=X[key], rare_threshold=self.rare_value_threshold)
+                    utils._raise_on_rare_value(x=X[key], rare_threshold=self.rare_value_threshold, name=key)
         X_val, n_samples = utils._validate_2d_dict(X)
 
         y = utils._validate_1d_target(y, n_samples)

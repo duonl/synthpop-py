@@ -409,7 +409,7 @@ def test_cart_method_raises_on_rare_category(y):
 
     method = tune_cart(n_leaves=2)
 
-    with pytest.raises(ValueError, match=re.escape("Categorical predictor column contains a category occurring fewer than 5 times. \
+    with pytest.raises(ValueError, match=re.escape("Categorical predictor column contains a category occurring fewer than 2 times. \
                                                    This may allow the CART method to copy target values for small groups, \
                                                    which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
         result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
