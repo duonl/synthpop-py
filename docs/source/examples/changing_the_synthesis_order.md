@@ -4,6 +4,9 @@ In the previous example, we generated a synthetic version of the Titanic dataset
 
 When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
 ![S_pMSE heatmap of the Titanic dataset](../images/titanic_spmse_1.png)
+```{note}
+The S_pMSE is influenced by the number of observations in the original and synthetic datasets. Generating more synthetic rows may result in larger S_pMSE values, even if the underlying quality of the synthesis has not changed, because small differences can be estimated more precisely. Therefore, S_pMSE values are most meaningful when comparing synthesis methods or parameter settings on datasets of the same size.
+```
 
 Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Most relationships are preserved well, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced as well as desired.
 

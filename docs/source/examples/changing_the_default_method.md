@@ -1,4 +1,4 @@
-# Changing the default synthesis method
+# Change the default synthesis method
 In the previous examples, we changed several parameters of the {class}`~synthpop.synthesiser.Synthesiser`, such as the number of generated rows (`n`) and the synthesis order (`column_order`). However, the `Synthesiser` also allows you to control what synthesis method is used.
 
 By default, synthpop-py uses the {class}`~synthpop.methods.cart_synth.CartMethod`. CART is a flexible method that models relationships between variables by using previously synthesised variables as predictors.
