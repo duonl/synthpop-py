@@ -47,13 +47,14 @@ synthesiser.fit(data)
 
 synthetic_data = synthesiser.generate()
 ```
-The values of `survived`, which is the first column, are copied directly from the original dataset. This may be appropriate for structural variables that should remain unchanged.
+The values of `survived`, which is the first column, are copied directly from the original dataset. This may be appropriate for structural variables that should remain unchanged. We can now check if the first column of the synthetic dataset is identical to the first column of the original dataset:
 ```python
 data.iloc[:, 0].equals(synthetic_data.iloc[:, 0])
 ```
 ```text
 True
 ```
+The second columns should not be identical:
 ```python
 data.iloc[:, 1].equals(synthetic_data.iloc[:, 1])
 ```
