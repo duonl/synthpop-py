@@ -10,23 +10,12 @@ In this example, we will explore how to change the `default_syn_method` paramete
 For a complete overview of available synthesis methods, see [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
 ## Loading the data
-We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables, which allows us to see how different synthesis methods handle different types of data.
+We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables, which allows us to see how different synthesis methods handle different types of data. We remove some columns that contain information that is not useful for this example:
 ```python
 import seaborn as sns
 
 data = sns.load_dataset("titanic")
 
-data.head(3)
-```
-The first three rows are:
-|    |   survived |   pclass | sex    |   age |   sibsp |   parch |    fare | embarked   | class   | who   | adult_male   | deck   | embark_town   | alive   | alone   |
-|---:|-----------:|---------:|:-------|------:|--------:|--------:|--------:|:-----------|:--------|:------|:-------------|:-------|:--------------|:--------|:--------|
-|  0 |          0 |        3 | male   |    22 |       1 |       0 |  7.25   | S          | Third   | man   | True         | nan    | Southampton   | no      | False   |
-|  1 |          1 |        1 | female |    38 |       1 |       0 | 71.2833 | C          | First   | woman | False        | C      | Cherbourg     | yes     | False   |
-|  2 |          1 |        3 | female |    26 |       0 |       0 |  7.925  | S          | Third   | woman | False        | nan    | Southampton   | yes     | True    |
-
-Before synthesis, we remove some columns that contain information that is not useful for this example:
-```python
 data = data[
     [
         "survived",
@@ -39,7 +28,16 @@ data = data[
         "embarked",
     ]
 ]
+
+data.head(3)
 ```
+The first three rows are:
+|    |   survived |   pclass | sex    |   age |   sibsp |   parch |    fare | embarked   
+|---:|-----------:|---------:|:-------|------:|--------:|--------:|--------:|:-----------|
+|  0 |          0 |        3 | male   |    22 |       1 |       0 |  7.25   | S          |
+|  1 |          1 |        1 | female |    38 |       1 |       0 | 71.2833 | C          |
+|  2 |          1 |        3 | female |    26 |       0 |       0 |  7.925  | S          |
+
 
 ## Using the default CART synthesis method
 The default synthesis method of synthpop-py is CART. Therefore, the following `Synthesiser` uses CART automatically:
