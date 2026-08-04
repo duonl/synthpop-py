@@ -9,7 +9,7 @@ In this example, we will explore how to change the `default_syn_method` paramete
 
 For a complete overview of available synthesis methods, see [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
-## Loading the data
+## Load the data
 We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables, which allows us to see how different synthesis methods handle different types of data. We remove some columns that contain information that is not useful for this example:
 ```python
 import seaborn as sns
@@ -39,7 +39,7 @@ The first three rows are:
 |  2 |          1 |        3 | female |    26 |       0 |       0 |  7.925  | S          |
 
 
-## Using the default CART synthesis method
+## Use the default CART synthesis method
 The default synthesis method of synthpop-py is CART. Therefore, the following `Synthesiser` uses CART automatically:
 ```python
 from synthpop import Synthesiser
@@ -62,7 +62,7 @@ This means that the generated values are not sampled independently. Only the fir
 
 More information about CART synthesis can be found in {ref}`User Guide 3.1: CART synthesis method <31-cart-synthesis>`.
 
-## Changing the default method to Sample
+## Change the default method to Sample
 Sometimes preserving relationships is unnecessary or computationally expensive. In those cases, a simpler synthesis method can be used.
 
 The {class}`~synthpop.methods.sample_synth.SampleMethod` samples values directly from the observed marginal distribution of each variable. It does not use predictors and therefore does not preserve relationships between variables.
@@ -96,7 +96,7 @@ This makes `SampleMethod` useful when:
 
 More information about sampling synthesis can be found in {ref}`User Guide 3.2: Sample synthesis method <32-sample-synthesis>`.
 
-## Comparing the synthesis methods
+## Compare the synthesis methods
 The difference between CART and Sample Synthesis becomes visible when comparing their utility.
 
 For example, we can calculate the pairwise S_pMSE:
