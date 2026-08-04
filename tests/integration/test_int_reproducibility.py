@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from synthpop.methods.cart_synth import tune_cart
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
@@ -270,3 +271,28 @@ def test_leafnode_sampler_sample_determinism_with_same_seed():
     # repeated calls not advance the random state, unless a generator is input
     y3 = sampler1.sample_from_leaves(leaf_ids)
     assert np.array_equal(y1, y3)
+
+def test_reproducibility_tune_cart_regression_220():
+    obs = combined_regressor_and_classifier_test_data()
+
+    synth = Synthesiser(random_seed=1,default_syn_method=tune_cart())
+    synth.fit(obs)
+    syn1 = synth.generate(2000)
+
+    synth2 = Synthesiser(random_seed=1,default_syn_method=tune_cart())
+    synth2.fit(obs)
+    syn2 = synth2.generate(2000)
+
+
+    for col in syn2.columns:
+        syn2_is_nan_mask = pd.isna(syn2[col])
+        syn1_is_nan_mask = pd.isna(syn1[col])
+        pd.testing.assert_series_equal(
+            syn1_is_nan_mask,
+            syn2_is_nan_mask,
+            obj=f"missingness not reproduced for column {col}",
+        )
+        assert (
+            syn2[col][~syn2_is_nan_mask]
+            == syn1[col][~syn1_is_nan_mask]
+        ).all(), f"column {col} not reproduced"
