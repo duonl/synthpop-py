@@ -62,7 +62,7 @@ A person with external knowledge about the group could then use the synthetic da
 
 While preserving relationships between variables is generally an objective of the synthesis method, doing so can increase the risk of attribute disclosure, particularly for small groups or individual records.
 
-Generally, *privacy-risks* can be increased by:
+Generally, *attribute disclosure privacy-risks* can be increased by:
 
 * categorical variables with many rare or unique categories;
 * small subgroups with little variation in sensitive attributes;

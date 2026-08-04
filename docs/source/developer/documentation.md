@@ -39,7 +39,8 @@ graph TD
 ```
 
 Using notebooks directly as documentation is not currently supported. They introduce significant additional dependencies and make pull requests more difficult to review.
-The added value is relatively small, especially since notebooks can be exported to markdown.
+Since notebooks can be exported to markdown, there is little added value to rendering notebooks by the documentation build system.
+Notebooks can be rendered by the developer and exported to markdown instead. 
 
 <!-- omit from toc -->
 ## About building and publishing documentation
