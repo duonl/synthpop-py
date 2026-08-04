@@ -1,5 +1,5 @@
 import secrets
-from typing import List
+from typing import Sequence
 import warnings
 
 import numpy as np
