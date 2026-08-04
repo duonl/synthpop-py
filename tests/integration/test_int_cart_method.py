@@ -416,3 +416,20 @@ def test_cart_method_raises_on_rare_category(y):
 
         # this assertion should not be reached when #156 is done.
         assert result[3] != y[3], "attribute disclosure for sample 3"
+
+def test_tune_cart_disable_rare_categories_check():
+
+    feature = ["x", "y", "z"] * 10
+    y = [1,2,3]*10
+    feature[3] = "unique value"
+    X = {
+        "column": np.array(feature, dtype=str_dtype)
+    }
+
+    method = tune_cart(n_leaves=2,enable_rare_categories_check=False)
+
+
+    result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
+
+    # this assertion should not be reached when #156 is done.
+    assert result[3] == y[3], "attribute disclosure for sample 3"
