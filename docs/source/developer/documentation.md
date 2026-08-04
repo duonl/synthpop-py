@@ -38,8 +38,7 @@ graph TD
     A[Start]-->B[End]
 ```
 
-Using notebooks directly for documentation is not supported for now.
-It adds significant dependencies and makes reviewing pull requests more difficult.
+Using notebooks directly as documentation is not currently supported. They introduce significant additional dependencies and make pull requests more difficult to review.
 The added value is relatively small, especially since notebooks can be exported to markdown.
 
 <!-- omit from toc -->

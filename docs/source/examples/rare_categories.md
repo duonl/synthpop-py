@@ -1,13 +1,13 @@
-# Risk of losing privacy with rare categories
+# Risk of privacy loss due to rare categories
 
 When dealing with data with rare categories, there is a risk of disclosing more information than intended about small groups.
-The following example demonstrates how rare or unique categorical values can lead to overfitting and potentially increase disclosure risk.
+The following example demonstrates how rare or unique categorical values can cause overfitting, potentially increasing disclosure risk
 
-The example uses a decision-tree-based synthesis method with a categorical predictor containing a unique value for every observation. Because the predictor uniquely identifies each observation, the decision tree can create homogeneous leaf nodes in which the target variable has only one possible value. Sampling from these leaf nodes therefore introduces little or no randomness, causing the synthetic target values to reproduce the original target values.
+The example uses a decision-tree-based synthesis method with a categorical predictor containing a unique value for every observation. Because the predictor uniquely identifies each observation, the decision tree can create homogeneous leaf nodes where all observations have the same target value. Sampling from these leaf nodes introduces little or no randomness because all possible sampled values are identical, causing the synthetic target values to reproduce the original target values.
 
 This example is intentionally constructed to demonstrate a potential failure mode. It does not imply that decision-tree-based synthesis methods will generally reproduce target variables exactly. Rather, it illustrates why the structure and cardinality of the input data should be considered when evaluating privacy.
 
-While this example is constructed, it can happen when floating-point data is unintentionally converted to strings.
+Although this example is deliberately constructed, similar situations can occur when floating-point data is unintentionally converted to strings.
 
 ## Demonstration of the problem
 
@@ -27,7 +27,7 @@ X, y = make_classification(
     n_classes=10,
     n_informative=11,
 )
-# By "accident", the floating-point numbers are cast to strings
+# The floating-point numbers are unintentionally cast to strings.
 # As a result, The data will be categorical and every value unique.
 X = X[:, 0:1].astype(str_dtype)
 X[0:3]
@@ -87,7 +87,7 @@ In this example, the synthesised target is identical to the original target:
 
 ## Why does this happen?
 
-This occurs because the decision tree is able to partition the observations into homogeneous leaf nodes. Each leaf contains observations with the same target value, so sampling a target value from a leaf does not introduce meaningful randomness.
+This occurs because the decision tree is able to partition the observations into homogeneous leaf nodes. Each leaf contains observations with the same target value, so sampling a target value from a leaf does not introduce uncertainty because all values in the leaf are identical.
 
 The resulting tree illustrates this behaviour:
 
@@ -106,13 +106,13 @@ plt.show()
     
 
 
-Because the predictor contains 100 different values and the target contains only 10 possible values, the tree can separate observations into groups that are homogeneous with respect to the target. The synthesis model has therefore learned the relationship between the predictor and target too precisely for this dataset.
+Because the predictor contains 100 different values and the target contains only 10 possible values, the tree can separate observations into groups that are homogeneous with respect to the target. The synthesis model has captured the relationship between the predictor and target too precisely for this dataset.
 
-This is an example of [overfitting](https://en.wikipedia.org/wiki/Overfitting). In this case, the consequence of overfitting is a potential privacy risk: the synthesis process reproduces a relationship in the original data without introducing sufficient uncertainty.
+This is an example of [overfitting](https://en.wikipedia.org/wiki/Overfitting) in the sense that the model has captured a highly specific relationship present in the training data rather than a generalisable pattern. In this case, the consequence of overfitting is a potential privacy risk: the synthesis process reproduces a relationship in the original data without introducing sufficient uncertainty.
 
 A similar issue can occur in realistic datasets when a variable contains rare categories that are strongly associated with a sensitive variable. For example, suppose a dataset contains a rare category that identifies a small group of individuals and that group has a particular sensitive characteristic. If the synthesis model reproduces this relationship exactly, a third party with knowledge of the rare category may be able to infer the sensitive characteristic from the synthetic data.
 
-For example, suppose you have a dataset about traffic safety for employees of a company. The first column indicates the mode of transportation to work.The second column is how many sick leaves the employee had, which is sensitive information. While most employees come to work by public transit, bike, or foot, there are 2 employees that go to work on a trike. The value "trike" is a rare category for the first column. The synthetic dataset would reveal the exact amount of sick leave for the employees going to work by trike. So, in this scenario, if you have this synthetic dataset, and know that your coworker comes to work by trike, you can infer something about their health. 
+For example, suppose you have a dataset about traffic safety for employees of a company. The first column indicates the mode of transportation to work. The second column is how many sick leaves the employee had, which is sensitive information. While most employees come to work by public transit, bike, or foot, there are 2 employees that go to work on a trike. The value "trike" is a rare category for the first column. The synthetic dataset would reveal the exact amount of sick leave for the employees going to work by trike. So, in this scenario, if you have this synthetic dataset, and know that your coworker comes to work by trike, you can infer something about their health. 
 
 
 ### The impact of this problem
@@ -121,7 +121,7 @@ The previous example demonstrates the mechanism by which overfitting can lead to
 
 Nevertheless, the same privacy risk can occur in realistic settings when rare or unique categories are present in the data. If a rare category is reproduced in the synthetic dataset and a synthesis model has learned a strong relationship between that category and a sensitive variable, the sensitive value associated with the category may also be reproduced too accurately. A third party who knows that an individual belongs to the rare category could then use the synthetic data to infer sensitive information about that individual or group.
 
-The risk is particularly clear when a variable is intentionally copied using {class}`~synthpop.methods.copy_synth.CopyMethod`. Consider the following dataset:
+The risk is particularly evident when a variable is intentionally copied using {class}`~synthpop.methods.copy_synth.CopyMethod`. Consider the following dataset:
 
 
 ```python
@@ -251,7 +251,7 @@ In practice, users should therefore take particular care when using `CopyMethod`
 However, the risk is not specific to `CopyMethod`. The example uses `CopyMethod` to make the privacy risk particularly clear by ensuring that the rare or unique values are present in the synthetic data. The same underlying risk can occur with the default CART-based synthesis methods. If a rare category is generated in the synthetic data and the CART model has overfitted the relationship between that category and a sensitive variable, the corresponding sensitive value may also be reproduced with high probability. In this situation, the synthetic dataset does not need to reproduce the entire original dataset to create a privacy risk: reproducing the relationship between a rare category and a sensitive attribute may be sufficient for attribute disclosure.
 
 The following example demonstrates this risk of attribute disclosure without using `CopyMethod`.
-In this example, a synthetic dataset is made with the default settings.
+In this example, a synthetic dataset is generated using the default settings.
 
 
 ```python

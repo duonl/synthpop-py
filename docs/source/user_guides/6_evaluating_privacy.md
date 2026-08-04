@@ -60,8 +60,7 @@ For example, consider a dataset containing a categorical variable that identifie
 If the synthesis model learns a deterministic relationship between the two variables, the synthetic dataset may reproduce that relationship even though the individual records themselves are not directly copied.
 A person with external knowledge about the group could then use the synthetic data to infer the sensitive characteristic.
 
-While reproducing relationships between variables is in general a goal of the synthesis method, it can be problematic in this situation.
-It can be problematic in this situation because accurate information is disclosed about small groups or individuals. 
+While preserving relationships between variables is generally an objective of the synthesis method, doing so can increase the risk of attribute disclosure, particularly for small groups or individual records.
 
 Generally, *privacy-risks* can be increased by:
 
@@ -71,13 +70,13 @@ Generally, *privacy-risks* can be increased by:
 * synthesis models that overfit small groups; and
 * synthesis methods that reproduce original relationships with little or no added uncertainty.
 
-The presence of rare categories should therefore be carefully assessed. In particular, users should examine whether small or rare groups are represented in the synthetic data and whether sensitive attributes associated with those groups are reproduced too accurately.
+The presence and characteristics of rare categories should therefore be carefully assessed. In particular, users should examine whether small or rare groups are represented in the synthetic data and whether sensitive attributes associated with these groups are preserved in a way that increases disclosure risk.
 
-This risk is not limited to a particular synthesis method. It depends on the interaction between the characteristics of the original data, the synthesis model and the specific synthesis configuration. A model that performs well on common categories may still overfit on rare categories or small subgroups.
+This risk is not specific to any particular synthesis method. It depends on the interaction between the characteristics of the original data, the synthesis model, and the specific synthesis configuration. A model that performs well on common categories may still overfit to rare categories or small subgroups.
 
-**A synthetic dataset should therefore not be assumed to be private simply because individual records are not explicitly copied. Privacy evaluation should also consider whether the synthesis process has preserved relationships within rare groups in a way that could reveal sensitive information.**
+A synthetic dataset should therefore not be assumed to be private simply because individual records are not explicitly copied. Privacy evaluation should also consider whether the synthesis process has preserved relationships within rare groups in a way that could enable the inference of sensitive information.
 
-For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce target values, see the [Risk of losing privacy with rare categories example](../examples/rare_categories.md).
+For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce sensitive attributes, see the [Risk of privacy loss due to rare categories example](../examples/rare_categories.md).
 
 ### 6.1.3. Membership disclosure
 Membership disclosure occurs when a third party can determine whether a particular individual was included in the original dataset.
