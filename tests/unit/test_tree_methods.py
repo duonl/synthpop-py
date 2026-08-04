@@ -325,10 +325,12 @@ def test_fit_raises_on_rare_values_default(X, y, index_cat, tree_method,):
         actual_calls = synthpop.utils._raise_on_rare_value.call_args_list
         matching_calls = np.array([(args["x"] == (X[cat_col])).all() & (
             args["rare_threshold"] == 5) for (_, args) in actual_calls])
-        assert len(matching_calls[matching_calls]) == 1, "_raise_on_rare_value not called"
+        assert len(matching_calls[matching_calls]
+                   ) == 1, "_raise_on_rare_value not called"
         # assert_any_call(x=X[cat_col],rare_threshold=5)
 
     assert len(index_cat) == synthpop.utils._raise_on_rare_value.call_count
+
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
 def test_fit_raises_on_rare_values_other_threshold(X, y, index_cat, tree_method,):
@@ -342,10 +344,12 @@ def test_fit_raises_on_rare_values_other_threshold(X, y, index_cat, tree_method,
         matching_calls = np.array([(args["x"] == (X[cat_col])).all() & (
             args["rare_threshold"] == 10) &
             (args["name"] == cat_col) for (_, args) in actual_calls])
-        assert len(matching_calls[matching_calls]) == 1, "_raise_on_rare_value not called"
+        assert len(matching_calls[matching_calls]
+                   ) == 1, "_raise_on_rare_value not called"
         # assert_any_call(x=X[cat_col],rare_threshold=5)
 
     assert len(index_cat) == synthpop.utils._raise_on_rare_value.call_count
+
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
 def test_fit_raises_on_rare_values_not_called_when_disabled(X, y, index_cat, tree_method,):
