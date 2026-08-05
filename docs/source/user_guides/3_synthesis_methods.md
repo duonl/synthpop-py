@@ -16,6 +16,7 @@ Available synthesis methods are:
 
 ---
 
+(31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
 CART (Classification And Regression Trees) is the default synthesis method. 
