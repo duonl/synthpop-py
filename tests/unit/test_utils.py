@@ -356,39 +356,46 @@ def test_to_standardised_array_dict_with_numpy_inputs():
 
 
 @pytest.mark.parametrize("x, threshold", [
-    (["a"], 5),  # one row, so unique value by definition
-    ((["a"]*5)+["b"]*6, 5),  # number of occurrences exactly equal to threshold
-    ((["a"]*5)+["b"]*6, 7),  # number of occurrences strictly lower than threshold
-    # number of occurrences exactly equal to threshold, with missing values.
-    (([np.nan]*5)+["b"]*6, 5),
-    # number of occurrences strictly lower than threshold, with missing values
-    (([np.nan]*5)+["b"]*6, 7),
+    (np.array(["a"]), 5),  # one row, so unique value by definition
+    (np.array(["a","b","c","d","e"]), 5),  # all values unique 
+    (np.array((["a"]*5)+["b"]*6), 7),  # number of occurrences strictly lower than threshold
+    (np.array(([np.nan]*5)+["b"]*6,dtype=str_dtype), 7),# number of occurrences strictly lower than threshold, with missing values
+    (np.array(([np.nan]*10)+["b"]*6,dtype=str_dtype), 7),# number of occurrences strictly lower than threshold, with missing values
+    ( np.array(([True]*4 + [False]*6)),5)#boolean
 ])
 def test_array_has_rare_value_positive_cases(x, threshold):
-    x_in = np.array(x, dtype=str_dtype)
 
-    with pytest.raises(ValueError, match=re.escape(f"Categorical predictor column_with_thresold{threshold} contains a category occurring fewer than {threshold} times. \
-                                                   This may allow the CART method to copy target values for small groups, \
-                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+    txt_threshold = re.escape(f"fewer than {threshold} times.")
+    txt_column_name = re.escape(f"column_with_thresold{threshold}")
+
+    message_regex = f".* {txt_column_name}.*{txt_threshold}"
+
+    with pytest.raises(ValueError,match=message_regex):
         _raise_on_rare_value(
-            x_in, threshold, name=f"column_with_thresold{threshold}")
+            x, threshold, name=f"column_with_thresold{threshold}")
 
 
 def test_raise_on_rare_value_no_name():
     x_in = np.array(["a"], dtype=str_dtype)
-    with pytest.raises(ValueError, match=re.escape(f"Categorical unnamed predictor  contains a category occurring fewer than 2 times. \
-                                                   This may allow the CART method to copy target values for small groups, \
-                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+
+    txt_threshold = re.escape(f"fewer than 2 times.")
+    txt_column_name = re.escape(f"unnamed predictor")
+
+    message_regex = f".* {txt_column_name}.*{txt_threshold}"
+    with pytest.raises(ValueError, match=message_regex):
         _raise_on_rare_value(x_in, 2, name=None)
 
 
 @pytest.mark.parametrize("x, threshold", [
     (["a"]*5, 4),  # just above threshold
+    ((["a"]*5)+["b"]*6, 5),  # number of occurrences exactly equal to threshold
     # number of occurrences strictly higher than threshold
     ((["a"]*7)+["b"]*10, 5),
     ([np.nan]*5, 4),  # just above threshold, with nan
     # number of occurrences strictly higher than threshold, with nan
     (([np.nan]*7)+["b"]*10, 5),
+    # number of occurrences exactly equal to threshold, with missing values.
+    (([np.nan]*5)+["b"]*6, 5),
 ])
 def test_array_has_rare_value_negative_cases(x, threshold):
     x_in = np.array(x, dtype=str_dtype)

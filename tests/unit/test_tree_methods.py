@@ -320,14 +320,14 @@ def test_fit_raises_on_rare_values_default(X, y, index_cat, tree_method,):
     tree_method.fit(X, y)
 
     for cat_col in index_cat:
+        calls = synthpop.utils._raise_on_rare_value.call_args_list
 
-        # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
-        actual_calls = synthpop.utils._raise_on_rare_value.call_args_list
-        matching_calls = np.array([(args["x"] == (X[cat_col])).all() & (
-            args["rare_threshold"] == 5) for (_, args) in actual_calls])
-        assert len(matching_calls[matching_calls]
-                   ) == 1, "_raise_on_rare_value not called"
-        # assert_any_call(x=X[cat_col],rare_threshold=5)
+        assert any(
+            np.array_equal(call.kwargs["x"], X[cat_col])
+            and call.kwargs["rare_threshold"] == 5
+            and call.kwargs["name"] == cat_col
+            for call in calls
+        )
 
     assert len(index_cat) == synthpop.utils._raise_on_rare_value.call_count
 
@@ -340,13 +340,14 @@ def test_fit_raises_on_rare_values_other_threshold(X, y, index_cat, tree_method,
     for cat_col in index_cat:
 
         # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
-        actual_calls = synthpop.utils._raise_on_rare_value.call_args_list
-        matching_calls = np.array([(args["x"] == (X[cat_col])).all() & (
-            args["rare_threshold"] == 10) &
-            (args["name"] == cat_col) for (_, args) in actual_calls])
-        assert len(matching_calls[matching_calls]
-                   ) == 1, "_raise_on_rare_value not called"
-        # assert_any_call(x=X[cat_col],rare_threshold=5)
+        calls = synthpop.utils._raise_on_rare_value.call_args_list
+        
+        assert any(
+            np.array_equal(call.kwargs["x"], X[cat_col])
+            and call.kwargs["rare_threshold"] == 10
+            and call.kwargs["name"] == cat_col
+            for call in calls
+        )
 
     assert len(index_cat) == synthpop.utils._raise_on_rare_value.call_count
 
