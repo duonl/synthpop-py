@@ -10,7 +10,7 @@ In this example, we will explore how to change the `default_syn_method` paramete
 For a complete overview of available synthesis methods, see [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
 ## Load the data
-We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables, which allows us to see how different synthesis methods handle different types of data. We remove some columns that contain information that is not useful for this example:
+We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables, which allows us to see how different synthesis methods handle different types of data. For simplicity, we keep only 8 variables:
 ```python
 import seaborn as sns
 
@@ -56,16 +56,22 @@ from synthpop.methods import CartMethod
 
 default_syn_method=CartMethod()
 ```
-CART attempts to preserve relationships between variables. For example, when synthesising `fare`, the method can use previously generated variables such as passenger class (`pclass`) and sex (`sex`) as predictors.
+We used the default column order,  which you can see in the code where we specified which 8 variables we use. CART does not require predictors for the first variable in the synthesis order, so the first column is sampled from its observed distribution.
 
-This means that the generated values are not sampled independently. Only the first column is sampled. The generated values in later columns depend on the relationships learned from the original dataset.
+For each following column, CART uses the previously synthesised variables as predictors to model the conditional distribution of that variable. This means that generated values are not sampled independently: later columns depend on the relationships learned from the original dataset. For example, when synthesising `sex`, the method uses the previously generated variables, `survived` and `pclass`, as predictors.
 
 More information about CART synthesis can be found in {ref}`User Guide 3.1: CART synthesis method <31-cart-synthesis>`.
 
 ## Change the default method to Sample
-Sometimes preserving relationships is unnecessary or computationally expensive. In those cases, a simpler synthesis method can be used.
+Sometimes it is useful to synthesise variables without modelling its relationships with other variables. The {class}`~synthpop.methods.sample_synth.SampleMethod` samples values directly from the observed marginal distribution of each variable. It does not use predictors and therefore does not explicitly preserve relationships between variables.
 
-The {class}`~synthpop.methods.sample_synth.SampleMethod` samples values directly from the observed marginal distribution of each variable. It does not use predictors and therefore does not preserve relationships between variables.
+Unlike CART, where only the first column is sampled independently and later columns are conditioned on previously synthesised variables, `SampleMethod` generates every column independently from its own observed distribution.
+
+Because it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets or for variables where modelling relationships provides limited additional value.
+
+In practice, `SampleMethod` is often used at the beginning of a synthesis process when some variables should be generated first without creating combinations of values that do not exist in the original data. For example, sampling initial variables independently can help prevent later synthesis steps from conditioning on unrealistic combinations. It can also be useful when a variable has very weak relationships with the rest of the dataset and a CART model is unlikely to provide additional benefit.
+
+However, `SampleMethod` should not generally be preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from observed distributions, privacy protection may be weaker in some situations, particularly for variables containing rare or distinctive values.
 
 We can use it as the default synthesis method by passing it to `default_syn_method`.
 ```python
@@ -80,19 +86,14 @@ sample_synthesiser.fit(data)
 
 synthetic_sample = sample_synthesiser.generate()
 ```
-The generated dataset has the sae variables as the original dataset, but the synthesis process is different. Each column is generated independently based only on its own distribution.
+The generated dataset has the same variables as the original dataset, but the synthesis process is different. Each column is generated independently based only on its own distribution.
 
 For example, the original Titanic dataset contains relationships such as:
-- passenger class being related to fare;
-- sex being related to survival;
-- passenger class being related to survival.
+- `pclass` (passenger class) being related to `fare`;
+- `sex` being related to `survived`;
+- `pclass` being related to `survived`.
 
 These relationships are not explicitly modelled by `SampleMethod`.
-
-This makes `SampleMethod` useful when:
-- only individual variable distributions are important;
-- a simple baseline synthetic dataset is required;
-- relationships between variables do not need to be preserved.
 
 More information about sampling synthesis can be found in {ref}`User Guide 3.2: Sample synthesis method <32-sample-synthesis>`.
 
@@ -128,7 +129,7 @@ Sample synthesis can reproduce individual distribution well, which you can check
 
 This illustrates an important choice in synthetic data generation:
 - **CART** preserves relationships between variables.
-- **Sample** preserves individual distributions only.
+- **Sample** preserves individual distributions but not relationships between variables.
 
 The appropriate method depends on the intended use of the synthetic dataset.
 
@@ -139,15 +140,13 @@ For example:
 ```python
 from synthpop.methods import CopyMethod
 ```
-could be used for variables where exact reproduction is required. A common example is a structural variable that must remain unchanged, such as a fixed administrative category.
+could be used for variables that act as fixed identifiers or structural fields that must remain unchanged. A possible example is an internal record identifier that is required for linking synthetic data with another system.
 
-However, `CopyMethod` should be used carefully because copied values are directly taken from the original dataset. it does not provide privacy protection for that variable. It should never be used as the `default_syn_method`.
+However, `CopyMethod` should be used carefully because copied values are directly taken from the original dataset. It does **not** provide privacy protection for that variable. It should never be used as the `default_syn_method`.
 
 Additionally, because values are copied directly, it cannot generate more rows than the original dataset.
 
-We will use `CopyMethod` in the next example where different synthesis methods are assigned to different columns.
-
-More information about CART synthesis can be found in {ref}`User Guide 3.3: Copy synthesis method <33-copy-synthesis>`.
+We will use `CopyMethod` in the next example where different synthesis methods are assigned to different columns. More information about CART synthesis can be found in {ref}`User Guide 3.3: Copy synthesis method <33-copy-synthesis>`.
 
 ## Next steps
 Changing the default synthesis method applies the same synthesis strategy to every column. However, in practice, different variables may require different approaches.
