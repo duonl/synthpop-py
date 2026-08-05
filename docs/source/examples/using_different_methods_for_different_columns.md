@@ -6,7 +6,7 @@ In practice, however, different variables often require different treatment. For
 - a variable with little relationship to the others may only need to be sampled;
 - a structural variable may need to remain unchanged.
 
-The `special_syn_method` parameter makes this possible. It allows you to override the default synthesis method for selected columns while leaving all other columns unchanged.
+As such, a flexible parameter is required to allow different synthesis methods to be applied to different variables. The `special_syn_method` parameter makes it possible to specify synthesis methods for individual variables, overriding the default method where needed. 
 
 In this example, we will use the Titanic dataset again to demonstrate several common configurations.
 
@@ -118,7 +118,7 @@ Now the configuration becomes:
 `fare`                  | CART
 all remaining columns   | Sample
 
-This illustrates that `special_syn_method` always overrides the default method for the specified variables.
+As such, this illustrates that `special_syn_method` always overrides the default method for the specified variables.
 
 ## Combine with a custom synthesis order
 `special_syn_method` can also be combined with a custom `column_order`. The two parameters control different aspects of the synthesis process:
@@ -149,14 +149,14 @@ synthesiser.fit(data)
 synthetic_data = synthesiser.generate(n=5000)
 ```
 Here:
-- the variables are synthesised in the specified order;
+- the variables are synthesised in the specified order, as defined by `column_order`;
 - `embarked` is still generated using `SampleMethod`;
 - all remaining variables continue to use `CartMethod`.
 
 The synthesis order and synthesis method are completely independent settings and can be configured together.
 
 ## Summary
-The `special_syn_method` parameter allows individual variables to use a different synthesis method than the default. This makes it possible to build hybrid synthesis workflows where each variable is synthesised using the method most appropriate for its role in the dataset.
+The `special_syn_method` parameter allows individual variables to use a different synthesis method than the default synthesis method. This makes it possible to build hybrid synthesis workflows, where each variable is synthesised using the most appropriate method.
 
 More information about the parameter can be found in [User Guide 2: Synthetic data generation](../user_guides/2_synthetic_data_generation.md). More information about the available synthesis methods can be found in [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 

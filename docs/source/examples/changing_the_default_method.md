@@ -1,7 +1,7 @@
 # Change the default synthesis method
-In the previous examples, we changed several parameters of the {class}`~synthpop.synthesiser.Synthesiser`, such as the number of generated rows (`n`) and the synthesis order (`column_order`). However, the `Synthesiser` also allows you to control what synthesis method is used.
+In the previous examples, we changed several parameters of the {class}`~synthpop.synthesiser.Synthesiser`, such as the [number of generated rows](generating_a_larger_dataset.md) (`n`) and the [synthesis order](changing_the_synthesis_order.md) (`column_order`). In each case, we used the default synthesis method. However, the `Synthesiser` supports other synthesis methods as well. In this example, we will show how to configure and control these alternative synthesis methods.
 
-By default, synthpop-py uses the {class}`~synthpop.methods.cart_synth.CartMethod`. CART is a flexible method that models relationships between variables by using previously synthesised variables as predictors.
+By default, synthpop-py uses the {class}`~synthpop.methods.cart_synth.CartMethod`. The CART (Classification and Regression Trees) method is a flexible algorithm that models relationships between variables by using previously synthesised variables as predictors.
 
 However, not every dataset requires the same synthesis strategy for every situation. For some variables, a simpler approach may be sufficient. For example, you may only want to reproduce the distribution of a variable without preserving relationships.
 
@@ -10,7 +10,7 @@ In this example, we will explore how to change the `default_syn_method` paramete
 For a complete overview of available synthesis methods, see [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
 ## Load the data
-We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables, which allows us to see how different synthesis methods handle different types of data. For simplicity, we keep only 8 variables:
+We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables. As such it allows us to explain how different synthesis methods handle different types of data. For simplicity, we limit ourself to only 8 variables:
 ```python
 import seaborn as sns
 
@@ -39,8 +39,8 @@ The first three rows are:
 |  2 |          1 |        3 | female |    26 |       0 |       0 |  7.925  | S          |
 
 
-## Use the default CART synthesis method
-The default synthesis method of synthpop-py is CART. Therefore, the following `Synthesiser` uses CART automatically:
+## The default CART synthesis method
+The default synthesis method of synthpop-py is CART. Therefore calling the `Synthesiser` without arguments uses CART automatically:
 ```python
 from synthpop import Synthesiser
 
@@ -56,24 +56,24 @@ from synthpop.methods import CartMethod
 
 default_syn_method=CartMethod()
 ```
-We used the default column order,  which you can see in the code where we specified which 8 variables we use. CART does not require predictors for the first variable in the synthesis order, so the first column is sampled from its observed distribution.
+We did not specifiy any specific column order, and kept the original column order as in the Titanic dataset. CART does not require predictors for the first variable in the synthesis order. As such, the first column is sampled from its observed distribution.
 
-For each following column, CART uses the previously synthesised variables as predictors to model the conditional distribution of that variable. This means that generated values are not sampled independently: later columns depend on the relationships learned from the original dataset. For example, when synthesising `sex`, the method uses the previously generated variables, `survived` and `pclass`, as predictors.
+For each column sequentially synthesised after the first, CART uses the previously synthesised variables as predictors to model that column's conditional distribution. As a result, generated values are not sampled independently: later columns depend on the relationships learned from the original dataset. For example, when synthesising `sex`, the method uses the previously generated variables, `survived` and `pclass`, as predictors. Whereas, when synthesising `embarked`,  the methods uses all 7 previously generated variables as predictors.
 
-More information about CART synthesis can be found in {ref}`User Guide 3.1: CART synthesis method <31-cart-synthesis>`.
+More information about the CART synthesis method can be found in {ref}`User Guide 3.1: CART synthesis method <31-cart-synthesis>`.
 
 ## Change the default method to Sample
 Sometimes it is useful to synthesise variables without modelling its relationships with other variables. The {class}`~synthpop.methods.sample_synth.SampleMethod` samples values directly from the observed marginal distribution of each variable. It does not use predictors and therefore does not explicitly preserve relationships between variables.
 
 Unlike CART, where only the first column is sampled independently and later columns are conditioned on previously synthesised variables, `SampleMethod` generates every column independently from its own observed distribution.
 
-Because it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets or for variables where modelling relationships provides limited additional value.
+Because it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets, or in cases where modelling relationships between variables provides limited additional value.
 
 In practice, `SampleMethod` is often used at the beginning of a synthesis process when some variables should be generated first without creating combinations of values that do not exist in the original data. For example, sampling initial variables independently can help prevent later synthesis steps from conditioning on unrealistic combinations. It can also be useful when a variable has very weak relationships with the rest of the dataset and a CART model is unlikely to provide additional benefit.
 
-However, `SampleMethod` should not generally be preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from observed distributions, privacy protection may be weaker in some situations, particularly for variables containing rare or distinctive values.
+However, `SampleMethod` is generally not preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from observed distributions, privacy protection may be weaker in some situations, particularly for variables containing rare or distinctive values.
 
-We can use it as the default synthesis method by passing it to `default_syn_method`.
+`SampleMethod` can be used as the default synthesis method by passing it to `default_syn_method`.
 ```python
 from synthpop.methods import SampleMethod
 
@@ -123,7 +123,7 @@ plot_sample = plot_spmse(spmse_sample, show_plot=True)
 ```
 ![S_pMSE heatmap using the Sample synthesis method](../images/sample_spmse_default.png)
 
-As you can see in the plots, CART generally produces lower S_pMSE values because it attempts to preserve relationships between variables.
+As can be seen in the plots, CART generally produces lower S_pMSE values. This is because it attempts to preserve relationships between variables.
 
 Sample synthesis can reproduce individual distribution well, which you can check using {func}`~synthpop.plotting.plot_univariate_distributions`. However, relationships between variables will often have large differences because variables are generated independently.
 
