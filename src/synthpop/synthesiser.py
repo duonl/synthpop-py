@@ -203,6 +203,6 @@ class Synthesiser:
                     pred = result
 
                 new_syn_column = self.models_[y].transform(X=pred)
-                result = pd.concat((result, new_syn_column), axis=1, join='outer')
+                result = pd.concat([result, new_syn_column], axis=1, join='outer')
 
         return result

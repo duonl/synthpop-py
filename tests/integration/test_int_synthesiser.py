@@ -335,10 +335,11 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     assert generated['c'].isna().all()
 
-def test_performance_warning_DataFrame_fragmented():
+def test_generate_does_not_raise_dataframe_fragmentation_warning():
     """
-    This is a regression test to check for a pandas PerfomanceWarning during the synthesis process.
-    This test is the result of bug issue #164
+    Regression test for issue #164.
+    
+    Ensures that generating synthetic data does not trigger pandas' PerformanceWarning for highly fragmented DataFrames.
     """
     seed = 7
     X, y = get_test_data_regressor(
