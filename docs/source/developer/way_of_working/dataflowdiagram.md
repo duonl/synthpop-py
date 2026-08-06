@@ -7,6 +7,8 @@ The diagrams illustrate key processes such as fitting a Synthesiser and generati
 ## Overall process data flow
 ### `Synthesiser.fit()` data flow
 ```{mermaid}
+:zoom:
+
 flowchart TD
       U(["User"]) -->|X: pd.DataFrame| S["Synthesiser.fit(X: pd.DataFrame)"]
 
@@ -74,6 +76,8 @@ flowchart TD
 
 ### `Synthesiser.generate()` data flow
 ```{mermaid}
+:zoom:
+
 flowchart TD
       U(["User"]) -->|"n: int | None"| S["Synthesiser.generate(n)"]
 
