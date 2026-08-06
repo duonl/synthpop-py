@@ -156,7 +156,7 @@ def combined_regressor_and_classifier_test_data(seed=10):
 def test_reproducibility_synthesis():
     obs = combined_regressor_and_classifier_test_data()
 
-    synth = Synthesiser(random_seed=1,default_syn_method=tune_cart(enable_rare_categories_check=False))
+    synth = Synthesiser(random_seed=1,default_syn_method=tune_cart(rare_categories_threshold=0))
     synth.fit(obs)
 
     syn1 = synth.generate(2000)
@@ -167,7 +167,7 @@ def test_reproducibility_synthesis():
         syn2,
         obj="generating 2 consecutive times did not produce the same synthetic dataset",
     )
-    synth2 = Synthesiser(random_seed=1,default_syn_method=tune_cart(enable_rare_categories_check=False))
+    synth2 = Synthesiser(random_seed=1,default_syn_method=tune_cart(rare_categories_threshold=0))
     synth2.fit(obs)
 
     syn3 = synth2.generate(2000)

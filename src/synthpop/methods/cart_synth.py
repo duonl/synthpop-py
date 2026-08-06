@@ -339,13 +339,13 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def __init__(
             self,
             *,
-            rare_value_threshold: int | None = 5,
+            rare_categories_threshold: int | None = 5,
             tree=None,
             encoder=None,
             missing_handler=None,
             tree_sampler=None
     ) -> None:
-        super().__init__(rare_categories_threshold=rare_value_threshold, encoder=encoder, missing_handler=missing_handler,
+        super().__init__(rare_categories_threshold=rare_categories_threshold, encoder=encoder, missing_handler=missing_handler,
                          tree_sampler=tree_sampler, tree=tree)
 
     def _get_encoder(self):
@@ -515,7 +515,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         return self.method_.get_feature_names_out(input_features)
 
 
-def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, enable_rare_categories_check: bool = True, rare_categories_threshold: int | None = None) -> CartMethod:
+def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_categories_threshold: int | None = None) -> CartMethod:
     """
     Shortcut to set parameters of the CartMethod.
 
@@ -545,16 +545,15 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, enable
 
     """
 
-    if not enable_rare_categories_check:
-        effective_categories_threshold = None
-    elif rare_categories_threshold is None:
+
+    if rare_categories_threshold is None:
         effective_categories_threshold = n_leaves
     else:
         effective_categories_threshold = rare_categories_threshold
 
     return CartMethod(
         regressor=TreeRegressorMethod(
-            rare_value_threshold=effective_categories_threshold,
+            rare_categories_threshold=effective_categories_threshold,
             tree=DecisionTreeRegressor(
                 min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
                 min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
