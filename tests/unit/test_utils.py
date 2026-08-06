@@ -363,16 +363,16 @@ def test_to_standardised_array_dict_with_numpy_inputs():
     (np.array(([np.nan]*10)+["b"]*6,dtype=str_dtype), 7),# number of occurrences strictly lower than threshold, with missing values
     ( np.array(([True]*4 + [False]*6)),5)#boolean
 ])
-def test_raise_on_rare_value_positive_cases(x, threshold):
+def test_raise_on_rare_value_raises_below_threshold(x, threshold):
 
     txt_threshold = re.escape(f"fewer than {threshold} times.")
-    txt_column_name = re.escape(f"column_with_thresold{threshold}")
+    txt_column_name = re.escape(f"column_with_threshold{threshold}")
 
     message_regex = f".* {txt_column_name}.*{txt_threshold}"
 
     with pytest.raises(ValueError,match=message_regex):
         _raise_on_rare_value(
-            x, threshold, name=f"column_with_thresold{threshold}")
+            x, threshold, name=f"column_with_threshold{threshold}")
 
 
 def test_raise_on_rare_value_no_name():
@@ -397,7 +397,7 @@ def test_raise_on_rare_value_no_name():
     # number of occurrences exactly equal to threshold, with missing values.
     (([np.nan]*5)+["b"]*6, 5),
 ])
-def test_array_has_rare_value_negative_cases(x, threshold):
+def test_raise_on_rare_value_does_not_raise_above_threshold(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
 
     assert _raise_on_rare_value(x_in, threshold, name="some_name") is None
@@ -411,4 +411,4 @@ def test_array_has_rare_value_negative_cases(x, threshold):
     ( np.array(([True]*4 + [False]*6)))#boolean
 ])
 def test_raise_on_rare_value_disabled(x):
-    assert _raise_on_rare_value(x,0, name="some_name") is None
+    assert _raise_on_rare_value(x, 0, name="some_name") is None

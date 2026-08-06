@@ -318,7 +318,7 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
 @pytest.mark.parametrize("X, y, index_cat, threshold",
                          [(*standard_args,threshold) for standard_args in get_input_test_data() for threshold in [None,10,1]]
                          )
-def test_fit_raises_on_rare_values(X, y, index_cat,threshold, tree_method):
+def test_fit_calls_rare_value_check(X, y, index_cat,threshold, tree_method):
     # the testcase where the parameter threshold is None simulates default behaviour. 
     if threshold is None:
         expected_threshold = 5
