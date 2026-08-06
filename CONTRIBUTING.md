@@ -4,6 +4,7 @@ First off, thanks for taking the time to contribute! ❤️
 
 All types of contributions are encouraged and valued. See below for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions.
 
+(#i-have-a-question)=
 ## I Have a Question
 
 > If you want to ask a question, we assume that you have read the available [Documentation](https://github.com/Synthpop-data/synthpop-py/tree/develop/docs/source).
@@ -46,7 +47,7 @@ Depending on how large the project is, you may want to outsource the questioning
 A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as fast as possible.
 
 - Make sure that you are using the latest version.
-- Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://github.com/Synthpop-data/synthpop-py/tree/develop/docs/source). If you are looking for support, you might want to check [this section](#i-have-a-question)).
+- Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://github.com/Synthpop-data/synthpop-py/tree/develop/docs/source). If you are looking for support, you might want to check {ref}`this section <#i-have-a-question>`.
 - To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/Synthpop-data/synthpop-py/issues).
 - Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
@@ -64,7 +65,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 
-- Open an [Issue](/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
+- Open an [Issue](https://github.com/duonl/synthpop-py/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
 - Explain the behaviour you would expect and the actual behaviour.
 - Please provide as much context as possible and describe the *reproduction steps* that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
 - Provide the information you collected in the previous section.
@@ -73,7 +74,7 @@ Once it's filed:
 
 - The project team will label the issue accordingly.
 - A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
-- If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
+- If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be {ref}`implemented by someone <#your-first-code-contribution>`.
 
 <!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
@@ -84,8 +85,8 @@ This section guides you through submitting an enhancement suggestion for Synthpo
 
 #### What kind of enhancements can I do
 We are always happy with improvements to readability and language. We would accept improvements in the efficiency of the code that should not break the code of users. We would like to hear improvements that would break code of users of this package as well. Let us know if you feel that there is some guide or documentation missing. If it would had been useful for you, it will be useful for others.
-#### Before Submitting an Enhancement
 
+#### Before Submitting an enhancement
 - Make sure that you are using the latest version.
 - Read the [documentation](https://github.com/Synthpop-data/synthpop-py/tree/develop/docs/source) carefully and find out if the functionality is already covered, maybe by an individual configuration.
 - Perform a [search](https://github.com/Synthpop-data/synthpop-py/issues) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one. This helps us prioritize enhancements and to make it helpful to as many people as possible.
@@ -106,6 +107,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/Synthp
 
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
+(#your-first-code-contribution)=
 ### Your First Code Contribution
 
 #### Setting up your development environment
@@ -127,4 +129,4 @@ Updating, improving and correcting the documentation
 
 ## Styleguides
 See [here](https://github.com/Synthpop-data/synthpop-py/blob/develop/docs/source/developer/code_standards_and_norms.md) for style guides and conventions.
-We have checklist that can be used when [developing](https://github.com/Synthpop-data/synthpop-py/blob/develop/docs/source/developer/checklist_for_developer.md) and when [reviewing](https://github.com/Synthpop-data/synthpop-py/blob/develop/docs/source/developer/checklist_for_review.md) code.
+We have checklist that can be used when [developing](./docs/source/developer/way_of_working/checklist_for_developer.md) and when [reviewing](./docs/source/developer/way_of_working/checklist_for_review.mdd) code.
