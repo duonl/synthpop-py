@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.utils.estimator_checks import check_estimator
 
 from synthpop.data_processing.encoders import PCAEncoder
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
@@ -261,7 +262,6 @@ def test_output_is_not_a_copy_unique_data():
     result = method.fit_transform(X, y)
 
     assert not np.array_equal(y, result)
-
 
 
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
@@ -540,3 +540,76 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
     # check if transform does not fail
     result = method.transform(X_pred)
     assert len(result) == len(y) * 100
+
+
+def ndarray_to_dict(a):
+    if isinstance(a, np.ndarray):
+        return {i: a[:, i] for i in range(a.shape[1])}
+    return a
+
+
+def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
+    # sklearn provides valuable tests.
+    # Those tests assume that the input is a numpy array.
+    # The tree methods assume that the input is a dictionary.
+
+    # We want to test if the tree method that the user is going to use are sklearn compatible.
+    # So we cannot use the StubTreeMethod as in all other tests.
+
+    # The solution is that a class is constructed in each sklearn test.
+    # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
+
+    class EstimatorWrap(TreeClassifierMethod):
+
+        def __sklearn_tags__(self):
+            tags = super().__sklearn_tags__()
+            tags.input_tags.two_d_array = True  # Required for sklearn to apply the tests
+            return tags
+
+        def fit(self, X, y):
+            return super().fit(ndarray_to_dict(X.astype(str_dtype)), y.astype(str_dtype))
+
+        def transform(self, X):
+            return super().transform(ndarray_to_dict(X))
+
+    # This is needed to change the datatype of the estimator to the child class.
+    # estimator.__class__ = EstimatorWrap
+    wrapped = EstimatorWrap()
+
+    test_results = check_estimator(
+        wrapped,
+        legacy=False,
+        expected_failed_checks={
+            "check_fit_score_takes_y": "tests with a score component"
+        },
+        on_fail='raise'
+    )
+
+
+@pytest.mark.noautofixt
+def test_TreeMethod_is_sklearn_TreeRegressor_compatible():
+
+    class EstimatorWrap(TreeRegressorMethod):
+        def __sklearn_tags__(self):
+            tags = super().__sklearn_tags__()
+            tags.input_tags.two_d_array = True  # Required for sklearn to apply the tests
+            return tags
+
+        def fit(self, X, y):
+            return super().fit(ndarray_to_dict(X), y)
+
+        def transform(self, X):
+            return super().transform(ndarray_to_dict(X))
+
+    # This is needed to change the datatype of the estimator to the child class.
+    # estimator.__class__ = EstimatorWrap
+    wrapped = EstimatorWrap()
+
+    test_results = check_estimator(
+        wrapped,
+        legacy=False,
+        expected_failed_checks={
+            "check_fit_score_takes_y": "tests with a score component"
+        },
+        on_fail='raise'
+    )
