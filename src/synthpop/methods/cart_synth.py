@@ -39,7 +39,7 @@ def _to_fixed_length_string_array(a: npt.NDArray) -> npt.NDArray:
     Converts an array of StringDType to an array of fixed length string dtype.
     Missing values are not supported.
     """
-    max_length = max([len(v) for v in a])
+    max_length = max(len(v) for v in a)
     return a.astype("U" + str(max_length))
 
 
@@ -52,8 +52,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to 0, the check is disabled. \
-        If set to an integer, categorical values that occur less than that value are considered rare.
+        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to ``0``, the check is disabled.
         .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
 
     """
@@ -61,7 +61,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def __init__(
         self,
         *,
-        rare_categories_threshold: int  = 5,
+        rare_categories_threshold: int = 5,
         tree: BaseDecisionTree | None = None,
         encoder: TransformerMixin | None = None,
         missing_handler: BaseMissingValueHandler | None = None,
@@ -248,8 +248,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to 0, the check is disabled. \
-        If set to an integer, categorical values that occur less than that value are considered rare.
+        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to ``0``, the check is disabled.
 
     .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
 
@@ -319,8 +319,8 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param rare_categories_threshold:  Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to 0, the check is disabled. \
-        If set to an integer, categorical values that occur less than that value are considered rare.
+        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to ``0``, the check is disabled.
 
     .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
 
@@ -353,7 +353,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def __init__(
             self,
             *,
-            rare_categories_threshold: int | None = 5,
+            rare_categories_threshold: int = 5,
             tree=None,
             encoder=None,
             missing_handler=None,
@@ -544,8 +544,8 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         
-        If set to a positive integer, that value is used as the threshold. 
-        If set to ``0``, the rare-category check is disabled.
+        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to ``0``, the check is disabled.
         If set to ``None``, the value of ``n_leaves`` is used.
         The default value is ``None`` for :func:`tune_cart`, which means the threshold
         defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective

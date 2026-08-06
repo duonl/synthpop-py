@@ -144,7 +144,7 @@ def _to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
     return {key: _standardise_array_dtypes(value) for key, value in data.items()}
 
 
-def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None):
+def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None) -> None:
 
     m_nan = pd.isna(x)
     _, counts = np.unique(x[~m_nan], return_counts=True)
@@ -164,4 +164,3 @@ def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | Non
             "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. "
             "See :func:`~synthpop.methods.cart_synth.tune_cart`"
         )
-    return

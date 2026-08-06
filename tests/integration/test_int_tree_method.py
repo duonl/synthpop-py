@@ -171,7 +171,7 @@ NO_MISSING_TARGET = [
 
 
 def test_treemethod_classifier_fit_and_transform():
-    tree_method = TreeClassifierMethod(rare_categories_threshold=0,)
+    tree_method = TreeClassifierMethod(rare_categories_threshold=0)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -190,7 +190,7 @@ def test_treemethod_classifier_fit_and_transform():
 
 
 def test_treemethod_regressor_fit_and_transform():
-    tree_method = TreeRegressorMethod(rare_categories_threshold=0,)
+    tree_method = TreeRegressorMethod(rare_categories_threshold=0)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -405,11 +405,11 @@ def test_classifier_missing_target(method, X, y):
     "method, X, y",
     [
         (
-            TreeRegressorMethod(rare_categories_threshold=0,),
+            TreeRegressorMethod(rare_categories_threshold=0),
             *get_test_data_regressor(with_cats=True),
         ),
         (
-            TreeRegressorMethod(rare_categories_threshold=0,),
+            TreeRegressorMethod(rare_categories_threshold=0),
             *get_test_data_regressor(with_cats=True,
                                      with_missing_features=True),
         ),

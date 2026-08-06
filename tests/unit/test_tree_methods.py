@@ -315,10 +315,16 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
         y, 42
     )  # 42 is the hardcoded n_samples value of the validate_dict_x stub
 
-@pytest.mark.parametrize("X, y, index_cat, threshold",
-                         [(*standard_args,threshold) for standard_args in get_input_test_data() for threshold in [None,10,1]]
+@pytest.mark.parametrize(
+    "X, y, index_cat, threshold",
+    [
+        (*standard_args, threshold)
+        for standard_args in get_input_test_data()
+        for threshold in [None, 10, 1]
+    ],
+)
                          )
-def test_fit_calls_rare_value_check(X, y, index_cat,threshold, tree_method):
+def test_fit_calls_rare_category_check(X, y, index_cat,threshold, tree_method):
     # the testcase where the parameter threshold is None simulates default behaviour. 
     if threshold is None:
         expected_threshold = 5
@@ -346,11 +352,16 @@ def test_fit_calls_rare_value_check(X, y, index_cat,threshold, tree_method):
 
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
-def test_fit_raises_on_rare_values_not_called_when_disabled(X, y, index_cat, tree_method,):
+def test_fit_raises_on_rare_category_not_called_when_disabled(
+    X,
+    y,
+    index_cat,
+    tree_method,
+):
     tree_method.rare_categories_threshold = 0
     tree_method.fit(X, y)
 
-    assert 0 == synthpop.utils._raise_on_rare_category.call_count
+    synthpop.utils._raise_on_rare_category.assert_not_called()
 
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())

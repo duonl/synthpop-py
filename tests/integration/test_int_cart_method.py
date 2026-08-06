@@ -419,7 +419,7 @@ def test_cart_method_raises_on_rare_category(y):
 def test_tune_cart_disable_rare_categories_check():
 
     feature = ["x", "y", "z"] * 10
-    y = [1, 2, 3]*10
+    y = [1, 2, 3] * 10
     feature[3] = "unique value"
     X = {
         "column": np.array(feature, dtype=str_dtype)
