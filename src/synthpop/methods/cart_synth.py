@@ -109,7 +109,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
                 is_numeric = pd.api.types.is_numeric_dtype(values.dtype)
                 is_boolean = pd.api.types.is_bool_dtype(values.dtype)
                 if (not is_numeric) or is_boolean:
-                    utils._raise_on_rare_value(
+                    utils._raise_on_rare_category(
                         x=values,
                         rare_threshold=self.rare_categories_threshold,
                         name=key,
