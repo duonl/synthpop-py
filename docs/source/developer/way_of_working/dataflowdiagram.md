@@ -81,7 +81,7 @@ flowchart TD
 zoom:
 ---
 
-graph TD
+flowchart TD
       U(["User"]) -->|"n: int | None"| S["Synthesiser.generate(n)"]
 
       S --> CHECK["Check fitted Synthesiser<br/><br/>Load models_ and column_order_"]
