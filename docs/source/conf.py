@@ -66,6 +66,9 @@ myst_enable_extensions = [
     "tasklist",
     "attrs_inline",
 ]
+
+myst_heading_anchors = 3
+
 autodoc_member_order = "bysource"
 
 autodoc_typehints = "description"
