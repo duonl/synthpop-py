@@ -86,15 +86,9 @@ intersphinx_mapping = {
 
 mermaid_init_js = """
 mermaid.initialize({
-    startOnLoad: true,
-    theme: "base",
     flowchart: {
-        diagramPadding: 4,
-        nodeSpacing: 30,
-        rankSpacing: 40,
-    },
-    themeVariables: {
-        background: "#ffffff"
+        htmlLabels: false,
+        useMaxWidth: false,
     }
 });
 """

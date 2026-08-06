@@ -58,7 +58,7 @@ flowchart LR
       FM_C --> DTC["DecisionTreeClassifier.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[str]<br/>)"]
 
       DTR --> DTRA["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
-      DTC --> DTCA["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>) <br/><br/></br>Output:<br/>leaf_ids: np.ndarray[int64]"]
+      DTC --> DTCA["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
       DTRA --> LS1["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[float32]<br/>)"]
 
