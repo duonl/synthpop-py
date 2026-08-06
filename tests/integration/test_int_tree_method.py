@@ -586,7 +586,6 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
     )
 
 
-@pytest.mark.noautofixt
 def test_TreeMethod_is_sklearn_TreeRegressor_compatible():
 
     class EstimatorWrap(TreeRegressorMethod):
