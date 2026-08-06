@@ -41,6 +41,14 @@ alternative_encoder.md
 ```{toctree}
 :maxdepth: 1
 :hidden:
+:caption: Privacy caveats
+
+rare_categories.md
+```
+
+```{toctree}
+:maxdepth: 1
+:hidden:
 :caption: Custom synthesis
 
 custom_encoder.md
@@ -48,10 +56,3 @@ custom_synth.md
 
 ```
 
-```{toctree}
-:maxdepth: 1
-:hidden:
-:caption: Privacy caveats
-
-rare_categories.md
-```

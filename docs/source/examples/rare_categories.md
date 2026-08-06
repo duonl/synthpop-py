@@ -105,8 +105,10 @@ plt.show()
 ```
 
 
-    
-![png](../images/rare_categories_decision_tree.png)
+
+```{image} ../images/rare_categories_decision_tree.svg 
+:width: 500%
+```  
     
 
 

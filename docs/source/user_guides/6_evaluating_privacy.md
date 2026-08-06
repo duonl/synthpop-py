@@ -39,6 +39,8 @@ A common approach for evaluating identity disclosure is to measure how closely s
 ### 6.1.2. Attribute disclosure
 Attribute disclosure occurs when a third party learns sensitive information about an individual, even without identifying the exact record.
 
+A sensitive attribute is an attribute whose value is considered confidential and could cause harm or reveal private information if inferred about an individual. Examples include medical diagnoses, income, political affiliation or other personal characteristics. In the context of attribute disclosure, the concern is that a third party who already knows an individual's quasi-identifying characteristics (such as age, sex or location) may use the synthetic data to infer the value of one or more sensitive attributes with high confidence.
+
 For example, if an individual is known to belong to a particular group and the synthetic data reveal that all individuals in that group share a sensitive attribute, a third party may infer information about the individual.
 
 Attribute disclosure can occur when:
