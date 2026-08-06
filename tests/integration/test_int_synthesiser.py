@@ -1,14 +1,17 @@
 import numpy as np
 import pandas as pd
 import pytest
+import warnings
 
 from synthpop.methods.cart_synth import CartMethod
 from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.synthesiser import Synthesiser
+from synthpop.reproducibility import RandomStateManager
 
 from tests.integration.data_generated_for_tests import (
     simulate_realistic_dataset_correlations,
+    get_test_data_regressor,
     make_data_missing
 )
 
@@ -541,3 +544,23 @@ def test_error_on_rowcount_mismatch():
 
     with pytest.raises(ValueError, match="Row mismatch"):
         fit.generate(n=10)
+ 
+def test_generate_does_not_raise_dataframe_fragmentation_warning():
+    """
+    Regression test for issue #164.
+    
+    Ensures that generating synthetic data does not trigger pandas' PerformanceWarning for highly fragmented DataFrames.
+    """
+    seed = 7
+    X, y = get_test_data_regressor(
+        seed=seed, with_cats=True, with_missing_features=True, with_missing_target=True)
+
+    RandomStateManager.set_root_seed([seed])
+    obs = pd.DataFrame(X)
+    obs["target"] = y
+
+    synth = Synthesiser(random_seed=0)
+    synth.fit(obs)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", pd.errors.PerformanceWarning)
+        synth.generate(100)

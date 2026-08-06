@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,6 +12,7 @@ from synthpop.methods.cart_synth import (
     CartMethod,
     TreeClassifierMethod,
     TreeRegressorMethod,
+    tune_cart,
 )
 from synthpop.utils import str_dtype
 
@@ -505,3 +508,34 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
     out_different_missing_handling = cart_standard.transform(X)
     pd.testing.assert_series_equal(
         out_standard, out_different_missing_handling)
+
+@pytest.mark.parametrize(" y", [
+    (np.array(
+        ["a", "b", "c", "d", "e"] * 6, dtype=str_dtype)),
+    (np.array([1, 2, 3, 4, 5] * 6))
+])
+def test_cart_method_raises_on_rare_category(y):
+    """
+    Test for an exception when there is a value of a categorical variable that occurs once.
+    Since the decision trees use randomness, this error does not happen for all seeds.
+
+    If the root seed is 0, the overfitting happens.
+    The control_random_state_manager fixture in make_int_test_reproducible.py sets the root seed to 0.
+
+    """
+    # This test is affected by #210
+    feature = ["x", "y", "z"] * 10
+    feature[3] = "unique value"
+    X = {
+        "column": np.array(feature, dtype=str_dtype)
+    }
+
+    method = tune_cart(n_leaves=2)
+
+    with pytest.raises(ValueError, match=re.escape("Categorical predictor column contains a category occurring fewer than 5 times. \
+                                                   This may allow the CART method to copy target values for small groups, \
+                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+        result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
+
+        # this assertion should not be reached when #156 is done.
+        assert result[3] != y[3], "attribute disclosure for sample 3"
