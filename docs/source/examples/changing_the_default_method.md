@@ -140,9 +140,10 @@ from synthpop.methods import CopyMethod
 ```
 could be used for variables that act as fixed identifiers or structural fields that must remain unchanged. A possible example is an internal record identifier that is required for linking synthetic data with another system.
 
-However, `CopyMethod` should be used carefully because copied values are directly taken from the original dataset. It does **not** provide privacy protection for that variable. It should never be used as the `default_syn_method`.
+However, `CopyMethod` should be used carefully because copied values are directly taken from the original dataset. It does **not** provide privacy protection for that variable. It should **never** be used as the `default_syn_method`. Additionally, because values are copied directly, it cannot generate more rows than the original dataset.
 
-Additionally, because values are copied directly, it cannot generate more rows than the original dataset.
+The S_pMSE heatmap below shows that the value for each variable pair is 0 (defined as "CONSTANT VARIABLE") because the original and the synthetic data are identical.
+![S_pMSE heatmap for synthetic dataset fully copied from the original](../images/spmse_copymethod.png)
 
 We will use `CopyMethod` in the next example where different synthesis methods are assigned to different columns. More information about CART synthesis can be found in {ref}`User Guide 3.3: Copy synthesis method <33-copy-synthesis>`.
 
