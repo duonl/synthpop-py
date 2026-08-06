@@ -25,7 +25,7 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
 
 /* Generated SVG */
 .mermaid svg {
-    background: white;
+    background: transparant !important;
     display: block;
     margin: auto;
 }
