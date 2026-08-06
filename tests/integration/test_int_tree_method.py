@@ -570,7 +570,7 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
             return super().fit(ndarray_to_dict(X.astype(str_dtype)), y.astype(str_dtype))
 
         def transform(self, X):
-            return super().transform(ndarray_to_dict(X))
+            return super().transform(ndarray_to_dict(X.astype(str_dtype)))
 
     # This is needed to change the datatype of the estimator to the child class.
     # estimator.__class__ = EstimatorWrap
@@ -596,10 +596,10 @@ def test_TreeMethod_is_sklearn_TreeRegressor_compatible():
             return tags
 
         def fit(self, X, y):
-            return super().fit(ndarray_to_dict(X), y)
+            return super().fit(ndarray_to_dict(X.astype(np.float32)), y)
 
         def transform(self, X):
-            return super().transform(ndarray_to_dict(X))
+            return super().transform(ndarray_to_dict(X.astype(np.float32)))
 
     # This is needed to change the datatype of the estimator to the child class.
     # estimator.__class__ = EstimatorWrap
