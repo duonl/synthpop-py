@@ -56,7 +56,7 @@ def rigged_tree_classifier_method(pca_components=1):
     return TreeClassifierMethod(
         tree=tree,
         encoder=PCAEncoder(pca_transform=PCA(n_components=pca_components)),
-        rare_value_threshold=None
+        rare_categories_threshold=None
     )
 
 
@@ -171,7 +171,7 @@ NO_MISSING_TARGET = [
 
 
 def test_treemethod_classifier_fit_and_transform():
-    tree_method = TreeClassifierMethod(rare_value_threshold=None,)
+    tree_method = TreeClassifierMethod(rare_categories_threshold=None,)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -489,7 +489,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
             random_state=tree_seed,  # seed that reproduces the bug
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
-        rare_value_threshold=None,
+        rare_categories_threshold=None,
     )
 
     X, y = get_test_data_classifier(
