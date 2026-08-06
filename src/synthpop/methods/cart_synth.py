@@ -49,6 +49,9 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param encoder: a transformer object.
     :param missing_handler: handler for missing values in the target variable.
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
+                    If set to `None` or 0, the check is disabled. \
+                    If set to an integer, categorical values that occur less than that value are considered rare.
 
     """
 
@@ -239,8 +242,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_value_threshold: threshold for when a categorical value is considered "rare". \
-                If set to `None`, the check is disabled. \
+    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
+                If set to `None` or 0, the check is disabled. \
                 If set to an integer, categorical values that occur less than that value are considered rare.
 
     The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
@@ -306,9 +309,9 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_value_threshold: threshold for when a categorical value is considered "rare". \
-            If set to `None`, the check is disabled. \
-            If set to an integer, categorical values that occur less than that value are considered rare.
+    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
+                    If set to `None` or 0, the check is disabled. \
+                    If set to an integer, categorical values that occur less than that value are considered rare.
 
     The output will always be a numpy array. The output will always have np.float32 as dtype.
     Missing values will always be represented with `np.nan`.
