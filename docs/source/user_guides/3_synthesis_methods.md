@@ -45,6 +45,9 @@ During synthesis, a synthetic observation is first assigned to a leaf node based
 The following diagram illustrates a simplified CART model. The internal nodes represent decision rules applied to predictor variables, while the leaf nodes contain the empirical distribution of observed target values from which synthetic values are sampled.
 
 ```{mermaid}
+---
+zoom:
+---
 flowchart TD
     A["Root node<br/>Age < 50?"] -->|Yes| B["Profession = Cook?"]
     A -->|No| C["Leaf 3<br/><br/>Observed target values:<br/>[72, 75, 80]"]

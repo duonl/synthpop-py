@@ -7,8 +7,9 @@ The diagrams illustrate key processes such as fitting a Synthesiser and generati
 ## Overall process data flow
 ### `Synthesiser.fit()` data flow
 ```{mermaid}
-:zoom:
-
+---
+zoom:
+---
 flowchart LR
       U(["User"]) -->|X: pd.DataFrame| S["Synthesiser.fit(X: pd.DataFrame)"]
 
@@ -76,7 +77,9 @@ flowchart LR
 
 ### `Synthesiser.generate()` data flow
 ```{mermaid}
-:zoom:
+---
+zoom:
+---
 
 flowchart LR
       U(["User"]) -->|"n: int | None"| S["Synthesiser.generate(n)"]
@@ -143,6 +146,11 @@ flowchart LR
 
 ## Fit flow for numeric target
 ```{mermaid}
+
+---
+zoom:
+---
+
 flowchart TD
 
 subgraph input
@@ -176,6 +184,9 @@ ft_missing-->fit_missing
 
 ## Fit flow for categorical targets
 ```{mermaid}
+---
+zoom:
+---
 flowchart TD
 
 subgraph input
@@ -198,6 +209,9 @@ np_target-->fill_na["replace missing values with 'N.a.N.'"]-->no_na_target[("tar
 ## Generating a numeric column
 
 ```{mermaid}
+---
+zoom:
+---
 flowchart TD
 
 prev_syn[("previously synthesised data: **Dataframe**")]
@@ -222,6 +236,9 @@ new_column --> to_df["convert to series/dataframe"] -->prev_syn
 
 ## Generating a categorical column
 ```{mermaid}
+---
+zoom:
+---
 flowchart TD
 
 prev_syn[("previously synthesised data: **Dataframe**")]
@@ -238,6 +255,9 @@ new_column --> to_df["convert to series/dataframe"] -->prev_syn
 
 ## Abstract diagram
 ```{mermaid}
+---
+zoom:
+---
 flowchart LR
 
 subgraph input
