@@ -7,8 +7,8 @@ from typing import Sequence
 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 def _categorise_spmse(spmse: pd.DataFrame, bins: Sequence[float]) -> pd.DataFrame:
@@ -34,13 +34,23 @@ def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     :param value_string: either S_pMSE (matrix for text in figure)
     or category (matrix for colour in figure)
 
-    return: NxN matrix
+    return: an NxN matrix
     """
 
     matrix = df.pivot(index="column1", columns="column2", values=value_string)
     matrix = matrix.combine_first(matrix.T)
+
+    # Ensure variables present on only one axis are included in both axes.
+    # This is required when the diagonal is not stored.
+    variables = sorted(set(matrix.index) | set(matrix.columns))
+
+    matrix = matrix.reindex(
+        index=variables,
+        columns=variables,
+    )
+
     matrix = matrix.rename_axis(index=None, columns=None)
-    # invert s.t. the diagonal goes from upper-left to lower-right
+
     return matrix.iloc[::-1]
 
 
@@ -54,20 +64,27 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
 
     :param matrix: NxN numpy matrix
 
-    return: NxN matrix
+    return: an NxN matrix
     """
     text_matrix = matrix.round(2).astype(str)
+
+    text_matrix = text_matrix.mask(
+        matrix.isna(),
+        "UNDEFINED",
+    )
+
     text_matrix = text_matrix.mask(matrix == 0, "CONSTANT VARIABLE")
 
     return text_matrix
 
 
 def _get_colour_scale() -> list:
-    """"
+    """
     Helper function to obtain the discrete colour scale used for the S_pMSE bins.
     """
 
-    colours = ['rgb(255,255,255)'] + px.colors.sequential.YlOrBr[:5]
+    colours = ['rgb(225, 225, 225)'] + ['rgb(255, 255, 255)'] + \
+        px.colors.sequential.YlOrBr[:5]
 
     n = len(colours)
     colour_scale = []
@@ -81,16 +98,18 @@ def _get_colour_scale() -> list:
 
 
 def _make_heatmap(
-        matrix: pd.DataFrame, text_matrix: pd.DataFrame,
-        colour_scale: list, bins: Sequence[float], bin_labels: Sequence[str]
-)-> go.Figure:
+        matrix: pd.DataFrame,
+        text_matrix: pd.DataFrame,
+        colour_scale: list,
+        bin_labels: Sequence[str]
+) -> go.Figure:
     """
     Generate an interactive Plotly heatmap of the categorised S_pMSE matrix.
 
     :param matrix: pandas DataFrame of the categorised S_pMSE
     :param text_matrix: pandas DataFrame of the same shape as ``matrix``
         containing the text displayed in each heatmap cell (e.g. rounded
-        values or "CONSTANT VARIABLE").
+        values, "CONSTANT VARIABLE" or "UNDEFINED" for unpresent combinations).
     :param colour_scale: Plotly-compatible colour scale applied to the heatmap.
     :param bins: Sequence of bin edges used to categorise the S_pMSE values.
     :param bin_labels: Labels corresponding to the bins, displayed on the
@@ -114,10 +133,10 @@ def _make_heatmap(
             ),
             colorscale=colour_scale,
             zmin=0,
-            zmax=len(bins),
+            zmax=len(bin_labels),
             colorbar=dict(
                 tickmode="array",
-                tickvals=np.array(range(len(bins)))+0.5,
+                tickvals=np.array(range(len(bin_labels))) + 0.5,
                 ticktext=bin_labels,
                 title="S_pMSE bins",
                 outlinecolor="black",
@@ -198,7 +217,8 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     """
 
     if not isinstance(spmse, pd.DataFrame):
-        raise ValueError(f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead.")
+        raise ValueError(
+            f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead.")
 
     if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
 
@@ -214,21 +234,28 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
 
     bins = [0, 3, 10, 30, 100, np.inf]
     bin_labels = [
-        "CONSTANT VARIABLE", "(0,3]", "(3,10]",
+        "UNDEFINED", "CONSTANT VARIABLE", "(0,3]", "(3,10]",
         "(10,30]", "(30,100]", '(100,+)'
     ]
 
     # pairwise_spmse does not return nan
     spmse = _categorise_spmse(spmse, bins)
 
-    matrix = _make_matrix(spmse, "category")
     matrix_orig = _make_matrix(spmse, "S_pMSE")
-
     text_matrix = _make_text_matrix(matrix_orig)
+
+    matrix = _make_matrix(spmse, "category")
+    matrix += 1
+    matrix = matrix.fillna(0)
+
+    # Make matrix gives back the categories corresponding to the bins
+    # Reserve category 0 for UNDEFINED pairwise combinations
+    # Category 1 then represents constant variables (S_pMSE == 0)
+    # Category 2 then becomes the (0, 3] bin, and so on
 
     colour_scale = _get_colour_scale()
 
-    fig = _make_heatmap(matrix, text_matrix, colour_scale, bins, bin_labels)
+    fig = _make_heatmap(matrix, text_matrix, colour_scale, bin_labels)
 
     if save_path:
 
