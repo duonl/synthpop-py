@@ -9,7 +9,7 @@ The diagrams illustrate key processes such as fitting a Synthesiser and generati
 ```{mermaid}
 :zoom:
 
-flowchart TD
+flowchart LR
       U(["User"]) -->|X: pd.DataFrame| S["Synthesiser.fit(X: pd.DataFrame)"]
 
       S --> O["Determine column_order_"]
@@ -78,7 +78,7 @@ flowchart TD
 ```{mermaid}
 :zoom:
 
-flowchart TD
+flowchart LR
       U(["User"]) -->|"n: int | None"| S["Synthesiser.generate(n)"]
 
       S --> CHECK["Check fitted Synthesiser<br/><br/>Load models_ and column_order_"]
