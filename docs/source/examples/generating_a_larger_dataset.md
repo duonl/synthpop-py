@@ -4,39 +4,27 @@ In the previous examples, we generated a synthetic dataset with the same number 
 One advantage of synthetic data is that we can generate more records than were available in the original dataset. This can be useful when testing analysis pipelines, developing software or creating datasets for simulation studies.
 
 ## Loading the data
-For this example, we use the Iris dataset from `scikit-learn`. Unlike the diabetes dataset used in the previous example, this dataset contains both numerical variables and a categorical variable. Initially, the categorical variable is represented as integers. In the code below, we map them to the related names.
+For this example, we use the [Titanic dataset](https://github.com/mwaskom/seaborn-data/blob/master/titanic.csv) from `seaborn`. Unlike the diabetes dataset used in the previous example, this dataset contains both numerical and categorical variables making it a realistic example for demonstrating synthetic data generation.
 ```python
-from sklearn.datasets import load_iris
+import seaborn as sns
 
-iris = load_iris(as_frame=True)
-
-data = iris.frame
-
-# use the names instead of integer representation
-data["target"] = data["target"].map(
-    dict(enumerate(iris.target_names))
-)
+data = sns.load_dataset("titanic")
 
 data.head(3)
 ```
 The first three rows of the dataset are:
-|    |   sepal length (cm) |   sepal width (cm) |   petal length (cm) |   petal width (cm) | target   |
-|---:|--------------------:|-------------------:|--------------------:|-------------------:|:---------|
-|  0 |                 5.1 |                3.5 |                 1.4 |                0.2 | setosa   |
-|  1 |                 4.9 |                3   |                 1.4 |                0.2 | setosa   |
-|  2 |                 4.7 |                3.2 |                 1.3 |                0.2 | setosa   |     
+|    |   survived |   pclass | sex    |   age |   sibsp |   parch |    fare | embarked   | class   | who   | adult_male   | deck   | embark_town   | alive   | alone   |
+|---:|-----------:|---------:|:-------|------:|--------:|--------:|--------:|:-----------|:--------|:------|:-------------|:-------|:--------------|:--------|:--------|
+|  0 |          0 |        3 | male   |    22 |       1 |       0 |  7.25   | S          | Third   | man   | True         | nan    | Southampton   | no      | False   |
+|  1 |          1 |        1 | female |    38 |       1 |       0 | 71.2833 | C          | First   | woman | False        | C      | Cherbourg     | yes     | False   |
+|  2 |          1 |        3 | female |    26 |       0 |       0 |  7.925  | S          | Third   | woman | False        | nan    | Southampton   | yes     | True    |   
 
-The dataset contains measurements of iris flowers. The target column describes the flower species and is a categorical variable. In total, the dataset has 150 rows.
-```{warning}
-The Iris dataset contains only 150 observation, which is small for training and evaluating a synthetic data model. 
-
-We use the Iris dataset because it is a simple, well-known, and readily available dataset that makes it easy to demonstrate the effect of changing the synthesis order without introducing unnecessary complexity.
-```
+The dataset contains information about passengers aboard the Titanic, including demographic characteristics, ticket information, and whether each passenger survived.
 
 ## Creating and fitting the Synthesiser
-First, we create and fit the synthesiser like we've done in previous examples.
+First, we create and fit the synthesiser as in the previous examples.
 ```python
-from synthpop.synthesiser import Synthesiser
+from synthpop import Synthesiser
 
 synthesiser = Synthesiser(random_seed=1)
 
@@ -54,14 +42,14 @@ The generated dataset now contains 5000 observations:
 synthetic_data.shape
 ```
 ```text
-(5000, 5)
+(5000, 15)
 ```
 The generated data has the same columns as the original dataset, but contains many more rows.
 ```python
 data.shape
 ```
 ```text
-(150, 5)
+(891, 15)
 ```
 
 ## Evaluating the larger synthetic dataset
@@ -69,7 +57,7 @@ Even when generating a larger dataset, it is important to verify that the synthe
 
 For example, we can compare the univariate distributions:
 ```python
-from synthpop.plotting.plot_univariate import plot_univariate_distributions
+from synthpop.plotting import plot_univariate_distributions
 
 plot_univariate_distributions(
     orig_df=data,
@@ -83,8 +71,8 @@ For categorical variables, the proportion of each category should be similar. Fo
 
 We can also evaluate pairwise relationships using S_pMSE:
 ```python
-from synthpop.utility_metrics.spmse import pairwise_spmse
-from synthpop.plotting.plot_spmse import plot_spmse
+from synthpop.utility_metrics import pairwise_spmse
+from synthpop.plotting import plot_spmse
 
 spmse = pairwise_spmse(
     orig_df=data,

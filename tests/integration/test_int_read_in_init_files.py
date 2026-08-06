@@ -8,7 +8,7 @@ def test_read_in_synthpop_all_():
         "methods",
         "plotting",
         "utility_metrics",
-        "Synthesiser"
+        "Synthesiser",
     ]
 
     assert callable(synthpop.Synthesiser)
@@ -19,7 +19,7 @@ def test_read_in_plotting_functions_all_():
 
     assert plotting.__all__ == [
         "plot_spmse",
-        "plot_univariate_distributions"
+        "plot_univariate_distributions",
     ]
 
     assert callable(plotting.plot_univariate_distributions)
@@ -46,7 +46,7 @@ def test_read_in_methods_functions_all_():
         "CartMethod",
         "tune_cart",
         "TreeRegressorMethod",
-        "TreeClassifierMethod"
+        "TreeClassifierMethod",
     ]
 
     assert callable(methods.CopyMethod)

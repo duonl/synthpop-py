@@ -149,7 +149,7 @@ def _plot_single_distribution(orig: pd.Series, syn: pd.Series, column: str) -> g
     orig_missing = int(orig.isna().sum())
     syn_missing = int(syn.isna().sum())
 
-    if pd.api.types.is_numeric_dtype(orig):
+    if pd.api.types.is_numeric_dtype(orig) and not pd.api.types.is_bool_dtype(orig):
 
         orig_hist, syn_hist = _make_histograms(orig, syn)
 
@@ -270,9 +270,10 @@ def plot_univariate_distributions(
 
     For each variable in the datasets, a separate Plotly visualisation is
     generated and added to a single HTML document. Numeric variables are
-    displayed as overlapping density histograms, while categorical variables
-    are displayed as side-by-side relative frequency bar charts. Missing value
-    counts for both datasets are included as plot annotations.
+    displayed as overlapping density histograms, while categorical and
+    boolean variables are displayed as side-by-side relative frequency bar
+    charts. Missing value counts for both datasets are included as plot
+    annotations.
 
     The original and synthetic datasets must contain identical columns.
     Variables are processed independently and visualised sequentially in a 
@@ -300,54 +301,54 @@ def plot_univariate_distributions(
     Notes
     -----
     Histograms are normalised to probability densities to allow comparison
-    between datasets of different sizes. For categorical variables, relative
-    frequencies are displayed and category levels missing from either dataset
+    between datasets of different sizes. For categorical and boolean variables,
+    relative frequencies are displayed and category levels missing from either dataset
     are assigned a density of zero to maintain comparability.
 
     Examples
     --------
     Using the default parameters:
-        >>> import numpy as np
-        >>> import pandas as pd
-        >>> from synthpop.plotting import plot_univariate_distributions
-        >>>
-        >>> np.random.seed(42)
-        >>>
-        >>> orig_df = pd.DataFrame(
-        ...     {
-        ...         "age": np.random.normal(50, 10, 1000),
-        ...         "children": np.random.poisson(2, 1000),
-        ...         "sex": np.random.choice(
-        ...             ["Male", "Female"],
-        ...             size=1000,
-        ...             p=[0.45, 0.55],
-        ...         ),
-        ...     }
-        ... )
-        >>>
-        >>> syn_df = pd.DataFrame(
-        ...     {
-        ...         "age": np.random.normal(52, 12, 1000),
-        ...         "children": np.random.poisson(3, 1000),
-        ...         "sex": np.random.choice(
-        ...             ["Male", "Female"],
-        ...             size=1000,
-        ...             p=[0.40, 0.60],
-        ...         ),
-        ...     }
-        ... )
-        >>>
-        >>> orig_df.loc[:50, "age"] = np.nan # add missing
-        >>> syn_df.loc[:30, "age"] = np.nan
-        >>>
-        >>> plots = plot_univariate_distributions(
-        ...     orig_df=orig_df,
-        ...     syn_df=syn_df,
-        ...     save_path=None,
-        ...     interactive=False,
-        ... )
-        >>> for fig in plots:
-        ...     fig.show()
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from synthpop.plotting import plot_univariate_distributions
+    >>>
+    >>> np.random.seed(42)
+    >>>
+    >>> orig_df = pd.DataFrame(
+    ...     {
+    ...         "age": np.random.normal(50, 10, 1000),
+    ...         "children": np.random.poisson(2, 1000),
+    ...         "sex": np.random.choice(
+    ...             ["Male", "Female"],
+    ...             size=1000,
+    ...             p=[0.45, 0.55],
+    ...         ),
+    ...     }
+    ... )
+    >>>
+    >>> syn_df = pd.DataFrame(
+    ...     {
+    ...         "age": np.random.normal(52, 12, 1000),
+    ...         "children": np.random.poisson(3, 1000),
+    ...         "sex": np.random.choice(
+    ...             ["Male", "Female"],
+    ...             size=1000,
+    ...             p=[0.40, 0.60],
+    ...         ),
+    ...     }
+    ... )
+    >>>
+    >>> orig_df.loc[:50, "age"] = np.nan # add missing
+    >>> syn_df.loc[:30, "age"] = np.nan
+    >>>
+    >>> plots = plot_univariate_distributions(
+    ...     orig_df=orig_df,
+    ...     syn_df=syn_df,
+    ...     save_path=None,
+    ...     interactive=False,
+    ... )
+    >>> for fig in plots:
+    ...     fig.show()
         
     """
     if not isinstance(orig_df, pd.DataFrame):
