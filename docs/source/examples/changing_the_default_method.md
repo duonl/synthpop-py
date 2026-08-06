@@ -10,7 +10,7 @@ In this example, we will explore how to change the `default_syn_method` paramete
 For a complete overview of available synthesis methods, see [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md).
 
 ## Load the data
-We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables. As such it allows us to explain how different synthesis methods handle different types of data. For simplicity, we limit ourself to only 8 variables:
+We start with the Titanic dataset that was also used in the previous examples. It contains both numerical and categorical variables. As such it allows us to explain how different synthesis methods handle different types of data. For simplicity, we limit ourselves to only 8 variables:
 ```python
 import seaborn as sns
 
@@ -56,7 +56,7 @@ from synthpop.methods import CartMethod
 
 default_syn_method=CartMethod()
 ```
-We did not specifiy any specific column order, and kept the original column order as in the Titanic dataset. CART does not require predictors for the first variable in the synthesis order. As such, the first column is sampled from its observed distribution.
+We did not specify the column order, thus kept the original column order as in the Titanic dataset. CART does not require predictors for the first variable in the synthesis order. As such, the first column is sampled from its observed distribution.
 
 For each column sequentially synthesised after the first, CART uses the previously synthesised variables as predictors to model that column's conditional distribution. As a result, generated values are not sampled independently: later columns depend on the relationships learned from the original dataset. For example, when synthesising `sex`, the method uses the previously generated variables, `survived` and `pclass`, as predictors. Whereas, when synthesising `embarked`,  the methods uses all 7 previously generated variables as predictors.
 
@@ -69,9 +69,7 @@ Unlike CART, where only the first column is sampled independently and later colu
 
 Because it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets, or in cases where modelling relationships between variables provides limited additional value.
 
-In practice, `SampleMethod` is often used at the beginning of a synthesis process when some variables should be generated first without creating combinations of values that do not exist in the original data. For example, sampling initial variables independently can help prevent later synthesis steps from conditioning on unrealistic combinations. It can also be useful when a variable has very weak relationships with the rest of the dataset and a CART model is unlikely to provide additional benefit.
-
-However, `SampleMethod` is generally not preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from observed distributions, privacy protection may be weaker in some situations, particularly for variables containing rare or distinctive values.
+However, `SampleMethod` should generally not be preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from observed distributions, privacy protection may be weaker in some situations, particularly for variables containing rare or distinctive values.
 
 `SampleMethod` can be used as the default synthesis method by passing it to `default_syn_method`.
 ```python
