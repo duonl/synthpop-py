@@ -529,10 +529,11 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
         For integers => 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
-    :param enable_rare_categories_check: Enable or disable checking for rare categories. This is to prevent undesirable attribute disclosure. Enabled by default.
-    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
+    :param rare_categories_threshold: threshold for checking rare categories. \
         If set to `None`, it uses the same value as `n_leaves`. \
         If set to an integer, categorical values that occur less than that value are considered rare. 
+        The check is enabled with a default with a default threshold of 5.
+        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/examples_index>` TODO: add link to example about attribute disclosure.
 
     :return: a CartMethod object with the parameters consistently applied.
 
