@@ -429,5 +429,4 @@ def test_tune_cart_disable_rare_categories_check():
 
     result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
-    # this assertion should not be reached when #156 is done.
     assert result[3] == y[3], "attribute disclosure for sample 3"

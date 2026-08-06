@@ -347,7 +347,7 @@ def test_fit_calls_rare_value_check(X, y, index_cat,threshold, tree_method):
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
 def test_fit_raises_on_rare_values_not_called_when_disabled(X, y, index_cat, tree_method,):
-    tree_method.rare_categories_threshold = None
+    tree_method.rare_categories_threshold = 0
     tree_method.fit(X, y)
 
     assert 0 == synthpop.utils._raise_on_rare_value.call_count

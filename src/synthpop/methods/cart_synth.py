@@ -49,16 +49,19 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param encoder: a transformer object.
     :param missing_handler: handler for missing values in the target variable.
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
-                    If set to `None` or 0, the check is disabled. \
-                    If set to an integer, categorical values that occur less than that value are considered rare.
+    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
+        If a categorical predictor contains values occurring fewer than this threshold, 
+        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        If set to 0, the check is disabled. \
+        If set to an integer, categorical values that occur less than that value are considered rare.
+        .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
 
     """
 
     def __init__(
         self,
         *,
-        rare_categories_threshold: int | None = 5,
+        rare_categories_threshold: int  = 5,
         tree: BaseDecisionTree | None = None,
         encoder: TransformerMixin | None = None,
         missing_handler: BaseMissingValueHandler | None = None,
@@ -101,7 +104,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
 
         self.target_name_ = getattr(y, "name", None)
-        if self.rare_categories_threshold is not None:
+        if self.rare_categories_threshold > 0:
             for key, values in X.items():
                 is_numeric = pd.api.types.is_numeric_dtype(values.dtype)
                 is_boolean = pd.api.types.is_bool_dtype(values.dtype)
@@ -241,13 +244,17 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
-    :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
-                If set to `None` or 0, the check is disabled. \
-                If set to an integer, categorical values that occur less than that value are considered rare.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
+        If a categorical predictor contains values occurring fewer than this threshold, 
+        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        If set to 0, the check is disabled. \
+        If set to an integer, categorical values that occur less than that value are considered rare.
 
-    The output will always be a numpy array. The output will always have `np.dtypes.StringDType(na_object=np.nan)` as dtype.
-    Missing values will always be represented with `np.nan`.
+    .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
+
+    The output will always be a numpy array. The output will always have ``np.dtypes.StringDType(na_object=np.nan)`` as dtype.
+    Missing values will always be represented with ``np.nan``.
 
 
     Examples
@@ -275,7 +282,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     def __init__(
             self,
             *,
-            rare_categories_threshold: int | None = 5,
+            rare_categories_threshold: int = 5,
             tree=None,
             encoder=None,
             missing_handler=None,
@@ -308,13 +315,17 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
-    :param tree_sampler: a  {class}`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold: threshold for when a categorical value is considered "rare". \
-                    If set to `None` or 0, the check is disabled. \
-                    If set to an integer, categorical values that occur less than that value are considered rare.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param rare_categories_threshold:  Threshold for when a categorical value is considered rare.
+        If a categorical predictor contains values occurring fewer than this threshold, 
+        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        If set to 0, the check is disabled. \
+        If set to an integer, categorical values that occur less than that value are considered rare.
 
-    The output will always be a numpy array. The output will always have np.float32 as dtype.
-    Missing values will always be represented with `np.nan`.
+    .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
+
+    The output will always be a numpy array. The output will always have ``np.float32`` as dtype.
+    Missing values will always be represented with ``np.nan``.
 
 
     Examples
@@ -529,11 +540,17 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
         For integers => 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
-    :param rare_categories_threshold: threshold for checking rare categories. \
-        If set to `None`, it uses the same value as `n_leaves`. \
-        If set to an integer, categorical values that occur less than that value are considered rare. 
-        The check is enabled with a default with a default threshold of 5.
-        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/examples_index>` TODO: add link to example about attribute disclosure.
+    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
+        If a categorical predictor contains values occurring fewer than this threshold, 
+        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        
+        If set to a positive integer, that value is used as the threshold. 
+        If set to ``0``, the rare-category check is disabled.
+        If set to ``None``, the value of ``n_leaves`` is used.
+        The default value is ``None`` for :func:`tune_cart`, which means the threshold
+        defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
+        default threshold is also 5.
+        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/examples_index>` for more information. TODO: add link to example about attribute disclosure.
 
     :return: a CartMethod object with the parameters consistently applied.
 

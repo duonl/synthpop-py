@@ -56,7 +56,7 @@ def rigged_tree_classifier_method(pca_components=1):
     return TreeClassifierMethod(
         tree=tree,
         encoder=PCAEncoder(pca_transform=PCA(n_components=pca_components)),
-        rare_categories_threshold=None
+        rare_categories_threshold=0
     )
 
 
@@ -64,7 +64,7 @@ def rigged_tree_regressor_method():
     tree = SpyDecisionTreeRegressor(
         random_state=RandomStateManager.create_instance_seed(),
     )
-    return TreeRegressorMethod(tree=tree, rare_categories_threshold=None)
+    return TreeRegressorMethod(tree=tree, rare_categories_threshold=0)
 
 
 # ----- create data for test cases -----
@@ -171,7 +171,7 @@ NO_MISSING_TARGET = [
 
 
 def test_treemethod_classifier_fit_and_transform():
-    tree_method = TreeClassifierMethod(rare_categories_threshold=None,)
+    tree_method = TreeClassifierMethod(rare_categories_threshold=0,)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -190,7 +190,7 @@ def test_treemethod_classifier_fit_and_transform():
 
 
 def test_treemethod_regressor_fit_and_transform():
-    tree_method = TreeRegressorMethod(rare_categories_threshold=None,)
+    tree_method = TreeRegressorMethod(rare_categories_threshold=0,)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -405,11 +405,11 @@ def test_classifier_missing_target(method, X, y):
     "method, X, y",
     [
         (
-            TreeRegressorMethod(rare_categories_threshold=None,),
+            TreeRegressorMethod(rare_categories_threshold=0,),
             *get_test_data_regressor(with_cats=True),
         ),
         (
-            TreeRegressorMethod(rare_categories_threshold=None,),
+            TreeRegressorMethod(rare_categories_threshold=0,),
             *get_test_data_regressor(with_cats=True,
                                      with_missing_features=True),
         ),
@@ -457,7 +457,7 @@ def test_regressor_trainings_data_reaches_all_nodes():
             tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=1),
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
-        rare_categories_threshold=None,
+        rare_categories_threshold=0,
     )
 
     X, y = get_test_data_regressor(
@@ -489,7 +489,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
             random_state=tree_seed,  # seed that reproduces the bug
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
-        rare_categories_threshold=None,
+        rare_categories_threshold=0,
     )
 
     X, y = get_test_data_classifier(

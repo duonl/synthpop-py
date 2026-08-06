@@ -156,9 +156,9 @@ def _raise_on_rare_value(x: npt.NDArray, rare_threshold: int, name: str | None):
     else:
         unnamed = ""
 
-        if (counts < rare_threshold).any() or (0 < n_nan < rare_threshold):
+    if (counts < rare_threshold).any() or (0 < n_nan < rare_threshold):
         raise ValueError(
-            f"Categorical {unnamed} predictor {name} contains a category occurring fewer than {rare_threshold} times. "
+            f"Categorical {unnamed}predictor {name} contains a category occurring fewer than {rare_threshold} times. "
             "This may allow the CART method to copy target values for small groups, "
             "which can pose a risk of undesirable attribute disclosure. "
             "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. "

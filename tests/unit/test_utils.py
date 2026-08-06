@@ -352,16 +352,19 @@ def test_to_standardised_array_dict_with_numpy_inputs():
     assert result["num"].dtype == np.float32
     assert result["cat"].dtype == str_dtype
 
-# ----- array_has_rare_value -----
+# ----- _raise_on_rare_value -----
 
 
 @pytest.mark.parametrize("x, threshold", [
     (np.array(["a"]), 5),  # one row, so unique value by definition
-    (np.array(["a","b","c","d","e"]), 5),  # all values unique 
-    (np.array((["a"]*5)+["b"]*6), 7),  # number of occurrences strictly lower than threshold
-    (np.array(([np.nan]*5)+["b"]*6,dtype=str_dtype), 7),# number of occurrences strictly lower than threshold, with missing values
-    (np.array(([np.nan]*10)+["b"]*6,dtype=str_dtype), 7),# number of occurrences strictly lower than threshold, with missing values
-    ( np.array(([True]*4 + [False]*6)),5)#boolean
+    (np.array(["a", "b", "c", "d", "e"]), 5),  # all values unique
+    # number of occurrences strictly lower than threshold
+    (np.array((["a"]*5)+["b"]*6), 7),
+    # number of occurrences strictly lower than threshold, with missing values
+    (np.array(([np.nan]*5)+["b"]*6, dtype=str_dtype), 7),
+    # number of occurrences strictly lower than threshold, with missing values
+    (np.array(([np.nan]*10)+["b"]*6, dtype=str_dtype), 7),
+    (np.array(([True]*4 + [False]*6)), 5)  # boolean
 ])
 def test_raise_on_rare_value_raises_below_threshold(x, threshold):
 
@@ -370,7 +373,7 @@ def test_raise_on_rare_value_raises_below_threshold(x, threshold):
 
     message_regex = f".* {txt_column_name}.*{txt_threshold}"
 
-    with pytest.raises(ValueError,match=message_regex):
+    with pytest.raises(ValueError, match=message_regex):
         _raise_on_rare_value(
             x, threshold, name=f"column_with_threshold{threshold}")
 
@@ -379,7 +382,7 @@ def test_raise_on_rare_value_no_name():
     x_in = np.array(["a"], dtype=str_dtype)
 
     txt_threshold = re.escape(f"fewer than 2 times.")
-    txt_column_name = re.escape(f"unnamed predictor")
+    txt_column_name = re.escape(f"unnamed predictor ")
 
     message_regex = f".* {txt_column_name}.*{txt_threshold}"
     with pytest.raises(ValueError, match=message_regex):
@@ -402,13 +405,17 @@ def test_raise_on_rare_value_does_not_raise_above_threshold(x, threshold):
 
     assert _raise_on_rare_value(x_in, threshold, name="some_name") is None
 
+
 @pytest.mark.parametrize("x", [
     (np.array(["a"])),  # one row, so unique value by definition
-    (np.array(["a","b","c","d","e"])),  # all values unique 
-    (np.array((["a"]*5)+["b"]*6)),  # number of occurrences strictly lower than threshold
-    (np.array(([np.nan]*5)+["b"]*6,dtype=str_dtype)),# number of occurrences strictly lower than threshold, with missing values
-    (np.array(([np.nan]*10)+["b"]*6,dtype=str_dtype)),# number of occurrences strictly lower than threshold, with missing values
-    ( np.array(([True]*4 + [False]*6)))#boolean
+    (np.array(["a", "b", "c", "d", "e"])),  # all values unique
+    # number of occurrences strictly lower than threshold
+    (np.array((["a"]*5)+["b"]*6)),
+    # number of occurrences strictly lower than threshold, with missing values
+    (np.array(([np.nan]*5)+["b"]*6, dtype=str_dtype)),
+    # number of occurrences strictly lower than threshold, with missing values
+    (np.array(([np.nan]*10)+["b"]*6, dtype=str_dtype)),
+    (np.array(([True]*4 + [False]*6)))  # boolean
 ])
-def test_raise_on_rare_value_disabled(x):
+def test_raise_on_rare_value_does_not_raise(x):
     assert _raise_on_rare_value(x, 0, name="some_name") is None
