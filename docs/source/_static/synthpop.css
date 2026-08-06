@@ -18,6 +18,7 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
 
 .mermaid {
     overflow-x: auto;
+    background: transparant !important;
 }
 
 .mermaid svg {
