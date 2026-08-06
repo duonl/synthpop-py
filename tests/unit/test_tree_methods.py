@@ -1,4 +1,5 @@
 import copy
+import itertools
 
 import numpy as np
 import numpy.typing as npt
@@ -18,7 +19,7 @@ from synthpop.methods.cart_synth import (
     _to_fixed_length_string_array,
 )
 from synthpop.utils import str_dtype
-import itertools
+
 
 
 # ----- stubs -----
@@ -190,7 +191,7 @@ def mock_fit_decision_tree(mocker,):
 
 
 @pytest.fixture(autouse=True)
-def mock_raise_on_rare_value(mocker):
+def mock_raise_on_rare_category(mocker):
     mocker.patch("synthpop.utils._raise_on_rare_category")
 
 
@@ -322,8 +323,7 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
         for standard_args in get_input_test_data()
         for threshold in [None, 10, 1]
     ],
-)
-                         )
+)                   
 def test_fit_calls_rare_category_check(X, y, index_cat,threshold, tree_method):
     # the testcase where the parameter threshold is None simulates default behaviour. 
     if threshold is None:

@@ -382,7 +382,7 @@ def test_raise_on_rare_category_no_name():
     x_in = np.array(["a"], dtype=str_dtype)
 
     txt_threshold = re.escape(f"fewer than 2 times.")
-    txt_column_name = re.escape(f"unnamed predictor ")
+    txt_column_name = re.escape(f"unnamed predictor")
 
     message_regex = f".* {txt_column_name}.*{txt_threshold}"
     with pytest.raises(ValueError, match=message_regex):
@@ -410,12 +410,12 @@ def test_raise_on_rare_category_does_not_raise_above_threshold(x, threshold):
     (np.array(["a"])),  # one row, so unique value by definition
     (np.array(["a", "b", "c", "d", "e"])),  # all values unique
     # number of occurrences strictly lower than threshold
-    np.array(["a"] * 5 + ["b"] * 6),
+    (np.array(["a"] * 5 + ["b"] * 6)),
     # number of occurrences strictly lower than threshold, with missing values
-    np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype),
+    (np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype)),
     # number of occurrences strictly lower than threshold, with missing values
-    np.array([np.nan] * 10) + ["b"] * 6, dtype=str_dtype),
-    np.array([True] * 4 + [False] * 6) # boolean
+    (np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype)),
+    (np.array([True] * 4 + [False] * 6) )# boolean
 ])
 def test_raise_on_rare_category_check_disabled(x):
     assert _raise_on_rare_category(x, 0, name="some_name") is None
