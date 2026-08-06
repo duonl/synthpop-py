@@ -7,8 +7,9 @@ The example uses a decision-tree-based synthesis method with a categorical predi
 
 This example is intentionally constructed to demonstrate a potential failure mode. It does not imply that decision-tree-based synthesis methods will generally reproduce target variables exactly. Rather, it illustrates why the structure and cardinality of the input data should be considered when evaluating privacy.
 
+```{note}
 Although this example is deliberately constructed, similar situations can occur when floating-point data is unintentionally converted to strings.
-
+```
 ## Demonstration of the problem
 
 Suppose the following happens:
@@ -19,7 +20,6 @@ import warnings
 import pandas as pd
 from sklearn.datasets import make_classification
 from synthpop.utils import str_dtype
-warnings.filterwarnings('ignore')
 
 X, y = make_classification(
     random_state=42,
@@ -70,7 +70,10 @@ print(y)
            '8', '5', '1', '5', '2', '0', '8', '2', '4'],
           dtype=StringDType(na_object=nan))
 
-
+The class `TreeClassifierMethod` is rarely used directly like this.
+`TreeClassifierMethod` is intended to be used via `CartMethod`.
+See [sythesis methods](../user_guides/3_synthesis_methods) for more information.
+See [the example at the end of this document](rare-categories-synth-example) for a more plausible example.
 
 In this example, the synthesised target is identical to the original target:
 
@@ -225,7 +228,7 @@ df
 
 Here, `X` is a categorical variable with a unique value for every observation, while `y` is the target variable. If `X` is copied exactly and `y` is synthesised using an overfitted model, the relationship between `X` and `y` can be reproduced exactly:
 
-
+(rare-categories-synth-example)=
 ```python
 from synthpop.synthesiser import Synthesiser
 from synthpop.methods.copy_synth import CopyMethod
