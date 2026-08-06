@@ -50,7 +50,7 @@ Preventing attribute disclosure requires considering not only whether individual
 
 #### 6.1.2.1 Rare categories and overfitting
 
-Rare categories can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, synthesis models may be able to reproduce relationships for those rare values too accurately.
+Categories with very limited records in the data, so called rare categories, can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, synthesis models may be able to reproduce relationships for those rare values too accurately.
 
 This can occur when a synthesis model overfits the original data. For example, suppose a categorical predictor contains a unique value for every observation. A classification model may be able to split the data into groups of arbitrary size that contain only a single target value. When synthetic values are subsequently sampled from these groups, there may be little or no randomness in the generated values. This means that the relationship between the predictor and target column will be almost exactly reproduced. As a result the synthetic target column will be (close to) equal to the original target column.
 
