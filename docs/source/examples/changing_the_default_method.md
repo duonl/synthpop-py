@@ -54,7 +54,7 @@ No `default_syn_method` was specified, so the `Synthesiser` automatically uses:
 ```python
 from synthpop.methods import CartMethod
 
-default_syn_method=CartMethod()
+Synthesiser(default_syn_method=CartMethod())
 ```
 We did not specify the column order, thus kept the original column order as in the Titanic dataset. CART does not require predictors for the first variable in the synthesis order. As such, the first column is sampled from its observed distribution.
 
@@ -69,7 +69,7 @@ Unlike CART, where only the first column is sampled independently and later colu
 
 Because it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets, or in cases where modelling relationships between variables provides limited additional value.
 
-However, `SampleMethod` should generally not be preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from observed distributions, privacy protection may be weaker in some situations, particularly for variables containing rare or distinctive values.
+However, `SampleMethod` should generally not be preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from the observed distribution, including rare values, the method provides less protection against reproducing characteristics from the original data than model-based synthesis methods. Depending on the dataset, this may increase disclosure risks (see [User Guide 6: Evaluating privacy](../user_guides/6_evaluating_privacy.md)).
 
 `SampleMethod` can be used as the default synthesis method by passing it to `default_syn_method`.
 ```python
