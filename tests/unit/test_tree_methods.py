@@ -21,7 +21,6 @@ from synthpop.methods.cart_synth import (
 from synthpop.utils import str_dtype
 
 
-
 # ----- stubs -----
 
 
@@ -316,6 +315,7 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
         y, 42
     )  # 42 is the hardcoded n_samples value of the validate_dict_x stub
 
+
 @pytest.mark.parametrize(
     "X, y, index_cat, threshold",
     [
@@ -323,16 +323,16 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
         for standard_args in get_input_test_data()
         for threshold in [None, 10, 1]
     ],
-)                   
-def test_fit_calls_rare_category_check(X, y, index_cat,threshold, tree_method):
-    # the testcase where the parameter threshold is None simulates default behaviour. 
+)
+def test_fit_calls_rare_category_check(X, y, index_cat, threshold, tree_method):
+    # the testcase where the parameter threshold is None simulates default behaviour.
     if threshold is None:
         expected_threshold = 5
     else:
         tree_method.rare_categories_threshold = threshold
         expected_threshold = threshold
 
-    X["boolean_col"] = np.array(([True]*3) + ([False]*3))
+    X["boolean_col"] = np.array([True]*3 + [False]*3)
     index_cat = index_cat + ["boolean_col"]
     tree_method.fit(X, y)
 
@@ -340,7 +340,7 @@ def test_fit_calls_rare_category_check(X, y, index_cat,threshold, tree_method):
 
         # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
         calls = synthpop.utils._raise_on_rare_category.call_args_list
-        
+
         assert any(
             np.array_equal(call.kwargs["x"], X[cat_col])
             and call.kwargs["rare_threshold"] == expected_threshold

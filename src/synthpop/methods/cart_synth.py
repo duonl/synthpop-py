@@ -52,7 +52,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
         .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
 
@@ -248,7 +248,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
 
     .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
@@ -319,7 +319,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param rare_categories_threshold:  Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
 
     .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
@@ -544,7 +544,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         If a categorical predictor contains values occurring fewer than this threshold, 
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         
-        If set to an integer, categories occuring fewer than this number of times raise an exception.
+        If set to an integer, categories occurring fewer than this number of times raise an exception.
         If set to ``0``, the check is disabled.
         If set to ``None``, the value of ``n_leaves`` is used.
         The default value is ``None`` for :func:`tune_cart`, which means the threshold

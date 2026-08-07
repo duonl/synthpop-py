@@ -364,7 +364,8 @@ def test_to_standardised_array_dict_with_numpy_inputs():
     (np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype), 7),
     # number of occurrences strictly lower than threshold, with missing values
     (np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype), 7),
-    (np.array([True] * 4 + [False] * 6), 5)  # boolean
+    (np.array([True] * 4 + [False] * 6), 5),  # boolean
+    (np.array([np.nan]*6),7)
 ])
 def test_raise_on_rare_category_raises_below_threshold(x, threshold):
 
@@ -391,7 +392,8 @@ def test_raise_on_rare_category_no_name():
 
 @pytest.mark.parametrize("x, threshold", [
     (["a"] * 5, 4),  # just above threshold
-    (["a"] * 5 + ["b"] * 6, 5),  # number of occurrences exactly equal to threshold
+    # number of occurrences exactly equal to threshold
+    (["a"] * 5 + ["b"] * 6, 5),
     # number of occurrences strictly higher than threshold
     (["a"] * 7 + ["b"] * 10, 5),
     ([np.nan] * 5, 4),  # just above threshold, with nan
@@ -399,6 +401,7 @@ def test_raise_on_rare_category_no_name():
     ([np.nan] * 7 + ["b"] * 10, 5),
     # number of occurrences exactly equal to threshold, with missing values.
     ([np.nan] * 5 + ["b"] * 6, 5),
+    (np.array([np.nan]*7),7), # do not raise on nan only array containing less values than the threshold.
 ])
 def test_raise_on_rare_category_does_not_raise_above_threshold(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
@@ -407,15 +410,15 @@ def test_raise_on_rare_category_does_not_raise_above_threshold(x, threshold):
 
 
 @pytest.mark.parametrize("x", [
-    (np.array(["a"])),  # one row, so unique value by definition
-    (np.array(["a", "b", "c", "d", "e"])),  # all values unique
+    np.array(["a"]),  # one row, so unique value by definition
+    np.array(["a", "b", "c", "d", "e"]),  # all values unique
     # number of occurrences strictly lower than threshold
-    (np.array(["a"] * 5 + ["b"] * 6)),
+    np.array(["a"] * 5 + ["b"] * 6),
     # number of occurrences strictly lower than threshold, with missing values
-    (np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype)),
+    np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype),
     # number of occurrences strictly lower than threshold, with missing values
-    (np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype)),
-    (np.array([True] * 4 + [False] * 6) )# boolean
+    np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype),
+    np.array([True] * 4 + [False] * 6)  # boolean
 ])
 def test_raise_on_rare_category_check_disabled(x):
     assert _raise_on_rare_category(x, 0, name="some_name") is None
