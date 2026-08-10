@@ -14,6 +14,7 @@ from synthpop.methods.cart_synth import (
     TreeRegressorMethod,
     tune_cart,
 )
+from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import str_dtype
 
 # This imports an auto-use fixture to set the seed,
@@ -389,6 +390,7 @@ def test_transform_handles_entire_nan_array(y, dtype):
     assert out.name == "c"
     assert out.dtype == dtype
 
+
 @pytest.mark.parametrize(
     "y",
     [
@@ -488,25 +490,31 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
             "blood type": ["A", "O", "AB", "O"],
         }
     )
-    cart_standard = CartMethod()
 
-    cart_standard.fit(X, y)
-    out_standard = cart_standard.transform(X)
+    with RandomStateManager(seed=0):
+        cart_standard = CartMethod()
 
-    cart_different_missing_handling = CartMethod(
-        regressor=TreeRegressorMethod(
-            tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
-        ),
+        cart_standard.fit(X, y)
+        out_standard = cart_standard.transform(X)
 
-        classifier=TreeClassifierMethod(
-            tree=None, missing_handler=MissingValuePredictor()
+    with RandomStateManager(seed=0):
+        cart_different_missing_handling = CartMethod(
+            regressor=TreeRegressorMethod(
+                tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
+            ),
+
+            classifier=TreeClassifierMethod(
+                tree=None, missing_handler=MissingValuePredictor()
+            )
         )
-    )
 
-    cart_different_missing_handling.fit(X, y)
-    out_different_missing_handling = cart_different_missing_handling.transform(X)
+        cart_different_missing_handling.fit(X, y)
+        out_different_missing_handling = cart_different_missing_handling.transform(
+            X)
+
     pd.testing.assert_series_equal(
         out_standard, out_different_missing_handling)
+
 
 @pytest.mark.parametrize(" y", [
     (np.array(

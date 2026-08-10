@@ -113,7 +113,7 @@ def test_synthesiser_preserves_1d_statistics():
     n_samples_synthetic = 6000
     original_data, index_num, index_cat = (
         simulate_realistic_dataset_correlations(
-        n_samples=n_samples_orig,
+            n_samples=n_samples_orig,
         )
     )
     synthesiser = Synthesiser(random_seed=74125)
@@ -130,7 +130,7 @@ def test_synthesiser_preserves_1d_statistics():
             original_mean - synthetic_mean) > 1e-3, "original and synthetic are too close"
         assert (
             np.abs(original_mean - synthetic_mean) / original_mean < 0.05
-         ), "original and synthetic are too different"
+        ), "original and synthetic are too different"
 
     for cat_col in index_cat:
         original_dist = original_data[cat_col].value_counts(
@@ -209,6 +209,7 @@ def test_missingness_predicts_value(missing_value, b_values, expected):
 
     assert (generated.loc[rows, "b"] == expected).all()
 
+
 @pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 @pytest.mark.parametrize(
     "a_values, expected",
@@ -256,6 +257,7 @@ def test_joint_missingness_pattern(missing_value, c_values):
     generated = synth.fit(test_data).generate(n=200)
 
     assert (generated["a"].isna() == generated["b"].isna()).all()
+
 
 @pytest.mark.parametrize(
     "method",
@@ -381,12 +383,13 @@ def test_conditional_missingness_multiple_columns(missing_value):
 
     assert generated.loc[mask, "c"].isna().all()
 
+
 def test_mixed_missing_representations():
     """Different missing-value should be handled similarly"""
 
     test_data = pd.DataFrame({
         "a": [np.nan, pd.NA, None, 1, 2, 3,] * 20,
-        "b": ["x","x", "x", "one", "two", "three",] * 20,
+        "b": ["x", "x", "x", "one", "two", "three",] * 20,
     })
 
     synth = Synthesiser(random_seed=2)
@@ -395,6 +398,7 @@ def test_mixed_missing_representations():
     missing = generated["a"].isna()
 
     assert (generated.loc[missing, "b"] == "x").all()
+
 
 @pytest.mark.parametrize(
     "missing_value",
@@ -424,7 +428,7 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     synth = Synthesiser(
         random_seed=2,
-        special_syn_method=special_syn_method
+        special_syn_method=special_syn_method,
     )
     fit = synth.fit(df)
 
@@ -443,68 +447,60 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     assert generated['c'].isna().all()
 
+
 @pytest.mark.parametrize(
     "test_data",
     [
-
         (
             pd.DataFrame({
-                "a": [1, 2]*10,
-                "b": [3, 4]*10,
-                "c": [5, 6]*10
+                "a": [1, 2]*30,
+                "b": [3, 4]*30,
+                "c": [5, 6]*30,
             })
         ),
-
         (
             pd.DataFrame({
-                "a": [np.nan, np.nan]*10,
-                "b": [3, pd.NA]*10,
-                "c": [None, 6]*10
+                "a": [np.nan, np.nan]*30,
+                "b": [3, pd.NA]*30,
+                "c": [None, 6]*30,
             })
         ),
-
         (
             pd.DataFrame({
-                "a": [1, None]*10,
-                "b": [0, 0]*10,
-                "c": [np.nan, np.nan]*10
+                "a": [1, None]*30,
+                "b": [0, 0]*30,
+                "c": [np.nan, np.nan]*30,
             })  # Produces error for CART
         ),
-
         (
             pd.DataFrame({
-                "a": [1, None]*10,
-                "b": [0, -12]*10,
-                "c": [pd.NA, pd.NA]*10
+                "a": [1, None]*30,
+                "b": [0, -12]*30,
+                "c": [pd.NA, pd.NA]*30,
             })
         ),
-
         (
             pd.DataFrame({
-                "a": [np.nan, None]*10,
-                "b": [pd.NA, pd.NA]*10,
-                "c": [0, -12]*10
+                "a": [np.nan, None]*30,
+                "b": [pd.NA, pd.NA]*30,
+                "c": [0, -12]*30,
             })
         ),
-
         (
             pd.DataFrame({
-                "a": [pd.NA, pd.NA]*10,
-                "b": [np.nan, np.nan]*10,
-                "c": [0, -12]*10
+                "a": [pd.NA, pd.NA]*30,
+                "b": [np.nan, np.nan]*30,
+                "c": [0, -12]*30,
             })
         )
-
-
     ]
-
 )
 def test_multiple_synthesis_methods(test_data):
 
     special_syn_method = {
         "a": SampleMethod(),
         "b": CopyMethod(),
-        "c": CartMethod()
+        "c": CartMethod(),
     }
 
     synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
@@ -523,21 +519,29 @@ def test_multiple_synthesis_methods(test_data):
     expected_nan_values = test_data["c"].fillna(np.nan)
     # CART-method always outputs np.nan, but accepts pd.NA
 
-    assert test_data['a'].isin(generated['a']).all()
+    # Required fillna(0) to count the nan values
+    expected_SampleMethod = test_data['a'].fillna(
+        0).value_counts(normalize=True)
+    actual_SampleMethod = generated['a'].fillna(0).value_counts(normalize=True)
+
+    assert expected_SampleMethod.sub(
+        actual_SampleMethod, fill_value=0).abs().max() < 0.05
+
     assert expected_nan_values.isin(generated['c']).all()
+
 
 def test_error_on_rowcount_mismatch():
     """Test if CopyMethod still produces an error if n != len(initial_dataset)"""
     test_data = pd.DataFrame({
         "a": [1, 2],
         "b": [3, 4],
-        "c": [5, 6]
+        "c": [5, 6],
     })
 
     special_syn_method = {
         "a": SampleMethod(),
         "b": CopyMethod(),
-        "c": CartMethod()
+        "c": CartMethod(),
     }
 
     synth = Synthesiser(random_seed=2, special_syn_method=special_syn_method)
@@ -546,10 +550,11 @@ def test_error_on_rowcount_mismatch():
     with pytest.raises(ValueError, match="Row mismatch"):
         fit.generate(n=10)
 
+
 def test_generate_does_not_raise_dataframe_fragmentation_warning():
     """
     Regression test for issue #164.
-    
+
     Ensures that generating synthetic data does not trigger pandas' PerformanceWarning for highly fragmented DataFrames.
     """
     seed = 7
