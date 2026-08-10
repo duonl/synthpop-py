@@ -51,8 +51,8 @@
     let lastPointerY = 0;
 
     /*
-     * The image is initially allowed to render normally.
-     * We measure that rendered size before taking it out of normal flow.
+     * Measure the image at its normal rendered size before
+     * taking it out of normal flow.
      */
     function measureImage() {
       const rect = image.getBoundingClientRect();
@@ -84,8 +84,8 @@
 
     function reset() {
       /*
-       * Temporarily remove the transform so that getBoundingClientRect()
-       * tells us the image's normal Sphinx-rendered dimensions.
+       * Temporarily remove the transform so that
+       * getBoundingClientRect() reports the normal dimensions.
        */
       image.style.transform = "none";
 
@@ -104,7 +104,7 @@
       baseHeight = measured.height;
 
       /*
-       * Now put the image into the zoom viewport.
+       * Put the image into the zoom viewport.
        */
       image.style.position = "absolute";
       image.style.width = baseWidth + "px";
@@ -113,9 +113,7 @@
       zoom = 1;
 
       /*
-       * Match normal document rendering horizontally.
-       *
-       * Vertically center the image in the zoombox.
+       * Center the image horizontally and vertically when possible.
        */
       x = Math.max(
         (box.clientWidth - baseWidth) / 2,
@@ -410,51 +408,17 @@
     );
   }
 
-
   /*
-   * Automatically turn sufficiently large documentation
-   * images into zoomboxes.
+   * Turn explicitly marked images into zoomboxes.
+   *
+   * Only images with the `synthpop-zoom` class are affected.
+   * Ordinary documentation images are left untouched.
    */
-  function wrapImage(image) {
+  function wrapExplicitZoomImage(image) {
     if (
       image.closest(
         ".synthpop-zoombox"
       )
-    ) {
-      return;
-    }
-
-    /*
-     * Don't touch theme/navigation images.
-     */
-    if (
-      image.closest(
-        ".navbar, " +
-        ".bd-header, " +
-        ".sd-card, " +
-        ".sidebar-primary, " +
-        ".sidebar-secondary"
-      )
-    ) {
-      return;
-    }
-
-    const width =
-      image.naturalWidth ||
-      image.width ||
-      0;
-
-    const height =
-      image.naturalHeight ||
-      image.height ||
-      0;
-
-    /*
-     * Only wrap reasonably large images.
-     */
-    if (
-      width < 300 ||
-      height < 200
     ) {
       return;
     }
@@ -465,38 +429,31 @@
     box.className =
       "synthpop-zoombox";
 
-    const figure =
-      image.closest("figure");
-
-    if (figure) {
-      figure.insertBefore(
-        box,
-        image
-      );
-    } else {
-      image.parentNode.insertBefore(
-        box,
-        image
-      );
-    }
+    /*
+     * The image is normally inside the Sphinx-generated
+     * image-reference <a>. Keep that structure intact.
+     */
+    image.parentNode.insertBefore(
+      box,
+      image
+    );
 
     box.appendChild(image);
 
     setupZoombox(box);
   }
 
-
   function initialise() {
     /*
-     * Explicit zoomboxes.
+     * Only images explicitly marked with
+     * `class: synthpop-zoom` are made interactive.
      */
     document
       .querySelectorAll(
-        ".synthpop-zoombox"
+        "img.synthpop-zoom"
       )
-      .forEach(setupZoombox);
+      .forEach(wrapExplicitZoomImage);
   }
-
 
   if (
     document.readyState ===
