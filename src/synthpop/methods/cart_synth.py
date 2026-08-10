@@ -54,7 +54,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
-        .. note:: Setting ``rare_categories_threshold`` to ``None`` does not have the same effect as in :func:`tune_cart`.
+        .. note:: Contrary to :func:`tune_cart`, ``rare_categories_threshold`` should not be set to ``None``.
 
     """
 
