@@ -580,7 +580,8 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
         wrapped,
         legacy=False,
         expected_failed_checks={
-            "check_fit_score_takes_y": "tests with a score component"
+            "check_fit_score_takes_y":
+                "Tree methods do not implement sklearn scoring semantics"
         },
         on_fail='raise'
     )
