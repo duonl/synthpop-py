@@ -40,7 +40,7 @@ The first three rows are:
 
 
 ## The default CART synthesis method
-The default synthesis method of synthpop-py is CART. Therefore calling the `Synthesiser` without arguments uses CART automatically:
+The default synthesis method of synthpop-py is CART. Therefore, calling the `Synthesiser` without arguments automatically uses the CarthMethod:
 ```python
 from synthpop import Synthesiser
 
@@ -56,7 +56,7 @@ from synthpop.methods import CartMethod
 
 Synthesiser(default_syn_method=CartMethod())
 ```
-We did not specify the column order, thus kept the original column order as in the Titanic dataset. CART does not require predictors for the first variable in the synthesis order. As such, the first column is sampled from its observed distribution.
+We did not specify the column order in the `Synthesiser`. Thus the dataset is synthesised with its original column order. CART does not require predictors for the first variable in the synthesis order as the first column is sampled from its observed distribution.
 
 For each column sequentially synthesised after the first, CART uses the previously synthesised variables as predictors to model that column's conditional distribution. As a result, generated values are not sampled independently: later columns depend on the relationships learned from the original dataset. For example, when synthesising `sex`, the method uses the previously generated variables, `survived` and `pclass`, as predictors. Whereas, when synthesising `embarked`,  the methods uses all 7 previously generated variables as predictors.
 
@@ -67,7 +67,7 @@ Sometimes it is useful to synthesise variables without modelling its relationshi
 
 Unlike CART, where only the first column is sampled independently and later columns are conditioned on previously synthesised variables, `SampleMethod` generates every column independently from its own observed distribution.
 
-Because it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets, or in cases where modelling relationships between variables provides limited additional value.
+As it does not fit predictive models, `SampleMethod` is computationally less expensive than CART. This can make it useful for large datasets, and/or in cases where modelling relationships between variables provides limited additional value.
 
 However, `SampleMethod` should generally not be preferred over CART when relationships between variables are important. Since relationships are not modelled, important associations between variables may not be preserved. Additionally, because values are sampled directly from the observed distribution, including rare values, the method provides less protection against reproducing characteristics from the original data than model-based synthesis methods. Depending on the dataset, this may increase disclosure risks (see [User Guide 6: Evaluating privacy](../user_guides/6_evaluating_privacy.md)).
 
@@ -86,7 +86,7 @@ synthetic_sample = sample_synthesiser.generate()
 ```
 The generated dataset has the same variables as the original dataset, but the synthesis process is different. Each column is generated independently based only on its own distribution.
 
-For example, the original Titanic dataset contains relationships such as:
+For example, the original Titanic dataset contains inter-variable relationships such as:
 - `pclass` (passenger class) being related to `fare`;
 - `sex` being related to `survived`;
 - `pclass` being related to `survived`.
