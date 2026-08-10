@@ -150,12 +150,11 @@ def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | Non
     _, counts = np.unique(x[~m_nan], return_counts=True)
     n_nan = m_nan.sum()
 
-
     predictor = (
-    "unnamed predictor"
-    if name is None
-    else f"predictor {name}"
-)
+        "unnamed predictor"
+        if name is None
+        else f"predictor {name}"
+    )
 
     if (counts < rare_threshold).any() or (0 < n_nan < rare_threshold):
         raise ValueError(
@@ -163,5 +162,5 @@ def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | Non
             "This may allow the CART method to copy target values for small groups, "
             "which can pose a risk of undesirable attribute disclosure. "
             "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. "
-            "See :func:`~synthpop.methods.cart_synth.tune_cart`"
+            "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html#synthpop.methods.cart_synth.tune_cart"
         )
