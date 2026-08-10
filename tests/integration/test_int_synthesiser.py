@@ -219,7 +219,7 @@ def test_missingness_predicts_value(missing_value, b_values, expected):
 )
 @pytest.mark.parametrize("as_categorical", [False, True])
 def test_value_predicts_missingness(missing_value, a_values, expected, as_categorical):
-    """a = A or 0 should always imply b is missing."""
+    """A specific value of column a should imply missingness in column b."""
 
     test_data = pd.DataFrame({
         "a": a_values * 20,
@@ -365,7 +365,7 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
 )
 def test_conditional_missingness_multiple_columns(missing_value):
     """
-    c is missing only when b == 'x' and a == 1.
+    c is missing only when a == 'x' and b == 1.
     """
 
     test_data = pd.DataFrame({
@@ -443,6 +443,10 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     assert generated['c'].isna().all()
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3180eec3a248483378381759ea36ec4ab9702bb7
 @pytest.mark.parametrize(
     "test_data",
     [
@@ -516,12 +520,14 @@ def test_multiple_synthesis_methods(test_data):
 
     generated = fit.generate()
 
-    assert test_data['b'].equals(generated['b'])
+    pd.testing.assert_series_equal(
+        test_data["b"],
+        generated["b"],
+    )
     expected_nan_values = test_data["c"].fillna(np.nan)
     # CART-method always outputs np.nan, but accepts pd.NA
 
     assert test_data['a'].isin(generated['a']).all()
-    assert test_data['b'].isin(generated['b']).all()
     assert expected_nan_values.isin(generated['c']).all()
 
 def test_error_on_rowcount_mismatch():
@@ -543,7 +549,11 @@ def test_error_on_rowcount_mismatch():
 
     with pytest.raises(ValueError, match="Row mismatch"):
         fit.generate(n=10)
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 3180eec3a248483378381759ea36ec4ab9702bb7
 def test_generate_does_not_raise_dataframe_fragmentation_warning():
     """
     Regression test for issue #164.

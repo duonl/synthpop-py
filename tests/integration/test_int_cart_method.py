@@ -389,6 +389,10 @@ def test_transform_handles_entire_nan_array(y, dtype):
     assert out.name == "c"
     assert out.dtype == dtype
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3180eec3a248483378381759ea36ec4ab9702bb7
 @pytest.mark.parametrize(
     "y",
     [
@@ -504,7 +508,7 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
     )
 
     cart_different_missing_handling.fit(X, y)
-    out_different_missing_handling = cart_standard.transform(X)
+    out_different_missing_handling = cart_different_missing_handling.transform(X)
     pd.testing.assert_series_equal(
         out_standard, out_different_missing_handling)
 
