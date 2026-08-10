@@ -494,7 +494,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         return self.method_.get_feature_names_out(input_features)
 
 
-def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Callable[[],CartMethod]:
+def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Callable[[], CartMethod]:
     """
     Shortcut to set parameters of the CartMethod.
 
@@ -504,7 +504,9 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Cal
     :param n_components: sets the number of principal components used in encoding in the classifier. \
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components. For integers => 1, it is the number of principal components. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
 
-    :return: a CartMethod object with the parameters consistently applied.
+    :return: a callable that returns a CartMethod object with the parameters consistently applied.
+
+    A callable is returned because the seed might not be set when ``tune_cart`` is called.
 
     Examples
     --------
@@ -517,7 +519,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Cal
     ... special_syn_method={"b": tune_cart(n_leaves=20)})
 
     """
-   
+
     return lambda: CartMethod(
         regressor=TreeRegressorMethod(
             tree=DecisionTreeRegressor(
@@ -538,7 +540,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Cal
             ),
             encoder=PCAEncoder(
                 pca_transform=PCA(n_components=n_components,
-                                random_state=RandomStateManager.create_instance_seed())
+                                  random_state=RandomStateManager.create_instance_seed())
             )
         )
     )

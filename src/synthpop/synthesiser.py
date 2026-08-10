@@ -1,7 +1,7 @@
 """
 module for generating synthetic data
 """
-from typing import Self, Dict
+from typing import Callable, Self, Dict
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,7 @@ from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
-import synthpop.reproducibility 
+import synthpop.reproducibility
 
 
 class Synthesiser:
@@ -20,7 +20,15 @@ class Synthesiser:
     :param random_seed: A seed for randomness that makes both model fitting and data generation reproducible.
     :param column_order: list of variable names or list of indexes to define the order in which the columns will be synthesised. Default is the column order of the original dataset.
     :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartMethod. 
-    :param special_syn_method: Dictionary of special synthesis method per variable. If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynth objects. By default, there is no special synthesis method.
+    :param special_syn_method: Dictionary of special synthesis method per variable. 
+        If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynthMethod objects. 
+        By default, there is no special synthesis method.
+
+
+    Both ``default_syn_method`` and the values of ``special_syn_method`` can be callables.
+    If they are callable, they are expected to take no arguments and produce a child instance of BaseSynthMethod.
+    If ``default_syn_method`` is callable, it will be called for each variable that does not have a ``special_syn_method``.
+    If a value of ``special_syn_method`` is callable, it will be called once. 
 
     Examples
     --------
@@ -67,8 +75,10 @@ class Synthesiser:
 
     def __init__(self, random_seed: int | None = None,
                  column_order: list[str] | list[int] | None = None,
-                 default_syn_method: BaseSynthMethod | None = None,
-                 special_syn_method: Dict[str, BaseSynthMethod] | None = None,
+                 default_syn_method: BaseSynthMethod | Callable[[
+                 ], BaseSynthMethod] | None = None,
+                 special_syn_method: Dict[str, BaseSynthMethod] | Callable[[
+                 ], BaseSynthMethod] | None = None,
                  ) -> None:
 
         self.default_syn_method = default_syn_method
@@ -79,19 +89,20 @@ class Synthesiser:
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
         if self.special_syn_method is None:
-            use_default=True
+            use_default = True
         elif column_name in self.special_syn_method:
-            use_default=False
+            use_default = False
         else:
-            use_default=True
+            use_default = True
 
         if use_default:
             if self.default_syn_method is None:
                 effective_default_method = CartMethod()
             elif callable(self.default_syn_method):
                 effective_default_method = self.default_syn_method()
-                if not isinstance(effective_default_method,BaseSynthMethod):
-                    raise ValueError("If the value of default_syn_method is callable it should return an instance of a child class of BaseSynthMethod")
+                if not isinstance(effective_default_method, BaseSynthMethod):
+                    raise ValueError(
+                        "If the value of default_syn_method is callable it should return an instance of a child class of BaseSynthMethod")
             else:
                 effective_default_method = clone(self.default_syn_method)
             return effective_default_method
@@ -99,11 +110,12 @@ class Synthesiser:
             model = self.special_syn_method[column_name]
             if callable(model):
                 new_model = model()
-                if not isinstance(new_model,BaseSynthMethod):
-                    raise ValueError(f"If the value of special_syn_method is callable for entry '{column_name}' it should return an instance of a child class of BaseSynthMethod")
+                if not isinstance(new_model, BaseSynthMethod):
+                    raise ValueError(
+                        f"If the value of special_syn_method is callable for entry '{column_name}' it should return an instance of a child class of BaseSynthMethod")
+                return new_model
             else:
                 return clone(model)
-
 
     def _validate_column_order_unique(self, column_order: list[str] | list[int]):
         unique_column_order = np.unique_counts(column_order)
@@ -125,8 +137,6 @@ class Synthesiser:
         :return: Fitted synthesiser.
         """
 
-        
-
         if not isinstance(X, pd.DataFrame):
             raise ValueError(
                 f"X must be a pandas DataFrame, got {type(X)} instead.")
@@ -145,10 +155,11 @@ class Synthesiser:
             if out_of_bounds.any():
                 raise ValueError(
                     f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
-            
+
             negative_indices = array_columns < 0
             if negative_indices.any():
-                raise ValueError(f"The following indices of Synthesiser.column_order are negative: {array_columns[negative_indices]}")
+                raise ValueError(
+                    f"The following indices of Synthesiser.column_order are negative: {array_columns[negative_indices]}")
 
             self.column_order_ = X.columns[self.column_order].to_list()
         elif not all(isinstance(item, str) for item in self.column_order):
@@ -174,11 +185,12 @@ class Synthesiser:
 
                 model = self._get_model(y)
 
-                self.models_[self.column_order_[i]] = model.fit(predictors, X[y])
+                self.models_[self.column_order_[i]
+                             ] = model.fit(predictors, X[y])
 
         return self
 
-    def generate(self, n: int | None = None, random_seed: int|None =None) -> pd.DataFrame:
+    def generate(self, n: int | None = None, random_seed: int | None = None) -> pd.DataFrame:
         """
         Generate a synthetic dataset of ``n`` rows. 
 
@@ -198,23 +210,22 @@ class Synthesiser:
         if n is None:
             n_syn_rows = self.n_samples_
         elif n < 0:
-            raise ValueError(f"number of rows of the synthetic data must be positive, got {n}")
+            raise ValueError(
+                f"number of rows of the synthetic data must be positive, got {n}")
         else:
             n_syn_rows = n
 
-
-        
         if random_seed is None:
             seed_to_use = self.random_seed
         else:
             seed_to_use = random_seed
 
-
         with synthpop.reproducibility.RandomStateManager(seed=seed_to_use):
             for i, y in enumerate(self.column_order_):
 
                 if i == 0:
-                    pred = pd.DataFrame({"init": np.zeros(n_syn_rows, dtype=int)})
+                    pred = pd.DataFrame(
+                        {"init": np.zeros(n_syn_rows, dtype=int)})
                 else:
                     pred = result
 
