@@ -62,7 +62,7 @@ For example, consider a dataset containing a categorical variable that identifie
 If the synthesis model learns a deterministic relationship between the two variables, the synthetic dataset may reproduce that relationship even though the individual records themselves are not directly copied.
 A person with external knowledge about the group could then use the synthetic data to infer the sensitive characteristic.
 
-While preserving relationships between variables is generally an objective of the synthesis method, doing so can increase the risk of attribute disclosure, particularly for small groups or individual records.
+While preserving relationships between variables is generally an objective of the synthesis method it can also increase the risk of attribute disclosure, particularly for small groups or individual records.
 
 Generally, the risk of attribute disclosure can be increased by:
 

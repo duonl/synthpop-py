@@ -1,7 +1,7 @@
 # Risk of privacy loss due to rare categories
 
-When dealing with categorical data where some categories have very few observations, so-called rare categories, there is a risk of revealing more information about small groups than intended.
-The following example demonstrates how rare or unique categorical values can cause overfitting, potentially increasing disclosure risk.
+When categorical data contain categories with very few observations, known as rare categories, they can possibly become a privacy risk. Because these categories are associated with only a small number of observations, they may make individuals or small groups more distinguishable than intended. 
+The following example demonstrates how rare (or unique) categorical values can cause overfitting, potentially increasing disclosure risk.
 
 The example uses a decision-tree-based synthesis method with a categorical predictor containing a unique value for every observation. Because the predictor uniquely identifies each observation, the decision tree can create homogeneous leaf nodes where all observations have the same target value. Sampling from these leaf nodes introduces little or no randomness because all possible sampled values are identical, causing the synthetic target values to reproduce the original target values.
 
@@ -118,7 +118,7 @@ This is an example of [overfitting](https://en.wikipedia.org/wiki/Overfitting) i
 
 A similar issue can occur in realistic datasets when a variable contains rare categories that are strongly associated with a sensitive variable.
 
-For example, suppose you have a dataset about traffic safety for employees of a company. The first column indicates the mode of transportation to work. The second column contains the number of days of sick leave taken by the employee, which is sensitive information. While most employees come to work by public transit, bike, or foot, there are two employees who commute by trike. The value "trike" is a rare category for the first column. The synthetic dataset would reveal the exact amount of sick leave days for the employees going to work by trike. So, in this scenario, if you have this synthetic dataset and know that your coworker comes to work by trike, you can infer something about their health. 
+For example, suppose you have a dataset about traffic safety for employees of a company. The first column indicates the mode of transportation to work. The second column contains the number of days of sick leave taken by the employee, which is sensitive information. While most employees come to work by public transit, bike, or foot, there are two employees who commute by trike. The value "trike" is a rare category for the first column. The synthetic dataset would reveal the exact amount of sick leave days for the employees going to work by trike. So, in this scenario, if you have this synthetic dataset and know that your coworker comes to work by trike, you can infer information regarding their health. 
 
 As such, if the synthesis model reproduces this relationship exactly, a third-party with knowledge of the rare category may be able to infer the sensitive characteristic from the synthetic data.
 
