@@ -71,7 +71,7 @@ synthetic_data_2.describe()
 | 75%   |   0.0380759   |   0.0506801  |   0.0358287  |   0.0390866  |   0.0256061   |   0.0293747  |   0.0265503  |   0.0343089  |   0.037667   |   0.0279171   |  216.75  |
 | max   |   0.0961965   |   0.0506801  |   0.137143   |   0.125158   |   0.153914    |   0.155887   |   0.159089   |   0.185234   |   0.133597   |   0.135612    |  341     |   
 
-## Setting a random seed
+## Set a random seed
 To obtain reproducible results, specify the `random_seed` parameter when creating the Synthesiser.
 ```python
 synthesiser_1 = Synthesiser(random_seed=1)
