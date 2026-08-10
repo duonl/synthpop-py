@@ -20,6 +20,10 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
    In-page image zoom box
    ------------------------------------------------------------------------- */
 
+a.synthpop-zoom {
+  display: block;
+}
+
 .synthpop-zoombox {
   position: relative;
   width: 100%;
