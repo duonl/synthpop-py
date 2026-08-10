@@ -16,6 +16,7 @@ Available synthesis methods are:
 
 ---
 
+(31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
 CART (Classification And Regression Trees) is the default synthesis method. 
@@ -178,6 +179,7 @@ Currently `tune_cart` supports the following parameters:
 
 ---
 
+(32-sample-synthesis)=
 ## 3.2. Sample synthesis method
 
 The {class}`~synthpop.methods.sample_synth.SampleMethod` generates a column by drawing values from its empirical marginal distribution observed in the original data. It does not use any predictors and therefore does not model relationships between variables.
@@ -235,6 +237,7 @@ where $\hat{P}(Y)$ is the empirical distribution of the observed column.
 
 ---
 
+(33-copy-synthesis)=
 ## 3.3. Copy synthesis method
 
 The {class}`~synthpop.methods.copy_synth.CopyMethod` deterministically reproduces the observed column without any modification. It is used when a variable must remain unchanged in the synthetic dataset.

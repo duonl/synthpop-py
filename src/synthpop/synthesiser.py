@@ -205,8 +205,6 @@ class Synthesiser:
         if not hasattr(self, "models_"):
             raise NotFittedError("synthesiser has not been fitted.")
 
-        result = pd.DataFrame()
-
         if n is None:
             n_syn_rows = self.n_samples_
         elif n < 0:
@@ -214,11 +212,13 @@ class Synthesiser:
                 f"number of rows of the synthetic data must be positive, got {n}")
         else:
             n_syn_rows = n
-
+        
         if random_seed is None:
             seed_to_use = self.random_seed
         else:
             seed_to_use = random_seed
+
+        result = pd.DataFrame()
 
         with synthpop.reproducibility.RandomStateManager(seed=seed_to_use):
             for i, y in enumerate(self.column_order_):
@@ -230,5 +230,6 @@ class Synthesiser:
                     pred = result
 
                 new_syn_column = self.models_[y].transform(X=pred)
-                result[new_syn_column.name] = new_syn_column
+                result = pd.concat([result, new_syn_column], axis=1, join='outer')
+
         return result
