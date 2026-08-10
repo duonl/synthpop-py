@@ -389,10 +389,6 @@ def test_transform_handles_entire_nan_array(y, dtype):
     assert out.name == "c"
     assert out.dtype == dtype
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 3180eec3a248483378381759ea36ec4ab9702bb7
 @pytest.mark.parametrize(
     "y",
     [

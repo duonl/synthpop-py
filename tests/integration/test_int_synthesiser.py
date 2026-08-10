@@ -443,10 +443,6 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     assert generated['c'].isna().all()
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 3180eec3a248483378381759ea36ec4ab9702bb7
 @pytest.mark.parametrize(
     "test_data",
     [
@@ -549,11 +545,7 @@ def test_error_on_rowcount_mismatch():
 
     with pytest.raises(ValueError, match="Row mismatch"):
         fit.generate(n=10)
-<<<<<<< HEAD
 
-=======
- 
->>>>>>> 3180eec3a248483378381759ea36ec4ab9702bb7
 def test_generate_does_not_raise_dataframe_fragmentation_warning():
     """
     Regression test for issue #164.
