@@ -542,10 +542,35 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
     assert len(result) == len(y) * 100
 
 
-def ndarray_to_dict(a):
+def _ndarray_to_dict_helper_sklearn_compatible_tests(a):
+    """
+    This is a helper function for the tests:
+
+    test_TreeMethod_is_sklearn_TreeClassifier_compatible
+    test_TreeMethod_is_sklearn_TreeRegressor_compatible
+
+    It only accepts 2D arrays.
+    """
     if isinstance(a, np.ndarray):
         return {i: a[:, i] for i in range(a.shape[1])}
     return a
+
+
+class SklearnCompatibleInputMixin:
+    """
+    This is a helper class for the tests:
+
+    test_TreeMethod_is_sklearn_TreeClassifier_compatible
+    test_TreeMethod_is_sklearn_TreeRegressor_compatible
+
+    It changes the sklearn input tags solely for these tests,
+    as the inherent sklearn estimator tests do not run without two_d_array=True.
+    """
+
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.input_tags.two_d_array = True
+        return tags
 
 
 def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
@@ -559,24 +584,29 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
     # The solution is that a class is constructed in each sklearn test.
     # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
 
-    class EstimatorWrap(TreeClassifierMethod):
-
-        def __sklearn_tags__(self):
-            tags = super().__sklearn_tags__()
-            tags.input_tags.two_d_array = True  # Required for sklearn to apply the tests
-            return tags
+    class EstimatorWrap(
+        SklearnCompatibleInputMixin,
+        TreeClassifierMethod
+    ):
 
         def fit(self, X, y):
-            return super().fit(ndarray_to_dict(X.astype(str_dtype)), y.astype(str_dtype))
+            return super().fit(
+                _ndarray_to_dict_helper_sklearn_compatible_tests(
+                    X.astype(str_dtype)),
+                y.astype(str_dtype)
+            )
 
         def transform(self, X):
-            return super().transform(ndarray_to_dict(X.astype(str_dtype)))
+            return super().transform(
+                _ndarray_to_dict_helper_sklearn_compatible_tests(
+                    X.astype(str_dtype))
+            )
 
     # This is needed to change the datatype of the estimator to the child class.
     # estimator.__class__ = EstimatorWrap
     wrapped = EstimatorWrap()
 
-    test_results = check_estimator(
+    check_estimator(
         wrapped,
         legacy=False,
         expected_failed_checks={
@@ -589,23 +619,29 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
 
 def test_TreeMethod_is_sklearn_TreeRegressor_compatible():
 
-    class EstimatorWrap(TreeRegressorMethod):
-        def __sklearn_tags__(self):
-            tags = super().__sklearn_tags__()
-            tags.input_tags.two_d_array = True  # Required for sklearn to apply the tests
-            return tags
+    class EstimatorWrap(
+        TreeRegressorMethod,
+        SklearnCompatibleInputMixin
+    ):
 
         def fit(self, X, y):
-            return super().fit(ndarray_to_dict(X.astype(np.float32)), y)
+            return super().fit(
+                _ndarray_to_dict_helper_sklearn_compatible_tests(
+                    X.astype(np.float32)),
+                y
+            )
 
         def transform(self, X):
-            return super().transform(ndarray_to_dict(X.astype(np.float32)))
+            return super().transform(
+                _ndarray_to_dict_helper_sklearn_compatible_tests(
+                    X.astype(np.float32))
+            )
 
     # This is needed to change the datatype of the estimator to the child class.
     # estimator.__class__ = EstimatorWrap
     wrapped = EstimatorWrap()
 
-    test_results = check_estimator(
+    check_estimator(
         wrapped,
         legacy=False,
         expected_failed_checks={
