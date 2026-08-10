@@ -495,15 +495,6 @@
         ".synthpop-zoombox"
       )
       .forEach(setupZoombox);
-
-    /*
-     * Automatically wrap large images.
-     */
-    document
-      .querySelectorAll(
-        ".document img, main img"
-      )
-      .forEach(wrapImage);
   }
 
 
