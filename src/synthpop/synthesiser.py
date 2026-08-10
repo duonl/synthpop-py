@@ -78,19 +78,32 @@ class Synthesiser:
 
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
-        if self.default_syn_method is None:
-            effective_default_method = CartMethod()
-        else:
-            effective_default_method = clone(self.default_syn_method)
-
         if self.special_syn_method is None:
-            model = effective_default_method
+            use_default=True
         elif column_name in self.special_syn_method:
-            model = clone(self.special_syn_method[column_name])
+            use_default=False
         else:
-            model = effective_default_method
+            use_default=True
 
-        return model
+        if use_default:
+            if self.default_syn_method is None:
+                effective_default_method = CartMethod()
+            elif callable(self.default_syn_method):
+                effective_default_method = self.default_syn_method()
+                if not isinstance(effective_default_method,BaseSynthMethod):
+                    raise ValueError("If the value of default_syn_method is callable it should return an instance of a child class of BaseSynthMethod")
+            else:
+                effective_default_method = clone(self.default_syn_method)
+            return effective_default_method
+        else:
+            model = self.special_syn_method[column_name]
+            if callable(model):
+                new_model = model()
+                if not isinstance(new_model,BaseSynthMethod):
+                    raise ValueError(f"If the value of special_syn_method is callable for entry '{column_name}' it should return an instance of a child class of BaseSynthMethod")
+            else:
+                return clone(model)
+
 
     def _validate_column_order_unique(self, column_order: list[str] | list[int]):
         unique_column_order = np.unique_counts(column_order)

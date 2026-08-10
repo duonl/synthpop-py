@@ -2,7 +2,7 @@
 This module contains the CART method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Self
+from typing import Any, Callable, Dict, Self
 
 import numpy as np
 import numpy.typing as npt
@@ -494,7 +494,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         return self.method_.get_feature_names_out(input_features)
 
 
-def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, random_state: int | None = None) -> CartMethod:
+def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Callable[[],CartMethod]:
     """
     Shortcut to set parameters of the CartMethod.
 
@@ -517,28 +517,28 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, random
     ... special_syn_method={"b": tune_cart(n_leaves=20)})
 
     """
-    with RandomStateManager(seed=random_state):
-        return CartMethod(
-            regressor=TreeRegressorMethod(
-                tree=DecisionTreeRegressor(
-                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                    min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-                    random_state=RandomStateManager.create_instance_seed()
-                ),
-                missing_handler=MissingValuePredictor(
-                    tree=DecisionTreeClassifier(min_samples_leaf=n_leaves,
-                                                random_state=RandomStateManager.create_instance_seed())
-                )
+   
+    return lambda: CartMethod(
+        regressor=TreeRegressorMethod(
+            tree=DecisionTreeRegressor(
+                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                random_state=RandomStateManager.create_instance_seed()
             ),
-            classifier=TreeClassifierMethod(
-                tree=DecisionTreeClassifier(
-                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                    min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-                    random_state=RandomStateManager.create_instance_seed(),
-                ),
-                encoder=PCAEncoder(
-                    pca_transform=PCA(n_components=n_components,
-                                    random_state=RandomStateManager.create_instance_seed())
-                )
+            missing_handler=MissingValuePredictor(
+                tree=DecisionTreeClassifier(min_samples_leaf=n_leaves,
+                                            random_state=RandomStateManager.create_instance_seed())
+            )
+        ),
+        classifier=TreeClassifierMethod(
+            tree=DecisionTreeClassifier(
+                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                random_state=RandomStateManager.create_instance_seed(),
+            ),
+            encoder=PCAEncoder(
+                pca_transform=PCA(n_components=n_components,
+                                random_state=RandomStateManager.create_instance_seed())
             )
         )
+    )

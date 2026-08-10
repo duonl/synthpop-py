@@ -275,11 +275,11 @@ def test_leafnode_sampler_sample_determinism_with_same_seed():
 def test_reproducibility_tune_cart_regression_220():
     obs = combined_regressor_and_classifier_test_data()
 
-    synth = Synthesiser(random_seed=1,default_syn_method=tune_cart(random_state=3))
+    synth = Synthesiser(random_seed=1,default_syn_method=tune_cart())
     synth.fit(obs)
     syn1 = synth.generate(2000)
 
-    synth2 = Synthesiser(random_seed=1,default_syn_method=tune_cart(random_state=3))
+    synth2 = Synthesiser(random_seed=1,default_syn_method=tune_cart())
     synth2.fit(obs)
     syn2 = synth2.generate(2000)
 
