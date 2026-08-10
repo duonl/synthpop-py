@@ -401,7 +401,8 @@ def test_raise_on_rare_category_no_name():
     ([np.nan] * 7 + ["b"] * 10, 5),
     # number of occurrences exactly equal to threshold, with missing values.
     ([np.nan] * 5 + ["b"] * 6, 5),
-    (np.array([np.nan] * 7), 7), # do not raise on nan only array containing a number of values equaling the threshold.
+    # do not raise on nan only array containing a number of values equaling the threshold.
+    (np.array([np.nan] * 7), 7),
 ])
 def test_raise_on_rare_category_does_not_raise_above_threshold(x, threshold):
     x_in = np.array(x, dtype=str_dtype)
