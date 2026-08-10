@@ -104,13 +104,10 @@ tree.plot_tree(method.tree_)
 plt.show()
 ```
 
-
-
-```{image} ../images/rare_categories_decision_tree.svg 
-:width: 500%
-```  
-    
-
+```{image} ../images/rare_categories_decision_tree.svg
+:width: 100%
+:class: synthpop-zoom
+```
 
 Because the predictor contains 100 different values and the target contains only 10 possible values, the tree can separate observations into groups that are homogeneous with respect to the target. The synthesis model has captured the relationship between the predictor and target too precisely for this dataset.
 
