@@ -332,7 +332,7 @@ def test_fit_calls_rare_category_check(X, y, index_cat, threshold, tree_method):
         tree_method.rare_categories_threshold = threshold
         expected_threshold = threshold
 
-    X["boolean_col"] = np.array([True]*3 + [False]*3)
+    X["boolean_col"] = np.array([True] * 3 + [False] * 3)
     index_cat = index_cat + ["boolean_col"]
     tree_method.fit(X, y)
 

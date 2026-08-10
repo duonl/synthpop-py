@@ -245,7 +245,6 @@ def test_output_is_not_a_copy_classifier(method, X, y):
 
 @pytest.mark.parametrize("method, X, y", REGRESSOR_CASES)
 def test_output_is_not_a_copy_regressor(method, X, y):
-    # method = TreeRegressorMethod()
     result = method.fit_transform(X, y)
 
     assert not np.array_equal(y, result, equal_nan=True)

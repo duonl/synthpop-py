@@ -150,11 +150,6 @@ def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | Non
     _, counts = np.unique(x[~m_nan], return_counts=True)
     n_nan = m_nan.sum()
 
-    # if name is None:
-    #     unnamed = "unnamed "
-    #     name = ""
-    # else:
-    #     unnamed = ""
 
     predictor = (
     "unnamed predictor"
