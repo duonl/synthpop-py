@@ -3,7 +3,7 @@
 When categorical data contain categories with very few observations, known as rare categories, they can possibly become a privacy risk. Because these categories are associated with only a small number of observations, they may make individuals or small groups more distinguishable than intended. 
 The following example demonstrates how rare (or unique) categorical values can cause overfitting, potentially increasing disclosure risk.
 
-The example uses a decision-tree-based synthesis method with a categorical predictor containing a unique value for every observation. Because the predictor uniquely identifies each observation, the decision tree can create homogeneous leaf nodes where all observations have the same target value. Sampling from these leaf nodes introduces little or no randomness because all possible sampled values are identical, causing the synthetic target values to reproduce the original target values.
+The example uses a decision-tree-based synthesis method with a categorical predictor containing a unique value for every observation. Because the predictor uniquely identifies each observation, the decision tree can create homogeneous leaf nodes during fitting where all observations have the same target value. Sampling from these leaf nodes introduces little or no randomness because all possible sampled values are identical, causing the synthetic target values to reproduce the original target values.
 
 This example is intentionally constructed to demonstrate a potential failure mode. It does not imply that decision-tree-based synthesis methods will generally reproduce target variables exactly. Rather, it illustrates why the structure and cardinality of the input data should be considered when evaluating privacy.
 
@@ -106,8 +106,8 @@ plt.show()
 
 
 
-```{image} ../images/rare_categories_decision_tree.svg 
-:width: 500%
+```{figure} ../images/rare_categories_decision_tree.svg 
+:width: 510%
 ```  
     
 
