@@ -8,7 +8,7 @@ Welcome to synthpop-py. In this example, you'll learn the complete workflow for 
 4. Generate synthetic data.
 5. Evaluate the utility of the synthetic data by comparing marginal distributions and pairwise relationships.
 
-## Loading the data
+## Load the data
 
 We begin with an existing dataset. The diabetes dataset contains measurements from diabetes patients and a target variable representing disease progression. The dataset contains only continuous variables.
 
@@ -33,7 +33,7 @@ The first three rows of the dataset are:
 
 Each row represents one observation in the original dataset. Our goal is generate a new dataset with the same structure, but containing synthetic data instead of the original data.
 
-## Creating a synthesiser
+## Create a synthesiser
 
 Now we create a {class}`~synthpop.synthesiser.Synthesiser` object.
 
@@ -49,7 +49,7 @@ At this stage, no synthetic data has been created yet. We have only configured t
 
 More information about initialising the Synthesiser can be found in {ref}`User Guide 2.2: The Synthesiser class <22-synthesiser-class>`.
 
-## Fitting the Synthesiser
+## Fit the Synthesiser
 
 Next, we fit the Synthesiser on the original dataset.
 
@@ -65,7 +65,7 @@ The original data is not modified. Instead, the Synthesiser stores the informati
 
 More information about fitting the Synthesiser can be found in {ref}`User Guide 2.4: Fitting the synthesiser <24-fitting-synthesiser>`.
 
-## Generating synthetic data
+## Generate synthetic data
 
 We can now generate a synthetic dataset.
 
@@ -90,9 +90,9 @@ The generated data are not copies of the original observations. Instead, they ar
 
 More information about generating synthetic data can be found in {ref}`User Guide 2.5: Generating synthetic data <25-generating-synthetic_data>`.
 
-## Evaluating the synthetic data
+## Evaluate the synthetic data
 
-### Comparing individual variable distributions
+### Compare individual variable distributions
 
 Creating synthetic data is only the first step. A synthetic dataset should also be evaluated to determine whether it is useful for its intended purpose. This step is called utility evaluation. Utility describes how well synthetic data preserve the statistical properties and analytical usefulness of the original data.
 
@@ -115,7 +115,7 @@ As you can see, the marginal distributions overlap mostly. There are some small 
 
 More information about plotting the univariate distributions can be found in {ref}`User Guide 7.1: Univariate distribution visualisation <71-univariate-distribution-visualisation>`.
 
-### Evaluating pairwise relationships with S_pMSE
+### Evaluate pairwise relationships with S_pMSE
 
 Another important aspect of utility is whether relationships between variables are preserved. `synthpop-py` provides the pairwise Standardised propensity Mean Squared Error (S_pMSE) metric ({func}`~synthpop.utility_metrics.spmse.pairwise_spmse`) for this purpose.
 

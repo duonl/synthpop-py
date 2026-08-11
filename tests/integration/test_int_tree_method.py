@@ -57,6 +57,7 @@ def rigged_tree_classifier_method(pca_components=1):
     return TreeClassifierMethod(
         tree=tree,
         encoder=PCAEncoder(pca_transform=PCA(n_components=pca_components)),
+        rare_categories_threshold=0
     )
 
 
@@ -64,7 +65,7 @@ def rigged_tree_regressor_method():
     tree = SpyDecisionTreeRegressor(
         random_state=RandomStateManager.create_instance_seed(),
     )
-    return TreeRegressorMethod(tree=tree)
+    return TreeRegressorMethod(tree=tree, rare_categories_threshold=0)
 
 
 # ----- create data for test cases -----
@@ -171,7 +172,7 @@ NO_MISSING_TARGET = [
 
 
 def test_treemethod_classifier_fit_and_transform():
-    tree_method = TreeClassifierMethod()
+    tree_method = TreeClassifierMethod(rare_categories_threshold=0)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -190,7 +191,7 @@ def test_treemethod_classifier_fit_and_transform():
 
 
 def test_treemethod_regressor_fit_and_transform():
-    tree_method = TreeRegressorMethod()
+    tree_method = TreeRegressorMethod(rare_categories_threshold=0)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -245,7 +246,6 @@ def test_output_is_not_a_copy_classifier(method, X, y):
 
 @pytest.mark.parametrize("method, X, y", REGRESSOR_CASES)
 def test_output_is_not_a_copy_regressor(method, X, y):
-    method = TreeRegressorMethod()
     result = method.fit_transform(X, y)
 
     assert not np.array_equal(y, result, equal_nan=True)
@@ -418,11 +418,11 @@ def test_classifier_missing_target(method, X, y):
     "method, X, y",
     [
         (
-            TreeRegressorMethod(),
+            TreeRegressorMethod(rare_categories_threshold=0),
             *get_test_data_regressor(with_cats=True),
         ),
         (
-            TreeRegressorMethod(),
+            TreeRegressorMethod(rare_categories_threshold=0),
             *get_test_data_regressor(with_cats=True,
                                      with_missing_features=True),
         ),
@@ -470,6 +470,7 @@ def test_regressor_trainings_data_reaches_all_nodes():
             tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=1),
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
+        rare_categories_threshold=0,
     )
 
     X, y = get_test_data_regressor(
@@ -501,6 +502,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
             random_state=tree_seed,  # seed that reproduces the bug
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
+        rare_categories_threshold=0,
     )
 
     X, y = get_test_data_classifier(
@@ -600,6 +602,10 @@ def test_TreeMethod_is_sklearn_compatible(
         SklearnCompatibleInputMixin,
         tree_method,
     ):
+        def __init__(self):
+            super().__init__()
+            self.rare_categories_threshold = 0
+
         def fit(self, X, y):
             X = _ndarray_to_dict_helper_sklearn_compatible_tests(
                 X.astype(input_dtype)
