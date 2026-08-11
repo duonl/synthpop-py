@@ -602,6 +602,7 @@ def test_TreeMethod_is_sklearn_compatible(
         SklearnCompatibleInputMixin,
         tree_method,
     ):
+        
         def __init__(self):
             super().__init__()
             self.rare_categories_threshold = 0
