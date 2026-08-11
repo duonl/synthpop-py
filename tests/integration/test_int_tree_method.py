@@ -603,8 +603,7 @@ def test_TreeMethod_is_sklearn_compatible(
         tree_method,
     ):
         def __init__(self):
-            super().__init__()
-            self.rare_categories_threshold = 0
+            super().__init__(rare_categories_threshold=0)
 
         def fit(self, X, y):
             X = _ndarray_to_dict_helper_sklearn_compatible_tests(
