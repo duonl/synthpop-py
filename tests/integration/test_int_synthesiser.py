@@ -219,7 +219,12 @@ def test_missingness_predicts_value(missing_value, b_values, expected):
     ],
 )
 @pytest.mark.parametrize("as_categorical", [False, True])
-def test_value_predicts_missingness(missing_value, a_values, expected, as_categorical):
+def test_value_predicts_missingness(
+    missing_value,
+    a_values,
+    expected,
+    as_categorical,
+):
     """A specific value of column a should imply missingness in column b."""
 
     test_data = pd.DataFrame({
@@ -232,7 +237,10 @@ def test_value_predicts_missingness(missing_value, a_values, expected, as_catego
     synth = Synthesiser(random_seed=2)
     generated = synth.fit(test_data).generate(n=200)
 
-    assert generated.loc[generated["a"] == expected, "b"].isna().all()
+    rows = generated["a"] == expected
+    
+    assert rows.sum() > 0
+    assert generated.loc[rows, "b"].isna().all()
 
 
 @pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
@@ -388,8 +396,8 @@ def test_mixed_missing_representations():
     """Different missing-value should be handled similarly"""
 
     test_data = pd.DataFrame({
-        "a": [np.nan, pd.NA, None, 1, 2, 3,] * 20,
-        "b": ["x", "x", "x", "one", "two", "three",] * 20,
+        "a": [np.nan, pd.NA, None, 1, 2, 3] * 20,
+        "b": ["x", "x", "x", "one", "two", "three"] * 20,
     })
 
     synth = Synthesiser(random_seed=2)

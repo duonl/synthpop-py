@@ -434,7 +434,7 @@ def test_regressor_method_and_replace_missing_with_value(y):
          dtype=object, name="target"), False),
     ]
 )
-def test_classifier_method_and_replace_missing_with_value(y, none_missing):
+def test_classifier_method_and_missing_value_predictor(y, none_missing):
     X = pd.DataFrame(
         {
             "age": [20, 30, 40, 50],
