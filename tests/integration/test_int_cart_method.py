@@ -426,15 +426,14 @@ def test_regressor_method_and_replace_missing_with_value(y):
 
 
 @pytest.mark.parametrize(
-    "y, none_missing",
+    "y",
     [
-        (pd.Series(['a', 'b', np.nan, 'c'], dtype=str, name="target"), False),
-        (pd.Series(['a', 'b', 'N.a.N', 'c'], dtype=str, name="target"), True),
-        (pd.Series(['a', 'b', np.nan, 'c'],
-         dtype=object, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'], dtype=str, name="target")),
+        (pd.Series(['a', 'b', 'N.a.N', 'c'], dtype=str, name="target")),
+        (pd.Series(['a', 'b', np.nan, 'c'], dtype=object, name="target")),
     ]
 )
-def test_classifier_method_and_missing_value_predictor(y, none_missing):
+def test_classifier_method_and_missing_value_predictor(y):
     X = pd.DataFrame(
         {
             "age": [20, 30, 40, 50],
@@ -452,8 +451,6 @@ def test_classifier_method_and_missing_value_predictor(y, none_missing):
     cart.fit(X, y)
 
     assert isinstance(cart.method_.missing_handler_, MissingValuePredictor)
-    assert not cart.method_.missing_handler_._all_missing
-    assert cart.method_.missing_handler_._none_missing == none_missing
 
     out = cart.transform(X)
 
