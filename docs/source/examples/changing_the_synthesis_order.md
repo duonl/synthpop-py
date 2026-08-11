@@ -4,6 +4,9 @@ In the previous example, we generated a synthetic version of the Titanic dataset
 
 When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
 ![S_pMSE heatmap of the Titanic dataset](../images/titanic_spmse_1.png)
+```{note}
+Reminder: the S_pMSE is influenced by the number of observations in the original and synthetic datasets. Generating more synthetic rows may result in larger S_pMSE values, even if the underlying quality of the synthesis has not changed, because small differences can be estimated more precisely. Therefore, S_pMSE values are most meaningful when comparing synthesis methods or parameter settings on datasets of the same size.
+```
 
 Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Most relationships are preserved well, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced as well as desired.
 
@@ -88,7 +91,7 @@ There is no synthesis order that is optimal for all datasets. The best order dep
 
 More information about the sequential synthesis procedure is available in [User Guide 2: Synthetic data generation](../user_guides/2_synthetic_data_generation.md).
 
-## Choosing a different order
+## Choose a different order
 
 Looking at the original S_pMSE heatmap, many of the largest values involve `fare`. For example, the relationships between `fare` and `survived`, `pclass`, `class`, `adult_male` and `alone` all have considerably larger S_pMSE values than most other pairs.
 
@@ -134,7 +137,7 @@ synthesiser = Synthesiser(
 
 Both approaches produce the same synthesis order.
 
-## Evaluating the new synthesis order
+## Evaluate the new synthesis order
 
 After changing the synthesis order, we now calculate the S_pMSE values again.
 
@@ -154,7 +157,7 @@ The improvement is encouraging, but `fare` is still involved in many of the larg
 
 This illustrates an important point: changing the synthesis order is rarely a one-shot optimisation. Instead, it is often useful to make a small change, evaluate the result, and then decide on the next refinement.
 
-## Trying another synthesis order
+## Try another synthesis order
 For the next step, we see what happens if we move `embark_town` to the end of the synthesis order as well. Since `fare` has already been moved, we place `embark_town` after `fare`, allowing it to use every other variable, including `fare`, as predictors.
 ```python
 synthesiser = Synthesiser(

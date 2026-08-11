@@ -1,9 +1,11 @@
 [project]
 name = "synthpop-py"
-version = "0.1.0"
+version = "0.1.2"
 description = ""
 authors = [
-    {name = "Erina",email = "erina.koomen@duo.nl"}
+    {name = "Erina",email = "synthetische.data@duo.nl"},
+    {name = "Annelies"},
+    {name = "Cas"},
 ]
 readme = "README.md"
 requires-python = ">=3.13"
