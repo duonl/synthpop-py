@@ -158,9 +158,10 @@ def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | Non
 
     if (counts < rare_threshold).any() or (0 < n_nan < rare_threshold):
         raise ValueError(
-            f"Categorical {predictor} contains a category occurring fewer than {rare_threshold} times. "
-            "This may allow the CART method to copy target values for small groups, "
-            "which can pose a risk of undesirable attribute disclosure. "
-            "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. "
+            f"Categorical {predictor} contains a category occurring fewer than {rare_threshold} times.\n "
+            "This may allow the CART method to copy target values for small groups,\n "
+            "which can pose a risk of undesirable attribute disclosure. \n"
+            "Consider whether this risk is acceptable and adjust rare_categories_threshold if appropriate.\n"
+            "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. \n"
             "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html#synthpop.methods.cart_synth.tune_cart"
         )
