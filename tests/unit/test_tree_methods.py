@@ -1,4 +1,5 @@
 import copy
+import itertools
 
 import numpy as np
 import numpy.typing as npt
@@ -9,6 +10,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.exceptions import NotFittedError
 
+import synthpop
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
 from synthpop.methods.cart_synth import (
     _AbstractTreeMethod,
@@ -187,6 +189,11 @@ def mock_fit_decision_tree(mocker,):
         "synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves", return_value=StubTree())
 
 
+@pytest.fixture(autouse=True)
+def mock_raise_on_rare_category(mocker):
+    mocker.patch("synthpop.utils._raise_on_rare_category")
+
+
 def assert_dict_array_equal(expected, actual):
     for k, v in expected.items():
         assert np.array_equal(
@@ -307,6 +314,54 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
     y_spy.assert_called_once_with(
         y, 42
     )  # 42 is the hardcoded n_samples value of the validate_dict_x stub
+
+
+@pytest.mark.parametrize(
+    "X, y, index_cat, threshold",
+    [
+        (*standard_args, threshold)
+        for standard_args in get_input_test_data()
+        for threshold in [None, 10, 1]
+    ],
+)
+def test_fit_calls_rare_category_check(X, y, index_cat, threshold, tree_method):
+    # the testcase where the parameter threshold is None simulates default behaviour.
+    if threshold is None:
+        expected_threshold = 5
+    else:
+        tree_method.rare_categories_threshold = threshold
+        expected_threshold = threshold
+
+    X["boolean_col"] = np.array([True] * 3 + [False] * 3)
+    index_cat = index_cat + ["boolean_col"]
+    tree_method.fit(X, y)
+
+    for cat_col in index_cat:
+
+        # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
+        calls = synthpop.utils._raise_on_rare_category.call_args_list
+
+        assert any(
+            np.array_equal(call.kwargs["x"], X[cat_col])
+            and call.kwargs["rare_threshold"] == expected_threshold
+            and call.kwargs["name"] == cat_col
+            for call in calls
+        )
+
+    assert len(index_cat) == synthpop.utils._raise_on_rare_category.call_count
+
+
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_raises_on_rare_category_not_called_when_disabled(
+    X,
+    y,
+    index_cat,
+    tree_method,
+):
+    tree_method.rare_categories_threshold = 0
+    tree_method.fit(X, y)
+
+    synthpop.utils._raise_on_rare_category.assert_not_called()
 
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
