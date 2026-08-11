@@ -26,7 +26,7 @@ These risks describe different ways in which information about individuals in th
 ### 6.1.1. Identity disclosure
 Identity disclosure occurs when an individual in the original dataset can be linked to a record in the synthetic dataset.
 
-This risk is related to the ability to identify a person based on combinations of characteristics. For example, a synthetic record containing a rare combination of age, occupation, location and other attributes could allow a third party to infer which original individual it represents.
+This risk is related to the ability to identify a person based on combinations of characteristics. For example, a synthetic record containing a rare combination of age, occupation, location and other attributes could allow a third-party to infer which original individual it represents.
 
 Identity disclosure is more likely when:
 - The original dataset contains unique or rare combinations of variables.
@@ -37,9 +37,11 @@ Identity disclosure is more likely when:
 A common approach for evaluating identity disclosure is to measure how closely synthetic records match original records based on identifying attributes.
 
 ### 6.1.2. Attribute disclosure
-Attribute disclosure occurs when a third party learns sensitive information about an individual, even without identifying the exact record.
+Attribute disclosure occurs when a third-party learns sensitive information about an individual, even without identifying the exact record.
 
-For example, if an individual is known to belong to a particular group and the synthetic data reveal that all individuals in that group share a sensitive attribute, a third party may infer information about the individual.
+A sensitive attribute is an attribute whose value is considered confidential and could cause harm or reveal private information if inferred about an individual. Examples include medical diagnoses, income, political affiliation or other personal characteristics. In the context of attribute disclosure, the concern is that a third-party who already knows an individual's quasi-identifying characteristics (such as age, sex or location) may use the synthetic data to infer the value of one or more sensitive attributes with high confidence.
+
+For example, if an individual is known to belong to a particular group and the synthetic data reveal that all individuals in that group share a sensitive attribute, a third-party may infer information about the individual.
 
 Attribute disclosure can occur when:
 -  Relationships between quasi-identifiers and sensitive attributes are preserved too strongly.
@@ -48,8 +50,38 @@ Attribute disclosure can occur when:
 
 Preventing attribute disclosure requires considering not only whether individual records can be identified, but also whether sensitive information can be inferred from preserved statistical relationships.
 
+#### 6.1.2.1 Rare categories and overfitting
+
+Categories with very few records in the data, so-called rare categories, can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, synthesis models may be able to reproduce relationships for those rare values too accurately.
+
+This can occur when a synthesis model overfits the original data. For example, suppose a categorical predictor contains a unique value for every observation. A classification model may be able to split the data into groups that contain only a single target value, including very small groups. When synthetic values are subsequently sampled from these groups, there may be little or no randomness in the generated values. This means that the relationship between the predictor and target column will be almost exactly reproduced. As a result, the synthetic target column may closely match the original target column.
+
+This is particularly relevant when rare categories are associated with sensitive attributes. If a rare category corresponds to a small group of individuals and the relationship between that category and a sensitive variable is preserved too accurately during the synthesis process, the synthetic data may allow a third-party to infer sensitive information about members of that group. This is a form of attribute disclosure.
+
+For example, consider a dataset containing a categorical variable that identifies a small group and a variable describing a sensitive characteristic of those individuals.
+If the synthesis model learns a deterministic relationship between the two variables, the synthetic dataset may reproduce that relationship even though the individual records themselves are not directly copied.
+A person with external knowledge about the group could then use the synthetic data to infer the sensitive characteristic.
+
+While preserving relationships between variables is generally an objective of the synthesis method it can also increase the risk of attribute disclosure, particularly for small groups or individual records.
+
+Generally, the risk of attribute disclosure can be increased by:
+
+* categorical variables with many rare or unique categories;
+* small subgroups with little variation in sensitive attributes;
+* strong or deterministic relationships between quasi-identifiers and sensitive variables;
+* synthesis models that overfit small groups; and
+* synthesis methods that reproduce original relationships with little or no added uncertainty.
+
+The presence and characteristics of rare categories should therefore be carefully assessed. In particular, users should examine whether small or rare groups are represented in the synthetic data and whether sensitive attributes associated with these groups are preserved in a way that increases disclosure risk.
+
+This risk is not specific to any particular synthesis method. It depends on the interaction between the characteristics of the original data, the synthesis model, and the specific synthesis configuration. A model that captures common categories well may still overfit rare categories or small subgroups.
+
+A synthetic dataset should therefore not be assumed to be provide strong privacy protection simply because individual records are not explicitly copied. Privacy evaluation should also consider whether the synthesis process has preserved relationships within rare groups in a way that could enable inference of sensitive information.
+
+For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce sensitive attributes, see the [Risk of privacy loss due to rare categories example](../examples/rare_categories.md).
+
 ### 6.1.3. Membership disclosure
-Membership disclosure occurs when a third party can determine whether a particular individual was included in the original dataset.
+Membership disclosure occurs when a third-party can determine whether a particular individual was included in the original dataset.
 
 For example, if a person suspects that their medical records were included in a dataset, synthetic data should not allow a third party to confidently confirm or deny their presence.
 
