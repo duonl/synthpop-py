@@ -513,10 +513,10 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
         out_standard, out_different_missing_handling)
 
 
-@pytest.mark.parametrize(" y", [
-    (np.array(
-        ["a", "b", "c", "d", "e"] * 6, dtype=str_dtype)),
-    (np.array([1, 2, 3, 4, 5] * 6))
+@pytest.mark.parametrize("y", [
+    np.array(
+        ["a", "b", "c", "d", "e"] * 6, dtype=str_dtype),
+    np.array([1, 2, 3, 4, 5] * 6),
 ])
 def test_cart_method_raises_on_rare_category(y):
     """
@@ -536,9 +536,12 @@ def test_cart_method_raises_on_rare_category(y):
 
     method = tune_cart(n_leaves=2)
 
-    with pytest.raises(ValueError, match=re.escape("Categorical predictor column contains a category occurring fewer than 5 times. \
-                                                   This may allow the CART method to copy target values for small groups, \
-                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+    with pytest.raises(ValueError, match=re.escape(
+            "Categorical predictor column contains a category occurring fewer than 5 times."
+            "This may allow the CART method to copy target values for small groups,"
+            "which can pose a risk of undesirable attribute disclosure. See <LINK>."
+        )
+    ):
         result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
         # this assertion should not be reached when #156 is done.

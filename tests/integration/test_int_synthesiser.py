@@ -186,12 +186,15 @@ def test_synthesiser_preserves_cat_cat_relation():
         assert value < 0.1
 
 
-@pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 @pytest.mark.parametrize(
-    "b_values, expected",
+    "missing_value, b_values, expected",
     [
-        ([3, 0, 3, 1, 2, 3], 3),
-        (["D", "A", "D", "C", "B", "D"], "D"),
+        (np.nan, [3, 0, 3, 1, 2, 3], 3),
+        (pd.NA, [3, 0, 3, 1, 2, 3], 3),
+        (None, [3, 0, 3, 1, 2, 3], 3),
+        (np.nan, ["D", "A", "D", "C", "B", "D"], "D"),
+        (pd.NA, ["D", "A", "D", "C", "B", "D"], "D"),
+        (None, ["D", "A", "D", "C", "B", "D"], "D"),
     ],
 )
 def test_missingness_predicts_value(missing_value, b_values, expected):
@@ -207,18 +210,27 @@ def test_missingness_predicts_value(missing_value, b_values, expected):
 
     rows = generated["a"].isna()
 
+    assert rows.sum() > 0
     assert (generated.loc[rows, "b"] == expected).all()
 
 
-@pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 @pytest.mark.parametrize(
-    "a_values, expected",
+    "missing_value, a_values, expected, as_categorical",
     [
-        ([0, 1, 2, 0, 1, 0], 0),
-        (["A", "B", "C", "A", "B", "A"], "A"),
+        (np.nan, [0, 1, 2, 0, 1, 0], 0, False),
+        (pd.NA, [0, 1, 2, 0, 1, 0], 0, False),
+        (None, [0, 1, 2, 0, 1, 0], 0, False),
+        (np.nan, ["A", "B", "C", "A", "B", "A"], "A", False),
+        (pd.NA, ["A", "B", "C", "A", "B", "A"], "A", False),
+        (None, ["A", "B", "C", "A", "B", "A"], "A", False),
+        (np.nan, [0, 1, 2, 0, 1, 0], 0, True),
+        (pd.NA, [0, 1, 2, 0, 1, 0], 0, True),
+        (None, [0, 1, 2, 0, 1, 0], 0, True),
+        (np.nan, ["A", "B", "C", "A", "B", "A"], "A", True),
+        (pd.NA, ["A", "B", "C", "A", "B", "A"], "A", True),
+        (None, ["A", "B", "C", "A", "B", "A"], "A", True),
     ],
 )
-@pytest.mark.parametrize("as_categorical", [False, True])
 def test_value_predicts_missingness(
     missing_value,
     a_values,
@@ -238,19 +250,21 @@ def test_value_predicts_missingness(
     generated = synth.fit(test_data).generate(n=200)
 
     rows = generated["a"] == expected
-    
+
     assert rows.sum() > 0
     assert generated.loc[rows, "b"].isna().all()
 
 
-@pytest.mark.parametrize("missing_value", [np.nan, pd.NA, None])
 @pytest.mark.parametrize(
-    "c_values",
+    "missing_value, c_values",
     [
-        [5, 6, 7, 8],
-        ["A", "B", "C", "D"],
+        (np.nan, [5, 6, 7, 8]),
+        (pd.NA, [5, 6, 7, 8]),
+        (None, [5, 6, 7, 8]),
+        (np.nan, ["A", "B", "C", "D"]),
+        (pd.NA, ["A", "B", "C", "D"]),
+        (None, ["A", "B", "C", "D"]),
     ],
-    ids=["numeric", "categorical"],
 )
 def test_joint_missingness_pattern(missing_value, c_values):
     """Missing values should occur together."""
@@ -264,7 +278,12 @@ def test_joint_missingness_pattern(missing_value, c_values):
     synth = Synthesiser(random_seed=2)
     generated = synth.fit(test_data).generate(n=200)
 
-    assert (generated["a"].isna() == generated["b"].isna()).all()
+    a_isna = generated['a'].isna()
+    b_isna = generated['b'].isna()
+
+    assert a_isna.any()
+    assert a_isna.any()
+    assert (a_isna == b_isna).all()
 
 
 @pytest.mark.parametrize(
@@ -389,6 +408,7 @@ def test_conditional_missingness_multiple_columns(missing_value):
 
     mask = (generated["a"] == "x") & (generated["b"] == 1)
 
+    assert mask.sum() > 0
     assert generated.loc[mask, "c"].isna().all()
 
 
@@ -405,6 +425,7 @@ def test_mixed_missing_representations():
 
     missing = generated["a"].isna()
 
+    assert missing.sum() > 0
     assert (generated.loc[missing, "b"] == "x").all()
 
 
@@ -456,52 +477,73 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
     assert generated['c'].isna().all()
 
 
+def _assert_distribution_preserved_multiple_methods(original, generated, tolerance=0.05):
+    """Assert that missingness and observed-value distributions are preserved."""
+    expected_missing = original.isna().mean()
+    actual_missing = generated.isna().mean()
+
+    assert abs(expected_missing - actual_missing) < tolerance
+
+    expected_values = original.dropna().value_counts(normalize=True)
+    actual_values = generated.dropna().value_counts(normalize=True)
+
+    if expected_values.empty:
+        assert actual_values.empty
+    else:
+        assert (
+            expected_values.sub(actual_values, fill_value=0)
+            .abs()
+            .max()
+            < tolerance
+        )
+
+
 @pytest.mark.parametrize(
     "test_data",
     [
-        (
-            pd.DataFrame({
-                "a": [1, 2]*30,
-                "b": [3, 4]*30,
-                "c": [5, 6]*30,
-            })
+        pd.DataFrame(
+            {
+                "a": [1, 2] * 30,
+                "b": [3, 4] * 30,
+                "c": [5, 6] * 30,
+            }
         ),
-        (
-            pd.DataFrame({
-                "a": [np.nan, np.nan]*30,
-                "b": [3, pd.NA]*30,
-                "c": [None, 6]*30,
-            })
+        pd.DataFrame(
+            {
+                "a": [np.nan, np.nan] * 30,
+                "b": [3, pd.NA] * 30,
+                "c": [None, 6] * 30,
+            }
         ),
-        (
-            pd.DataFrame({
-                "a": [1, None]*30,
-                "b": [0, 0]*30,
-                "c": [np.nan, np.nan]*30,
-            })  # Produces error for CART
+        pd.DataFrame(
+            {
+                "a": [1, None] * 30,
+                "b": [0, 0] * 30,
+                "c": [np.nan, np.nan] * 30,
+            }
         ),
-        (
-            pd.DataFrame({
-                "a": [1, None]*30,
-                "b": [0, -12]*30,
-                "c": [pd.NA, pd.NA]*30,
-            })
+        pd.DataFrame(
+            {
+                "a": [1, None] * 30,
+                "b": [0, -12] * 30,
+                "c": [pd.NA, pd.NA] * 30,
+            }
         ),
-        (
-            pd.DataFrame({
-                "a": [np.nan, None]*30,
-                "b": [pd.NA, pd.NA]*30,
-                "c": [0, -12]*30,
-            })
+        pd.DataFrame(
+            {
+                "a": [np.nan, None] * 30,
+                "b": [pd.NA, pd.NA] * 30,
+                "c": [0, -12] * 30,
+            }
         ),
-        (
-            pd.DataFrame({
-                "a": [pd.NA, pd.NA]*30,
-                "b": [np.nan, np.nan]*30,
-                "c": [0, -12]*30,
-            })
-        )
-    ]
+        pd.DataFrame(
+            {
+                "a": [pd.NA, pd.NA] * 30,
+                "b": [np.nan, np.nan] * 30,
+                "c": [0, -12] * 30,
+            }
+        ),
+    ],
 )
 def test_multiple_synthesis_methods(test_data):
 
@@ -520,22 +562,21 @@ def test_multiple_synthesis_methods(test_data):
 
     generated = fit.generate()
 
+    # Test the CopyMethod.
     pd.testing.assert_series_equal(
         test_data["b"],
         generated["b"],
     )
-    expected_nan_values = test_data["c"].fillna(np.nan)
-    # CART-method always outputs np.nan, but accepts pd.NA
 
-    # Required fillna(0) to count the nan values
-    expected_SampleMethod = test_data['a'].fillna(
-        0).value_counts(normalize=True)
-    actual_SampleMethod = generated['a'].fillna(0).value_counts(normalize=True)
-
-    assert expected_SampleMethod.sub(
-        actual_SampleMethod, fill_value=0).abs().max() < 0.05
-
-    assert expected_nan_values.isin(generated['c']).all()
+    # Test the SampleMethod and CartMethod.
+    _assert_distribution_preserved_multiple_methods(
+        test_data["a"],
+        generated["a"],
+    )
+    _assert_distribution_preserved_multiple_methods(
+        test_data["c"],
+        generated["c"],
+    )
 
 
 def test_error_on_rowcount_mismatch():
