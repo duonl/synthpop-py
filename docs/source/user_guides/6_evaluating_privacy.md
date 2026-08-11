@@ -36,6 +36,7 @@ Identity disclosure is more likely when:
 
 A common approach for evaluating identity disclosure is to measure how closely synthetic records match original records based on identifying attributes.
 
+(612-attribute-disclosure)=
 ### 6.1.2. Attribute disclosure
 Attribute disclosure occurs when a third-party learns sensitive information about an individual, even without identifying the exact record.
 

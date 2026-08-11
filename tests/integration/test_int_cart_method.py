@@ -28,7 +28,7 @@ def test_numeric_target_uses_regressor():
 
     y = pd.Series([1.1, 2.2, 3.3, 4.4], name="target")
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     assert isinstance(cart.method_, TreeRegressorMethod)
@@ -50,7 +50,7 @@ def test_string_target_uses_classifier():
 
     y = pd.Series(["A", "B", "A", "B"], name="group")
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     assert isinstance(cart.method_, TreeClassifierMethod)
@@ -91,7 +91,7 @@ def test_dirty_dataframe_roundtrip():
 
     y = pd.Series(["yes", "no", "yes", "no"], dtype="string", name="target")
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     out = cart.transform(X)
@@ -112,7 +112,7 @@ def test_transform_accepts_reordered_columns():
 
     y = pd.Series([1.0, 2.0, 3.0, 4.0], name="target")
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X_fit, y)
 
     X_transform = X_fit[["c", "a", "b"]]
@@ -136,7 +136,7 @@ def test_transform_accepts_extra_columns():
         name="target"
     )
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X_fit, y)
 
     X_transform = X_fit.assign(
@@ -164,7 +164,7 @@ def test_transform_preserves_index_and_name():
         name="salary",
     )
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     out = cart.transform(X)
@@ -187,7 +187,7 @@ def test_fit_sets_all_fitted_attributes():
 
     y = pd.Series([10.0, 20.0], name="target")
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     assert cart.feature_names_in_ == ["a", "b"]
@@ -213,7 +213,7 @@ def test_numeric_target_dtypes_dispatch_to_regressor(y):
         }
     )
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     assert isinstance(cart.method_, TreeRegressorMethod)
@@ -235,7 +235,7 @@ def test_non_numeric_target_dtypes_dispatch_to_classifier(y):
         }
     )
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     assert isinstance(cart.method_, TreeClassifierMethod)
@@ -266,7 +266,7 @@ def test_fit_transform_with_missing_values_in_predictors():
 
     y = pd.Series([10.0, 20.0, 30.0, 40.0], name="target")
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
 
     out = cart.transform(X)
@@ -328,7 +328,7 @@ def test_cart_preserves_target_dtype_end_to_end(y):
         }
     )
 
-    cart = CartMethod()
+    cart = tune_cart(rare_categories_threshold=0)
     cart.fit(X, y)
     result = cart.transform(X)
 
@@ -409,10 +409,24 @@ def test_cart_method_raises_on_rare_category(y):
 
     method = tune_cart(n_leaves=2)
 
-    with pytest.raises(ValueError, match=re.escape("Categorical predictor column contains a category occurring fewer than 5 times. \
-                                                   This may allow the CART method to copy target values for small groups, \
-                                                   which can pose a risk of undesirable attribute disclosure. See <LINK>.")):
+    with pytest.raises(ValueError, match=".* contains a category occurring fewer than 2 times.*"):
         result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
         # this assertion should not be reached when #156 is done.
         assert result[3] != y[3], "attribute disclosure for sample 3"
+
+
+def test_tune_cart_disable_rare_categories_check():
+
+    feature = ["x", "y", "z"] * 10
+    y = [1, 2, 3] * 10
+    feature[3] = "unique value"
+    X = {
+        "column": np.array(feature, dtype=str_dtype)
+    }
+
+    method = tune_cart(n_leaves=2, rare_categories_threshold=0)
+
+    result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
+
+    assert result[3] == y[3], "attribute disclosure for sample 3"

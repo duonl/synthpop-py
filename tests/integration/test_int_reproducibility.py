@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from synthpop.methods.cart_synth import tune_cart
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.methods.tree_utils import LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
@@ -155,7 +156,10 @@ def combined_regressor_and_classifier_test_data(seed=10):
 def test_reproducibility_synthesis():
     obs = combined_regressor_and_classifier_test_data()
 
-    synth = Synthesiser(random_seed=1)
+    synth = Synthesiser(
+        random_seed=1,
+        default_syn_method=tune_cart(rare_categories_threshold=0),
+    )
     synth.fit(obs)
 
     syn1 = synth.generate(2000)
@@ -166,7 +170,10 @@ def test_reproducibility_synthesis():
         syn2,
         obj="generating 2 consecutive times did not produce the same synthetic dataset",
     )
-    synth2 = Synthesiser(random_seed=1)
+    synth2 = Synthesiser(
+        random_seed=1,
+        default_syn_method=tune_cart(rare_categories_threshold=0),
+    )
     synth2.fit(obs)
 
     syn3 = synth2.generate(2000)
