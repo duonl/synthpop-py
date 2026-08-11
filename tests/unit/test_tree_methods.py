@@ -7,7 +7,6 @@ import pandas as pd
 import pytest
 from sklearn import clone
 from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.exceptions import NotFittedError
 
 import synthpop
@@ -481,12 +480,14 @@ def test_fit_tree_is_applied(X, y, index_cat, tree_method):
 def test_fit_sampler_fit(X, y, index_cat, tree_method):
     tree_method.fit(X, y)
 
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,
-                          tree_method.tree_.apply_result), (
+    assert np.array_equal(
+        tree_method.tree_sampler_.fit_sampler_leaf_ids,
+        tree_method.tree_.apply_result), (
         "input of the sampler must be the output of the tree"
     )
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,
-                          tree_method.missing_handler_.prepared_for_fit_result[1])
+    assert np.array_equal(
+        tree_method.tree_sampler_.fit_sampler_y,
+        tree_method.missing_handler_.prepared_for_fit_result[1])
     assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
 
@@ -792,45 +793,6 @@ def test_get_feature_names_out_no_target_name(X, tree_method):
 
     result = tree_method.get_feature_names_out()
     assert result == [["Trained", "on", "these", "features"]]
-
-
-def ndarray_to_dict(a):
-    if isinstance(a, np.ndarray):
-        return {i: a[:, i] for i in range(a.shape[1])}
-    return a
-
-
-@parametrize_with_checks(
-    [TreeClassifierMethod(), TreeRegressorMethod()],
-    legacy=False,
-    expected_failed_checks=lambda x: {
-        "check_fit_score_takes_y": "tests with a score component"
-    },
-)
-@pytest.mark.noautofixt
-def test_TreeMethod_is_sklearn_compatible(estimator, check):
-    # sklearn provides valuable tests.
-    # Those tests assume that the input is a numpy array.
-    # The tree methods assume that the input is a dictionary.
-
-    # We want to test if the tree method that the user is going to use are sklearn compatible.
-    # So we cannot use the StubTreeMethod as in all other tests.
-
-    # The solution is that a class is constructed in each sklearn test.
-    # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
-    class EstimatorWrap(estimator.__class__):
-        def fit(self, X, y):
-            return super().fit(ndarray_to_dict(X), y)
-
-        def transform(self, X):
-            return super().transform(ndarray_to_dict(X))
-
-    # This is needed to change the datatype of the estimator to the child class.
-    # estimator.__class__ = EstimatorWrap
-    wrapped = EstimatorWrap(**estimator.get_params())
-
-    check(wrapped)
-
 
 def test_to_fixed_length_string_array():
     x = np.array(["a", "b"], dtype=str_dtype)
