@@ -255,7 +255,11 @@ class MissingValuePredictor(BaseMissingValueHandler):
         missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
         missing_mask = np.asarray(missing_mask).astype(bool)
 
-        y_out = y_val.astype(float).copy()
+        if pd.api.types.is_numeric_dtype(y_val):
+            y_out = y_val.astype(float).copy()
+        else:
+            y_out = y_val.copy()
+
         y_out[missing_mask] = np.nan
 
         return y_out
