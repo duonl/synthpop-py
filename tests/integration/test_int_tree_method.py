@@ -573,7 +573,19 @@ class SklearnCompatibleInputMixin:
         return tags
 
 
-def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
+@pytest.mark.parametrize(
+    ("tree_method", "input_dtype", "target_dtype"),
+    [
+        (TreeClassifierMethod, str_dtype, str_dtype),
+        # target dtype should not be changed
+        (TreeRegressorMethod, np.float32, None),
+    ],
+)
+def test_TreeMethod_is_sklearn_compatible(
+    tree_method,
+    input_dtype,
+    target_dtype,
+):
     # sklearn provides valuable tests.
     # Those tests assume that the input is a numpy array.
     # The tree methods assume that the input is a dictionary.
@@ -586,24 +598,23 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
 
     class EstimatorWrap(
         SklearnCompatibleInputMixin,
-        TreeClassifierMethod
+        tree_method,
     ):
-
         def fit(self, X, y):
-            return super().fit(
-                _ndarray_to_dict_helper_sklearn_compatible_tests(
-                    X.astype(str_dtype)),
-                y.astype(str_dtype)
+            X = _ndarray_to_dict_helper_sklearn_compatible_tests(
+                X.astype(input_dtype)
             )
+            if target_dtype is not None:
+                y = y.astype(target_dtype)
+            return super().fit(X, y)
 
         def transform(self, X):
             return super().transform(
                 _ndarray_to_dict_helper_sklearn_compatible_tests(
-                    X.astype(str_dtype))
+                    X.astype(input_dtype)
+                )
             )
 
-    # This is needed to change the datatype of the estimator to the child class.
-    # estimator.__class__ = EstimatorWrap
     wrapped = EstimatorWrap()
 
     check_estimator(
@@ -613,39 +624,5 @@ def test_TreeMethod_is_sklearn_TreeClassifier_compatible():
             "check_fit_score_takes_y":
                 "Tree methods do not implement sklearn scoring semantics"
         },
-        on_fail='raise'
-    )
-
-
-def test_TreeMethod_is_sklearn_TreeRegressor_compatible():
-
-    class EstimatorWrap(
-        TreeRegressorMethod,
-        SklearnCompatibleInputMixin
-    ):
-
-        def fit(self, X, y):
-            return super().fit(
-                _ndarray_to_dict_helper_sklearn_compatible_tests(
-                    X.astype(np.float32)),
-                y
-            )
-
-        def transform(self, X):
-            return super().transform(
-                _ndarray_to_dict_helper_sklearn_compatible_tests(
-                    X.astype(np.float32))
-            )
-
-    # This is needed to change the datatype of the estimator to the child class.
-    # estimator.__class__ = EstimatorWrap
-    wrapped = EstimatorWrap()
-
-    check_estimator(
-        wrapped,
-        legacy=False,
-        expected_failed_checks={
-            "check_fit_score_takes_y": "tests with a score component"
-        },
-        on_fail='raise'
+        on_fail="raise",
     )
