@@ -38,6 +38,11 @@ graph TD
     A[Start]-->B[End]
 ```
 
+Using jupyter notebooks as documentation is not supported. They introduce significant additional dependencies, and make pull requests more difficult to review. 
+Since notebooks can be exported to markdown, there is little added value to rendering notebooks by the documentation build system.
+Notebooks can be rendered by the developer and exported to markdown by running
+`jupyter nbconvert --to markdown xx.ipynb`, where `xx` is the name of your notebook.
+
 <!-- omit from toc -->
 ## About building and publishing documentation
 
