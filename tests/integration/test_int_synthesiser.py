@@ -614,6 +614,9 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
     obs = pd.DataFrame(X)
     obs["target"] = y
 
+    # To surpass the Rare categories threshold
+    obs = pd.concat((obs, obs, obs, obs, obs), axis=0)
+
     synth = Synthesiser(random_seed=0)
     synth.fit(obs)
     with warnings.catch_warnings():
