@@ -82,10 +82,9 @@ In this example, the synthesised target is identical to the original target:
 (synth_data == y).all()
 ```
 
-
-
-
-    np.True_
+```python
+np.True_
+```
 
 
 
@@ -107,7 +106,7 @@ plt.show()
 
 
 ```{figure} ../images/rare_categories_decision_tree.svg 
-:width: 510%
+:width: 100%
 ```  
     
 
@@ -244,11 +243,9 @@ syn_df = synth.generate()
 
 syn_df["y"].equals(df["y"])
 ```
-
-
-
-
-    True
+```python
+True
+```
 
 
 
