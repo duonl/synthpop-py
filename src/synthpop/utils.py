@@ -106,7 +106,7 @@ def _standardise_array_dtypes(X: npt.ArrayLike) -> npt.NDArray:
     """
 
     is_numeric = pd.api.types.is_numeric_dtype(np.asanyarray(X))
-    # to avoid casting van np.nan to 'nan'
+    # to avoid casting from np.nan to 'nan'
     arr = np.asanyarray(X, dtype=object)
 
     if arr.ndim not in (1, 2):

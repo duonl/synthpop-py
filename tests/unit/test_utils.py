@@ -365,7 +365,7 @@ def test_to_standardised_array_dict_with_numpy_inputs():
     # number of occurrences strictly lower than threshold, with missing values
     (np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype), 7),
     (np.array([True] * 4 + [False] * 6), 5),  # boolean
-    (np.array([np.nan] * 6), 7)
+    (np.array([np.nan] * 6), 7),
 ])
 def test_raise_on_rare_category_raises_below_threshold(x, threshold):
 
