@@ -26,11 +26,12 @@ from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
     BaseMissingValueHandler,
     MissingValuePredictor,
-    ReplaceMissingWithValue
+    ReplaceMissingWithValue,
 )
 from synthpop.methods import base_synth
 import synthpop.methods.tree_utils as tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler
+import synthpop.methods.tree_utils as tree_utils
 from synthpop.reproducibility import RandomStateManager
 
 

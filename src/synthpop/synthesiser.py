@@ -77,8 +77,10 @@ class Synthesiser:
                  column_order: list[str] | list[int] | None = None,
                  default_syn_method: BaseSynthMethod | Callable[[
                  ], BaseSynthMethod] | None = None,
-                 special_syn_method: Dict[str, BaseSynthMethod] | Callable[[
-                 ], BaseSynthMethod] | None = None,
+                 special_syn_method: (Dict[str, BaseSynthMethod | Callable[[], 
+                 BaseSynthMethod]]
+                 | None
+                 )
                  ) -> None:
 
         self.default_syn_method = default_syn_method
@@ -185,8 +187,10 @@ class Synthesiser:
 
                 model = self._get_model(y)
 
-                self.models_[self.column_order_[i]
-                             ] = model.fit(predictors, X[y])
+                self.models_[self.column_order_[i]] = model.fit(
+    predictors,
+    X[y],
+)
 
         return self
 

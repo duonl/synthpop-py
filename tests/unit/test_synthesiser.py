@@ -150,7 +150,7 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_default_method():
         default_syn_method=method,
     )
 
-    with pytest.raises(ValueError,match=".*default_syn_method.*BaseSynthMethod"):
+    with pytest.raises(ValueError, match=".*default_syn_method.*BaseSynthMethod"):
         synth.fit(test_data)
 
 def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
@@ -164,7 +164,7 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
 
     synth = Synthesiser(
         random_seed=2,
-        special_syn_method={"b":method},
+        special_syn_method={"b": method},
     )
 
     with pytest.raises(ValueError,match=".*special_syn_method.* \'b\'.*BaseSynthMethod"):
