@@ -430,7 +430,6 @@ def test_regressor_method_and_replace_missing_with_value(y):
 @pytest.mark.parametrize(
     "y",
     [
-<<<<<<< HEAD
         (pd.Series(['a', 'b', np.nan, 'c'] * 5,
                    dtype=str, name="target")),
         (pd.Series(['a', 'b', np.nan, 'c'] * 5,
@@ -442,11 +441,6 @@ def test_regressor_method_and_replace_missing_with_value(y):
 
         (pd.Series(['a', 'b', 'N.a.N', 'c'] * 5,
                    dtype=str, name="target")),
-=======
-        pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=str, name="target"),
-        pd.Series(['a', 'b', 'N.a.N', 'c'] * 5, dtype=str, name="target"),
-        pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=object, name="target"),
->>>>>>> 1f25ab0b62b0659bc51d866ca5fa2ee5d587dda9
     ]
 )
 def test_classifier_method_and_missing_value_predictor(y):
