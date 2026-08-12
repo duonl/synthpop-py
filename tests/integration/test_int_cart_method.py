@@ -428,9 +428,9 @@ def test_regressor_method_and_replace_missing_with_value(y):
 @pytest.mark.parametrize(
     "y",
     [
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=str, name="target")),
-        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 5, dtype=str, name="target")),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=object, name="target")),
+        pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=str, name="target"),
+        pd.Series(['a', 'b', 'N.a.N', 'c'] * 5, dtype=str, name="target"),
+        pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=object, name="target"),
     ]
 )
 def test_classifier_method_and_missing_value_predictor(y):
@@ -513,11 +513,13 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
         out_standard, out_different_missing_handling)
 
 
-@pytest.mark.parametrize("y", [
-    np.array(
-        ["a", "b", "c", "d", "e"] * 6, dtype=str_dtype),
-    np.array([1, 2, 3, 4, 5] * 6),
-])
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.array(["a", "b", "c", "d", "e"] * 6, dtype=str_dtype),
+        np.array([1, 2, 3, 4, 5] * 6),
+    ],
+)
 def test_cart_method_raises_on_rare_category(y):
     """
     Test for an exception when there is a value of a categorical variable that occurs once.
