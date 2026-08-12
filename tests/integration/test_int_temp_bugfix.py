@@ -29,7 +29,7 @@ def test_classifier_method_and_replace_missing_with_value(y, none_missing):
     cart = CartMethod(
         classifier=TreeClassifierMethod(
             tree=None, missing_handler=MissingValuePredictor()
-        )
+        ),
     )
 
     cart.fit(X, y)
