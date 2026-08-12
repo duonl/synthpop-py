@@ -282,7 +282,7 @@ def test_joint_missingness_pattern(missing_value, c_values):
     b_isna = generated['b'].isna()
 
     assert a_isna.any()
-    assert a_isna.any()
+    assert b_isna.any()
     assert (a_isna == b_isna).all()
 
 
