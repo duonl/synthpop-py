@@ -10,6 +10,7 @@
                 "BDFL",
                 "crosstab",
                 "docstrings",
+                "overfitting",
                 "setdiff"
             ],
             "python-envs.defaultEnvManager": "ms-python.python:poetry",

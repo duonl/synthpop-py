@@ -9,7 +9,7 @@
 project = 'Synthpop'
 copyright = '2026, Betty, Annelies, Erina, Cas'
 author = 'Betty, Annelies, Erina, Cas'
-release = '0.1.0'
+release = '0.1.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -66,6 +66,9 @@ myst_enable_extensions = [
     "tasklist",
     "attrs_inline",
 ]
+
+myst_heading_anchors = 3
+
 autodoc_member_order = "bysource"
 
 autodoc_typehints = "description"

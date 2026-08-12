@@ -64,7 +64,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 
-- Open an [Issue](/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
+- Open an [Issue](https://github.com/duonl/synthpop-py/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
 - Explain the behaviour you would expect and the actual behaviour.
 - Please provide as much context as possible and describe the *reproduction steps* that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
 - Provide the information you collected in the previous section.
@@ -84,8 +84,8 @@ This section guides you through submitting an enhancement suggestion for Synthpo
 
 #### What kind of enhancements can I do
 We are always happy with improvements to readability and language. We would accept improvements in the efficiency of the code that should not break the code of users. We would like to hear improvements that would break code of users of this package as well. Let us know if you feel that there is some guide or documentation missing. If it would had been useful for you, it will be useful for others.
-#### Before Submitting an Enhancement
 
+#### Before Submitting an enhancement
 - Make sure that you are using the latest version.
 - Read the [documentation](https://github.com/Synthpop-data/synthpop-py/tree/develop/docs/source) carefully and find out if the functionality is already covered, maybe by an individual configuration.
 - Perform a [search](https://github.com/Synthpop-data/synthpop-py/issues) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one. This helps us prioritize enhancements and to make it helpful to as many people as possible.
