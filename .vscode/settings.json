@@ -13,6 +13,6 @@
                 "overfitting",
                 "setdiff"
             ],
-            "python-envs.defaultEnvManager": "ms-python.python:poetry",
-            "python-envs.defaultPackageManager": "ms-python.python:poetry"
+            "python-envs.defaultEnvManager": "ms-python.python:venv",
+            "python-envs.defaultPackageManager": "ms-python.python:pip"
 }

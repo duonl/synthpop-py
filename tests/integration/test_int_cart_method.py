@@ -428,45 +428,52 @@ def test_regressor_method_and_replace_missing_with_value(y):
 
 
 @pytest.mark.parametrize(
-    "y",
+    "y, expected_none_missing ",
     [
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
-                   dtype=str, name="target")),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
-                   dtype=str_dtype, name="target")),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
-                   dtype="category", name="target")),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
-                   dtype=object, name="target")),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=str, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=str_dtype, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype="category", name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=object, name="target"), False),
 
-        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 5,
-                   dtype=str, name="target")),
+        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 10,
+                   dtype=str, name="target"), True),
     ]
 )
-def test_classifier_method_and_missing_value_predictor(y):
+def test_classifier_method_and_missing_value_predictor(y, expected_none_missing):
     X = pd.DataFrame(
         {
-            "age": [20, 30, 40, 50] * 5,
-            "income": [1000.0, 2000.0, 3000.0, 4000.0] * 5,
-            "blood type": ["A", "O", "AB", "O"] * 5,
+            "age": [20, 30, 40, 50] * 10,
+            "income": [1000.0, 2000.0, 3000.0, 4000.0] * 10,
+            "blood type": ["A", "O", "AB", "O"] * 10,
         }
     )
 
     cart = CartMethod(
         classifier=TreeClassifierMethod(
             tree=None, missing_handler=MissingValuePredictor()
-        )
+        ),
     )
 
     cart.fit(X, y)
 
     assert isinstance(cart.method_.missing_handler_, MissingValuePredictor)
+    assert not cart.method_.missing_handler_._all_missing
+    assert cart.method_.missing_handler_._none_missing == expected_none_missing
 
     out = cart.transform(X)
 
     assert isinstance(out, pd.Series)
     assert len(out) == len(X)
     assert out.name == "target"
+    if expected_none_missing:
+        assert not out.isna().any()
+    else:
+        assert out.isna().any()
+
 
 
 @pytest.mark.parametrize(
