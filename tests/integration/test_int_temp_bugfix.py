@@ -7,17 +7,26 @@ from synthpop.methods.cart_synth import (
     TreeClassifierMethod,
 )
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+from synthpop.utils import str_dtype
+
 
 @pytest.mark.parametrize(
-    "y, none_missing",
+    "y, expected_none_missing ",
     [
-        (pd.Series(['a', 'b', np.nan, 'c'] * 10, dtype=str, name="target"), False),
-        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 10, dtype=str, name="target"), True),
         (pd.Series(['a', 'b', np.nan, 'c'] * 10,
-         dtype=object, name="target"), False),
+                   dtype=str, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=str_dtype, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype="category", name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=object, name="target"), False),
+
+        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 10,
+                   dtype=str, name="target"), True),
     ]
 )
-def test_classifier_method_and_replace_missing_with_value(y, none_missing):
+def test_classifier_method_and_missing_value_predictor(y, expected_none_missing):
     X = pd.DataFrame(
         {
             "age": [20, 30, 40, 50] * 10,
@@ -36,10 +45,14 @@ def test_classifier_method_and_replace_missing_with_value(y, none_missing):
 
     assert isinstance(cart.method_.missing_handler_, MissingValuePredictor)
     assert not cart.method_.missing_handler_._all_missing
-    assert cart.method_.missing_handler_._none_missing == none_missing
+    assert cart.method_.missing_handler_._none_missing == expected_none_missing
 
     out = cart.transform(X)
 
     assert isinstance(out, pd.Series)
     assert len(out) == len(X)
     assert out.name == "target"
+    if expected_none_missing:
+        assert not out.isna().any()
+    else:
+        assert out.isna().any()
