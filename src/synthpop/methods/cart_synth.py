@@ -503,11 +503,17 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None) -> Cal
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
         See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
     :param n_components: sets the number of principal components used in encoding in the classifier. \
-        For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components. For integers => 1, it is the number of principal components. See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
+        For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.
+        For integers => 1, it is the number of principal components. 
+        See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
 
     :return: a callable that returns a CartMethod object with the parameters consistently applied.
 
-    A callable is returned because the seed might not be set when ``tune_cart`` is called.
+    A zero-argument callable is returned instead of a ``CartMethod``
+    instance so that the underlying estimators are constructed during
+    ``Synthesiser.fit()``. This ensures that their random states are
+    derived from the ``Synthesiser.random_seed`` by
+    ``RandomStateManager``.
 
     Examples
     --------
