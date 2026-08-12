@@ -394,8 +394,10 @@ def test_transform_handles_entire_nan_array(y, dtype):
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series([1.1, 2.2, np.nan, 4.4] * 5, dtype=np.float64, name="target"),
-        pd.Series([1, 2, np.nan, 4] * 5, dtype="Float64", name="target"),
+        pd.Series([1.1, 2.2, np.nan, 4.4] * 5,
+                  dtype=np.float64, name="target"),
+        pd.Series([1, 2, np.nan, 4] * 5,
+                  dtype="Float64", name="target"),
     ]
 )
 def test_regressor_method_and_replace_missing_with_value(y):
@@ -428,9 +430,17 @@ def test_regressor_method_and_replace_missing_with_value(y):
 @pytest.mark.parametrize(
     "y",
     [
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=str, name="target")),
-        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 5, dtype=str, name="target")),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 5, dtype=object, name="target")),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
+                   dtype=str, name="target")),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
+                   dtype=str_dtype, name="target")),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
+                   dtype="category", name="target")),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 5,
+                   dtype=object, name="target")),
+
+        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 5,
+                   dtype=str, name="target")),
     ]
 )
 def test_classifier_method_and_missing_value_predictor(y):
@@ -475,8 +485,10 @@ def test_classifier_method_and_missing_value_predictor(y):
         pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="object"),
         pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="category"),
 
-        pd.Series([True, False, True, False] * 5, name='target', dtype="boolean"),
-        pd.Series([True, False, True, False] * 5, name='target', dtype=np.bool_),
+        pd.Series([True, False, True, False] * 5,
+                  name='target', dtype="boolean"),
+        pd.Series([True, False, True, False] * 5,
+                  name='target', dtype=np.bool_),
     ],
 )
 def test_missing_handler_does_not_mutate_output_no_missing(y):
