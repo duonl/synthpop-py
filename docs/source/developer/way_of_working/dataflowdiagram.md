@@ -35,8 +35,8 @@ flowchart TD
       TYPE -->|numeric| TR["TreeRegressorMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
       TYPE -->|categorical| TC["TreeClassifierMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>)"]
 
-      TR --> ENC_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
-      TC --> ENC_C{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit PCAEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
+      TR --> ENC_R{{"Loop through columns in X<br/>If column is non-numeric:<br/>fit MeanEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
+      TC --> ENC_C{{"Loop through columns in X<br/>If column is non-numeric:<br/>fit PCAEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
 
       ENC_R -->|Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
       ENC_C -->|Categorical X| PCA["PCAEncoder.fit(<br/>X: np.ndarray[str]<br/>y: np.ndarray[str]<br/>)"]
@@ -53,14 +53,14 @@ flowchart TD
       ME -->|Fitted encoder stored| APPLY_R
       PCA -->|Fitted encoder stored| APPLY_C
 
-      APPLY_R --> MERGE_R["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
-      APPLY_C --> MERGE_C["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
+      APPLY_R --> MERGE_R["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray[float32]]"]
+      APPLY_C --> MERGE_C["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray[float32]]"]
 
       LOOP_R -->|Numeric X| MERGE_R
       LOOP_C -->|Numeric X| MERGE_C
 
-      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
-      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
 
       FM_R --> DTR["DecisionTreeRegressor.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[float32]<br/>)"]
       FM_C --> DTC["DecisionTreeClassifier.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[str]<br/>)"]
@@ -115,8 +115,8 @@ flowchart TD
       TYPE -->|numeric| TR["TreeRegressorMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
       TYPE -->|categorical| TC["TreeClassifierMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
 
-      TR --> LOOP_R{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply MeanEncoder"}}
-      TC --> LOOP_C{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply PCAEncoder"}}
+      TR --> LOOP_R{{"Loop through columns in X<br/>If column is non-numeric:<br/>transform with stored MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      TC --> LOOP_C{{"Loop through columns in X<br/>If column is non-numeric:<br/>transform with stored PCAEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
       LOOP_R -->|Categorical X| ME["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
       LOOP_C -->|Categorical X| PCA["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
@@ -127,8 +127,8 @@ flowchart TD
       LOOP_R -->|Numeric X| MERGE_R
       LOOP_C -->|Numeric X| MERGE_C
 
-      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
-      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
 
       FM_R --> DTR["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
       FM_C --> DTC["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
@@ -181,14 +181,14 @@ flowchart TD
       Z --> STATUS{Are there both missing and observed y values?}
 
       STATUS -->|No| SKIP["Skip tree fitting<br/>"]
-      STATUS -->|Yes| LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder using z<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      STATUS -->|Yes| LOOP{{"Loop through columns in X<br/>If column is non-numeric:<br/>fit and transform with MeanEncoder using z<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
       LOOP -->|Categorical X<br/>y = z| ENC["MeanEncoder.fit_transform(<br/>X: np.ndarray[str],<br/>y: np.ndarray[bool]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
       LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[float32]]"]
 
       ENC --> MERGE
 
-      MERGE --> MATRIX["`Convert feature dictionary to tree input matrix<br/>*_build_feature_matrix(<br/>X: Dict[str, np.ndarray],<br/>feature_order<br/>)*<br/><br/>Output:<br/>X_matrix: np.ndarray[float32]<br/>shape: (n_samples, n_features)`"]
+      MERGE --> MATRIX["`Convert feature dictionary to tree input matrix<br/>*_build_feature_matrix(<br/>X: Dict[str, np.ndarray[float32]],<br/>feature_order<br/>)*<br/><br/>Output:<br/>X_matrix: np.ndarray[float32]<br/>shape: (n_samples, n_features)`"]
 
       MATRIX --> TREE["DecisionTreeClassifier.fit(<br/>X_matrix: np.ndarray[float32],<br/>y: np.ndarray[bool]<br/>)"]
 
@@ -227,7 +227,7 @@ flowchart TD
 
       MVP --> STATUS{"Missingness state<br/>from fitting?"}
 
-      STATUS -->|Mixed: some missing, some observed y values| LOOP{{"Loop through stored feature_order_<br/><br/>If column has stored encoder:<br/>apply MeanEncoder<br/><br/>If numeric:<br/>pass through unchanged"}}
+      STATUS -->|Mixed: some missing, some observed y values| LOOP{{"Loop through stored feature_order_<br/>If column is non-numeric:<br/>transform with stored MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
       LOOP -->|Categorical X| ENC["Stored MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
       LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[float32]]"]
@@ -290,11 +290,11 @@ flowchart LR
 
       ME -->|Fitted encoder stored| APPLY_R
 
-      APPLY_R --> MERGE_R["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
+      APPLY_R --> MERGE_R["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray[float32]]"]
 
       LOOP_R -->|Numeric X| MERGE_R
 
-      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
 
       FM_R --> DTR["DecisionTreeRegressor.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[float32]<br/>)"]
 
@@ -319,9 +319,9 @@ zoom:
 
 flowchart LR
       subgraph input
-            FEATURES[("Observed data features<br/><br/>X: pd.DataFrame<br/><br/>Predictor columns")]
+            FEATURES[("Observed data features<br/>X: pd.DataFrame<br/>Predictor columns")]
 
-            TARGET[("Observed target column<br/><br/>y: pd.Series<br/><br/>Categorical target to synthesise")]
+            TARGET[("Observed target column<br/>y: pd.Series<br/>Categorical target to synthesise")]
       end
 
       FEATURES --> CMF["CartMethod.fit(<br/>X: pd.DataFrame,<br/>y: pd.Series<br/>)"]
@@ -343,11 +343,11 @@ flowchart LR
 
       PCA -->|Fitted encoder stored| APPLY_C
 
-      APPLY_C --> MERGE_C["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
+      APPLY_C --> MERGE_C["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray[float32]]"]
 
       LOOP_C -->|Numeric X| MERGE_C
 
-      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
 
       FM_C --> DTC["DecisionTreeClassifier.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[str]<br/>)"]
 
@@ -373,7 +373,7 @@ zoom:
 
 flowchart LR
       subgraph input
-            FEATURES[("Previously synthesised data<br/><br/>X: pd.DataFrame<br/><br/>Previously generated columns")] 
+            FEATURES[("Previously synthesised data<br/>X: pd.DataFrame<br/>Previously generated columns")] 
       end
 
       FEATURES --> CMT["CartMethod.transform(<br/>X: pd.DataFrame<br/>)"]
@@ -383,7 +383,7 @@ flowchart LR
 
       CONV -->TR["TreeRegressorMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
 
-      TR --> LOOP_R{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply MeanEncoder"}}
+      TR --> LOOP_R{{"Loop through columns in X<br/><br/>If column is non-numeric,<br/>transform with stored MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
       LOOP_R -->|Categorical X| ME["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
@@ -391,7 +391,7 @@ flowchart LR
 
       LOOP_R -->|Numeric X| MERGE_R
 
-      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
 
       FM_R --> DTR["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
@@ -418,7 +418,7 @@ zoom:
 
 flowchart LR
       subgraph input
-            FEATURES[("Previously synthesised data<br/><br/>X: pd.DataFrame<br/><br/>Previously generated columns")] 
+            FEATURES[("Previously synthesised data<br/>X: pd.DataFrame<br/>Previously generated columns")] 
       end
 
       FEATURES --> CART["CartMethod.transform(<br/>X: pd.DataFrame<br/>)"]
@@ -427,15 +427,15 @@ flowchart LR
 
       CONVERT --> TREE_METHOD["TreeClassifierMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
 
-      TREE_METHOD --> LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>apply stored PCAEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      TREE_METHOD --> LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with stored PCAEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
       LOOP -->|Categorical X| ENCODER["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
 
-      ENCODER --> MERGE["Recombine transformed columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
+      ENCODER --> MERGE["Recombine transformed columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[float32]]"]
 
       LOOP -->|Numeric X| MERGE
 
-      MERGE --> MATRIX["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE --> MATRIX["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
 
       MATRIX --> APPLY["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
@@ -443,7 +443,7 @@ flowchart LR
 
       SAMPLE --> MISSING["ReplaceMissingWithValue.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[str]<br/><br/>Restore missing categorical values"]
 
-      MISSING --> SERIES["Create synthetic column<br/><br/>pd.Series<br/>dtype: str<br/>name: target column"]
+      MISSING --> SERIES["Create synthetic column<br/>pd.Series<br/>dtype: str<br/>name: target column"]
 
       SERIES --> DONE["TreeClassifierMethod.transform() completed<br/>CartMethod.transform() completed<br/><br/>Add generated column to synthetic dataset"]
 ```
