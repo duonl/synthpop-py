@@ -142,10 +142,10 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
 Now our encoder is fully ready to be used inside synthpop-py's framework! See [alternative encoding using CART](alternative_encoder.md) on how to implement your encoder in synthpop.
 
 ## Keep in mind:
-1. Test if your encoder works as expected. You can, for instance, check for sklearn compatibility by running:
+1. Test if your encoder works as expected. You can, for instance, check for sklearn compatibility by running [pytest](https://docs.pytest.org/en/stable/):
 ```python
 from sklearn.utils.estimator_checks import parametrize_with_checks
-
+import pytest
 
 @parametrize_with_checks([CustomEncoder()])
 def test(estimator, check):
