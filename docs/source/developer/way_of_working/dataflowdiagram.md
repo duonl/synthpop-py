@@ -172,7 +172,7 @@ flowchart TD
 ## Zoomed in: Missing value prediction
 Data flows for the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` class.
 
-### Prepare data for fit flow
+### MissingValuePredictor.prepare_data_for_fit() flow
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -205,7 +205,7 @@ flowchart TD
       LOOP -->|Categorical X<br/>y = z| ENC["MeanEncoder.fit_transform(<br/>X: np.ndarray[str],<br/>y: np.ndarray[bool]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
 
-      LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[np.float32]]"]
+      LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[float32]]"]
 
       ENC --> MERGE
 
@@ -230,7 +230,7 @@ flowchart TD
 ```
 </details>
 
-### Post synthesis transform flow
+### MissingValuePredictor.post_synth_transform() flow
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -243,27 +243,27 @@ zoom:
 flowchart TD
 
       subgraph input
-            FEATURES[("Synthetic predictor features<br/><br/>X: Dict[str, np.ndarray]<br/><br/>Previously synthesised columns")]
-            TARGET[("Sampled synthetic target<br/><br/>y: np.ndarray[float32]<br/><br/>Output from LeafNodeSampler")]
+            FEATURES[("Synthetic predictor feature dictionary<br/>X: Dict[str, np.ndarray]<br/>Previously synthesised predictor columns")]
+            TARGET[("Sampled synthetic target array<br/>y: np.ndarray[float32]<br/>Output from LeafNodeSampler")]
       end
 
 
       FEATURES --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
-
       TARGET --> MVP
 
+      MVP --> STATUS{"Missingness state<br/>from fitting?"}
 
-      MVP --> LOOP{{"Loop through columns in X<br/><br/>If column has stored encoder:<br/>apply encoder.transform()<br/><br/>If numeric:<br/>pass through unchanged"}}
+      STATUS -->|Mixed: some missing, some observed y values| LOOP{{"Loop through stored feature_order_<br/><br/>If column has stored encoder:<br/>apply MeanEncoder<br/><br/>If numeric:<br/>pass through unchanged"}}
 
       LOOP -->|Categorical X| ENC["Stored MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
 
 
-      LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X_encoded: Dict[str, np.ndarray]"]
+      LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[float32]]"]
 
       ENC --> MERGE
 
 
-      MERGE --> MATRIX["`Convert feature dictionary to tree input matrix<br/>*build_feature_matrix(<br/>Input:<br/>X: Dict[str, np.ndarray[np.float32]])*<br/><br/>Output:<br/>X_matrix: np.ndarray[float32]<br/>shape: (n_samples, n_features)`"]
+      MERGE --> MATRIX["`Convert feature dictionary to tree input matrix<br/>*_build_feature_matrix(<br/>X: Dict[str, np.ndarray[float32]]<br/>feature_order_<br/>)*<br/><br/>Output:<br/>X_matrix: np.ndarray[float32]<br/>shape: (n_samples, n_features)`"]
 
 
       MATRIX --> APPLY["Stored DecisionTreeClassifier.apply(<br/>X_matrix: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
@@ -272,15 +272,16 @@ flowchart TD
       APPLY --> SAMPLE["Stored LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>missing_mask: np.ndarray[bool]<br/><br/>True = set target to missing"]
 
 
-      TARGET --> MASK["Copy sampled target values<br/><br/>y_out = y.copy()"]
-
-      SAMPLE --> MASK
+      SAMPLE --> MASK["Copy sampled target values<br/><br/>y_out = y.copy()"]
+      TARGET --> MASK
 
 
       MASK --> RESTORE["Apply missingness mask<br/><br/>y_out[missing_mask] = np.nan"]
 
+      STATUS -->|All y was missing| Y_MISSING["Return np.full(<br/>len(y), np.nan<br/>)"] --> OUTPUT
+      STATUS -->|No y was missing| Y_OBSERVED("Return y unchanged") --> OUTPUT
 
-      RESTORE --> OUTPUT["Synthetic target with missing values restored<br/><br/>Output:<br/>np.ndarray[float32]<br/><br/>Observed values preserved<br/>Missing values reintroduced"]
+      RESTORE --> OUTPUT["Synthetic target with missing values restored<br/><br/>Output:<br/>y: np.ndarray<br/><br/>Observed values preserved<br/>Missing values reintroduced"]
 ```
 </details>
 
