@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.utils.estimator_checks import check_estimator
 
 from synthpop.data_processing.encoders import PCAEncoder
 from synthpop.data_processing.missing_value_handling import MissingValuePredictor
@@ -56,6 +57,7 @@ def rigged_tree_classifier_method(pca_components=1):
     return TreeClassifierMethod(
         tree=tree,
         encoder=PCAEncoder(pca_transform=PCA(n_components=pca_components)),
+        rare_categories_threshold=0
     )
 
 
@@ -63,7 +65,7 @@ def rigged_tree_regressor_method():
     tree = SpyDecisionTreeRegressor(
         random_state=RandomStateManager.create_instance_seed(),
     )
-    return TreeRegressorMethod(tree=tree)
+    return TreeRegressorMethod(tree=tree, rare_categories_threshold=0)
 
 
 # ----- create data for test cases -----
@@ -170,7 +172,7 @@ NO_MISSING_TARGET = [
 
 
 def test_treemethod_classifier_fit_and_transform():
-    tree_method = TreeClassifierMethod()
+    tree_method = TreeClassifierMethod(rare_categories_threshold=0)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -189,7 +191,7 @@ def test_treemethod_classifier_fit_and_transform():
 
 
 def test_treemethod_regressor_fit_and_transform():
-    tree_method = TreeRegressorMethod()
+    tree_method = TreeRegressorMethod(rare_categories_threshold=0)
 
     X = {
         "column1": np.array([1.1, 2.2]),
@@ -244,7 +246,6 @@ def test_output_is_not_a_copy_classifier(method, X, y):
 
 @pytest.mark.parametrize("method, X, y", REGRESSOR_CASES)
 def test_output_is_not_a_copy_regressor(method, X, y):
-    method = TreeRegressorMethod()
     result = method.fit_transform(X, y)
 
     assert not np.array_equal(y, result, equal_nan=True)
@@ -261,7 +262,6 @@ def test_output_is_not_a_copy_unique_data():
     result = method.fit_transform(X, y)
 
     assert not np.array_equal(y, result)
-
 
 
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
@@ -418,11 +418,11 @@ def test_classifier_missing_target(method, X, y):
     "method, X, y",
     [
         (
-            TreeRegressorMethod(),
+            TreeRegressorMethod(rare_categories_threshold=0),
             *get_test_data_regressor(with_cats=True),
         ),
         (
-            TreeRegressorMethod(),
+            TreeRegressorMethod(rare_categories_threshold=0),
             *get_test_data_regressor(with_cats=True,
                                      with_missing_features=True),
         ),
@@ -470,6 +470,7 @@ def test_regressor_trainings_data_reaches_all_nodes():
             tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=1),
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
+        rare_categories_threshold=0,
     )
 
     X, y = get_test_data_regressor(
@@ -501,6 +502,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
             random_state=tree_seed,  # seed that reproduces the bug
         ),
         tree_sampler=LeafNodeSampler(random_state=0),
+        rare_categories_threshold=0,
     )
 
     X, y = get_test_data_classifier(
@@ -540,3 +542,92 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
     # check if transform does not fail
     result = method.transform(X_pred)
     assert len(result) == len(y) * 100
+
+
+def _ndarray_to_dict_helper_sklearn_compatible_tests(a):
+    """
+    This is a helper function for the tests:
+
+    test_TreeMethod_is_sklearn_TreeClassifier_compatible
+    test_TreeMethod_is_sklearn_TreeRegressor_compatible
+
+    It only accepts 2D arrays.
+    """
+    if isinstance(a, np.ndarray):
+        return {i: a[:, i] for i in range(a.shape[1])}
+    return a
+
+
+class SklearnCompatibleInputMixin:
+    """
+    This is a helper class for the tests:
+
+    test_TreeMethod_is_sklearn_TreeClassifier_compatible
+    test_TreeMethod_is_sklearn_TreeRegressor_compatible
+
+    It changes the sklearn input tags solely for these tests,
+    as the inherent sklearn estimator tests do not run without two_d_array=True.
+    """
+
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.input_tags.two_d_array = True
+        return tags
+
+
+@pytest.mark.parametrize(
+    ("tree_method", "input_dtype", "target_dtype"),
+    [
+        (TreeClassifierMethod, str_dtype, str_dtype),
+        # target dtype should not be changed
+        (TreeRegressorMethod, np.float32, None),
+    ],
+)
+def test_TreeMethod_is_sklearn_compatible(
+    tree_method,
+    input_dtype,
+    target_dtype,
+):
+    # sklearn provides valuable tests.
+    # Those tests assume that the input is a numpy array.
+    # The tree methods assume that the input is a dictionary.
+
+    # We want to test if the tree method that the user is going to use are sklearn compatible.
+    # So we cannot use the StubTreeMethod as in all other tests.
+
+    # The solution is that a class is constructed in each sklearn test.
+    # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
+
+    class EstimatorWrap(
+        SklearnCompatibleInputMixin,
+        tree_method,
+    ):
+        def __init__(self):
+            super().__init__(rare_categories_threshold=0)
+
+        def fit(self, X, y):
+            X = _ndarray_to_dict_helper_sklearn_compatible_tests(
+                X.astype(input_dtype)
+            )
+            if target_dtype is not None:
+                y = y.astype(target_dtype)
+            return super().fit(X, y)
+
+        def transform(self, X):
+            return super().transform(
+                _ndarray_to_dict_helper_sklearn_compatible_tests(
+                    X.astype(input_dtype)
+                )
+            )
+
+    wrapped = EstimatorWrap()
+
+    check_estimator(
+        wrapped,
+        legacy=False,
+        expected_failed_checks={
+            "check_fit_score_takes_y":
+                "Tree methods do not implement sklearn scoring semantics"
+        },
+        on_fail="raise",
+    )

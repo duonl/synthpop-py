@@ -4,6 +4,7 @@ In the previous examples, we generated a synthetic dataset with the same number 
 One advantage of synthetic data is that we can generate more records than were available in the original dataset. This can be useful when testing analysis pipelines, developing software or creating datasets for simulation studies.
 
 ## Loading the data
+## Load the data
 For this example, we use the [Titanic dataset](https://github.com/mwaskom/seaborn-data/blob/master/titanic.csv) from `seaborn`. Unlike the diabetes dataset used in the previous example, this dataset contains both numeric and categorical variables making it a realistic example for demonstrating synthetic data generation.
 ```python
 import seaborn as sns
@@ -21,7 +22,7 @@ The first three rows of the dataset are:
 
 The dataset contains information about passengers aboard the Titanic, including demographic characteristics, ticket information, and whether each passenger survived.
 
-## Creating and fitting the Synthesiser
+## Create and fit the Synthesiser
 First, we create and fit the synthesiser as in the previous examples.
 ```python
 from synthpop import Synthesiser
@@ -32,7 +33,7 @@ synthesiser.fit(data)
 ```
 During fitting, synthpop-py learns the relationships between variables and estimates the distributions needed to generate new observations. The number of rows in the original dataset does not limit the number of synthetic observations that can be generated.
 
-## Generating a larger synthetic dataset
+## Generate a larger synthetic dataset
 The number of synthetic records can be specified using the `n` parameter of {func}`~synthpop.synthesiser.Synthesiser.generate`.
 ```python
 synthetic_data = synthesiser.generate(n=5000)
@@ -52,7 +53,7 @@ data.shape
 (891, 15)
 ```
 
-## Evaluating the larger synthetic dataset
+## Evaluate the larger synthetic dataset
 Even when generating a larger dataset, it is important to verify that the synthetic data still represents the original data well.
 
 For example, we can compare the univariate distributions:
@@ -82,6 +83,9 @@ spmse = pairwise_spmse(
 plot = plot_spmse(spmse, show_plot=True)
 ```
 The S_pMSE calculation also accounts for the different dataset sizes when comparing the pairwise relationship between variables.
+```{note}
+The S_pMSE is influenced by the number of observations in the original and synthetic datasets. Generating more synthetic rows may result in larger S_pMSE values, even if the underlying quality of the synthesis has not changed, because small differences can be estimated more precisely. Therefore, S_pMSE values are most meaningful when comparing synthesis methods or parameter settings on datasets of the same size.
+```
 
 More information about evaluating utility can be found in {ref}`User Guide 5: Evaluating utility <5-evaluating-utility>`. 
 

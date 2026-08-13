@@ -1,4 +1,5 @@
 import copy
+import itertools
 
 import numpy as np
 import numpy.typing as npt
@@ -6,9 +7,9 @@ import pandas as pd
 import pytest
 from sklearn import clone
 from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.exceptions import NotFittedError
 
+import synthpop
 from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
 from synthpop.methods.cart_synth import (
     _AbstractTreeMethod,
@@ -187,6 +188,11 @@ def mock_fit_decision_tree(mocker,):
         "synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves", return_value=StubTree())
 
 
+@pytest.fixture(autouse=True)
+def mock_raise_on_rare_category(mocker):
+    mocker.patch("synthpop.utils._raise_on_rare_category")
+
+
 def assert_dict_array_equal(expected, actual):
     for k, v in expected.items():
         assert np.array_equal(
@@ -309,6 +315,54 @@ def test_fit_validates_X_and_y(X, y, index_cat, tree_method, mocker):
     )  # 42 is the hardcoded n_samples value of the validate_dict_x stub
 
 
+@pytest.mark.parametrize(
+    "X, y, index_cat, threshold",
+    [
+        (*standard_args, threshold)
+        for standard_args in get_input_test_data()
+        for threshold in [None, 10, 1]
+    ],
+)
+def test_fit_calls_rare_category_check(X, y, index_cat, threshold, tree_method):
+    # the testcase where the parameter threshold is None simulates default behaviour.
+    if threshold is None:
+        expected_threshold = 5
+    else:
+        tree_method.rare_categories_threshold = threshold
+        expected_threshold = threshold
+
+    X["boolean_col"] = np.array([True] * 3 + [False] * 3)
+    index_cat = index_cat + ["boolean_col"]
+    tree_method.fit(X, y)
+
+    for cat_col in index_cat:
+
+        # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
+        calls = synthpop.utils._raise_on_rare_category.call_args_list
+
+        assert any(
+            np.array_equal(call.kwargs["x"], X[cat_col])
+            and call.kwargs["rare_threshold"] == expected_threshold
+            and call.kwargs["name"] == cat_col
+            for call in calls
+        )
+
+    assert len(index_cat) == synthpop.utils._raise_on_rare_category.call_count
+
+
+@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
+def test_fit_raises_on_rare_category_not_called_when_disabled(
+    X,
+    y,
+    index_cat,
+    tree_method,
+):
+    tree_method.rare_categories_threshold = 0
+    tree_method.fit(X, y)
+
+    synthpop.utils._raise_on_rare_category.assert_not_called()
+
+
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
 def test_fit_clones_dependencies_correctly(X, y, index_cat, tree_method):
     tree_method.fit(X, y)
@@ -426,12 +480,14 @@ def test_fit_tree_is_applied(X, y, index_cat, tree_method):
 def test_fit_sampler_fit(X, y, index_cat, tree_method):
     tree_method.fit(X, y)
 
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_leaf_ids,
-                          tree_method.tree_.apply_result), (
+    assert np.array_equal(
+        tree_method.tree_sampler_.fit_sampler_leaf_ids,
+        tree_method.tree_.apply_result), (
         "input of the sampler must be the output of the tree"
     )
-    assert np.array_equal(tree_method.tree_sampler_.fit_sampler_y,
-                          tree_method.missing_handler_.prepared_for_fit_result[1])
+    assert np.array_equal(
+        tree_method.tree_sampler_.fit_sampler_y,
+        tree_method.missing_handler_.prepared_for_fit_result[1])
     assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
 
@@ -737,45 +793,6 @@ def test_get_feature_names_out_no_target_name(X, tree_method):
 
     result = tree_method.get_feature_names_out()
     assert result == [["Trained", "on", "these", "features"]]
-
-
-def ndarray_to_dict(a):
-    if isinstance(a, np.ndarray):
-        return {i: a[:, i] for i in range(a.shape[1])}
-    return a
-
-
-@parametrize_with_checks(
-    [TreeClassifierMethod(), TreeRegressorMethod()],
-    legacy=False,
-    expected_failed_checks=lambda x: {
-        "check_fit_score_takes_y": "tests with a score component"
-    },
-)
-@pytest.mark.noautofixt
-def test_TreeMethod_is_sklearn_compatible(estimator, check):
-    # sklearn provides valuable tests.
-    # Those tests assume that the input is a numpy array.
-    # The tree methods assume that the input is a dictionary.
-
-    # We want to test if the tree method that the user is going to use are sklearn compatible.
-    # So we cannot use the StubTreeMethod as in all other tests.
-
-    # The solution is that a class is constructed in each sklearn test.
-    # This class inherits from the applicable tree method, and overwrites the fit and transform to convert np arrays to dictionaries.
-    class EstimatorWrap(estimator.__class__):
-        def fit(self, X, y):
-            return super().fit(ndarray_to_dict(X), y)
-
-        def transform(self, X):
-            return super().transform(ndarray_to_dict(X))
-
-    # This is needed to change the datatype of the estimator to the child class.
-    # estimator.__class__ = EstimatorWrap
-    wrapped = EstimatorWrap(**estimator.get_params())
-
-    check(wrapped)
-
 
 def test_to_fixed_length_string_array():
     x = np.array(["a", "b"], dtype=str_dtype)
