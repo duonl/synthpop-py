@@ -5,13 +5,14 @@ This page provides a visual overview of how data moves through the Synthpop syst
 The diagrams illustrate key processes such as fitting a Synthesiser and generating synthetic data, including both numeric and categorical workflows.
 
 ## Overall process data flow
-The diagrams below show the data flow of using a Synthesiser with the default `CartMethod`.
+The diagrams below show the data flow of using a Synthesiser with the default `CartMethod`. The function {func}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor.fit` is abstracted to one step. For a detailed data flow of the `MissingValuePredictor`, see {ref}`its focus diagram <mvp-diagram>`.
 ### `Synthesiser.fit()` data flow
 ```{mermaid}
 ---
 zoom:
 ---
-flowchart TD
+flowchart LR
+
       U(["User"]) -->|X: pd.DataFrame| S["Synthesiser.fit(X: pd.DataFrame)"]
 
       S --> O["Determine column_order_"]
@@ -29,45 +30,60 @@ flowchart TD
       CONV --> TYPE{{"Target dtype"}}
 
       TYPE -->|numeric| TR["TreeRegressorMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
+
       TYPE -->|categorical| TC["TreeClassifierMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>)"]
 
-      TR --> LOOP_R{{"Loop through columns in X<br/>If column is non-numeric,<br/>fit and apply MeanEncoder"}}
-      TC --> LOOP_C{{"Loop through columns in X<br/>If column is non-numeric,<br/>fit and apply PCAEncoder"}}
 
-      LOOP_R --> ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
-      LOOP_C --> PCA["PCAEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[str]<br/>)"]
+      TR --> ENC_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
+      TC --> ENC_C{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit PCAEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
 
-      ME --> MET["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
-      PCA --> PCAT["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
-      LOOP_R --> NUM_R["Numeric columns<br/>pass through unchanged"]
-      LOOP_C --> NUM_C["Numeric columns<br/>pass through unchanged"]
+      ENC_R --> |Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
+      ENC_C --> |Categorical X| PCA["PCAEncoder.fit(<br/>X: np.ndarray[str]<br/>y: np.ndarray[str]<br/>)"]
 
-      MET --> MERGE_R["Recombine columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
-      PCAT --> MERGE_C["Recombine columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
+      TR --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray] <br/>y: np.ndarray[float32]<br/>X and y without rows where y is missing<br/><br/>Fit missingness model"]
+      TC --> RV["ReplaceMissingWithValue.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray]<br/>y: np.ndarray[str] (missing made a category)<br/><br/>Missing categories in y replaced by marker"]
 
-      NUM_R --> MERGE_R
-      NUM_C --> MERGE_C
+      RMV --> |Continue with this output| LOOP_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      RV --> |Continue with this output| LOOP_C{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with PCAEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      
+      
+      LOOP_R --> |Categorical X| APPLY_R["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP_C --> |Categorical X| APPLY_C["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
-      MERGE_R --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray]<br/>y: np.ndarray[float32] (without rows with missing values)<br/><br/>Remove missing target rows<br/>Fit missingness model"]
-      MERGE_C --> RV["ReplaceMissingWithValue.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray]<br/>y: np.ndarray[str] (missing made a category)<br/><br/>Missing categories replaced by marker"]
+      ME --> |Fitted encoder stored| APPLY_R
+      PCA --> |Fitted encoder stored| APPLY_C
 
-      RMV --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
-      RV --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      APPLY_R --> MERGE_R["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
+      APPLY_C --> MERGE_C["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
+
+      LOOP_R --> |Numeric X| MERGE_R
+      LOOP_C --> |Numeric X| MERGE_C
+
+
+      MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Dict[str, np.ndarray]<br/>→ np.ndarray[float32]<br/><br/>shape: (n_samples, n_features)"]
+
+      MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Dict[str, np.ndarray]<br/>→ np.ndarray[float32]<br/><br/>shape: (n_samples, n_features)"]
+
 
       FM_R --> DTR["DecisionTreeRegressor.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[float32]<br/>)"]
+
       FM_C --> DTC["DecisionTreeClassifier.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[str]<br/>)"]
 
-      DTR --> DTRA["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
-      DTC --> DTCA["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
+
+      DTR --> DTRA["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>leaf_ids: np.ndarray[int64]"]
+
+      DTC --> DTCA["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>leaf_ids: np.ndarray[int64]"]
+
 
       DTRA --> LS1["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[float32]<br/>)"]
 
       DTCA --> LS2["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[str]<br/>)"]
 
+
       LS1 --> FIT_R["TreeRegressorMethod fully fitted"]
       LS2 --> FIT_C["TreeClassifierMethod fully fitted"]
-    
+
       FIT_R --> CART_FIT["CartMethod fully fitted"]
       FIT_C --> CART_FIT
 
@@ -82,7 +98,7 @@ flowchart TD
 zoom:
 ---
 
-flowchart TD
+flowchart LR
       U(["User"]) -->|"n: int | None"| S["Synthesiser.generate(n)"]
 
       S --> CHECK["Check fitted Synthesiser<br/><br/>Load models_ and column_order_"]
@@ -108,17 +124,14 @@ flowchart TD
       TR --> LOOP_R{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply MeanEncoder"}}
       TC --> LOOP_C{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply PCAEncoder"}}
 
-      LOOP_R --> ME["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
-      LOOP_C --> PCA["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
-
-      LOOP_R --> NUM_R["Numeric columns<br/>pass through unchanged"]
-      LOOP_C --> NUM_C["Numeric columns<br/>pass through unchanged"]
+      LOOP_R --> |Categorical X| ME["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP_C --> |Categorical X| PCA["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
       ME --> MERGE_R["Recombine columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
       PCA --> MERGE_C["Recombine columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
 
-      NUM_R --> MERGE_R
-      NUM_C --> MERGE_C
+      LOOP_R --> |Numeric X| MERGE_R
+      LOOP_C --> |Numeric X| MERGE_C
 
       MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
       MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
@@ -144,6 +157,7 @@ flowchart TD
 
       L --->|After looping<br/>through all columns| END["Synthetic dataframe<br/><br/>pd.DataFrame"]
 ```
+(mvp-diagram)=
 ## Zoomed in: Missing value prediction
 Data flows for the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` class.
 
@@ -156,8 +170,8 @@ zoom:
 flowchart LR
 
       subgraph input
-            FEATURES[("Feature dictionary<br/><br/>X: Dict[str, np.ndarray}<br/><br/>Predictor columns")]
-            TARGET[("Target array<br/><br/>y: np.ndarray[float32]<br/><br/>Contains np.nan values")]
+            FEATURES[("Feature dictionary<br/>X: Dict[str, np.ndarray]<br/>Predictor columns")]
+            TARGET[("Target array<br/>y: np.ndarray[float32]<br/>May contain missing values")]
       end
 
 
@@ -168,44 +182,36 @@ flowchart LR
 
       MVP --> Z["Create missingness indicator<br/><br/>z = pd.isna(y)<br/><br/>Output:<br/>z: np.ndarray[bool]<br/><br/>True = missing target"]
 
+      Z --> STATUS{Are there both missing and observed y values?}
 
-      MVP --> LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder using z<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      STATUS --> |No| SKIP["Skip tree fitting<br/>"]
+      STATUS --> |Yes| LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder using z<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
-
-      LOOP --> CAT["Categorical feature column<br/><br/>X: np.ndarray[str]"]
-
-      LOOP --> NUM["Numeric feature column<br/><br/>X: np.ndarray[float32]"]
-
-
-      CAT --> ENC["MeanEncoder.fit_transform(<br/>X: np.ndarray[str],<br/>y: np.ndarray[bool]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]"]
+      LOOP --> |Categorical X<br/>y = z| ENC["MeanEncoder.fit_transform(<br/>X: np.ndarray[str],<br/>y: np.ndarray[bool]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
 
-      NUM --> MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X_encoded: Dict[str, np.ndarray]"]
+      LOOP --> |Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[np.float32]]"]
 
       ENC --> MERGE
 
 
-      MERGE --> MATRIX["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE --> MATRIX["`Convert feature dictionary to tree input matrix<br/>*_build_feature_matrix(<br/>X: Dict[str, np.ndarray],<br/>feature_order<br/>)*<br/><br/>Output:<br/>X_matrix: np.ndarray[float32]<br/>shape: (n_samples, n_features)`"]
 
 
-      Z --> TREE["DecisionTreeClassifier.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[bool]<br/>)"]
+      MATRIX --> TREE["DecisionTreeClassifier.fit(<br/>X_matrix: np.ndarray[float32],<br/>y: np.ndarray[bool]<br/>)"]
 
-      MATRIX --> TREE
-
-
-      TREE --> APPLY["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
+      TREE --> APPLY["DecisionTreeClassifier.apply(<br/>X_matrix: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
 
       APPLY --> SAMPLE["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[bool]<br/>)"]
 
-
-      SAMPLE --> FITTED["Fitted MissingValuePredictor<br/><br/>Stores:<br/>- encoders_<br/>- tree_<br/>- tree_sampler_<br/>- feature_order_"]
-
+      SAMPLE --> |Fitted missingness model| FITTED["Fitted MissingValuePredictor<br/><br/>Stores:<br/>- encoders_<br/>- tree_ (if fitted)<br/>- tree_sampler_ (if fitted)<br/>- feature_order_"]
+      SKIP --> FITTED
 
       FITTED --> FILTER["Remove rows where y is missing<br/><br/>mask = ~pd.isna(y)"]
 
 
-      FILTER --> OUTPUT["Return cleaned data<br/><br/>X_filtered:<br/>Dict[str, np.ndarray]<br/><br/>y_filtered:<br/>np.ndarray[float32]<br/><br/>Only observed target values"]
+      FILTER --> OUTPUT["Return cleaned data<br/><br/>X_filtered:<br/>Dict[str, np.ndarray]<br/><br/>y_filtered:<br/>np.ndarray[float32]<br/><br/>X and y without rows where y is missing"]
 ```
 
 ### Post synthesis transform flow
@@ -214,7 +220,7 @@ flowchart LR
 zoom:
 ---
 
-flowchart LR
+flowchart TD
 
       subgraph input
             FEATURES[("Synthetic predictor features<br/><br/>X: Dict[str, np.ndarray}<br/><br/>Previously synthesised columns")]
@@ -229,24 +235,18 @@ flowchart LR
 
       MVP --> LOOP{{"Loop through columns in X<br/><br/>If column has stored encoder:<br/>apply encoder.transform()<br/><br/>If numeric:<br/>pass through unchanged"}}
 
-
-      LOOP --> CAT["Categorical feature column<br/><br/>X: np.ndarray[str]"]
-
-      LOOP --> NUM["Numeric feature column<br/><br/>X: np.ndarray[float32]"]
+      LOOP --> |Categorical X| ENC["Stored MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
 
 
-      CAT --> ENC["Stored MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
-
-
-      NUM --> MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X_encoded: Dict[str, np.ndarray]"]
+      LOOP --> |Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X_encoded: Dict[str, np.ndarray]"]
 
       ENC --> MERGE
 
 
-      MERGE --> MATRIX["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      MERGE --> MATRIX["`Convert feature dictionary to tree input matrix<br/>*build_feature_matrix(<br/>Input:<br/>X: Dict[str, np.ndarray[np.float32]])*<br/><br/>Output:<br/>X_matrix: np.ndarray[float32]<br/>shape: (n_samples, n_features)`"]
 
 
-      MATRIX --> APPLY["Stored DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
+      MATRIX --> APPLY["Stored DecisionTreeClassifier.apply(<br/>X_matrix: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
 
       APPLY --> SAMPLE["Stored LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>missing_mask: np.ndarray[bool]<br/><br/>True = set target to missing"]
