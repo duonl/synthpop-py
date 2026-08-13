@@ -31,6 +31,13 @@ from tests.integration.data_generated_for_tests import (
     get_test_data_regressor,
 )
 
+# disable the _raise_on_rare_category check
+
+
+@pytest.fixture(autouse=True)
+def mock_raise_on_rare_category(mocker):
+    mocker.patch("synthpop.utils._raise_on_rare_category")
+
 
 class SpyDecisionTreeClassifier(DecisionTreeClassifier):
     def fit(self, X, y):
@@ -65,11 +72,13 @@ def assert_tree_reaches_all_leaf_nodes(tree):
     assert set(leaves) == set(reached)
 
 
-@pytest.mark.noautofixt
 # These are four seeds that reproduced bug #129 before the fix.
-@pytest.mark.parametrize("tree_seed,data_seed", [
-    (i, j) for i in [89, 88, 52, 91] for j in [59, 14, 51, 80]
-])
+@pytest.mark.parametrize(
+    "tree_seed, data_seed",
+    [
+        (i, j) for i in [89, 88, 52, 91] for j in [59, 14, 51, 80]
+    ],
+)
 def test_regression_bug_129_regressor_no_empty_leaf_failure(tree_seed, data_seed):
 
     seeds = np.random.SeedSequence(0).generate_state(6)
@@ -119,9 +128,12 @@ def test_regression_bug_129_regressor_no_empty_leaf_failure(tree_seed, data_seed
     assert len(result) == len(y) * 100
 
 
-@pytest.mark.parametrize("tree_seed,data_seed", [
-    (i, j) for i in [89, 88, 52, 91] for j in [59, 14, 51, 80]
-])
+@pytest.mark.parametrize(
+    "tree_seed, data_seed",
+    [
+        (i, j) for i in [89, 88, 52, 91] for j in [59, 14, 51, 80]
+    ],
+)
 def test_regression_bug_129_classifier_no_empty_leaf_failure(tree_seed, data_seed):
     method = TreeClassifierMethod(
         tree=SpyDecisionTreeClassifier(
