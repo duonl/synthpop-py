@@ -281,8 +281,14 @@ def test_prepare_data_does_not_mutate_inputs(predictor):
 
 # ----- post synth transform tests -----
 
-
-def test_post_synth_all_missing(predictor):
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.array([1, 2, 3], dtype=np.float32),
+        np.array(['1', '2', '3'], dtype=str_dtype)
+    ]
+)
+def test_post_synth_all_missing(y, predictor):
     predictor._all_missing = True
     predictor._none_missing = False
     # all set to none as they are irrelevant to this test
@@ -292,14 +298,19 @@ def test_post_synth_all_missing(predictor):
     predictor.encoders_ = None
     predictor.feature_order_ = None
     X = {"a": np.array([1, 2, 3])}
-    y = np.array([1, 2, 3])
 
     out = predictor.post_synth_transform(X, y)
 
     assert np.all(np.isnan(out))
 
-
-def test_post_synth_no_missing(predictor):
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.array([1, 2, 3], dtype=np.float32),
+        np.array(['1', '2', '3'], dtype=str_dtype)
+    ]
+)
+def test_post_synth_no_missing(y, predictor):
     predictor._all_missing = False
     predictor._none_missing = True
     # all set to none as they are irrelevant to this test
@@ -309,7 +320,6 @@ def test_post_synth_no_missing(predictor):
     predictor.encoders_ = None
     predictor.feature_order_ = None
     X = {"a": np.array([1, 2, 3])}
-    y = np.array([1, 2, 3])
 
     out = predictor.post_synth_transform(X, y)
 
