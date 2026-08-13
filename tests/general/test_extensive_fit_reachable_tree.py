@@ -31,9 +31,8 @@ from tests.integration.data_generated_for_tests import (
     get_test_data_regressor,
 )
 
-# disable the _raise_on_rare_category check
 
-
+# Disable the _raise_on_rare_category check
 @pytest.fixture(autouse=True)
 def mock_raise_on_rare_category(mocker):
     mocker.patch("synthpop.utils._raise_on_rare_category")
