@@ -7,11 +7,15 @@ The diagrams illustrate key processes such as fitting a Synthesiser and generati
 ## Overall process data flow
 The diagrams below show the data flow of using a Synthesiser with the default `CartMethod`. The function {func}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor.fit` is abstracted to one step. For a detailed data flow of the `MissingValuePredictor`, see {ref}`its focus diagram <mvp-diagram>`.
 ### `Synthesiser.fit()` data flow
+
+<details open>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
 ---
-flowchart LR
+flowchart TD
 
       U(["User"]) -->|X: pd.DataFrame| S["Synthesiser.fit(X: pd.DataFrame)"]
 
@@ -38,27 +42,27 @@ flowchart LR
       TC --> ENC_C{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit PCAEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
 
 
-      ENC_R --> |Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
-      ENC_C --> |Categorical X| PCA["PCAEncoder.fit(<br/>X: np.ndarray[str]<br/>y: np.ndarray[str]<br/>)"]
+      ENC_R -->|Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
+      ENC_C -->|Categorical X| PCA["PCAEncoder.fit(<br/>X: np.ndarray[str]<br/>y: np.ndarray[str]<br/>)"]
 
       TR --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray] <br/>y: np.ndarray[float32]<br/>X and y without rows where y is missing<br/><br/>Fit missingness model"]
       TC --> RV["ReplaceMissingWithValue.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray]<br/>y: np.ndarray[str] (missing made a category)<br/><br/>Missing categories in y replaced by marker"]
 
-      RMV --> |Continue with this output| LOOP_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
-      RV --> |Continue with this output| LOOP_C{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with PCAEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      RMV -->|Continue with this output| LOOP_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      RV -->|Continue with this output| LOOP_C{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with PCAEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
       
       
-      LOOP_R --> |Categorical X| APPLY_R["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
-      LOOP_C --> |Categorical X| APPLY_C["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP_R -->|Categorical X| APPLY_R["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP_C -->|Categorical X| APPLY_C["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
-      ME --> |Fitted encoder stored| APPLY_R
-      PCA --> |Fitted encoder stored| APPLY_C
+      ME -->|Fitted encoder stored| APPLY_R
+      PCA -->|Fitted encoder stored| APPLY_C
 
       APPLY_R --> MERGE_R["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
       APPLY_C --> MERGE_C["Recombine transformed columns<br/><br/>X: Dict[str, np.ndarray]"]
 
-      LOOP_R --> |Numeric X| MERGE_R
-      LOOP_C --> |Numeric X| MERGE_C
+      LOOP_R -->|Numeric X| MERGE_R
+      LOOP_C -->|Numeric X| MERGE_C
 
 
       MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Dict[str, np.ndarray]<br/>→ np.ndarray[float32]<br/><br/>shape: (n_samples, n_features)"]
@@ -91,14 +95,19 @@ flowchart LR
 
       STORE --> END["Fitted Synthesiser"]
 ```
+</details>
 
 ### `Synthesiser.generate()` data flow
+
+<details open>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
 ---
 
-flowchart LR
+flowchart TD
       U(["User"]) -->|"n: int | None"| S["Synthesiser.generate(n)"]
 
       S --> CHECK["Check fitted Synthesiser<br/><br/>Load models_ and column_order_"]
@@ -124,14 +133,14 @@ flowchart LR
       TR --> LOOP_R{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply MeanEncoder"}}
       TC --> LOOP_C{{"Loop through columns in X<br/>If column is non-numeric,<br/>apply PCAEncoder"}}
 
-      LOOP_R --> |Categorical X| ME["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
-      LOOP_C --> |Categorical X| PCA["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP_R -->|Categorical X| ME["MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP_C -->|Categorical X| PCA["PCAEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
       ME --> MERGE_R["Recombine columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
       PCA --> MERGE_C["Recombine columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray]"]
 
-      LOOP_R --> |Numeric X| MERGE_R
-      LOOP_C --> |Numeric X| MERGE_C
+      LOOP_R -->|Numeric X| MERGE_R
+      LOOP_C -->|Numeric X| MERGE_C
 
       MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
       MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
@@ -153,21 +162,27 @@ flowchart LR
       SR --> ADD["Add generated column to result pd.DataFrame"]
       SC --> ADD
 
-      ADD --> |Move to next column|L
+      ADD -->|Move to next column|L
 
       L --->|After looping<br/>through all columns| END["Synthetic dataframe<br/><br/>pd.DataFrame"]
 ```
+</details>
+
 (mvp-diagram)=
 ## Zoomed in: Missing value prediction
 Data flows for the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` class.
 
 ### Prepare data for fit flow
+
+<details>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
 ---
 
-flowchart LR
+flowchart TD
 
       subgraph input
             FEATURES[("Feature dictionary<br/>X: Dict[str, np.ndarray]<br/>Predictor columns")]
@@ -184,13 +199,13 @@ flowchart LR
 
       Z --> STATUS{Are there both missing and observed y values?}
 
-      STATUS --> |No| SKIP["Skip tree fitting<br/>"]
-      STATUS --> |Yes| LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder using z<br/><br/>If column is numeric:<br/>pass through unchanged"}}
+      STATUS -->|No| SKIP["Skip tree fitting<br/>"]
+      STATUS -->|Yes| LOOP{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder using z<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
-      LOOP --> |Categorical X<br/>y = z| ENC["MeanEncoder.fit_transform(<br/>X: np.ndarray[str],<br/>y: np.ndarray[bool]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
+      LOOP -->|Categorical X<br/>y = z| ENC["MeanEncoder.fit_transform(<br/>X: np.ndarray[str],<br/>y: np.ndarray[bool]<br/>)<br/><br/>Output:<br/>X: np.ndarray[float32]<br/>(encoded)"]
 
 
-      LOOP --> |Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[np.float32]]"]
+      LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X: Dict[str, np.ndarray[np.float32]]"]
 
       ENC --> MERGE
 
@@ -205,7 +220,7 @@ flowchart LR
 
       APPLY --> SAMPLE["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[bool]<br/>)"]
 
-      SAMPLE --> |Fitted missingness model| FITTED["Fitted MissingValuePredictor<br/><br/>Stores:<br/>- encoders_<br/>- tree_ (if fitted)<br/>- tree_sampler_ (if fitted)<br/>- feature_order_"]
+      SAMPLE -->|Fitted missingness model| FITTED["Fitted MissingValuePredictor<br/><br/>Stores:<br/>- encoders_<br/>- tree_ (if fitted)<br/>- tree_sampler_ (if fitted)<br/>- feature_order_"]
       SKIP --> FITTED
 
       FITTED --> FILTER["Remove rows where y is missing<br/><br/>mask = ~pd.isna(y)"]
@@ -213,8 +228,13 @@ flowchart LR
 
       FILTER --> OUTPUT["Return cleaned data<br/><br/>X_filtered:<br/>Dict[str, np.ndarray]<br/><br/>y_filtered:<br/>np.ndarray[float32]<br/><br/>X and y without rows where y is missing"]
 ```
+</details>
 
 ### Post synthesis transform flow
+
+<details>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
@@ -223,7 +243,7 @@ zoom:
 flowchart TD
 
       subgraph input
-            FEATURES[("Synthetic predictor features<br/><br/>X: Dict[str, np.ndarray}<br/><br/>Previously synthesised columns")]
+            FEATURES[("Synthetic predictor features<br/><br/>X: Dict[str, np.ndarray]<br/><br/>Previously synthesised columns")]
             TARGET[("Sampled synthetic target<br/><br/>y: np.ndarray[float32]<br/><br/>Output from LeafNodeSampler")]
       end
 
@@ -235,10 +255,10 @@ flowchart TD
 
       MVP --> LOOP{{"Loop through columns in X<br/><br/>If column has stored encoder:<br/>apply encoder.transform()<br/><br/>If numeric:<br/>pass through unchanged"}}
 
-      LOOP --> |Categorical X| ENC["Stored MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
+      LOOP -->|Categorical X| ENC["Stored MeanEncoder.transform(<br/>X: np.ndarray[str]<br/>)<br/><br/>Output:<br/>np.ndarray[float32]<br/>(encoded)"]
 
 
-      LOOP --> |Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X_encoded: Dict[str, np.ndarray]"]
+      LOOP -->|Numeric X| MERGE["Combine encoded and numeric columns<br/><br/>Output:<br/>X_encoded: Dict[str, np.ndarray]"]
 
       ENC --> MERGE
 
@@ -262,9 +282,14 @@ flowchart TD
 
       RESTORE --> OUTPUT["Synthetic target with missing values restored<br/><br/>Output:<br/>np.ndarray[float32]<br/><br/>Observed values preserved<br/>Missing values reintroduced"]
 ```
+</details>
 
 ## Zoomed in: CART flows
 ### Fit flow for a numeric target
+
+<details>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
@@ -319,8 +344,13 @@ flowchart LR
 
       SAMPLE --> DONE["Fully fitted numeric CART model<br/><br/>TreeRegressorMethod → CartMethod"]
 ```
+</details>
 
 ### Fit flow for a categorical target
+
+<details>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
@@ -380,8 +410,12 @@ flowchart LR
 
       SAMPLER --> DONE["Fully fitted categorical CART model<br/><br/>TreeClassifierMethod → CartMethod"]
 ```
+</details>
 
 ### Generate flow for a numeric column
+
+<details>
+<summary>Show/hide diagram</summary>
 
 ```{mermaid}
 ---
@@ -435,8 +469,13 @@ flowchart LR
 
       SERIES --> DONE["TreeRegressorMethod.transform() completed<br/>CartMethod.transform() completed<br/><br/>Add column to synthetic dataset"]
 ```
+</details>
 
 ### Generate flow for categorical column
+
+<details>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
@@ -489,8 +528,13 @@ flowchart LR
 
       SERIES --> DONE["TreeClassifierMethod.transform() completed<br/>CartMethod.transform() completed<br/><br/>Return generated column"]
 ```
+</details>
 
 ## Abstract diagram
+
+<details>
+<summary>Show/hide diagram</summary>
+
 ```{mermaid}
 ---
 zoom:
@@ -515,3 +559,4 @@ combined_features-->fit_tree["Fit decision tree"]
 np_target-->fit_tree
 
 ```
+</details>
