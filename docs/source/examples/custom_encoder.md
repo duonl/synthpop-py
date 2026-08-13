@@ -1,11 +1,11 @@
 # Create a custom encoder
 
-Encoding of categorical features is a huge part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed and size of decision trees, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py inherently implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
+Encoding of categorical input features is a huge part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed and size of decision trees, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py inherently implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
-However, using other encoders for your specific use cases might be desired. In this section we will explain how one can build their own encoder that maps categorical data to a numerical value, using scikit-learn conventions. If you prefer to use a different encoder that is already built, see [alternative encoding using CART](alternative_encoder.md).
+However, you may want to use a different encoder for a specific use case. This section explains how to create a custom encoder that maps categorical data to numerical values while following scikit-learn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
 
 ## sklearn conventions
-synthpop-py is build around base `sklearn` objects. In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from these base `sklearn` objects. This will make sure your encoder has all the required tools to seamlessly fit in with the rest of the software. 
+synthpop-py is build around base `sklearn` objects. In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from these base `sklearn` objects. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the software.
 
 ### BaseEstimator
  An estimator is an object that fits a model based on some training data and can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
@@ -151,4 +151,14 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 def test(estimator, check):
     check(estimator)
 ```
-2. synthpop-py expects encoders to be one dimensional, write your functions accordingly.
+2. synthpop-py expects encoders to be one dimensional, write your functions accordingly and validate the input where appropriate. Make sure the encoder receives the expected one-dimensional categorical input and provide a useful error message when it does not.
+
+3. Handle unseen categories. The data passed to transform may contain categories that were not present when fit was called. Your encoder should therefore define how unseen categories are handled, for example by assigning them a default value or raising a clear error.
+
+4. Handle missing values consistently. Decide how values such as None or np.nan should be treated. The behaviour should be consistent between fit and transform and documented as part of your encoder. Change your sklearn tags accordingly
+
+5. Keep learned parameters separate from constructor parameters. Parameters learned from the training data should be stored with a trailing underscore, such as categories_ or mapping_. Parameters provided by the user should be defined in __init__ and stored as attributes with the same name.
+
+6. Do not modify the input data in-place. fit and transform should operate on the provided data without changing the original input.
+
+7. Keep the encoder stateless before fitting. Do not learn categories or mappings in __init__. All information derived from the input data should be learned in fit.
