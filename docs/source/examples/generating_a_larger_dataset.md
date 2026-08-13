@@ -4,7 +4,7 @@ In the previous examples, we generated a synthetic dataset with the same number 
 One advantage of synthetic data is that we can generate more records than were available in the original dataset. This can be useful when testing analysis pipelines, developing software or creating datasets for simulation studies.
 
 ## Loading the data
-For this example, we use the [Titanic dataset](https://github.com/mwaskom/seaborn-data/blob/master/titanic.csv) from `seaborn`. Unlike the diabetes dataset used in the previous example, this dataset contains both numerical and categorical variables making it a realistic example for demonstrating synthetic data generation.
+For this example, we use the [Titanic dataset](https://github.com/mwaskom/seaborn-data/blob/master/titanic.csv) from `seaborn`. Unlike the diabetes dataset used in the previous example, this dataset contains both numeric and categorical variables making it a realistic example for demonstrating synthetic data generation.
 ```python
 import seaborn as sns
 
@@ -67,7 +67,7 @@ plot_univariate_distributions(
 ```
 Because the synthetic dataset contains more observations, the absolute counts will naturally differ. Therefore, these plots compare **relative frequencies and densities** rather than raw counts.
 
-For categorical variables, the proportion of each category should be similar. For numerical variables, the shape of the distribution should be preserved.
+For categorical variables, the proportion of each category should be similar. For numeric variables, the shape of the distribution should be preserved.
 
 We can also evaluate pairwise relationships using S_pMSE:
 ```python

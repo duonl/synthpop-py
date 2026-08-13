@@ -5,7 +5,7 @@ This page provides a visual overview of how data moves through the Synthpop syst
 The diagrams illustrate key processes such as fitting a Synthesiser and generating synthetic data, including both numeric and categorical workflows.
 
 ## Overall process data flow
-The diagrams below show the data flow of using a Synthesiser with the default `CartMethod`. The function {func}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor.fit` is abstracted to one step. For a detailed data flow of the `MissingValuePredictor`, see {ref}`its focus diagram <mvp-diagram>`.
+The diagrams below show the data flow of using a Synthesiser with the default `CartMethod`. The function {func}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor.fit` is abstracted to one step. For a detailed data flow of the `MissingValuePredictor`, see {ref}`its focus diagrams <mvp-diagram>`.
 ### `Synthesiser.fit()` data flow
 
 <details open>
@@ -172,7 +172,7 @@ flowchart TD
 ## Zoomed in: Missing value prediction
 Data flows for the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` class.
 
-### MissingValuePredictor.prepare_data_for_fit() flow
+### `MissingValuePredictor.prepare_data_for_fit()` flow
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -230,7 +230,7 @@ flowchart TD
 ```
 </details>
 
-### MissingValuePredictor.post_synth_transform() flow
+### `MissingValuePredictor.post_synth_transform()` flow
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -285,8 +285,9 @@ flowchart TD
 ```
 </details>
 
-## Zoomed in: CART flows
-### Fit flow for a numeric target
+## Zoomed in: `CartMethod` flows
+### `CartMethod.fit()` for a numeric target flow
+The diagram below shows the flow for fitting a numeric variable using the default `CartMethod`.
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -347,7 +348,8 @@ flowchart LR
 ```
 </details>
 
-### Fit flow for a categorical target
+### `CartMethod.fit()` for a categorical target flow
+The diagram below shows the flow for fitting a categorical variable using the default `CartMethod`.
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -413,7 +415,8 @@ flowchart LR
 ```
 </details>
 
-### Generate flow for a numeric column
+### `CartMethod.transform()` for a numeric target flow
+The diagram below shows the flow for generating a numeric variable using the default `CartMethod`.
 
 <details>
 <summary>Show/hide diagram</summary>
@@ -472,7 +475,8 @@ flowchart LR
 ```
 </details>
 
-### Generate flow for categorical column
+### `CartMethod.transform()` for a categorical target flow
+The diagram below shows the flow for generating a categorical variable using the default `CartMethod`.
 
 <details>
 <summary>Show/hide diagram</summary>

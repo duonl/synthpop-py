@@ -31,7 +31,7 @@ class StubRNG:
 @pytest.mark.parametrize(
     "leaf_ids, y, expected_map",
     [
-        # --- numerical numpy arrays ---
+        # --- numeric numpy arrays ---
         (
             np.array([10, 10, 20, 20]),
             np.array([0, 0, 1, 1]),
