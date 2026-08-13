@@ -48,3 +48,6 @@ pythonpath = "src"
 addopts = [
     "--import-mode=importlib",
 ]
+markers = [
+    "noautofixt: do not apply the autouse of a fixture",
+]
