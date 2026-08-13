@@ -256,7 +256,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         missing_mask = np.asarray(missing_mask).astype(bool)
 
         if pd.api.types.is_numeric_dtype(y_val):
-            y_out = y_val.astype(float).copy()
+            y_out = y_val.astype(np.float32).copy()
         else:
             y_out = y_val.copy()
 

@@ -325,8 +325,14 @@ def test_post_synth_no_missing(y, predictor):
 
     assert np.array_equal(out, y)
 
-
-def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_encoder):
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.array(np.array([100, 200, 300, 400]), dtype=np.float32),
+        np.array(np.array(['100', '200', '300', '400']), dtype=str_dtype)
+    ]
+)
+def test_post_synth_transform_dataflow(y, predictor, stub_tree, stub_sampler, stub_encoder):
     predictor.tree_ = stub_tree
     predictor.tree_.apply_return = np.array([0, 1, 2, 3])
     predictor.tree_sampler_ = stub_sampler
@@ -342,9 +348,9 @@ def test_post_synth_transform_dataflow(predictor, stub_tree, stub_sampler, stub_
     predictor.feature_order_ = ["a", "b"]
 
     X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
-    y = np.array([100, 200, 300, 400])
 
     out = predictor.post_synth_transform(X, y)
+    assert out.dtype == y.dtype
 
     tree = predictor.tree_
     tree_X = tree.apply_inputs
@@ -373,8 +379,14 @@ def test_post_synth_transform_raises_unfitted():
     with pytest.raises(NotFittedError):
         model.post_synth_transform({"a": np.array([1])}, np.array([1]))
 
-
-def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler, stub_encoder):
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.array(np.array([100, 200, 300, 400]), dtype=np.float32),
+        np.array(np.array(['100', '200', '300', '400']), dtype=str_dtype)
+    ]
+)
+def test_post_synth_uses_feature_order(y, predictor, stub_tree, stub_sampler, stub_encoder):
     predictor.tree_ = stub_tree
     predictor.tree_.apply_return = np.array([0, 1, 2, 3])
     predictor.tree_sampler_ = stub_sampler
@@ -399,7 +411,6 @@ def test_post_synth_uses_feature_order(predictor, stub_tree, stub_sampler, stub_
         "c": np.array([["u"], ["v"], ["u"], ["v"]], dtype=str_dtype),
         "d": np.array([[10], [20], [30], [40]])
     }
-    y = np.array([100, 200, 300, 400])
 
     predictor.post_synth_transform(X, y)
 
