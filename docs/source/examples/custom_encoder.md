@@ -102,9 +102,9 @@ As you saw we also added `check_is_fitted` in our `transform` function. Even tho
 For a more in depth explanation (such as implementing other mixins), please take a careful look at [developing scikit-learn estimators](https://scikit-learn.org/dev/developers/develop.html#)
 
 ### sklearn tags
-When creating a custom estimator or transformer that follows the scikit-learn API, it is useful to tell scikit-learn what kind of estimator it is and what type of data it expects. This is done using [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags).
+When creating a custom estimator or transformer that follows the scikit-learn conventions, it is useful to tell scikit-learn what kind of estimator it is and what type of data it expects. This is done using [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags).
 
-Tags provide metadata about an estimator. Scikit-learn can use this information when running estimator checks, validating inputs, and integrating custom estimators with the wider scikit-learn ecosystem.
+Tags provide metadata about an estimator. Scikit-learn can use this information when running estimator checks, validating inputs, and integrating custom estimators with the wider scikit-learn package.
 
 In our case we find that we explicitly expect the data to be a one-dimensional categorical (list of strings). As such, we can inherent from the base class and mixin, and define specific tags from there:
 
