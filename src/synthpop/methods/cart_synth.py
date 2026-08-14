@@ -103,7 +103,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         """
 
-        self.target_name_ = getattr(y, "name", None)
         if self.rare_categories_threshold > 0:
             for key, values in X.items():
                 is_numeric = pd.api.types.is_numeric_dtype(values.dtype)
@@ -202,18 +201,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         result = self.missing_handler_.post_synth_transform(X_val, sample)
 
         return result
-
-    def get_feature_names_out(self, input_features=None) -> list[str]:
-
-        check_is_fitted(self, "target_name_")
-
-        if input_features is None:
-            input_features = getattr(self, "feature_order_", [])
-
-        if self.target_name_ is None:
-            return [input_features]
-
-        return [self.target_name_]
 
     @abstractmethod
     def _get_encoder(self):
