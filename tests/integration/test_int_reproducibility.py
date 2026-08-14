@@ -288,17 +288,8 @@ def test_reproducibility_tune_cart_regression_220():
     synth2 = Synthesiser(random_seed=1,default_syn_method=tune_cart(rare_categories_threshold=0))
     synth2.fit(obs)
     syn2 = synth2.generate(2000)
+    syn3 = synth2.generate(2000)
 
-    for col in syn2.columns:
-        syn2_is_nan_mask = pd.isna(syn2[col])
-        syn1_is_nan_mask = pd.isna(syn1[col])
-        pd.testing.assert_series_equal(
-            syn1_is_nan_mask,
-            syn2_is_nan_mask,
-            obj=f"missingness not reproduced for column {col}",
-        )
+    pd.testing.assert_frame_equal(syn1,syn2)
+    pd.testing.assert_frame_equal(syn3,syn2)
 
-        assert (
-            syn2[col][~syn2_is_nan_mask]
-            == syn1[col][~syn1_is_nan_mask]
-        ).all(), f"column {col} not reproduced"

@@ -150,7 +150,7 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_default_method():
         default_syn_method=method,
     )
 
-    with pytest.raises(ValueError, match=".*default_syn_method.*BaseSynthMethod"):
+    with pytest.raises(TypeError, match=".*default_syn_method.*BaseSynthMethod"):
         synth.fit(test_data)
 
 def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
@@ -159,15 +159,16 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
             "b": [3, 4],
             "c": [5, 6],
         })
-    
-    method = lambda: np.array([]) #returns something other than a synthesis method
+
+    def method():
+        return np.array([])#returns something other than a synthesis method
 
     synth = Synthesiser(
         random_seed=2,
         special_syn_method={"b": method},
     )
 
-    with pytest.raises(ValueError,match=".*special_syn_method.* \'b\'.*BaseSynthMethod"):
+    with pytest.raises(TypeError,match=".*special_syn_method.* \'b\'.*BaseSynthMethod"):
         synth.fit(test_data)
 
 def test_synthesiser_fit_default_synthesis():

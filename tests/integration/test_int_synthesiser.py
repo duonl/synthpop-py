@@ -354,3 +354,35 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
     with warnings.catch_warnings():
         warnings.simplefilter("error", pd.errors.PerformanceWarning)
         synth.generate(100)
+
+def test_tune_cart_makes_different_methods():
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+            n_samples=1000)
+    synthesiser = Synthesiser(random_seed=74124,
+                              special_syn_method={
+                                  "first":tune_cart(n_leaves=10),
+                                  "second":tune_cart(n_leaves=20),
+                              })
+
+    synthesiser.fit(original_data)
+
+    n_leaves_first = synthesiser.models_["first"].method_.tree_.min_samples_leaf
+    n_leaves_second = synthesiser.models_["second"].method_.tree_.min_samples_leaf
+
+    assert n_leaves_first == 10
+    assert n_leaves_second==20
+
+def test_callable_cart_method_factory():
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+                n_samples=1000)
+    synth = Synthesiser(
+        random_seed=1,
+        default_syn_method=lambda: CartMethod(),
+    )
+
+    synth.fit(original_data)
+
+    assert isinstance(
+        synth.models_["first"],
+        CartMethod,
+    )

@@ -580,30 +580,32 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
     else:
         effective_categories_threshold = rare_categories_threshold
 
-
-    return lambda: CartMethod(
-        regressor=TreeRegressorMethod(
-            rare_categories_threshold=effective_categories_threshold,
-            tree=DecisionTreeRegressor(
-                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-                random_state=RandomStateManager.create_instance_seed()
+    def tune_cart_factory():
+        return CartMethod(
+            regressor=TreeRegressorMethod(
+                rare_categories_threshold=effective_categories_threshold,
+                tree=DecisionTreeRegressor(
+                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                    min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                    random_state=RandomStateManager.create_instance_seed()
+                ),
+                missing_handler=MissingValuePredictor(
+                    tree=DecisionTreeClassifier(min_samples_leaf=n_leaves,
+                                                random_state=RandomStateManager.create_instance_seed())
+                )
             ),
-            missing_handler=MissingValuePredictor(
-                tree=DecisionTreeClassifier(min_samples_leaf=n_leaves,
-                                            random_state=RandomStateManager.create_instance_seed())
-            )
-        ),
-        classifier=TreeClassifierMethod(
-            rare_categories_threshold=effective_categories_threshold,
-            tree=DecisionTreeClassifier(
-                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-                random_state=RandomStateManager.create_instance_seed(),
-            ),
-            encoder=PCAEncoder(
-                pca_transform=PCA(n_components=n_components,
-                                  random_state=RandomStateManager.create_instance_seed())
+            classifier=TreeClassifierMethod(
+                rare_categories_threshold=effective_categories_threshold,
+                tree=DecisionTreeClassifier(
+                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                    min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                    random_state=RandomStateManager.create_instance_seed(),
+                ),
+                encoder=PCAEncoder(
+                    pca_transform=PCA(n_components=n_components,
+                                    random_state=RandomStateManager.create_instance_seed())
+                )
             )
         )
-    )
+
+    return tune_cart_factory

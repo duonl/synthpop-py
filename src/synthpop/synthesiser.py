@@ -12,6 +12,7 @@ from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
 import synthpop.reproducibility
 
+SynMethodCallable = Callable[[], BaseSynthMethod]
 
 class Synthesiser:
     """
@@ -25,10 +26,18 @@ class Synthesiser:
         By default, there is no special synthesis method.
 
 
-    Both ``default_syn_method`` and the values of ``special_syn_method`` can be callables.
-    If they are callable, they are expected to take no arguments and produce a child instance of BaseSynthMethod.
-    If ``default_syn_method`` is callable, it will be called for each variable that does not have a ``special_syn_method``.
-    If a value of ``special_syn_method`` is callable, it will be called once. 
+    Both ``default_syn_method`` and the values of
+    ``special_syn_method`` may be either ``BaseSynthMethod`` instances
+    or zero-argument callables returning ``BaseSynthMethod`` instances.
+
+    Callable synthesis methods are evaluated during :meth:`fit`, inside
+    the synthesiser's random-state context. This allows synthesis-method
+    factories to create internally randomised estimators using
+    ``RandomStateManager`` while retaining reproducibility from
+    ``Synthesiser(random_seed=...)``. 
+
+    If default_syn_method is callable, it is called once for each column that does not have a special synthesis method.
+    If a value of special_syn_method is callable, it is called once when that column is fitted.
 
     Examples
     --------
@@ -75,11 +84,10 @@ class Synthesiser:
 
     def __init__(self, random_seed: int | None = None,
                  column_order: list[str] | list[int] | None = None,
-                 default_syn_method: BaseSynthMethod | Callable[[],
-                                     BaseSynthMethod] | None = None,
-                 special_syn_method: (Dict[str, BaseSynthMethod | Callable[[],  BaseSynthMethod]]
-                 | None
-                 ) = None
+                 default_syn_method: BaseSynthMethod | SynMethodCallable | None = None,
+                 special_syn_method: (Dict[str, BaseSynthMethod | SynMethodCallable]
+                                      | None
+                                      ) = None,
                  ) -> None:
 
         self.default_syn_method = default_syn_method
@@ -89,34 +97,31 @@ class Synthesiser:
 
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
-        if self.special_syn_method is None:
-            use_default = True
-        elif column_name in self.special_syn_method:
-            use_default = False
+        if (
+        self.special_syn_method is not None
+        and column_name in self.special_syn_method
+        ):
+            method = self.special_syn_method[column_name]
+            method_description = f"special_syn_method for column '{column_name}'"
         else:
-            use_default = True
+            method = self.default_syn_method
+            method_description = "default_syn_method"
 
-        if use_default:
-            if self.default_syn_method is None:
-                effective_default_method = CartMethod()
-            elif callable(self.default_syn_method):
-                effective_default_method = self.default_syn_method()
-                if not isinstance(effective_default_method, BaseSynthMethod):
-                    raise ValueError(
-                        "If the value of default_syn_method is callable it should return an instance of a child class of BaseSynthMethod")
-            else:
-                effective_default_method = clone(self.default_syn_method)
-            return effective_default_method
-        else:
-            model = self.special_syn_method[column_name]
-            if callable(model):
-                new_model = model()
-                if not isinstance(new_model, BaseSynthMethod):
-                    raise ValueError(
-                        f"If the value of special_syn_method is callable for entry '{column_name}' it should return an instance of a child class of BaseSynthMethod")
-                return new_model
-            else:
-                return clone(model)
+        if method is None:
+            return CartMethod()
+
+        if callable(method):
+            new_model = method()
+            if not isinstance(new_model, BaseSynthMethod):
+                raise TypeError(
+                    f"{method_description} callable must return an instance "
+                    "of a child class of BaseSynthMethod"
+                )
+            return new_model
+
+        return clone(method)
+
+
 
     def _validate_column_order_unique(self, column_order: list[str] | list[int]):
         unique_column_order = np.unique_counts(column_order)
@@ -187,9 +192,9 @@ class Synthesiser:
                 model = self._get_model(y)
 
                 self.models_[self.column_order_[i]] = model.fit(
-    predictors,
-    X[y],
-)
+                    predictors,
+                    X[y],
+                )
 
         return self
 
@@ -215,7 +220,7 @@ class Synthesiser:
                 f"number of rows of the synthetic data must be positive, got {n}")
         else:
             n_syn_rows = n
-        
+
         if random_seed is None:
             seed_to_use = self.random_seed
         else:
@@ -233,6 +238,7 @@ class Synthesiser:
                     pred = result
 
                 new_syn_column = self.models_[y].transform(X=pred)
-                result = pd.concat([result, new_syn_column], axis=1, join='outer')
+                result = pd.concat([result, new_syn_column],
+                                   axis=1, join='outer')
 
         return result
