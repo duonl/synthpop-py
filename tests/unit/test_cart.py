@@ -521,14 +521,42 @@ def test_transform_requires_fit_missing_attribute(missing_attr):
         cart.transform(pd.DataFrame({"a": [1]}))
 
 
-# ----- get_feature_names_out test -----
+# ----- feature names out tests -----
 
 
-def test_get_feature_names_out_delegates():
-    cart = CartMethod()
-    cart.method_ = StubRegressor()
+@pytest.mark.parametrize(
+    "target_name, input_features, expected",
+    [
+        ("synthetic", None, "synthetic"),
+        ("synthetic", ["a", "b"], "synthetic"),
+        (None, ["a", "b"], ["a", "b"]),
+        (None, None, []),
+    ],
+)
+def test_get_feature_names_out_manual_state(target_name, input_features, expected):
+    model = CartMethod()
+    model.target_name_ = target_name
 
-    assert cart.get_feature_names_out() == ["fake_output"]
+    result = model.get_feature_names_out(input_features)
+
+    assert result == expected
+
+
+def test_get_feature_names_out_from_feature_names_in_():
+    X = pd.DataFrame(
+        {
+            "column1": [1, 2, 3],
+            "column2": ["a", "b", "c"],
+        }
+    )
+    y = pd.Series([0, 0, 1])
+
+    model = CartMethod()
+    model.feature_names_in_ = X.columns
+    model.target_name_ = None
+
+    result = model.get_feature_names_out()
+    np.testing.assert_array_equal(result, model.feature_names_in_)
 
 
 def test_get_feature_names_out_raises_unfitted():

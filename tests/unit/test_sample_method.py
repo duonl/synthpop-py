@@ -314,4 +314,27 @@ def test_get_feature_names_out_manual_state(target_name, input_features, expecte
 
     result = model.get_feature_names_out(input_features)
 
-    assert result == [expected]
+    assert result == expected
+
+
+def test_get_feature_names_out_from_feature_names_in_():
+    X = pd.DataFrame(
+        {
+            "column1": [1, 2, 3],
+            "column2": ["a", "b", "c"],
+        }
+    )
+    y = pd.Series([0, 0, 1])
+
+    model = SampleMethod()
+    model.fit(X, y)
+
+    result = model.get_feature_names_out()
+    np.testing.assert_array_equal(result, X.columns)
+
+
+def test_get_feature_names_out_raises_unfitted():
+    model = SampleMethod()
+
+    with pytest.raises(NotFittedError):
+        model.get_feature_names_out()

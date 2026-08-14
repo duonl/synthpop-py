@@ -514,8 +514,28 @@ class CartMethod(base_synth.BaseSynthMethod):
         )
 
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
-        check_is_fitted(self, ["method_"])
-        return self.method_.get_feature_names_out(input_features)
+        """
+        Get the name of the synthesised target column.
+
+        If the original target column has no name (i.e. `None`), the input feature
+        names are returned instead.
+
+        :param input_features: Names of the input columns. If not provided,
+            uses the feature names stored during fitting (`feature_names_in_`).
+        :return: Name of the synthesised target column, or the input feature names
+            if the target column has no name.
+        :raises NotFittedError: If the estimator has not been fitted.
+        """
+        if not hasattr(self, "target_name_"):
+            raise NotFittedError("CartMethod is not fitted. Call `fit` first.")
+
+        if input_features is None:
+            input_features = getattr(self, "feature_names_in_", [])
+
+        if self.target_name_ is None:
+            return input_features
+
+        return self.target_name_
 
 
 def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_categories_threshold: int | None = None) -> CartMethod:
