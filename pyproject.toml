@@ -48,3 +48,6 @@ pythonpath = "src"
 addopts = [
     "--import-mode=importlib",
 ]
+markers = [
+    "noautofixt: disable the autouse fixtures that stub production functionality",
+]
