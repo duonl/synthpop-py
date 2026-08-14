@@ -1,7 +1,7 @@
 # PCA encoding
 
 ## 1. Introduction
-PCA encoding is a method to transform categorical features into numeric representations by exploiting the relationship between a feature and a categorical target variable. This method constructs a contingency table and applies Principal Component Analysis (PCA) to obtain a low-dimensional, variance-preserving numerical encoding of the feature levels. This encoding is a required step in our synthesis pipeline because the underlying decision tree models do not support categorical input variables.
+PCA encoding is a method to transform categorical features into numeric representations by exploiting the relationship between a feature and a categorical target variable. This method constructs a contingency table and applies Principal Component Analysis (PCA) to obtain a low-dimensional, variance-preserving numeric encoding of the feature levels. This encoding is a required step in our synthesis pipeline because the underlying decision tree models do not support categorical input variables.
 
 ## 2. Input and output
 The input for PCA encoding consists of two columns:

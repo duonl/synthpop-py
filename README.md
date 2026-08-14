@@ -73,7 +73,7 @@ It includes:
 
 synthpop-py is designed for structured tabular datasets. It currently supports:
 
-* numerical variables;
+* numeric variables;
 * categorical variables;
 * boolean variables;
 * ordinal variables; and

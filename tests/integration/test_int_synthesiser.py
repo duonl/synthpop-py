@@ -295,7 +295,7 @@ def test_synthesiser_preserves_datatypes_with_missing(method):
 def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
     """
     Regression test for bug 152. The CartMethod failed for a
-    numerical array with only missing values, 
+    numeric array with only missing values, 
     Missing values are masked. As such, fitting on an entire 
     np.nan array is the same as fitting on an empty array.
     This threw an error resulting in bug issue 152. A fix was implemented
