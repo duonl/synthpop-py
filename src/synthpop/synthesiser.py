@@ -75,12 +75,11 @@ class Synthesiser:
 
     def __init__(self, random_seed: int | None = None,
                  column_order: list[str] | list[int] | None = None,
-                 default_syn_method: BaseSynthMethod | Callable[[
-                 ], BaseSynthMethod] | None = None,
-                 special_syn_method: (Dict[str, BaseSynthMethod | Callable[[], 
-                 BaseSynthMethod]]
+                 default_syn_method: BaseSynthMethod | Callable[[],
+                                     BaseSynthMethod] | None = None,
+                 special_syn_method: (Dict[str, BaseSynthMethod | Callable[[],  BaseSynthMethod]]
                  | None
-                 )
+                 ) = None
                  ) -> None:
 
         self.default_syn_method = default_syn_method

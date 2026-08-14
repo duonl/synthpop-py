@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 import warnings
 
-from synthpop.methods.cart_synth import CartMethod
+from synthpop.methods.cart_synth import CartMethod, tune_cart
 from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.synthesiser import Synthesiser
@@ -349,7 +349,7 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
     obs = pd.DataFrame(X)
     obs["target"] = y
 
-    synth = Synthesiser(random_seed=0)
+    synth = Synthesiser(random_seed=0,default_syn_method=tune_cart(rare_categories_threshold=0))
     synth.fit(obs)
     with warnings.catch_warnings():
         warnings.simplefilter("error", pd.errors.PerformanceWarning)
