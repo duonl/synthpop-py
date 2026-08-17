@@ -9,21 +9,12 @@ Here we can explain some stuff about the API reference
 
    synthesiser_class/synthesiser
 
-
-.. toctree::
-   :maxdepth: 4
-   :caption: Reproducibility
-
-   reproducibility/reproducibility
-
-
 .. toctree::
    :maxdepth: 4
    :caption: Data Processing
 
    data_processing/Encoder
    data_processing/Missing_value
-
 
 .. toctree::
    :maxdepth: 4
@@ -46,3 +37,9 @@ Here we can explain some stuff about the API reference
 
    plotting/Univariate
    plotting/S_pMSE
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Reproducibility
+
+   reproducibility/reproducibility

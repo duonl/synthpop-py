@@ -23,7 +23,7 @@ class RandomStateManager:
 
     Instances of this class can be used as a context manager to temporary switch seed:
 
-    See `the developer guide on randomness <./developer/randomness.html>`_ and the `functional description <./develop/developer/functional_descriptions/reproducibility.html>`_ about this.
+    See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__
 
     Examples
     --------
@@ -86,13 +86,14 @@ class RandomStateManager:
 
         :returns: an integer that can be used as a seed.
 
-    Examples
-    --------
+        Examples
+        --------
         >>> from reproducibility import RandomStateManager
         >>> class UsesRandom:
         ...     def fit(self, X, y):
         ...             self.random_state_ = RandomStateManager.create_instance_seed()
         """
+
         if cls._seed_sequence is None:
             cls.set_root_seed(None)
         return _create_seed_from_sequence(cls._seed_sequence)
