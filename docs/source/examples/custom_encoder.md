@@ -27,7 +27,7 @@ import numpy as np
 import numpy.typing as npt
 from sklearn.base import BaseEstimator
 
-class CustomEncoder(TransformerMixin, BaseEstimator):
+class CustomEncoder(BaseEstimator):
 
     def __init__(self) -> None:
         super().__init__()

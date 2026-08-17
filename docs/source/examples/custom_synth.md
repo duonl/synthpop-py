@@ -1,4 +1,6 @@
 # Custom synth method
+In this example we will explain how to create your own custom synthesiser method! Whether it might be for your own use case, or to extend synthpop's capabilities, synthpop has built a framework that helps you create your own method.
+
 An example of a custom synth method. It can be defined as follows:
 ```python
 class CustomSynth(BaseSynth):
