@@ -109,8 +109,8 @@ class LeafNodeSampler:
         - Provide ``leaf_ids`` for new samples (`X_syn`)
         - A target value is sampled from the empirical distribution associated with that leaf, with probabilities proportional to observed counts.
 
-    FOR REVIEWER: Please write some extra information +links to wherever is nice.
-    To me this doc string seems inconsistent with other docstrings, thus could use some rework.    
+    **FOR REVIEWER: Please write some extra information +links to wherever is nice.
+    To me this doc string seems inconsistent with other docstrings, thus could use some rework.**    
     
     .. rubric:: Usage
 
