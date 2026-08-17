@@ -183,7 +183,7 @@ def fitted_tree(tree_method, request):
 
 
 @pytest.fixture(autouse=True)
-def mock_fit_decision_tree(mocker,):
+def mock_fit_decision_tree(mocker):
     mocker.patch(
         "synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves", return_value=StubTree())
 

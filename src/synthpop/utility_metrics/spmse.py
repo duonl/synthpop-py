@@ -23,7 +23,7 @@ def _standardise_spmse_dtype(X: pd.Series) -> npt.NDArray:
 
     Missing values are normalised to `np.nan`.
 
-    The numerical dtype differs from the utils.standardise_array_dtypes, which returns float32.
+    The numeric dtype differs from the utils.standardise_array_dtypes, which returns float32.
 
     :param X: 1D array to standardise 
     """
