@@ -113,7 +113,7 @@ def test_synthesiser_preserves_1d_statistics():
     n_samples_synthetic = 6000
     original_data, index_num, index_cat = (
         simulate_realistic_dataset_correlations(
-        n_samples=n_samples_orig,
+            n_samples=n_samples_orig,
         )
     )
     synthesiser = Synthesiser(random_seed=74125)
@@ -130,7 +130,7 @@ def test_synthesiser_preserves_1d_statistics():
             original_mean - synthetic_mean) > 1e-3, "original and synthetic are too close"
         assert (
             np.abs(original_mean - synthetic_mean) / original_mean < 0.05
-         ), "original and synthetic are too different"
+        ), "original and synthetic are too different"
 
     for cat_col in index_cat:
         original_dist = original_data[cat_col].value_counts(
@@ -335,10 +335,11 @@ def test_synthesiser_handles_cart_with_all_missing_target(missing_value):
 
     assert generated['c'].isna().all()
 
+
 def test_generate_does_not_raise_dataframe_fragmentation_warning():
     """
     Regression test for issue #164.
-    
+
     Ensures that generating synthetic data does not trigger pandas' PerformanceWarning for highly fragmented DataFrames.
     """
     seed = 7
@@ -349,7 +350,8 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
     obs = pd.DataFrame(X)
     obs["target"] = y
 
-    synth = Synthesiser(random_seed=0,default_syn_method=tune_cart(rare_categories_threshold=0))
+    synth = Synthesiser(random_seed=0, default_syn_method=tune_cart(
+        rare_categories_threshold=0))
     synth.fit(obs)
     with warnings.catch_warnings():
         warnings.simplefilter("error", pd.errors.PerformanceWarning)
@@ -375,9 +377,10 @@ def test_tune_cart_applies_different_n_leaves():
     assert synthesiser.models_["first"].method_.tree_.min_samples_leaf == 10
     assert synthesiser.models_["second"].method_.tree_.min_samples_leaf == 20
 
+
 def test_synthesiser_accepts_callable_default_method():
     original_data, _, _ = simulate_realistic_dataset_correlations(
-                n_samples=1000)
+        n_samples=1000)
     synth = Synthesiser(
         random_seed=1,
         default_syn_method=lambda: CartMethod(),

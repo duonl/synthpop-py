@@ -251,7 +251,6 @@ def test_output_is_not_a_copy_regressor(method, X, y):
     assert not np.array_equal(y, result, equal_nan=True)
 
 
-
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
 def test_order_of_input_dict_does_not_change_output(method, X, y):
     method.fit(X, y)

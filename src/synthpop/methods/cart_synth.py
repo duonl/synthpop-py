@@ -607,7 +607,7 @@ def tune_cart(
                 ),
                 encoder=PCAEncoder(
                     pca_transform=PCA(n_components=n_components,
-                                    random_state=RandomStateManager.create_instance_seed())
+                                      random_state=RandomStateManager.create_instance_seed())
                 )
             )
         )
