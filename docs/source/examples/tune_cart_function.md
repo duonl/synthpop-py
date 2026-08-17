@@ -98,33 +98,64 @@ For more information about the role of PCA in CART, see {ref}`Guide 4.1.1: PCA e
 ## Configure the rare-category check
 CART can check categorical predictors for values that occur only a small number of times. This is a privacy safeguard: a very rare category can make it easier for information about an individual to be inferred from the synthetic data. See the example on [risk of privacy loss due to rare categories](rare_categories.md) for more information about this specific privacy caveat.
 
-The `rare_categories_treshold` controls this check. For example,
+The `rare_categories_treshold` parameter determines which categories are considered rare. A category is considered rare when  it occurs fewer than the specified threshold.
+
+For example,
+```python
+tune_cart(rare_categories_threshold=5)
+```
+means that a category occurring fewer than 5 times is considered rare.
+
+The check does not change how the CART model is fitted or how categories are synthesised. Instead, it provides a warning when rare categories make up a substantial proportion of the observations in a predictor. Synthesis continues after the warning.
+
+Specifically, a warning is raised when observations belonging to rare categories account for at least 25% of the observations.
+
+For example, suppose a categorical predictor contains these frequencies:
+**Category** | **Frequency**
+--- | ---
+A | 60
+B | 20
+C | 15
+D | 5
+
+With:
 ```python
 tune_cart(rare_categories_threshold=20)
 ```
-means that a categorical predictor containing a value that occurs fewer than 20 times causes synthesis to stop with an exception. This does not change how the CART model is fitted or how categories are synthesised. Instead, it acts as a safeguard before synthesis proceeds: it prevents the model from being fitted when a categorical predictor contains a potentially risky rare category.
-```warning
-the implementation of the rare category check will change in the future
-```
-A lower threshold allows rarer categories to pass the check, while a higher threshold is more conservative and rejects more categories. By default, `rare_categories_threshold` is `None`. In that case, `tune_cart` uses the value of `n_leaves` as the threshold. This means:
+categories `C` and `D` are rare because they occur fewer than 20 times. Together, they account for 20 observations out of 100, or 20% of the dataset. Therefore, the 25% warning threshold is not reached. If instead the rare categories accounted for 25 or more observations, the check would raise a warning:
+**Category** | **Frequency**
+--- | ---
+A | 55
+B | 20
+C | 15
+D | 5
+E | 5
+
+The warning is intended to draw attention to a potential privacy risk rather than prevent synthesis from proceeding. For more information about the reason for this check and the privacy implications of rare categorical values, see {ref}`User guide 6.1.2: Attribute disclosure <612-attribute-disclosure>`.
+
+A lower `rare_categories_threshold` means that fewer categories are considered rare. A higher threshold is more conservative because more categories can be classified as rare.
+
+By default, `rare_categories_threshold` is `None`. In that case, `tune_cart` uses the value of `n_leaves` as the threshold. This means:
 ```python
 tune_cart()
 ```
-has an effective rare-category threshold of `5`, because `n_leaves` defaults to `5`. Similarly:
+has an effective rare-category threshold of `5`, because `n_leaves` defaults to `5`.
+
+Similarly:
 ```python
 tune_cart(n_leaves=10)
 ```
-has an effective threshold of `10`, unless `rare_categories_threshold` is explicitly specified. This means that changing `n_leaves` can also change the rare-category check unless you provide an explicit threshold.
+has an effective threshold of `10`, unless `rare_categories_threshold` is explicitly specified. This means that changing `n_leaves` can also change which categories are considered rare unless you provide an explicit threshold.
 
 If you want to disable the check entirely, set the threshold to `0`:
 ```python
-synthesiser(
+synthesiser=Synthesiser(
     default_syn_method=tune_cart(
         rare_categories_threshold=0,
     ),
 )
 ```
-Disabling the check means that synthesis will no longer stop when a categorical predictor contains rare values. You therefore lose this safeguard against potential attribute disclosure. For more information about the reason for this check and the privacy implications of rare categorical values, see {ref}`User guide 6.1.2: Attribute disclosure <612-attribute-disclosure>`.
+With the check disabled, synthesis will no longer warn about rare categorical values. You therefore lose this safeguard against potential attribute disclosure.
 
 ## Tune several parameters together
 The tree parameters control different aspects of CART:
@@ -132,12 +163,12 @@ The tree parameters control different aspects of CART:
 --------------|-------------------|---------------------
 `n_leaves` | How small a group a decision tree can base a prediction on | Larger values produce more generalised trees; smaller values allow more specific patterns
 `n_components` | How much encoded categorical information is given to the classifier | Fewer components simplify the representation but may discard useful information
-`rare_categories_threshold` | Which rare categorical values are allowed to proceed to synthesis | Higher values provide a more conservative privacy safeguard
+`rare_categories_threshold` | Which rare categorical values are considered rare | Higher values classify more values as rare and can therefore trigger the privacy warning more easily
 
 For example, suppose we want to:
 - require at least 10 observations in each leaf;
 - retain enough principal components to explain 90% of its variance; and
-- reject categorical values occurring fewer than 3 times.
+- consider categorical values occurring fewer than 3 times to be rare.
 
 We can configure all three behaviours in one place:
 ```python
@@ -156,7 +187,7 @@ synthesiser.fit(data)
 
 synthetic_data = synthesiser.generate()
 ```
-This gives us a CART model that is less likely to make predictions from very small groups, uses a reduced representation of categorical predictors, and applies an explicit check for rare categorical values.
+This gives us a CART model that is less likely to make predictions from very small groups, uses a reduced representation of categorical predictors, and applies an explicit check for rare categorical values. If rare categories account for at least 25% of the observations, the check raises a warning, but synthesis can continue.
 
 ## Use different CART configurations for different columns
 A tuned CART factory can also be used with `special_syn_method`. This is useful when most columns should use one configuration, but a particular column needs a different one. For example, suppose we want most variables to use a minimum leaf size of 10, but `fare` needs a more conservative configuration with a minimum leaf size of 20:
@@ -209,7 +240,7 @@ The available parameters are:
 ----------------------------| ---
 `n_leaves`                  | Sets the minimum number of observations in the leaf nodes of the decision trees.
 `n_components`              | Controls the number of principal components retained by the PCA encoder.
-`rare_categories_threshold` | Sets the minimum frequency for categorical predictor values, or disables the check when set to `0`.
+`rare_categories_threshold` | Determines which categorical predictor values are considered rare. A warning is raised when rare categories account for at least 25% of the observations.
 
 For more advanced customisation, see the next examples in this module or {ref}`User Guide 3.1 CART synthesis <31-cart-synthesis>` to learn how to configure individual CART components directly.
 
