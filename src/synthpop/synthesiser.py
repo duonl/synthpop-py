@@ -82,13 +82,12 @@ class Synthesiser:
 
     """
 
-    def __init__(self, random_seed: int | None = None,
-                 column_order: list[str] | list[int] | None = None,
-                 default_syn_method: BaseSynthMethod | SynMethodCallable | None = None,
-                 special_syn_method: (Dict[str, BaseSynthMethod | SynMethodCallable]
-                                      | None
-                                      ) = None,
-                 ) -> None:
+    def __init__(
+            self, random_seed: int | None = None,
+            column_order: list[str] | list[int] | None = None,
+            default_syn_method: BaseSynthMethod | SynMethodCallable | None = None,
+            special_syn_method: Dict[str, BaseSynthMethod | SynMethodCallable] | None = None,
+    ) -> None:
 
         self.default_syn_method = default_syn_method
         self.column_order = column_order
@@ -97,9 +96,8 @@ class Synthesiser:
 
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
-        if (
-        self.special_syn_method is not None
-        and column_name in self.special_syn_method
+        if (self.special_syn_method is not None
+            and column_name in self.special_syn_method
         ):
             method = self.special_syn_method[column_name]
             method_description = f"special_syn_method for column '{column_name}'"

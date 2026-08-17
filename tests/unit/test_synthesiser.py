@@ -142,8 +142,9 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_default_method():
             "b": [3, 4],
             "c": [5, 6],
         })
-    
-    method = lambda: np.array([]) #returns something other than a synthesis method
+
+    def method():
+        return np.array([]) #returns something other than a synthesis method
 
     synth = Synthesiser(
         random_seed=2,
@@ -161,7 +162,7 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
         })
 
     def method():
-        return np.array([])#returns something other than a synthesis method
+        return np.array([]) #returns something other than a synthesis method
 
     synth = Synthesiser(
         random_seed=2,

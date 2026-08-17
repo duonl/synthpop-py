@@ -355,24 +355,27 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
         warnings.simplefilter("error", pd.errors.PerformanceWarning)
         synth.generate(100)
 
-def test_tune_cart_makes_different_methods():
-    original_data, _, _ = simulate_realistic_dataset_correlations(
-            n_samples=1000)
-    synthesiser = Synthesiser(random_seed=74124,
-                              special_syn_method={
-                                  "first":tune_cart(n_leaves=10),
-                                  "second":tune_cart(n_leaves=20),
-                              })
 
-    synthesiser.fit(original_data)
+def test_tune_cart_applies_different_n_leaves():
+    data = pd.DataFrame({
+        "first": range(10),
+        "second": range(10, 20),
+    })
 
-    n_leaves_first = synthesiser.models_["first"].method_.tree_.min_samples_leaf
-    n_leaves_second = synthesiser.models_["second"].method_.tree_.min_samples_leaf
+    synthesiser = Synthesiser(
+        random_seed=74124,
+        special_syn_method={
+            "first": tune_cart(n_leaves=10, rare_categories_threshold=0),
+            "second": tune_cart(n_leaves=20, rare_categories_threshold=0),
+        },
+    )
 
-    assert n_leaves_first == 10
-    assert n_leaves_second==20
+    synthesiser.fit(data)
 
-def test_callable_cart_method_factory():
+    assert synthesiser.models_["first"].method_.tree_.min_samples_leaf == 10
+    assert synthesiser.models_["second"].method_.tree_.min_samples_leaf == 20
+
+def test_synthesiser_accepts_callable_default_method():
     original_data, _, _ = simulate_realistic_dataset_correlations(
                 n_samples=1000)
     synth = Synthesiser(
