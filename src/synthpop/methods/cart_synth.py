@@ -538,7 +538,7 @@ def tune_cart(
     rare_categories_threshold: int | None = None,
 ) -> Callable[[], CartMethod]:
     """
-    Shortcut to set parameters of the CartMethod. ``tune_cart(...``)`` returns a `factory method <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
+    Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a `factory method <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
     When used as ``default_syn_method``, the factory is called once for each synthesised column that has no other method specified.
 
     :param n_leaves: minimum number of samples in the leaf nodes.\
