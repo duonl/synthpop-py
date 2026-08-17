@@ -80,13 +80,13 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
     :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_.
-    :param tree_sampler: Leaf node sampler. Default is :py:meth:`LeafNodeSampler`.
+    :param tree_sampler: Leaf node sampler. Default is :py:obj:`LeafNodeSampler`.
 
     Examples
     --------
     To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__ .
 
-    Internally the :py:meth:`MissingValuePredictor` works as follows:
+    Internally the :py:obj:`MissingValuePredictor` works as follows:
 
     >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np
@@ -269,7 +269,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
 
     To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__.
 
-    Internally the :py:meth:`ReplaceMissingWithValue` works as follows:
+    Internally the :py:obj:`ReplaceMissingWithValue` works as follows:
 
     >>> import numpy as np
     >>> from synthpop.data_processing import ReplaceMissingWithValue
@@ -340,7 +340,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         The method only copies initialisation parameters and does not copy
         any fitted state. Similar to sklearn's ``clone()``.
 
-        Note: :py:meth:`ReplaceMissingWithValue` does not have learned attributes.
+        Note: :py:obj:`ReplaceMissingWithValue` does not have learned attributes.
 
         :return: A new, unfitted instance of ``ReplaceMissingWithValue()`` with the 
             same ``missing_marker`` setting.

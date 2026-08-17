@@ -16,7 +16,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
     Examples
     --------
 
-    :class:`CopyMethod` should be given as an argument to the :py:meth:`~synthpop.synthesiser.Synthesiser`'s ``default_syn_method``/``special_syn_method``.
+    :class:`CopyMethod` should be given as an argument to the :py:obj:`~synthpop.synthesiser.Synthesiser`'s ``default_syn_method``/``special_syn_method``.
     See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
     `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
 

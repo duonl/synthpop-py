@@ -107,7 +107,7 @@ class PCAEncoder(_BaseEncoder):
     --------
 
     The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
-    can be changed using the :py:meth:`~synthpop.methods.cart_synth.tune_cart` method.
+    can be changed using the :py:obj:`~synthpop.methods.cart_synth.tune_cart` method.
 
     **Intended usage in this package is:**
     
