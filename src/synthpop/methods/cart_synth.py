@@ -393,7 +393,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     TreeClassifierMethod or TreeRegressorMethod depending on the dtype of `y`.
 
     When called without existing predictors (`X` is empty), CART automatically samples to create a synthetic `y`.
-    When `X` has columns during `transform` that were not present during `fit`, those columns are ignored.
+    When `X` has columns during ``transform`` that were not present during ``fit``, those columns are ignored.
 
     Input/output API uses pandas objects exclusively:
     - X must be a pandas DataFrame

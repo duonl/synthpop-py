@@ -23,7 +23,7 @@ class RandomStateManager:
 
     Instances of this class can be used as a context manager to temporary switch seed:
 
-    See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__
+    See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__.
 
     Examples
     --------
@@ -103,9 +103,9 @@ class RandomStateManager:
         """
         Creates a new instance of an RNG with a fixed initial state.
         Same root seed + same seed => RNGs with identical random streams.
-        This means that executing `RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)` in a loop would produce the same sequence of "random" numbers each time.
-        However, `RandomStateManager.create_rng(seed=3) is
-        RandomStateManager.create_rng(seed=3) ` would evaluate to `False`.
+        This means that executing ``RandomStateManager.create_rng(seed=3).integers(0, 100, size=10)`` in a loop would produce the same sequence of "random" numbers each time.
+        However, ``RandomStateManager.create_rng(seed=3) is
+        RandomStateManager.create_rng(seed=3)`` would evaluate to ``False``.
 
         In other words, this method creates replay RNGs.
 
