@@ -11,7 +11,7 @@ Here we can explain some stuff about the API reference
 
 .. toctree::
    :maxdepth: 4
-   :caption: Data Processing
+   :caption: Data Preparation
 
    data_processing/Encoder
    data_processing/Missing_value
