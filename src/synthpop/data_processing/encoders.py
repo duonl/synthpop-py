@@ -115,7 +115,7 @@ class PCAEncoder(_BaseEncoder):
     >>> from synthpop import Synthesiser
     ... 
     >>> default_syn_method = tune_cart(n_components=1)
-    >>> syn = Synthesiser(default_syn_method=tune_cart)
+    >>> syn = Synthesiser(default_syn_method=default_syn_method)
 
     See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
 
