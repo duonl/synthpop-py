@@ -308,47 +308,48 @@ def plot_univariate_distributions(
     Examples
     --------
     Using the default parameters:
-        >>> import numpy as np
-        >>> import pandas as pd
-        >>> from synthpop.plotting import plot_univariate_distributions
-        >>>
-        >>> np.random.seed(42)
-        >>>
-        >>> orig_df = pd.DataFrame(
-        ...     {
-        ...         "age": np.random.normal(50, 10, 1000),
-        ...         "children": np.random.poisson(2, 1000),
-        ...         "sex": np.random.choice(
-        ...             ["Male", "Female"],
-        ...             size=1000,
-        ...             p=[0.45, 0.55],
-        ...         ),
-        ...     }
-        ... )
-        >>>
-        >>> syn_df = pd.DataFrame(
-        ...     {
-        ...         "age": np.random.normal(52, 12, 1000),
-        ...         "children": np.random.poisson(3, 1000),
-        ...         "sex": np.random.choice(
-        ...             ["Male", "Female"],
-        ...             size=1000,
-        ...             p=[0.40, 0.60],
-        ...         ),
-        ...     }
-        ... )
-        >>>
-        >>> orig_df.loc[:50, "age"] = np.nan # add missing
-        >>> syn_df.loc[:30, "age"] = np.nan
-        >>>
-        >>> plots = plot_univariate_distributions(
-        ...     orig_df=orig_df,
-        ...     syn_df=syn_df,
-        ...     save_path=None,
-        ...     interactive=False,
-        ... )
-        >>> for fig in plots:
-        ...     fig.show()
+    
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from synthpop.plotting import plot_univariate_distributions
+    >>>
+    >>> np.random.seed(42)
+    >>>
+    >>> orig_df = pd.DataFrame(
+    ...     {
+    ...         "age": np.random.normal(50, 10, 1000),
+    ...         "children": np.random.poisson(2, 1000),
+    ...         "sex": np.random.choice(
+    ...             ["Male", "Female"],
+    ...             size=1000,
+    ...             p=[0.45, 0.55],
+    ...         ),
+    ...     }
+    ... )
+    >>>
+    >>> syn_df = pd.DataFrame(
+    ...     {
+    ...         "age": np.random.normal(52, 12, 1000),
+    ...         "children": np.random.poisson(3, 1000),
+    ...         "sex": np.random.choice(
+    ...             ["Male", "Female"],
+    ...             size=1000,
+    ...             p=[0.40, 0.60],
+    ...         ),
+    ...     }
+    ... )
+    >>>
+    >>> orig_df.loc[:50, "age"] = np.nan # add missing
+    >>> syn_df.loc[:30, "age"] = np.nan
+    >>>
+    >>> plots = plot_univariate_distributions(
+    ...     orig_df=orig_df,
+    ...     syn_df=syn_df,
+    ...     save_path=None,
+    ...     interactive=False,
+    ... )
+    >>> for fig in plots:
+    ...     fig.show()
             
     """
     if not isinstance(orig_df, pd.DataFrame):

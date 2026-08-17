@@ -95,13 +95,31 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
 class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the number of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`
+    The user can adjust the number of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`.
+    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#pca-encoding>`__ 
+    for more in depth-information on PCA encoding
 
-    :param pca_transform: The pca transform used. The default value is {class}`sklearn.decomposition.PCA`. 
-         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. With the default parameters, all principal components are computed and used.
+    :param pca_transform: The pca transform used. The default value is :class:`sklearn.decomposition.PCA`. 
+        See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. 
+        With the default parameters, all principal components are computed and used.
 
     Examples
     --------
+
+    The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
+    can be changed using the :py:meth:`~synthpop.methods.cart_synth.tune_cart` method.
+
+    **Intended usage in this package is:**
+    
+    >>> from synthpop.methods import tune_cart
+    >>> from synthpop import Synthesiser
+    ... 
+    >>> default_syn_method = tune_cart(n_components=1)
+    >>> syn = Synthesiser(default_syn_method=tune_cart)
+
+    See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
+
+    Internally the encoder works as follows:
 
     >>> import numpy as np
     >>> from synthpop.data_processing import PCAEncoder
@@ -254,19 +272,27 @@ class PCAEncoder(_BaseEncoder):
 
 class MeanEncoder(_BaseEncoder):
     """
-    Transforms categorical data to numeric using mean encoding. The feature column `X` is encoded based on a numeric target column `y`.
+    Transforms categorical data to numeric using mean encoding.
+    The feature column `X` is encoded based on a numeric target column `y`.
+    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#mean-encoding>`__ 
+    for more in depth-information on PCA encoding
 
     Examples
     --------
-        >>> from synthpop.data_processing import MeanEncoder
-        >>> X = np.array(["a", "a", "b", "b", "c"])
-        >>> y = np.array([1, 0, 2, 0, 3])
-        >>>
-        >>> encoder = MeanEncoder()
-        >>> encoder.fit(X, y)
-        >>> X_transformed = encoder.transform(X)
-        >>> X_transformed
-        array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
+    The MeanEncoder does not have changeable parameters.
+    See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
+
+    Internally MeanEncoder works as follows:
+
+    >>> from synthpop.data_processing import MeanEncoder
+    >>> X = np.array(["a", "a", "b", "b", "c"])
+    >>> y = np.array([1, 0, 2, 0, 3])
+    >>>
+    >>> encoder = MeanEncoder()
+    >>> encoder.fit(X, y)
+    >>> X_transformed = encoder.transform(X)
+    >>> X_transformed
+    array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
     """
 
     def __init__(self) -> None:
@@ -293,14 +319,6 @@ class MeanEncoder(_BaseEncoder):
         :param X: Feature 1D array of categorical data. This contains the data to be encoded.
         :param y: Target 1D array of categorical data. The encoding is based on this data.
         :return: Fitted encoder.
-
-        Examples
-        --------
-            >>> X = np.array(["a", "a", "b", "b", "c"])
-            >>> y = np.array([1, 0, 2, 0, 3])
-            >>>
-            >>> encoder = MeanEncoder()
-            >>> encoder.fit(X, y)
         """
 
         if not pd.api.types.is_numeric_dtype(y):
@@ -344,16 +362,6 @@ class MeanEncoder(_BaseEncoder):
 
         :param X: Original column to be encoded
         :return: Encoded column
-
-        Examples
-            >>> X = np.array(["a", "a", "b", "b", "c"])
-            >>> y = np.array([1, 0, 2, 0, 3])
-            >>>
-            >>> encoder = MeanEncoder()
-            >>> encoder.fit(X, y)
-            >>> X_transformed = encoder.transform(X)
-            >>> X_transformed
-            array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
         """
 
         check_is_fitted(self, 'mapping_')
