@@ -15,7 +15,9 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     A synthesis method in synthpop is an algorithm to synthesise a column of a dataset, based on already synthesised columns. 
     Specifically, such method learns a conditional distribution of a target column given one or multiple columns. 
-    A synthesis method inheriting from this class should work even if there are no predictors (so only a target)
+    A synthesis method inheriting from this class should work even if there are no predictors (so only a target).
+
+    See example `custom synthesis method <../../example/custom_synth.html>`__ to make your own synthesis method using the ``BaseSynthMethod``.
 
     Both fit and transform should work for numeric and categorical variables.
 
@@ -50,11 +52,11 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     @abstractmethod
     def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
-        The `transform` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
+        The ``transform`` method must use the fitted model to generate a synthetic version of the target variable and append it as a new column to the input dataset.
 
         There should be an implementation of missing values support in case of missing values in feature columns.
 
-        Calling `transform` before `fit` raises an error.
+        Calling ``transform`` before ``fit`` raises an error.
 
         :param X: Input dataset, may be heterogeneous
         :return: Synthetic column.
@@ -73,12 +75,12 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     @abstractmethod
     def get_feature_names_out(self, input_features=None):
         """
-        Get output feature names and category names for transformation. This method is required to support the `set_output(transform="pandas")` API in scikit-learn.
+        Get output feature names and category names for transformation. This method is required to support the ``set_output(transform="pandas")`` API in scikit-learn.
         
         See https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output 
         and SLEP018 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html) and SLEP007 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html)
         
-        :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during `fit` are used.
+        :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during ``fit`` are used.
         """
         
         pass
