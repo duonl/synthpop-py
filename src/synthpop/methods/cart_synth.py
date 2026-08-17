@@ -1,5 +1,5 @@
 """
-This module contains the CART method for synthesising data.
+This module contains the Classification and Regression Trees (CART) method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Self
@@ -260,6 +260,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
+    Internally the ``TreeClassifierMethod`` works as:
+
     >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np
     >>> from synthpop.utils import str_dtype
@@ -332,6 +334,8 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     Examples
     --------
+    Internally the ``TreeRegressorMethod`` works as:
+
     >>> from synthpop.methods import TreeRegressorMethod
     >>> import numpy as np
     >>> from synthpop.utils import str_dtype
@@ -409,6 +413,20 @@ class CartMethod(base_synth.BaseSynthMethod):
 
     Examples
     --------
+
+    :class:`CartMethod` should be given as an argument to the :py:meth:`~synthpop.synthesiser.Synthesiser`'s ``default_syn_method``/``special_syn_method``.
+    See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
+    `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
+
+    **Intended usage in this package is:**
+        
+    >>> from synthpop.methods import CartMethod
+    >>> from synthpop import Synthesiser
+    ... 
+    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
+
+    Internally the ``CartMethod`` works as:
+    
     >>> import pandas as pd
     >>> from synthpop.methods import CartMethod
     >>>
