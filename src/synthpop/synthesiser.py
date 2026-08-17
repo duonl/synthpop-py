@@ -22,7 +22,7 @@ class Synthesiser:
     :param column_order: list of variable names or list of indexes to define the order in which the columns will be synthesised. Default is the column order of the original dataset.
     :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartMethod. 
     :param special_syn_method: Dictionary of special synthesis method per variable. 
-        If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are BaseSynthMethod objects. 
+        If some variables should not follow the default_syn_method, they should be indicated in a dictionary where keys are variable names and values are `BaseSynthMethod` instances or zero-argument callables returnnig `BaseSynthMethod` instances. 
         By default, there is no special synthesis method.
 
 
@@ -120,7 +120,6 @@ class Synthesiser:
             return new_model
 
         return clone(method)
-
 
 
     def _validate_column_order_unique(self, column_order: list[str] | list[int]):

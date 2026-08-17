@@ -168,7 +168,7 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
         special_syn_method={"b": method},
     )
 
-    with pytest.raises(TypeError,match=".*special_syn_method.* \'b\'.*BaseSynthMethod"):
+    with pytest.raises(TypeError,match=r".*special_syn_method.* 'b'.*BaseSynthMethod"):
         synth.fit(test_data)
 
 def test_synthesiser_fit_default_synthesis():

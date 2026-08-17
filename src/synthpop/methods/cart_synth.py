@@ -532,7 +532,11 @@ class CartMethod(base_synth.BaseSynthMethod):
         return self.method_.get_feature_names_out(input_features)
 
 
-def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_categories_threshold: int | None = None) -> Callable[[], CartMethod]:
+def tune_cart(
+    n_leaves: int = 5,
+    n_components: int | float | None = None,
+    rare_categories_threshold: int | None = None,
+) -> Callable[[], CartMethod]:
     """
     Shortcut to set parameters of the CartMethod.
 
@@ -541,7 +545,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
     :param n_components: sets the number of principal components used in encoding in the classifier. \
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
-        For integers => 1, it is the number of principal components.\
+        For integers ≥ 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
@@ -549,7 +553,6 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
 
         If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
-        If set to ``None``, the value of ``n_leaves`` is used.
         The default value is ``None`` for :func:`tune_cart`, which means the threshold
         defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
         default threshold is also 5.
