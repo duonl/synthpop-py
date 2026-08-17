@@ -75,12 +75,19 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
+    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#predicting-missing-values>`__ for more
+    in-depth information.
+
     :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
     :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_.
-    :param tree_sampler: Leaf node sampler. Default is :py:meth:LeafNodeSampler.
+    :param tree_sampler: Leaf node sampler. Default is :py:meth:`LeafNodeSampler`.
 
     Examples
     --------
+    To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__ .
+
+    Internally the :py:meth:`MissingValuePredictor` works as follows:
+
     >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np
     >>>
@@ -120,21 +127,6 @@ class MissingValuePredictor(BaseMissingValueHandler):
         :param y: the target column.
 
         :return: a tuple (X, y) of the original data excluding the rows where `y` is missing.
-
-        Examples
-        --------
-        >>> from synthpop.data_processing import MissingValuePredictor
-        >>> import numpy as np
-        >>>
-        >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
-        >>> y = np.array([1.0, np.nan, 3.0, np.nan])
-        >>>
-        >>> mvp = MissingValuePredictor()
-        >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
-        >>> X_clean
-        {'num': array([[25], [35]]), 'cat': array([['A'], ['A']], dtype=StringDType(na_object=nan))}
-        >>> y_clean
-        array([1., 3.])
 
         """
         # input validation
@@ -201,23 +193,6 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         :return:  The synthesised target with missing values.
 
-        Examples
-        --------
-        >>> from synthpop.data_processing import MissingValuePredictor
-        >>> import numpy as np
-        >>>
-        >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
-        >>> y = np.array([1.0, np.nan, 3.0, np.nan])
-        >>>
-        >>> mvp = MissingValuePredictor()
-        >>> X_clean, y_clean = mvp.prepare_data_for_fit(X, y)
-        >>>
-        >>> #simulate synthetic generation step
-        >>> y_synth = np.array([10, 20, 30, 40])
-        >>> y_final = mvp.post_synth_transform(X, y_synth)
-        >>> y_final
-        array([10., nan, nan, 40.])
-
         """
         # input validation
         if (not hasattr(self, "tree_")
@@ -265,10 +240,10 @@ class MissingValuePredictor(BaseMissingValueHandler):
         Create a new instance of the missing value predictor with the same configuration.
 
         The method only copies initialisation parameters and does not copy
-        any fitted state. Similar to sklearn's `clone()`.
+        any fitted state. Similar to sklearn's ``clone()``.
 
-        :return: A new, unfitted instance of `MissingValuePredictor()` with the 
-            same `encoder`, `tree` and `tree_sampler` setting.
+        :return: A new, unfitted instance of ``MissingValuePredictor()`` with the 
+            same ``encoder``, ``tree`` and ``tree_sampler`` setting.
 
         Examples
         --------
@@ -284,10 +259,18 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     see missing values in targets which they cannot handle. Missingness
     is preserved exactly.
 
-    :param missing_marker: The value to replace missing values with.
+    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#treating-missing-as-category>`__ for more
+    in-depth information.
 
+    :param missing_marker: The value to replace missing values with.
+    
     Examples
     --------
+
+    To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__.
+
+    Internally the :py:meth:`ReplaceMissingWithValue` works as follows:
+
     >>> import numpy as np
     >>> from synthpop.data_processing import ReplaceMissingWithValue
     >>>
@@ -355,12 +338,12 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         Create a new instance of ReplaceMissingWithValue with the same configuration.
 
         The method only copies initialisation parameters and does not copy
-        any fitted state. Similar to sklearn's `clone()`.
+        any fitted state. Similar to sklearn's ``clone()``.
 
-        Note: `ReplaceMissingWithValue` does not have learned attributes.
+        Note: :py:meth:`ReplaceMissingWithValue` does not have learned attributes.
 
-        :return: A new, unfitted instance of `ReplaceMissingWithValue()` with the 
-            same `missing_marker` setting.
+        :return: A new, unfitted instance of ``ReplaceMissingWithValue()`` with the 
+            same ``missing_marker`` setting.
 
         Examples
         --------

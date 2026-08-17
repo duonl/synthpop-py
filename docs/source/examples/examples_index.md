@@ -35,6 +35,7 @@ using_different_methods_for_different_columns.md
 
 tune_cart_function.md
 alternative_encoder.md
+alternative_missing_handler.md
 
 ```
 
