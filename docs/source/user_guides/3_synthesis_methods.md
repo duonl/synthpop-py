@@ -61,10 +61,14 @@ flowchart TD
     C --> H["Synthetic sample:<br/>draw randomly from<br/>[72, 75, 80]"]
 ```
 
+To reduce the risk of disclosing information about individual observations, a minimum number of observations per terminal leaf can be specified. This prevents CART from creating terminal leaves based on very small groups of observations. A higher minimum leaf size generally provides stronger protection against highly specific splits, but may reduce the algorithm's ability to capture detailed patterns in the data.
+
 CART is recommended when:
 - preserving relationships between variables is important;
 - realistic conditional distributions are required;
-- interpretability of local structure matters.
+- interpretability of local structure matters;
+- limiting the influence of outliers is important for privacy.
+
 
 (311-algorithm)=
 ### 3.1.1. Algorithm
@@ -140,6 +144,9 @@ For the first column, no predictors are available. In that case, CART samples di
 - CART models only relationships captured by the available predictors. Important dependencies cannot be reproduced if relevant predictors are unavailable.
 - As part of the sequential synthesis framework, the available predictors depend on the column synthesis order. The ordering of predictors within a single CART model does not affect the fitted tree; only the selection of available predictors through the synthesis order matters.
 
+
+(314-configuring-cart)=
+
 ### 3.1.4. Configuring CART
 The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify hyperparameters of the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
@@ -177,7 +184,7 @@ Which can then be passed in the {class}`~synthpop.synthesiser.Synthesiser`:
 >>> Synthesiser(default_syn_method=tuned_cart)
 ```
 Currently `tune_cart` supports the following parameters:
-- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
+- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree. Consider increasing its value to preserve privacy by limiting influence of outliers on the synthesis model.
 - `n_components`: configures the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
 
 ---
