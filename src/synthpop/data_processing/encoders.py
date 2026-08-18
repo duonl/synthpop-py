@@ -106,7 +106,7 @@ class PCAEncoder(_BaseEncoder):
     Examples
     --------
 
-    The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
+    PCAEncoding is a part of the :py:obj:`~synthpop.methods.cart_synth.CartMethod`. The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
     can be changed using the :py:obj:`~synthpop.methods.cart_synth.tune_cart` method.
 
     **Intended usage in this package is:**
@@ -279,10 +279,10 @@ class MeanEncoder(_BaseEncoder):
 
     Examples
     --------
-    The MeanEncoder does not have changeable parameters.
+    The :py:obj:`~synthpop.encoders.MeanEncoder` does not have changeable parameters.
     See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
 
-    Internally MeanEncoder works as follows:
+    Internally :py:obj:`~synthpop.encoders.MeanEncoder` works as follows:
 
     >>> from synthpop.data_processing import MeanEncoder
     >>> X = np.array(["a", "a", "b", "b", "c"])
@@ -358,7 +358,7 @@ class MeanEncoder(_BaseEncoder):
     # float32 is optimal for decision trees.
     def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:
         """
-        Apply mapping from fitting function to ``X`` and returns the encoded version ``X_transformed``
+        Apply mapping from fitting function to X and returns the encoded version ``X_transformed``
 
         :param X: Original column to be encoded
         :return: Encoded column

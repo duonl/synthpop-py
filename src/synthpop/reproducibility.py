@@ -21,26 +21,50 @@ class RandomStateManager:
     """
     Manages random numbers and reproducibility in this package.
 
+    ``RandomStateManager`` provides a central mechanism for controlling
+    randomness. A single root seed is used as the source of entropy from
+    which independent seeds can be derived for individual components.
     Instances of this class can be used as a context manager to temporary switch seed:
 
-    See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__.
+    See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__ 
+    on why reproducibility is important.
+
+    The class also acts as a context manager. Entering
+    ``RandomStateManager(seed)`` temporarily replaces the current root seed.
+    When leaving the context, both the previous root seed and its associated
+    ``SeedSequence`` are restored:
 
     Examples
     --------
-        >>> from synthpop.reproducibility import RandomStateManager
-        >>> RandomStateManager.set_root_seed(42)
-        >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
-        array([48, 51, 33])
-        >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
-        array([48, 51, 33])
-        >>> with RandomStateManager(6):     
-        ...   RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
-        ...   RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
-        ...
-        array([79, 17,  7])
-        array([79, 17,  7])
-        >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
-        array([48, 51, 33])
+    Setting a root seed makes RNG creation reproducible:
+
+    >>> RandomStateManager.set_root_seed(42)
+    >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
+    array([48, 51, 33])
+    >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
+    array([48, 51, 33])
+
+    The same component seed creates the same random stream. Each call creates
+    a new ``Generator`` rather than returning a shared RNG:
+
+    >>> rng1 = RandomStateManager.create_rng(seed=7)
+    >>> rng2 = RandomStateManager.create_rng(seed=7)
+    >>> rng1 is rng2
+    False
+
+    A different root seed temporarily changes the generated random streams:
+
+    >>> with RandomStateManager(6):
+    ...     RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
+    ...     RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
+    ...
+    array([79, 17,  7])
+    array([79, 17,  7])
+
+    After leaving the context, the previous root seed is restored:
+
+    >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
+    array([48, 51, 33])
 
     """
 
@@ -59,7 +83,7 @@ class RandomStateManager:
     @classmethod
     def set_root_seed(cls, seed: int | Sequence[int] | npt.NDArray[np.integer] | None):
         """
-        Set the root seed.
+        Set the root seed and initializes its :py:obj:`~numpy.random.SeedSequence`.
         The intended usage is within the Synthesiser class.
         """
 

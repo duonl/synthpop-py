@@ -104,7 +104,7 @@ class Synthesiser:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
 
-        If the variable name is found in keys of ``special_syn_method``, its corresponding value is the object used to synthesise that variable. The `fit` method of that object will be called.
+        If the variable name is found in keys of ``special_syn_method``, its corresponding value is the object used to synthesise that variable. The ``fit`` method of that object will be called.
         Otherwise, we use the object defined in ``default_syn_method``.
 
         :param X: The original dataset used to fit the synthesiser.
@@ -169,7 +169,7 @@ class Synthesiser:
         """
         Generate a synthetic dataset of ``n`` rows. 
 
-        This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in `fit`.
+        This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in ``fit``.
 
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows as the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
         :param random_seed: A seed for randomness that overrides the generation seed without refitting the synthesiser.

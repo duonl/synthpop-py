@@ -108,12 +108,11 @@ class LeafNodeSampler:
     2. Sampling phase (``sample_from_leaves``):
         - Provide ``leaf_ids`` for new samples (`X_syn`)
         - A target value is sampled from the empirical distribution associated with that leaf, with probabilities proportional to observed counts.
-
-    **FOR REVIEWER: Please write some extra information +links to wherever is nice.
-    To me this doc string seems inconsistent with other docstrings, thus could use some rework.**    
     
     .. rubric:: Usage
 
+    One could use the tree sampler in a tree based synthesiser method as follows:
+    
     >>> from sklearn.tree import BaseDecisionTree
     ...
     >>> class TreeMethod(BaseDecisionTree):
@@ -137,6 +136,8 @@ class LeafNodeSampler:
     >>>        leaf_ids = self.apply(X_syn)
     ...
     >>>        return self.tree_sampler_.sample_from_leaves(leaf_ids)
+    
+    See `custom synthesis method <../../examples/custom_synth.html>` on how to create your own synthesis method.
     """
 
     def __init__(self, random_state: int | np.random.Generator | None = None) -> None:
@@ -157,8 +158,8 @@ class LeafNodeSampler:
         Fit the sampler by constructing leaf-wise target histograms.
 
         This function passes any missing or non-missing values of `y` to ``treeMethod``. However, at this point
-        in the ``CartMethod``  synthesis, missing values are not expected. So when missing values are seen in 
-        `y`, a warning will be raised.
+        in the ``CartMethod`` synthesis, `missing values are handled <../data_processing/Missing_value.html>`__. So when missing values are seen in 
+        `y`, a warning will be raised. 
 
         :param leaf_ids: Leaf identifiers assigned to each training sample `X`. Can be any
             Array-like of shape (n_samples,).
@@ -220,7 +221,8 @@ class LeafNodeSampler:
             P(y = v | leaf) = count(v) / sum(counts in leaf)
 
         Note that calling this function twice gives the same return value.
-        See the docs about reproducibility for more information.
+        See `User Guide 2 <../../user_guides/2_synthetic_data_generation.html>`__ 
+        and `the API Reference on Reproducibility <../reproducibility/reproducibility.html>`__ for more information.
 
         :param leaf_ids: Leaf IDs of synthetic samples for which target values
             should be generated. Array-like of shape (n_samples,)

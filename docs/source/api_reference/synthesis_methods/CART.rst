@@ -10,7 +10,8 @@ CART synthesis
 .. warning::
 
    The module for **TreeClassifierMethod** and **TreeRegressorMethod** is not part of the stable public API.
-   Interfaces may change without notice.
+   Interfaces may change without notice. See `User Guide 3.1.4. <../../user_guides/3_synthesis_methods.html#configuring-cart>`__
+   on how to configure CART's TreeClassifierMethod and TreeRegressorMethod.
 
 .. autoclass:: TreeClassifierMethod
    :members:

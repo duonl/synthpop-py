@@ -64,6 +64,7 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
 class MissingValuePredictor(BaseMissingValueHandler):
     """
     Use a decision tree to predict which values are missing.
+    As such, it treats missingness itself as something that can be learned from the other columns.
 
     Learns:
         P(z = 1 | X)
@@ -75,8 +76,12 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
+    During synthesis, the decision tree determines which leaf each row belongs to. 
+    A :py:obj`~synthpop.methods.tree_utils.LeafNodeSampler` then samples whether the target should be missing based on the missingness patterns observed in that leaf. 
+    This means that missing values are not inserted completely at random: the probability of a value being missing can depend on the characteristics of the row.
+
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#predicting-missing-values>`__ for more
-    in-depth information.
+    in-depth information on the MissingValuePredictor.
 
     :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
     :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_.
@@ -84,7 +89,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     Examples
     --------
-    To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__ .
+    To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__.
 
     Internally the :py:obj:`MissingValuePredictor` works as follows:
 
@@ -260,7 +265,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     is preserved exactly.
 
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#treating-missing-as-category>`__ for more
-    in-depth information.
+    in-depth information on the ReplaceMissingWithValue.
 
     :param missing_marker: The value to replace missing values with.
     
