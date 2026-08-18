@@ -561,7 +561,7 @@ def tune_cart(
         The default value is ``None`` for :func:`tune_cart`, which means the threshold
         defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
         default threshold is also 5.
-        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/examples_index>` for more information. TODO: add link to example about attribute disclosure.
+        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
 
     :return: a callable that returns a CartMethod object with the parameters consistently applied.
 
