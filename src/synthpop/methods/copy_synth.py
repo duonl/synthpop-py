@@ -27,7 +27,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
     ... 
     >>> syn = Synthesiser(special_syn_method={"your_column_name" : CopyMethod()})
 
-   The ``CopyMethod`` can be used directly as follows (note that this is not the intended usage):
+    The ``CopyMethod`` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.methods import CopyMethod
     >>> import pandas as pd

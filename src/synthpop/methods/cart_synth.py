@@ -260,7 +260,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
-    ``TreeClassifierMethod``  can be used directly as follows:
+    ``TreeClassifierMethod`` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np
@@ -334,7 +334,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     Examples
     --------
-    Internally the ``TreeRegressorMethod`` works as:
+    ``TreeRegressorMethod`` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.methods import TreeRegressorMethod
     >>> import numpy as np
@@ -425,7 +425,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     ... 
     >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
 
-    Internally the ``CartMethod`` works as:
+    ``CartMethod`` can be used directly as follows (note that this is not the intended usage):
     
     >>> import pandas as pd
     >>> from synthpop.methods import CartMethod

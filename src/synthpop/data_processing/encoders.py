@@ -119,7 +119,7 @@ class PCAEncoder(_BaseEncoder):
 
     See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
 
-   The encoder can be used directly as follows:
+    The encoder can be used directly as follows (note that this is not the intended usage):
 
     >>> import numpy as np
     >>> from synthpop.data_processing import PCAEncoder
@@ -282,7 +282,7 @@ class MeanEncoder(_BaseEncoder):
     The :py:obj:`~synthpop.encoders.MeanEncoder` does not have changeable parameters.
     See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
 
-    :py:obj:`~synthpop.encoders.MeanEncoder` can be used directly as follows:
+    :py:obj:`~synthpop.encoders.MeanEncoder` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.data_processing import MeanEncoder
     >>> X = np.array(["a", "a", "b", "b", "c"])

@@ -29,7 +29,7 @@ class SampleMethod(BaseSynthMethod):
     ... 
     >>> syn = Synthesiser(special_syn_method={"your_column_name" : SampleMethod()})
 
-    Internally the ``SampleMethod`` works as:
+    ``SampleMethod`` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.methods import SampleMethod
     >>> import pandas as pd
