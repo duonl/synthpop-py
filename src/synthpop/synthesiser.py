@@ -117,10 +117,18 @@ class Synthesiser:
 
         if callable(method):
             new_model = method()
+
+            if callable(new_model):
+                raise TypeError(
+                    f"{method_description} returned another callable instead of "
+                    "a BaseSynthMethod instance. If you intended to use tune_cart, "
+                    "pass tune_cart() rather than tune_cart."
+                )
             if not isinstance(new_model, BaseSynthMethod):
                 raise TypeError(
-                    f"{method_description} callable must return an instance "
-                    "of a child class of BaseSynthMethod"
+                    f"{method_description} callable must return a "
+                    "BaseSynthMethod instance, but returned "
+                    f"{type(new_model).__name__}."
                 )
             return new_model
 

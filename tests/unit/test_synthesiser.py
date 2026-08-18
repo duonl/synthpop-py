@@ -157,6 +157,26 @@ def test_synthesiser_fit_raises_on_wrong_return_of_callable_default_method():
         synth.fit(test_data)
 
 
+def test_synthesiser_fit_raises_on_factory_returns_callable():
+
+    def wrong_factory():
+        return lambda: 0
+
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6],
+    })
+
+    synth = Synthesiser(
+        random_seed=2,
+        default_syn_method=wrong_factory,
+    )
+
+    with pytest.raises(TypeError, match=".*default_syn_method.*another callable.*BaseSynthMethod"):
+        synth.fit(test_data)
+
+
 def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
     test_data = pd.DataFrame({
         "a": [1, 2],
