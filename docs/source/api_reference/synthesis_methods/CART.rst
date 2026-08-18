@@ -7,10 +7,10 @@ CART synthesis
 
 .. note::
 
-   A warning is emitted when CART is trained on a feature that consist for more than half of rare categories.
+   A warning is emitted when CART is trained on a feature that consist for more than 25% of rare categories.
    If the features used to fit a CART model contain categories with rare values, there is a risk of :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
    See :doc:`the examples <../../examples/rare_categories>` for an example of this privacy problem.
-   Use :meth:`tune_cart` to adjust this warning.
+   Use :func:`tune_cart` to adjust this warning.
    See <TODO: link to tune_cart examples> for how to adjust when this warning is emitted.
 
 
