@@ -8,11 +8,10 @@ CART synthesis
    :inherited-members: BaseEstimator,_MetadataRequester,_SetOutputMixin
 
 .. warning::
-
-    **TreeClassifierMethod** and **TreeRegressorMethod** are not part of the stable public API.
+   **TreeClassifierMethod** and **TreeRegressorMethod** are not part of the stable public API.
    Interfaces may change without notice. See `User Guide 3.1.4. <../../user_guides/3_synthesis_methods.html#configuring-cart>`__
    for the recommended way to configure CART's TreeClassifierMethod and TreeRegressorMethod.
-   Using TreeClassifierMethod and TreeRegressorMethod directly is only needed for limited specific usecases
+   Using TreeClassifierMethod and TreeRegressorMethod directly is only needed for limited specific usecases.
 
 .. autoclass:: TreeClassifierMethod
    :members:
