@@ -92,7 +92,7 @@ For example, we could configure parameters such as:
 
 See {class}`sklearn.tree.DecisionTreeClassifier` and {class}`sklearn.tree.DecisionTreeRegressor` for the available parameters.
 
-```note
+```{note}
 When configuring the trees directly, remember that classification and regression use different `scikit-learn` estimators. If both types of variables occur in the dataset, configure both `classifier` and `regressor` if you want the same customisation to apply to both.
 ```
 
