@@ -7,7 +7,7 @@ However, you may want to use a different encoder for a specific use case. This s
 ## sklearn conventions
 synthpop-py is build around base `sklearn` objects. In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from these base `sklearn` objects. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the software.
 
-### BaseEstimator
+## BaseEstimator
  An estimator is an object that fits a model based on some training data and can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
 
  ```python
@@ -23,6 +23,7 @@ class CustomEncoder(BaseEstimator):
 
   ```python
 from typing import Self
+
 import numpy as np
 import numpy.typing as npt
 from sklearn.base import BaseEstimator
@@ -58,12 +59,13 @@ print(encoder.mapping_)
 
 However this does not yet do anything with input data, it just learns a model.
 
-### TransformerMixin
+## TransformerMixin
 
 In order for our encoder to actually map input variables to output variables we need a method that is able to transform the data, given a learned model. Luckily `sklearn` also provides a mixin class for that: [TransformerMixin](https://scikit-learn.org/dev/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin). We can, and should, also inherit from this class. With that we can define a `transform` function:
 
 ```python
 from typing import Self
+
 import numpy as np
 import numpy.typing as npt
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -109,7 +111,7 @@ As you saw we also added `check_is_fitted` in our `transform` function. Even tho
 
 For a more in depth explanation (such as implementing other mixins), please take a careful look at [developing scikit-learn estimators](https://scikit-learn.org/dev/developers/develop.html#)
 
-### sklearn tags
+## sklearn tags
 When creating a custom estimator or transformer that follows the scikit-learn conventions, it is useful to tell scikit-learn what kind of estimator it is and what type of data it expects. This is done using [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags).
 
 Tags provide metadata about an estimator. Scikit-learn can use this information when running estimator checks, validating inputs, and integrating custom estimators with the wider scikit-learn package.
@@ -165,8 +167,21 @@ def test(estimator, check):
 
 4. Handle missing values consistently. Decide how values such as None or np.nan should be treated. The behaviour should be consistent between fit and transform and documented as part of your encoder. Change your sklearn tags accordingly.
 
-5. Keep learned parameters separate from constructor parameters. Parameters learned from the training data should be stored with a trailing underscore, such as categories_ or mapping_. Parameters provided by the user should be defined in __init__ and stored as attributes with the same name.
+5. Keep learned parameters separate from constructor parameters. Parameters learned from the training data should be stored with a trailing underscore, such as categories_ or mapping_. Parameters provided by the user should be defined in `__init__` and stored as attributes with the same name.
 
 6. Do not modify the input data in-place. fit and transform should operate on the provided data without changing the original input.
 
-7. Keep the encoder stateless before fitting. Do not learn categories or mappings in __init__. All information derived from the input data should be learned in fit.
+7. Keep the encoder stateless before fitting. Do not learn categories or mappings in `__init__`. All information derived from the input data should be learned in fit.
+
+## Summary
+Custom encoders in synthpop-py can be implemented following scikit-learn conventions by inheriting from `BaseEstimator` and `TransformerMixin`. 
+The encoder should learn its mapping during the fit, and transform categorical values into numerical representations.
+Defining appropriate sklearn `__tags__` also helps ensure compatibility with sklearn validation and synthpop-py.
+
+When implementing a custom encoder, it is important to validate one-dimensional categorical input, handle unseen and missing values consistently, keep learned parameters separate from constructor parameters, avoid modifying input data, and remain stateless until fit is called. Running sklearn's estimator checks can help verify that the implementation follows the expected conventions.
+
+## Next Steps
+With the custom encoder implemented and validated, the next step is to integrate it into synthpop-py. 
+See [alternative encoding using CART](./alternative_encoder.md) for an example of how to connect a custom encoder to the encoding workflow and use it during synthesis.
+
+In the [following example](./custom_encoder.md) we will explain how to build your own synthesis model.
