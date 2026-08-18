@@ -138,7 +138,7 @@ PCAEncoder(
 ```
 This is something `tune_cart` deliberately does not expose. The convenience function provides a simple interface for the most common setting, while direct configuration gives us access to the underlying estimator. For the full list of available parameters, see [sklearn.decomposition.PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html).
 
-For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: PCA encoding <411-pca-encoding>`.
+For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: PCA encoding <411-pca-encoding>`. The `MeanEncoder` has no configuration options. For more information about how mean encoding works, see {ref}`User Guide 4.1.2: Mean encoding <412-mean-encoding>`. 
 
 ## Use a different encoder
 We are not limited to the encoders provided by synthpop-py. The `encoder` parameter accepts a transformer that follows the expected `scikit-learn` transformer interface.
@@ -222,6 +222,8 @@ cart = CartMethod(
 synthesiser = Synthesiser(default_syn_method=cart)
 ```
 Now both the classifier and regressor use the same missing value handling strategy. However, just like the trees, you can also use a different configuration for the `MissingValuePredictor` in both paths.
+
+For more information about the role of missing value handling during synthesis, see {ref}`User Guide 4.2: Handling missing values <42-handling-missing-values>`.
 
 ## Combine multiple customisations
 The real benefit of constructing `CartMethod` directly is that these components can be combined.
