@@ -544,7 +544,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
-        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        a warning is emitted to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
 
         If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
