@@ -29,7 +29,7 @@ class RandomStateManager:
     See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__ 
     on why reproducibility is important.
 
-    The class also acts as a context manager. Entering
+    The class can  is also  a context manager. Entering
     ``RandomStateManager(seed)`` temporarily replaces the current root seed.
     When leaving the context, both the previous root seed and its associated
     ``SeedSequence`` are restored:

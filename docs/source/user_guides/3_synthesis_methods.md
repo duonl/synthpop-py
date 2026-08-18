@@ -19,7 +19,7 @@ Available synthesis methods are:
 (31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
-CART (Classification And Regression Trees) is the default synthesis method. Which internally works as follows:
+CART (Classification And Regression Trees) is the default synthesis method. Which can be used as follows:
 ```python
 >>> from synthpop.methods import CartMethod
 
@@ -33,7 +33,7 @@ CART (Classification And Regression Trees) is the default synthesis method. Whic
 Name: length, dtype: float32
 ```                
 
-However, it can be used directly from the {class}`~synthpop.synthesiser.Synthesiser` class:
+However, most users do not need to use it directly. It's main purpose is to be used within the {class}`~synthpop.synthesiser.Synthesiser` class:
 
 ```python
 >>> from synthpop import Synthesiser

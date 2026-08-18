@@ -9,9 +9,10 @@ CART synthesis
 
 .. warning::
 
-   The module for **TreeClassifierMethod** and **TreeRegressorMethod** is not part of the stable public API.
+    **TreeClassifierMethod** and **TreeRegressorMethod** are not part of the stable public API.
    Interfaces may change without notice. See `User Guide 3.1.4. <../../user_guides/3_synthesis_methods.html#configuring-cart>`__
-   on how to configure CART's TreeClassifierMethod and TreeRegressorMethod.
+   for the recommended way to configure CART's TreeClassifierMethod and TreeRegressorMethod.
+   Using TreeClassifierMethod and TreeRegressorMethod directly is only needed for limited specific usecases
 
 .. autoclass:: TreeClassifierMethod
    :members:
@@ -27,7 +28,7 @@ CART synthesis
 
    The module for **LeafNodeSampling** is not part of the stable public API.
    Interfaces may change without notice.
-   One should only infer this documentation for information. Not to change manually.
+   Most users do not need to use this class directly.
 
 .. automodule:: synthpop.methods.tree_utils
    :members:

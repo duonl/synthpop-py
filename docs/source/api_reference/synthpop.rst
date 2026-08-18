@@ -2,7 +2,7 @@ API reference
 ================
 
 This section provides the API reference for the Python modules that make up the
-data synthesis workflow. For more in-depth information, and synthpop-py in practe, please see the 
+data synthesis workflow. For more in-depth information, and synthpop-py in practe, see the 
 `User Guides <../user_guides/user_guides_index.html>`__
 and `Examples <../examples/examples_index.html>`__.
 

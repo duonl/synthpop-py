@@ -91,7 +91,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
     --------
     To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__.
 
-    Internally the :py:obj:`MissingValuePredictor` works as follows:
+    :py:obj:`MissingValuePredictor` can be used directly as follows:
 
     >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np

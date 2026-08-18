@@ -260,7 +260,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
-    Internally the ``TreeClassifierMethod`` works as:
+    ``TreeClassifierMethod``  can be used directly as follows:
 
     >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np

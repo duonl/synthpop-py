@@ -106,7 +106,7 @@ class PCAEncoder(_BaseEncoder):
     Examples
     --------
 
-    PCAEncoding is a part of the :py:obj:`~synthpop.methods.cart_synth.CartMethod`. The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
+    PCAEncoding is a dependency of the :py:obj:`~synthpop.methods.cart_synth.CartMethod`. The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
     can be changed using the :py:obj:`~synthpop.methods.cart_synth.tune_cart` method.
 
     **Intended usage in this package is:**
@@ -119,7 +119,7 @@ class PCAEncoder(_BaseEncoder):
 
     See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
 
-    Internally the encoder works as follows:
+   The encoder can be used directly as follows:
 
     >>> import numpy as np
     >>> from synthpop.data_processing import PCAEncoder
@@ -282,7 +282,7 @@ class MeanEncoder(_BaseEncoder):
     The :py:obj:`~synthpop.encoders.MeanEncoder` does not have changeable parameters.
     See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
 
-    Internally :py:obj:`~synthpop.encoders.MeanEncoder` works as follows:
+    :py:obj:`~synthpop.encoders.MeanEncoder` can be used directly as follows:
 
     >>> from synthpop.data_processing import MeanEncoder
     >>> X = np.array(["a", "a", "b", "b", "c"])
