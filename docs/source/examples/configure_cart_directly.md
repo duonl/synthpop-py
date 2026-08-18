@@ -141,6 +141,9 @@ This is something `tune_cart` deliberately does not expose. The convenience func
 For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: PCA encoding <411-pca-encoding>`. The `MeanEncoder` has no configuration options. For more information about how mean encoding works, see {ref}`User Guide 4.1.2: Mean encoding <412-mean-encoding>`. 
 
 ## Use a different encoder
+```{warning}
+Using a different encoder does not work in version 0.1.2. This is likely to change in a newer version.
+```
 We are not limited to the encoders provided by synthpop-py. The `encoder` parameter accepts a transformer that follows the expected `scikit-learn` transformer interface.
 
 For example, we could use `scikit-learn's` {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>` instead of `MeanEncoder`:
@@ -192,7 +195,7 @@ CART also has a component specifically responsible for missing values in the tar
 
 The missing-value handler can also be configured directly. For example, `MissingValuePredictor` has its own encoder (`MeanEncoder`) and decision tree (`DecisionTreeClassifier`) that can be configured just like the examples above:
 ```python
-from synthpop.data_processing import MissingValuePredictor
+from synthpop.data_processing import MeanEncoder, MissingValuePredictor
 
 missing_handler = MissingValuePredictor(
         tree=DecisionTreeClassifier(
@@ -236,7 +239,7 @@ Suppose we want to build a classifier that:
 
 But we want a regressor that:
 - uses the default number of observations (`CartMethod` uses 5, but `DecisionTreeRegressor` uses 1) in each main CART tree leaf, but measures the quality of the spit by minimising the L1;
-- uses one-hot encoding instead of mean encoding;
+- uses one-hot encoding instead of mean encoding (not supported yet, so commented out in the code);
 - uses a minimum leaf size of 15 for the missing-value prediction tree; and
 - uses a maximum depth of 5 for the missing-value prediction tree.
 
@@ -276,9 +279,9 @@ cart = CartMethod(
                         min_samples_leaf=5,
                         criterion="absolute_error",
                 ),
-                encoder=OneHotEncoder(
-                        handle_unknown="ignore",
-                ),
+                #encoder=OneHotEncoder(
+                #        handle_unknown="ignore",
+                #),
                 missing_handler=MissingValuePredictor(
                         tree=DecisionTreeClassifier(
                                 min_samples_leaf=15,
