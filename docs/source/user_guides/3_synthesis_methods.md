@@ -19,7 +19,7 @@ Available synthesis methods are:
 (31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
-CART (Classification And Regression Trees) is the default synthesis method. 
+CART (Classification And Regression Trees) is the default synthesis method. Which internally works as follows:
 ```python
 >>> from synthpop.methods import CartMethod
 
@@ -31,6 +31,15 @@ CART (Classification And Regression Trees) is the default synthesis method.
 1    70.0
 2    60.0
 Name: length, dtype: float32
+```                
+
+However, it can be used directly from the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser()
+>>> synthetic_data = synth.fit(original_data).generate()
 ```                
 
 CART generates a column by learning an approximation of the conditional distribution:
@@ -198,6 +207,15 @@ new_target_column
 2                 1
 ```
 
+Or for intended use, directly from the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser(default_syn_method=SampleMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```                
+
 It approximates:
 ```{math}
 P(Y) \approx \hat{P}(Y)
@@ -255,6 +273,15 @@ new_target_column
 1             2
 2             <NA>
 ```
+
+Or for intended use, directly from the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser(default_syn_method=CopyMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```       
 
 It implements:
 ```{math}
