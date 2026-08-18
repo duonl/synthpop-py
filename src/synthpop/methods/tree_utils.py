@@ -112,12 +112,12 @@ class LeafNodeSampler:
     .. rubric:: Usage
 
     One could use the tree sampler in a tree based synthesiser method as follows:
-    
+
     >>> from sklearn.tree import BaseDecisionTree
     ...
     >>> class TreeMethod(BaseDecisionTree):
     ...
-    >>>    def __init(self, tree_sampler: LeafNodeSampler | None = None):
+    >>>    def __init__(self, tree_sampler: LeafNodeSampler | None = None):
     >>>        self.tree_sampler = tree_sampler
     ...
     >>>    def fit(self, X, y):
