@@ -1,4 +1,4 @@
-# Tune the CART synthesis method
+# Use the `tune_cart` function
 In the previous examples, we used the synthesis methods with their default configuration. This works well as a starting point, but the characteristics of a dataset may call for some additional tuning.
 
 For example, a dataset might contain many observations, where using larger leaf nodes could produce a more generalised model. Or categorical predictors might contain many levels, making dimensionality reduction useful before they are passed to the classifier.
