@@ -189,8 +189,8 @@ def mock_fit_decision_tree(mocker):
 
 
 @pytest.fixture(autouse=True)
-def mock_raise_on_rare_category(mocker):
-    mocker.patch("synthpop.utils._raise_on_rare_category")
+def mock_warn_on_rare_category(mocker):
+    mocker.patch("synthpop.utils._warn_on_rare_category")
 
 
 def assert_dict_array_equal(expected, actual):
@@ -338,7 +338,7 @@ def test_fit_calls_rare_category_check(X, y, index_cat, threshold, tree_method):
     for cat_col in index_cat:
 
         # The normal asserts of pytest mock cannot be used because == on a numpy array results in an array.
-        calls = synthpop.utils._raise_on_rare_category.call_args_list
+        calls = synthpop.utils._warn_on_rare_category.call_args_list
 
         assert any(
             np.array_equal(call.kwargs["x"], X[cat_col])
@@ -347,7 +347,7 @@ def test_fit_calls_rare_category_check(X, y, index_cat, threshold, tree_method):
             for call in calls
         )
 
-    assert len(index_cat) == synthpop.utils._raise_on_rare_category.call_count
+    assert len(index_cat) == synthpop.utils._warn_on_rare_category.call_count
 
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
@@ -360,7 +360,7 @@ def test_fit_raises_on_rare_category_not_called_when_disabled(
     tree_method.rare_categories_threshold = 0
     tree_method.fit(X, y)
 
-    synthpop.utils._raise_on_rare_category.assert_not_called()
+    synthpop.utils._warn_on_rare_category.assert_not_called()
 
 
 @pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
@@ -793,6 +793,7 @@ def test_get_feature_names_out_no_target_name(X, tree_method):
 
     result = tree_method.get_feature_names_out()
     assert result == [["Trained", "on", "these", "features"]]
+
 
 def test_to_fixed_length_string_array():
     x = np.array(["a", "b"], dtype=str_dtype)

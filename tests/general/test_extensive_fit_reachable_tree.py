@@ -32,10 +32,10 @@ from tests.integration.data_generated_for_tests import (
 )
 
 
-# Disable the _raise_on_rare_category check
+# Disable the _warn_on_rare_category check
 @pytest.fixture(autouse=True)
-def mock_raise_on_rare_category(mocker):
-    mocker.patch("synthpop.utils._raise_on_rare_category")
+def mock_warn_on_rare_category(mocker):
+    mocker.patch("synthpop.utils._warn_on_rare_category")
 
 
 class SpyDecisionTreeClassifier(DecisionTreeClassifier):
