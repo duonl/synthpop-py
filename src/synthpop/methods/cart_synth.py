@@ -537,7 +537,8 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
 
     :param n_leaves: minimum number of samples in the leaf nodes.\
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
-        See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
+        See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.\
+        Consider increasing this parameter to preserve privacy.
     :param n_components: sets the number of principal components used in encoding in the classifier. \
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
         For integers => 1, it is the number of principal components.\
