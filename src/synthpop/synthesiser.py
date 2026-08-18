@@ -1,7 +1,7 @@
 """
 module for generating synthetic data
 """
-from typing import Callable, Self, Dict
+from typing import Callable, Dict, Self
 
 import numpy as np
 import pandas as pd

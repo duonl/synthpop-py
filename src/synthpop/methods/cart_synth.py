@@ -538,8 +538,12 @@ def tune_cart(
     rare_categories_threshold: int | None = None,
 ) -> Callable[[], CartMethod]:
     """
-    Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a `factory method <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
-    When used as ``default_syn_method``, the factory is called once for each synthesised column that has no other method specified.
+    Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a factory function <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
+    The factory is normally passed directly to `Synthesiser`.
+    The factory is called by `Synthesiser.fit()` to create a new `CartMethod` for each column.
+    
+    Calling `tune_cart(...)` returns a factory to use in the Synthesiser.
+    Calling `tune_cart(...)()` returns a `CartMethod` instance.
 
     :param n_leaves: minimum number of samples in the leaf nodes.\
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
