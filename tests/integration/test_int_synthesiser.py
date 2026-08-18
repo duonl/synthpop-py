@@ -114,7 +114,6 @@ def test_synthesiser_preserves_1d_statistics():
     original_data, index_num, index_cat = (
         simulate_realistic_dataset_correlations(
             n_samples=n_samples_orig,
-            n_samples=n_samples_orig,
         )
     )
     synthesiser = Synthesiser(random_seed=74125)
