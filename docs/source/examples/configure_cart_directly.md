@@ -182,5 +182,167 @@ Other `scikit-learn` encoders can also be used, provided that they are compatibl
 - a custom `scikit-learn` compatible transformer implementing a project-specific encoding strategy. An example of this can also be found in the example module (TO DO ADD LINK).
 
 ## Configure the missing value handling
+CART also has a component specifically responsible for missing values in the target variable being synthesised. The default strategy differs between classification and regression:
+- `TreeClassifierMethod` uses {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`;
+- `TreeRegressorMethod` uses {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
+
+`ReplaceMissingWithValue` treats missingness as another target category while fitting the tree. After synthesis, the special marker is converted back to a missing value.
+
+`MissingValuePredictor` takes a different approach. It separately models whether the target is missing. The decision tree first predicts the target value and then the `MissingValuePredictor` predicts whether the target is missing. This allows the probability of a value being missing to depend on the predictors.
+
+The missing-value handler can also be configured directly. For example, `MissingValuePredictor` has its own encoder (`MeanEncoder`) and decision tree (`DecisionTreeClassifier`) that can be configured just like the examples above:
+```python
+from synthpop.data_processing import MissingValuePredictor
+
+missing_handler = MissingValuePredictor(
+        tree=DecisionTreeClassifier(
+                min_samples_leaf=5,
+        ),
+        encoder=MeanEncoder(),
+)
+
+cart = CartMethod(
+        regressor=TreeRegressorMethod(
+                missing_handler=missing_handler,
+        ),
+)
+```
+
+## Change the missing value handling
+We can also replace the missing-value strategy entirely. For example, suppose we are synthesising a categorical target. The default classifier behaviour is to use `ReplaceMissingWithValue`, but we want missingness to be predicted from the other variables instead.
+
+We can configure the classifier to use `MissingValuePredictor`:
+```python
+cart = CartMethod(
+        classifier=TreeClassifierMethod(
+                missing_handler=MissingValuePredictor(),
+        ),
+)
+
+synthesiser = Synthesiser(default_syn_method=cart)
+```
+Now both the classifier and regressor use the same missing value handling strategy. However, just like the trees, you can also use a different configuration for the `MissingValuePredictor` in both paths.
+
+## Combine multiple customisations
+The real benefit of constructing `CartMethod` directly is that these components can be combined.
+
+Suppose we want to build a classifier that:
+- requires at least 20 observations in each main CART tree leaf;
+- retain 90% of variance with the PCAEncoder;
+- predicts missing values rather than treating missingness as a category; and
+- uses a minimum leaf size of 10 for the missing-value prediction tree.
+
+But we want a regressor that:
+- uses the default number of observations (`CartMethod` uses 5, but `DecisionTreeRegressor` uses 1) in each main CART tree leaf, but measures the quality of the spit by minimising the L1;
+- uses one-hot encoding instead of mean encoding;
+- uses a minimum leaf size of 15 for the missing-value prediction tree; and
+- uses a maximum depth of 5 for the missing-value prediction tree.
+
+We can configure all of these components explicitly:
+```python
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+
+from synthpop import Synthesiser
+from synthpop.data_processing import MissingValuePredictor, PCAEncoder
+from synthpop.methods import (
+        CartMethod,
+        TreeClassifierMethod,
+        TreeRegressorMethod,
+)
+
+cart = CartMethod(
+        classifier=TreeClassifierMethod(
+                tree=DecisionTreeClassifier(
+                        min_samples_leaf=20,
+                        min_impurity_decrease=1e-8,  #default in CartMethod
+                ),
+                encoder=PCAEncoder(
+                        pca_transform=PCA(
+                                n_components=0.9,
+                        ),
+                ),
+                missing_handler=MissingValuePredictor(
+                        tree=DecisionTreeClassifier(
+                                min_samples_leaf=10,
+                        ),
+                ),
+        ),
+        regressor=TreeRegressorMethod(
+                tree=DecisionTreeRegressor(
+                        min_samples_leaf=5,
+                        criterion="absolute_error",
+                ),
+                encoder=OneHotEncoder(
+                        handle_unknown="ignore",
+                ),
+                missing_handler=MissingValuePredictor(
+                        tree=DecisionTreeClassifier(
+                                min_samples_leaf=15,
+                                max_depth=5,
+                        ),
+                ),
+        ),
+)
+
+synthesiser = Synthesiser(
+        random_seed=1,
+        default_syn_method=cart,
+)
+
+synthesiser.fit(data)
+
+synthetic_data = synthesiser.generate()
+```
+
+The important thing to notice is that each part controls a different stage of the synthesis process:
+**Configuration** | **What it changes**
+--- | ---
+`tree` | How the target is modelled from its predictors.
+`encoder` | How categorical predictors are represented to the main tree.
+`missing_handler` | How missing target values are modelled.
+Missing-value `tree` | How the probability of a missing target is modelled.
+Missing-value `encoder` | How categorical predictors are represented to the missing-value tree.
+
+This is the level of control that is not possible with `tune_cart`.
+
+## When should you configure components directly?
+At this point, there are two ways to customise CART. Use {func}`~synthpop.methods.cart_synth.tune_cart` when the parameters you need are among its common tuning options:
+```python
+tune_cart(
+        n_leaves=5,
+        n_components=None,
+        rate_categories_threshold=5,
+)
+```
+This is concise and ensures that the relevant CART components receive a consistent configuration.
+
+Configure `CartMethod` directly when you need to change the components themselves or access parameters that `tune_cart` does not expose. A useful way to think about the distinction is:
+- `tune_cart` → "*Change some common CART settings*".
+- Direct configuration → "*Change how CART is constructed*".
+
+The direct approach is more verbose, but it gives control over the underlying `scikit-learn` estimators and synthpop-py components.
+
+## Summary
+`CartMethod` is composed of separate components for classification and regression. These components can be configured or replaced independently.
+
+The main components are:
+**Component** | **Can be configured/replaced?** | **Examples**
+--- | --- | ---
+Decision tree | Yes | {class}`sklearn.tree.DecisionTreeClassifier`, {class}`sklearn.tree.DecisionTreeRegressor`
+Categorical encoder | Yes | {class}`~synthpop.data_processing.encoders.PCAEncoder`, {class}`~synthpop.data_processing.encoders.MeanEncoder`, {class}`sklearn.preprocessing.OneHotEncoder`
+Missing-value handler | Yes | {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`, {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+Missing-value prediction tree | Yes| Configure the {class}`sklearn.tree.DecisionTreeClassifier` inside {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+Tree sampler | Yes, but is more advanced | Supply a custom `LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+Rare-category threshold | Yes | Set the `rare_categories_treshold` parameter in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`or {class}`~synthpop.methods.cart_synth.TreeRegressorMethod`
+
+For common adjustments, {func}`~synthpop.methods.cart_synth.tune_cart` is the simpler interface. When the synthesis workflow requires a different encoder, missing-value strategy, tree configuration, or another component, constructing {class}`~synthpop.methods.cart_synth.CartMethod` directly provides the necessary flexibility.
+
+## Next steps
+We have now seen how CART can be customised at two levels. The next step is to go beyond configuring the components that synthpop-py already provides. In the following examples, we will see how to create custom components and custom synthesis methods. This makes it possible to implement behaviour that is not available through built-in synthesis methods, encoders, trees, missing-value handlers, or leaf node samplers.
+
+
+
 
 
