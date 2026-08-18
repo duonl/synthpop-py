@@ -143,7 +143,7 @@ For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: 
 ## Use a different encoder
 We are not limited to the encoders provided by synthpop-py. The `encoder` parameter accepts a transformer that follows the expected `scikit-learn` transformer interface.
 
-For example, we could use `scikit-learn's` {class}`sklearn.preprocessing.OneHotEncoder` instead of `MeanEncoder`:
+For example, we could use `scikit-learn's` {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>` instead of `MeanEncoder`:
 ```python
 from sklearn.preprocessing import OneHotEncoder
 
@@ -332,10 +332,10 @@ The direct approach is more verbose, but it gives control over the underlying `s
 The main components are:
 **Component** | **Can be configured/replaced?** | **Examples**
 --- | --- | ---
-Decision tree | Yes | {class}`sklearn.tree.DecisionTreeClassifier`, {class}`sklearn.tree.DecisionTreeRegressor`
-Categorical encoder | Yes | {class}`~synthpop.data_processing.encoders.PCAEncoder`, {class}`~synthpop.data_processing.encoders.MeanEncoder`, {class}`sklearn.preprocessing.OneHotEncoder`
+Decision tree | Yes | {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>`, {class}`DecisionTreeRegressor <sklearn.tree.DecisionTreeRegressor>`
+Categorical encoder | Yes | {class}`~synthpop.data_processing.encoders.PCAEncoder`, {class}`~synthpop.data_processing.encoders.MeanEncoder`, {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>`
 Missing-value handler | Yes | {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`, {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
-Missing-value prediction tree | Yes| Configure the {class}`sklearn.tree.DecisionTreeClassifier` inside {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+Missing-value prediction tree | Yes| Configure the {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>` inside {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
 Tree sampler | Yes, but is more advanced | Supply a custom `LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
 Rare-category threshold | Yes | Set the `rare_categories_treshold` parameter in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`or {class}`~synthpop.methods.cart_synth.TreeRegressorMethod`
 

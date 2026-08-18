@@ -242,7 +242,7 @@ The available parameters are:
 `n_components`              | Controls the number of principal components retained by the PCA encoder.
 `rare_categories_threshold` | Determines which categorical predictor values are considered rare. A warning is raised when rare categories account for at least 25% of the observations.
 
-For more advanced customisation, see the next examples in this module or {ref}`User Guide 3.1 CART synthesis <31-cart-synthesis>` to learn how to configure individual CART components directly.
+For more advanced customisation, see the [next examples](configure_cart_directly.md) in this module or {ref}`User Guide 3.1 CART synthesis <31-cart-synthesis>` to learn how to configure individual CART components directly.
 
 ## Next steps
 We now have seen how to customise the most common CART parameters using `tune_cart`. In the next example, we will look at a more advances CART configuration, where individual components such as the decision trees, categorical encoders, and missing-value handler can be replaced or configured independently.
