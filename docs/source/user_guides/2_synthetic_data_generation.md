@@ -10,6 +10,9 @@ Rather than modelling the joint distribution of all variables simultaneously, sy
 
 At a high level, the workflow is:
 ```{mermaid}
+---
+zoom:
+---
 flowchart LR
 
     A[Original data]

@@ -4,12 +4,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from synthpop.data_processing.missing_value_handling import (
+    MissingValuePredictor,
+    ReplaceMissingWithValue
+)
 from synthpop.methods.cart_synth import (
     CartMethod,
     TreeClassifierMethod,
     TreeRegressorMethod,
     tune_cart,
 )
+from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import str_dtype
 
 # This imports an auto-use fixture to set the seed,
@@ -386,11 +391,154 @@ def test_transform_handles_entire_nan_array(y, dtype):
     assert out.dtype == dtype
 
 
-@pytest.mark.parametrize(" y", [
-    (np.array(
-        ["a", "b", "c", "d", "e"] * 6, dtype=str_dtype)),
-    (np.array([1, 2, 3, 4, 5] * 6))
-])
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([1.1, 2.2, np.nan, 4.4] * 5,
+                  dtype=np.float64, name="target"),
+        pd.Series([1, 2, np.nan, 4] * 5,
+                  dtype="Float64", name="target"),
+    ]
+)
+def test_regressor_method_and_replace_missing_with_value(y):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50] * 5,
+            "income": [1000.0, 2000.0, 3000.0, 4000.0] * 5,
+            "blood type": ["A", "O", "AB", "O"] * 5,
+        }
+    )
+
+    cart = CartMethod(
+        regressor=TreeRegressorMethod(
+            tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
+        )
+    )
+
+    cart.fit(X, y)
+
+    assert isinstance(cart.method_.missing_handler_, ReplaceMissingWithValue)
+    assert cart.method_.missing_handler_.missing_marker == -8
+
+    out = cart.transform(X)
+
+    assert isinstance(out, pd.Series)
+    assert len(out) == len(X)
+    assert out.name == "target"
+
+
+@pytest.mark.parametrize(
+    "y, expected_none_missing ",
+    [
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=str, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=str_dtype, name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype="category", name="target"), False),
+        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
+                   dtype=object, name="target"), False),
+
+        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 10,
+                   dtype=str, name="target"), True),
+    ]
+)
+def test_classifier_method_and_missing_value_predictor(y, expected_none_missing):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50] * 10,
+            "income": [1000.0, 2000.0, 3000.0, 4000.0] * 10,
+            "blood type": ["A", "O", "AB", "O"] * 10,
+        }
+    )
+
+    cart = CartMethod(
+        classifier=TreeClassifierMethod(
+            tree=None, missing_handler=MissingValuePredictor()
+        ),
+    )
+
+    cart.fit(X, y)
+
+    assert isinstance(cart.method_.missing_handler_, MissingValuePredictor)
+    assert not cart.method_.missing_handler_._all_missing
+    assert cart.method_.missing_handler_._none_missing == expected_none_missing
+
+    out = cart.transform(X)
+
+    assert isinstance(out, pd.Series)
+    assert len(out) == len(X)
+    assert out.name == "target"
+    if expected_none_missing:
+        assert not out.isna().any()
+    else:
+        assert out.isna().any()
+
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        pd.Series([1, 2, 3, 4] * 5, name='target', dtype=np.int64),
+        pd.Series([1, 2, 3, 4] * 5, name='target', dtype=np.float64),
+        pd.Series([1, 2, 3, 4] * 5, name='target', dtype=np.float32),
+        pd.Series([1, 2, 3, 4] * 5, name='target', dtype="Int64"),
+        pd.Series([1.1, 2.2, 3.3, 4.4] * 5, name='target', dtype="Float32"),
+
+        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="str"),
+        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="string"),
+        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype=str_dtype),
+
+        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="object"),
+        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="category"),
+
+        pd.Series([True, False, True, False] * 5,
+                  name='target', dtype="boolean"),
+        pd.Series([True, False, True, False] * 5,
+                  name='target', dtype=np.bool_),
+    ],
+)
+def test_missing_handler_does_not_mutate_output_no_missing(y):
+    X = pd.DataFrame(
+        {
+            "age": [20, 30, 40, 50] * 5,
+            "income": [1000.0, 2000.0, 3000.0, 4000.0] * 5,
+            "blood type": ["A", "O", "AB", "O"] * 5,
+        }
+    )
+
+    with RandomStateManager(seed=0):
+        cart_standard = CartMethod()
+
+        cart_standard.fit(X, y)
+        out_standard = cart_standard.transform(X)
+
+    with RandomStateManager(seed=0):
+        cart_different_missing_handling = CartMethod(
+            regressor=TreeRegressorMethod(
+                tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
+            ),
+
+            classifier=TreeClassifierMethod(
+                tree=None, missing_handler=MissingValuePredictor()
+            )
+        )
+
+        cart_different_missing_handling.fit(X, y)
+        out_different_missing_handling = cart_different_missing_handling.transform(
+            X)
+
+    pd.testing.assert_series_equal(
+        out_standard, out_different_missing_handling)
+
+
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.array(["a", "b", "c", "d", "e"] * 6, dtype=str_dtype),
+        np.array([1, 2, 3, 4, 5] * 6),
+    ],
+)
 def test_cart_method_raises_on_rare_category(y):
     """
     Test for an exception when there is a value of a categorical variable that occurs once.

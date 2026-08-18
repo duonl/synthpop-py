@@ -18,6 +18,9 @@ The {class}`~synthpop.synthesiser.Synthesiser` generates data sequentially. Each
 
 During fitting, synthesis methods learn from the original dataset:
 ```{mermaid}
+---
+zoom:
+---
 flowchart TD
 
     A[Original data]
@@ -40,6 +43,9 @@ flowchart TD
 
 During generation, the fitted methods generate synthetic columns sequentially:
 ```{mermaid}
+---
+zoom:
+---
 flowchart TD
 
     A[Fitted synthesis methods]
