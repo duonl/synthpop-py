@@ -2,13 +2,13 @@
 
 Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
-However, you may want to use a different encoder for a specific use case. This section explains how to create a custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
+However, you may want to use a different encoder for a specific use case. In this example we explain how to create a custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
 
 ## sklearn conventions
 In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from base `sklearn` objects explained below. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the package.
 
 ## BaseEstimator
- An estimator is an object that fits a model based on some training data and can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
+An estimator is an object that fits a model based on some training data and can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
 
  ```python
 from sklearn.base import BaseEstimator
