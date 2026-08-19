@@ -363,27 +363,32 @@ def unique_cats(count):
 
 
 RARE_CATEGORIES_WARN_CASES = [
-    # one row, so unique value by definition, and more than half.
+    # one row, so unique value , and more than quarter.
     (np.array(["a"]), 5),
     (np.array(["a"]*4), 5),  # rowcount below threshold.
     (np.array(["a", "b", "c", "d", "e"]), 5),  # all values unique
     (np.array(unique_cats(100) * 5), 6),  # all categories rare
 
-    # 11*5 = 55 rows with values that occur 5 times
-    # So 55% of the rows have a rare category
-    (np.array(unique_cats(11) * 5 + ["b"] * 45), 6),
-    (np.array(unique_cats(11) * 5 + [np.nan] * 45), 6),  # same, but with nan.
+    # 6*5 = 30 rows with values that occur 5 times
+    # So 30% of the rows have a rare category
+    (np.array(unique_cats(6) * 5 + ["b"] * 70), 6),
+    (np.array(unique_cats(6) * 5 + [np.nan] * 70), 6),  # same, but with nan.
+
+    # 9*5 = 45 rows with values that occur 5 times
+    # So 45% of the rows have a rare category
+    (np.array(unique_cats(9) * 5 + ["b"] * 55), 6),
+    (np.array(unique_cats(9) * 5 + [np.nan] * 55), 6),  # same, but with nan.
 
 
     # nan is the rare category.
-    (np.array([np.nan]*51 + ["b"] * 49), 52),
-    (np.array([True] * 51 + [False] * 49), 52),  # boolean
+    (np.array([np.nan]*26 + ["b"] * 74), 52),
+    (np.array([True] * 26 + [False] * 74), 52),  # boolean
 
 ]
 
 
 @pytest.mark.parametrize("x, threshold", RARE_CATEGORIES_WARN_CASES)
-def test_warn_on_rare_category_proportion_more_than_half_warns(x, threshold):
+def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
     txt_threshold = re.escape(f"fewer than {threshold} times")
     txt_column_name = re.escape(f"column_with_threshold{threshold}")
 
@@ -421,18 +426,20 @@ def test_warn_on_rare_category_no_name():
     (np.array([np.nan] * 7), 7),
 
     # number of 'a' is below threshold (rare category), but is less than 50% of the rows
-    (["a"] * 4 + ["b"] * 5, 5),
-    ([np.nan] * 4 + ["b"] * 5, 5),  # same, but with nan.
-    ([True] * 4 + [False] * 5, 5),  # same, but with boolean.
+    (["a"] * 4 + ["b"] * 13, 5),
+    ([np.nan] * 4 + ["b"] * 13, 5),  # same, but with nan.
+    ([True] * 4 + [False] * 13, 5),  # same, but with boolean.
 
-    # 9*5 = 45 rows with values that occur 5 times
-    # So 45% of the rows have a rare category
-    (np.array(unique_cats(9) * 5 + ["b"] * 55), 6),
-    (np.array(unique_cats(9) * 5 + [np.nan] * 55), 6),  # same, but with nan.
+    
+
+    # 4*5 = 20 rows with values that occur 5 times
+    # So 20% of the rows have a rare category
+    (np.array(unique_cats(4) * 5 + ["b"] * 80), 6),
+    (np.array(unique_cats(4) * 5 + [np.nan] * 80), 6),  # same, but with nan.
 
 
 ])
-def test_warn_on_rare_category_does_not_warn_below_half(x, threshold):
+def test_warn_on_rare_category_does_not_warn_below_quarter(x, threshold):
     x_in = np.array(x)
 
     with warnings.catch_warnings():

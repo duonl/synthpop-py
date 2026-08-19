@@ -163,7 +163,7 @@ def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None
     if (0 < n_nan < rare_threshold):
         n_rows_with_rare_values += n_nan
 
-    if n_rows_with_rare_values*2 > x.shape[0]:
+    if n_rows_with_rare_values*4 > x.shape[0]:
         warnings.warn(
             f"Categorical {predictor} contains categories occurring fewer than {rare_threshold} times for more than half the rows.\n "
             "This may allow the CART method to copy target values for small groups,\n "
