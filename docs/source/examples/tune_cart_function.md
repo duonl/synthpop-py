@@ -1,13 +1,15 @@
 # Use the `tune_cart` function
 In the previous examples, we used the synthesis methods with their default configuration. This works well as a starting point, but the characteristics of a dataset may call for some additional tuning.
 
-For example, a dataset might contain many observations, where using larger leaf nodes could produce a more generalised model. Or categorical predictors might contain many levels, making dimensionality reduction useful before they are passed to the classifier.
+For example, a dataset might contain many observations, where using larger leaf nodes could produce a more generalised model. Or categorical predictors might contain many levels, which makes them computationally heavy. As such, dimensionality reduction of the data, before passing it to the classifier, might be usefull.
 
-The CART synthesis method can be configured by constructing a {class}`~synthpop.methods.cart_synth.CartMethod` and changing its individual components. However, this can involve configuring several underlying estimators separately. For common CART tuning options, synthpop-py provides the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. It lets us change the most commonly tuned parameters in one place and applies those settings consistently to the relevant CART components.
+The CART synthesis method can be configured by constructing a {class}`~synthpop.methods.cart_synth.CartMethod` instance and changing its individual components manually. However, this can involve configuring several underlying estimators separately from each other. How to do this will be explained in the following example: [Configure the CART components directly](./configure_cart_directly.md).
 
-In this example, we will introduce how to use the convenience function. In the next example, we will show how to configure the underlying components directly.
+For common CART tuning options however, synthpop-py provides the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. It lets us change the most commonly tuned parameters in one place and applies those settings consistently to the relevant CART components.
 
-## Start with a tuned CART method
+In this example, we will introduce how to use the convenience {func}`~synthpop.methods.cart_synth.tune_cart` function. More precisely, we will show 1). how to adjust the number of observations in a leaf node `n_leaves`, 2). number of PCA Components `n_components`, and 3) the consideration threshold for rare categories `rare_categories_threshold`.
+
+## Implement tune_cart
 Suppose we are working with the Titanic dataset and want every variable to use CART synthesis, but we want each decision tree to require at least 10 observations in a leaf.
 
 Instead of constructing a `CartMethod` and configuring each decision tree individually, we can use `tune_cart`:
@@ -29,7 +31,7 @@ synthetic_data = synthesiser.generate()
 Here, `tune_cart(n_leaves=10)` returns a [factory](https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)) that creates a `CartMethod` configured with `n_leaves=10`.
 
 ## Control the size of the decision tree leaves
-The `n_leaves` parameter controls the minimum number of observations in each leaf of the decision tree used by CART. For example:
+The `n_leaves` parameter controls the minimum number of observations in each leaf of the decision tree used by CART. For example, defining the minimum number to be 20:
 ```python
 synthesiser = Synthesiser(
     random_seed=1,
@@ -60,9 +62,9 @@ makes the CART models less specific: every prediction must be based on at least 
 The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
 ## Change the number of principal components
-CART uses a {class}`~synthpop.data_processing.encoders.PCAEncoder` to encode categorical predictors before they are passed to the classifier. This is necessary because the classifier operators on numerical features, while categorical variables may contain many different categories.
+CART uses a {class}`~synthpop.data_processing.encoders.PCAEncoder` to encode categorical predictors before they are passed to the classifier. This is necessary because the classifier operates on numerical features. Moreover, categorical variables contain many different categories, heavily increasing the computation cost.
 
-The `n_components` parameter controls how much of this encoded information is retained by PCA.
+The `n_components` parameter controls the number of principal compents, and thus how much of this encoded information is retained by PCA.
 
 For example:
 ```python
@@ -190,7 +192,7 @@ synthetic_data = synthesiser.generate()
 This gives us a CART model that is less likely to make predictions from very small groups, uses a reduced representation of categorical predictors, and applies an explicit check for rare categorical values. If rare categories account for at least 25% of the observations, the check raises a warning, but synthesis can continue.
 
 ## Use different CART configurations for different columns
-A tuned CART factory can also be used with `special_syn_method`. This is useful when most columns should use one configuration, but a particular column needs a different one. For example, suppose we want most variables to use a minimum leaf size of 10, but `fare` needs a more conservative configuration with a minimum leaf size of 20:
+A tuned CART factory can also be used with [`special_syn_method`](./using_different_methods_for_different_columns.md). This is useful when most columns should use one configuration, but a particular column needs a different one. For example, suppose we want most variables to use a minimum leaf size of 10, but `fare` needs a more conservative configuration with a minimum leaf size of 20:
 ```python
 synthesiser = Synthesiser(
     random_seed=1,
@@ -215,7 +217,7 @@ all remaining columns   | `n_leaves=10`
 As with other synthesis methods, the method specified in `special_syn_method` overrides the default for that column.
 
 ## When should you use `tune_cart`?
-`CartMethod` remains the most flexible option when you need to customise individual components of the CART method. For example, if you want to replace the PCA encoder or use a different missing-value handling strategy, construct `CartMethod` and the underlying components directly:
+Initiating `CartMethod` manually remains the most flexible option when you need to customise individual components of the CART method. For example, if you want to replace the PCA encoder or use a different missing-value handling strategy, construct `CartMethod` and the underlying components directly:
 ```python
 CartMethod(
     regressor=TreeRegressorMethod(...),

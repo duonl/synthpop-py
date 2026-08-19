@@ -1,5 +1,5 @@
 # Configure the CART components directly
-In the [previous example](./tune_cart_function.md), we used {func}`~synthpop.methods.cart_synth.tune_cart` to adjust the most common CART settings. This is the most convenient approach when we want to change parameters such as the minimum leaf size or the number of PCA components.
+In the [previous example](./tune_cart_function.md), we used {func}`~synthpop.methods.cart_synth.tune_cart` to adjust the most common CART settings. This is the most convenient approach when we want to change parameters such as the minimum leaf size (`n_leaves`) or the number of PCA components (`n_components`).
 
 Sometimes, however, we need more control. For example, we might want to:
 - change a parameter of the underlying decision tree;
@@ -24,10 +24,10 @@ Each of these methods is itself composed of several components:
 `encoder`               | Converts categorical predictor values into numeric features for the tree.
 `missing_handler`       | Determines how missing values in the target are handled.
 `tree_sampler`          | Samples values from the leaves of the fitted tree.
-`rare_categories_threshold` | Checks categorical predictors for potentially risky rare categories
+`rare_categories_threshold` | Checks categorical predictors for potentially risky rare categories.
 
 The defaults are slightly different for classification and regression:
-**Component** | **Classification** | **Regression**
+**Component** | **Default Classification** | ** Default Regression**
 --------------|--------------------|-------------------
 `tree` | {class}`sklearn.tree.DecisionTreeClassifier` | {class}`sklearn.tree.DecisionTreeRegressor`
 `encoder` | {class}`~synthpop.data_processing.encoders.PCAEncoder` | {class}`~synthpop.data_processing.encoders.MeanEncoder`
@@ -43,7 +43,7 @@ cart = CartMethod()
 
 synthesiser = Synthesiser(default_syn_method=cart)
 ```
-This would be the same as just calling:
+As CART is also the `Synthesiser` default method this would be the same as just calling:
 ```python
 synthesiser = Synthesiser()
 ```
@@ -124,7 +124,7 @@ cart = CartMethod(
 
 synthesiser = Synthesiser(default_syn_method=cart)
 ```
-The effect is the same: categorical predictors used by the classifier are encoded using two principal components.
+The effect is the same: categorical predictors used by the classifier are encoded using two principal components. Note that since we did not specify a Regressor this is set to the Default value.
 
 Direct configuration becomes more useful when we want to configure other PCA options as well. For example:
 ```python
@@ -182,16 +182,16 @@ The decision tree can therefore make splits based directly on the individual cat
 Other `scikit-learn` encoders can also be used, provided that they are compatible with the input and output expected by the CART implementation. For example, depending on the data and modelling goal, alternatives could include:
 - {class}`sklearn.preprocessing.OneHotEncoder`, for explicit binary indicators for each category;
 - {class}`sklearn.preprocessing.OrdinalEncoder`, when an ordinal or integer representation is appropriate; or
-- a custom `scikit-learn` compatible transformer implementing a project-specific encoding strategy. An example of this can also be found in the example module (TO DO ADD LINK).
+- a custom `scikit-learn` compatible transformer implementing a project-specific encoding strategy. An example of this can also be found in the example module [custom encoder](./custom_encoder.md)
 
 ## Configure the missing value handling
-CART also has a component specifically responsible for missing values in the target variable being synthesised. The default strategy differs between classification and regression:
+CART also has a component specifically responsible for missing value handling as the sklearn's decission trees do not directly accept missing values. The default strategy differs between classification and regression:
 - `TreeClassifierMethod` uses {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`;
 - `TreeRegressorMethod` uses {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
 
 `ReplaceMissingWithValue` treats missingness as another target category while fitting the tree. After synthesis, the special marker is converted back to a missing value.
 
-`MissingValuePredictor` takes a different approach. It separately models whether the target is missing. The decision tree first predicts the target value and then the `MissingValuePredictor` predicts whether the target is missing. This allows the probability of a value being missing to depend on the predictors.
+`MissingValuePredictor` takes a different approach. It fits a decision tree that first predicts the target value and then the `MissingValuePredictor` predicts whether the target is missing. This allows the probability of a value being missing to depend on the predictors.
 
 The missing-value handler can also be configured directly. For example, `MissingValuePredictor` has its own encoder (`MeanEncoder`) and decision tree (`DecisionTreeClassifier`) that can be configured just like the examples above:
 ```python
