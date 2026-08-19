@@ -558,7 +558,7 @@ def test_cart_method_raises_on_rare_category(y):
 
     method = tune_cart(n_leaves=2)
 
-    with pytest.warns(UserWarning, match=".* contains a category occurring fewer than 2 times.*"):
+    with pytest.warns(UserWarning, match=".* contains categories occurring fewer than 2 times.*"):
         result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
 
