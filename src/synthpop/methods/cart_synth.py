@@ -539,8 +539,8 @@ def tune_cart(
 ) -> Callable[[], CartMethod]:
     """
     Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a factory function <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
-    The factory is normally passed directly to `Synthesiser`.
-    The factory is called by `Synthesiser.fit()` to create a new `CartMethod` for each column.
+    The factory is normally passed directly to {class}`~synthpop.synthesiser.Synthesiser`.
+    The factory is called by {func}`~synthpop.synthesiser.Synthesiser.fit` to create a new {class}`~synthpop.methods.cart_synth.CartMethod` for each column.
     
     Calling `tune_cart(...)` returns a factory to use in the Synthesiser.
     Calling `tune_cart(...)()` returns a `CartMethod` instance.
