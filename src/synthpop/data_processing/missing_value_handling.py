@@ -77,19 +77,21 @@ class MissingValuePredictor(BaseMissingValueHandler):
         z ~ Bernoulli(P(z=1|x))
 
     During synthesis, the decision tree determines which leaf each observation belongs to. 
-    A :py:obj`~synthpop.methods.tree_utils.LeafNodeSampler` then samples whether the target should be missing based on the missingness patterns observed in that leaf. 
+    A :py:obj:`~synthpop.methods.tree_utils.LeafNodeSampler` then samples whether the target should be missing based on the missingness patterns observed in that leaf. 
     This means that missing values are not inserted completely at random: the probability of a value being missing depends on the characteristics of the observation.
 
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#predicting-missing-values>`__ for more
-    in-depth information on the MissingValuePredictor.
+    in-depth information on the ``MissingValuePredictor``.
 
     :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
-    :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_.
-    :param tree_sampler: Leaf node sampler. Default is :py:obj:`LeafNodeSampler`.
+    :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`__.
+    :param tree_sampler: Leaf node sampler. Default is :py:obj:`~synthpop.methods.tree_utils.LeafNodeSampler`.
 
     Examples
     --------
-    To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__.
+
+    To configure or change the missing value handling of a synthesis, 
+    please see example `configure CART <../../examples/configure_cart_directly.html>`__.
 
     :py:obj:`MissingValuePredictor` can be used directly as follows (note that this is not the intended usage):
 
@@ -265,14 +267,15 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     is preserved exactly.
 
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#treating-missing-as-category>`__ for more
-    in-depth information on the ReplaceMissingWithValue.
+    in-depth information on the ``ReplaceMissingWithValue``.
 
     :param missing_marker: The value to replace missing values with.
     
     Examples
     --------
 
-    To change the missing value handling of a synthesis, please see example `alternative missing handler <../../user_guides/examples/alternative_missing_handler.html>`__.
+    To configure or change the missing value handling of a synthesis,
+    please see example `configure CART <../../examples/configure_cart_directly.html>`__.
 
     :py:obj:`ReplaceMissingWithValue` can be used directly as follows (note that this is not the intended usage):
 
@@ -345,7 +348,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         The method only copies initialisation parameters and does not copy
         any fitted state. Similar to sklearn's ``clone()``.
 
-        Note: :py:obj:`ReplaceMissingWithValue` does not have learned attributes.
+        Note: ``ReplaceMissingWithValue`` does not have learned attributes.
 
         :return: A new, unfitted instance of ``ReplaceMissingWithValue()`` with the 
             same ``missing_marker`` setting.

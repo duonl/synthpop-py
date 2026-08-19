@@ -18,7 +18,7 @@ class SampleMethod(BaseSynthMethod):
     Examples
     --------
 
-    :class:`SampleMethod` should be given as an argument to the :py:obj:`~synthpop.synthesiser.Synthesiser`'s ``default_syn_method`` or ``special_syn_method``.
+    :class:`SampleMethod` should be given as an argument to the :class:`Synthesiser`'s ``default_syn_method`` or ``special_syn_method``.
     See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
     `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
 

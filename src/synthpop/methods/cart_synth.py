@@ -414,7 +414,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     Examples
     --------
 
-    :class:`CartMethod` should be given as an argument to the :py:obj:`~synthpop.synthesiser.Synthesiser`'s ``default_syn_method``/``special_syn_method``.
+    :class:`CartMethod` should be given as an argument to the :class:`Synthesiser`'s ``default_syn_method``/``special_syn_method``.
     See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
     `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
 
@@ -572,7 +572,7 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         default threshold is also 5.
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/examples_index>` for more information. TODO: add link to example about attribute disclosure.
 
-    :return: a CartMethod object with the parameters consistently applied.
+    :return: a ``CartMethod`` object with the parameters consistently applied.
 
     Examples
     --------

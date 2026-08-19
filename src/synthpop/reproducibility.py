@@ -32,7 +32,7 @@ class RandomStateManager:
     The class is also  a context manager. Entering
     ``RandomStateManager(seed)`` temporarily replaces the current root seed.
     When leaving the context, both the previous root seed and its associated
-    ``SeedSequence`` are restored:
+    :py:obj:`~numpy.random.SeedSequence` are restored:
 
     Examples
     --------

@@ -137,7 +137,7 @@ class LeafNodeSampler:
     ...
     >>>        return self.tree_sampler_.sample_from_leaves(leaf_ids)
     
-    See `custom synthesis method <../../examples/custom_synth.html>` on how to create your own synthesis method.
+    See `Example: custom synthesis method <../../examples/custom_synth.html>`__ on how to create your own synthesis method.
     """
 
     def __init__(self, random_state: int | np.random.Generator | None = None) -> None:
@@ -293,7 +293,7 @@ class LeafNodeSampler:
         any fitted state (i.e., ``_leaf_map`` or ``random_state_``).
         Similar to sklearn's ``clone()``.
 
-        :return: A new, unfitted instance of :py:obj:`~synthpop.tree_utils.LeafNodeSampler` with the 
+        :return: A new, unfitted instance of :class:`LeafNodeSampler` with the 
             same ``random_state`` setting.
 
         Examples
