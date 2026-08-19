@@ -285,8 +285,8 @@ def test_prepare_data_does_not_mutate_inputs(predictor):
     "y",
     [
         np.array([1, 2, 3], dtype=np.float32),
-        np.array(['1', '2', '3'], dtype=str_dtype)
-    ]
+        np.array(['1', '2', '3'], dtype=str_dtype),
+    ],
 )
 def test_post_synth_all_missing(y, predictor):
     predictor._all_missing = True
@@ -307,8 +307,8 @@ def test_post_synth_all_missing(y, predictor):
     "y",
     [
         np.array([1, 2, 3], dtype=np.float32),
-        np.array(['1', '2', '3'], dtype=str_dtype)
-    ]
+        np.array(['1', '2', '3'], dtype=str_dtype),
+    ],
 )
 def test_post_synth_no_missing(y, predictor):
     predictor._all_missing = False
@@ -329,8 +329,8 @@ def test_post_synth_no_missing(y, predictor):
     "y",
     [
         np.array(np.array([100, 200, 300, 400]), dtype=np.float32),
-        np.array(np.array(['100', '200', '300', '400']), dtype=str_dtype)
-    ]
+        np.array(np.array(['100', '200', '300', '400']), dtype=str_dtype),
+    ],
 )
 def test_post_synth_transform_dataflow(y, predictor, stub_tree, stub_sampler, stub_encoder):
     predictor.tree_ = stub_tree
@@ -383,8 +383,8 @@ def test_post_synth_transform_raises_unfitted():
     "y",
     [
         np.array(np.array([100, 200, 300, 400]), dtype=np.float32),
-        np.array(np.array(['100', '200', '300', '400']), dtype=str_dtype)
-    ]
+        np.array(np.array(['100', '200', '300', '400']), dtype=str_dtype),
+    ],
 )
 def test_post_synth_uses_feature_order(y, predictor, stub_tree, stub_sampler, stub_encoder):
     predictor.tree_ = stub_tree
