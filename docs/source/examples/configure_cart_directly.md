@@ -188,9 +188,9 @@ CART also has a component specifically responsible for missing value handling as
 - `TreeClassifierMethod` uses {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`;
 - `TreeRegressorMethod` uses {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
 
-`ReplaceMissingWithValue` treats missingness as another target category while fitting the tree. After synthesis, the special marker is converted back to a missing value.
+`ReplaceMissingWithValue` treats missingness as another target category while fitting the tree. After synthesis, the special marker is converted back to a missing value. This means that the same tree is responsible for both predicting the target value and implicitly modelling whether that value is missing.
 
-`MissingValuePredictor` takes a different approach. It fits a decision tree that first predicts the target value and then the `MissingValuePredictor` predicts whether the target is missing. This allows the probability of a value being missing to depend on the predictors.
+`MissingValuePredictor` takes a different approach, separating the two tasks. The main decision tree (i.e. in `TreeRegressorMethod`) is fitted to the observed target values and predicts what the target value should be, while a second decision tree (in `MissingValuePredictor`) is fitted to the target's missingness pattern and predicts whether the target should be missing. This allows the probability of a value being missing to depend on the predictors.
 
 The missing-value handler can also be configured directly. For example, `MissingValuePredictor` has its own encoder (`MeanEncoder`) and decision tree (`DecisionTreeClassifier`) that can be configured just like the examples above:
 ```python
@@ -340,7 +340,7 @@ Categorical encoder | Yes | {class}`~synthpop.data_processing.encoders.PCAEncode
 Missing-value handler | Yes | {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`, {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
 Missing-value prediction tree | Yes| Configure the {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>` inside {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
 Tree sampler | Yes, but is more advanced | Supply a custom `LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
-Rare-category threshold | Yes | Set the `rare_categories_treshold` parameter in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`or {class}`~synthpop.methods.cart_synth.TreeRegressorMethod`. See the [API reference](../api_reference/synthesis_methods/CART.rst) for more information.
+Rare-category threshold | Yes | Set the `rare_categories_threshold` parameter in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`or {class}`~synthpop.methods.cart_synth.TreeRegressorMethod`. See the [API reference](../api_reference/synthesis_methods/CART.rst) for more information.
 
 For common adjustments, {func}`~synthpop.methods.cart_synth.tune_cart` is the simpler interface. When the synthesis workflow requires a different encoder, missing-value strategy, tree configuration, or another component, constructing {class}`~synthpop.methods.cart_synth.CartMethod` directly provides the necessary flexibility.
 
