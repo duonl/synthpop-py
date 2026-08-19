@@ -105,7 +105,7 @@ class SampleMethod(BaseSynthMethod):
         
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
         """
-        Get the name of the synthesised target column.
+        Return the name of the synthesised target column.
 
         If the original target column has no name (i.e. `None`), the input feature
         names are returned instead.
