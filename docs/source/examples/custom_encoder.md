@@ -2,7 +2,7 @@
 
 Encoding of categorical input features is a huge part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed and reduces the size of decision trees, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py inherently implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
-However, you may want to use a different encoder for a specific use case. This section explains how to create a custom encoder. Specifically one that maps categorical data to numerical values while following scikit-learn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
+However, you may want to use a different encoder for a specific use case. This section explains how to create a custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
 
 ## sklearn conventions
 synthpop-py is build around base `sklearn` objects. In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from these base `sklearn` objects. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the software.
@@ -61,7 +61,7 @@ However this does not yet do anything with input data, it just learns a model.
 
 ## TransformerMixin
 
-In order for our encoder to actually map input variables to output variables we need a method that is able to transform the data, given a learned model. Luckily `sklearn` also provides a mixin class for that: [TransformerMixin](https://scikit-learn.org/dev/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin). We can, and should, also inherit from this class. With that we can define a `transform` function:
+In order for our encoder to actually map input variables to output variables we need a method that is able to transform the data, given a learned model. Luckily `sklearn` also provides a mixin class for that: [TransformerMixin](https://sklearn.org/dev/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin). We can, and should, also inherit from this class. With that we can define a `transform` function:
 
 ```python
 from typing import Self
@@ -109,12 +109,12 @@ We see that we successfully managed to encode our animals into numbers. Ain't th
 
 As you saw we also added `check_is_fitted` in our `transform` function. Even though this is not a requisite, we heavily recommend the use of this `sklearn` utility function as it checks whether required learned parameters are actually learned by `fit`. It will produce an `NotFittedError` in cases where one calls `transform` before `fit`.
 
-For a more in depth explanation (such as implementing other mixins), please take a careful look at [developing scikit-learn estimators](https://scikit-learn.org/dev/developers/develop.html#)
+For a more in depth explanation (such as implementing other mixins), please take a careful look at [developing sklearn estimators](https://scikit-learn.org/dev/developers/develop.html#)
 
 ## sklearn tags
-When creating a custom estimator or transformer that follows the scikit-learn conventions, it is useful to tell scikit-learn what kind of estimator it is and what type of data it expects. This is done using [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags).
+When creating a custom estimator or transformer that follows the sklearn conventions, it is useful to tell sklearn what kind of estimator it is and what type of data it expects. This is done using [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags).
 
-Tags provide metadata about an estimator. Scikit-learn can use this information when running estimator checks, validating inputs, and integrating custom estimators with the wider scikit-learn package.
+Tags provide metadata about an estimator. sklearn can use this information when running estimator checks, validating inputs, and integrating custom estimators with the wider sklearn package.
 
 In our case we find that we explicitly expect the data to be a one-dimensional categorical (list of strings). As such, we can inherent from the base class and mixin, and define specific tags from there:
 
@@ -174,7 +174,7 @@ def test(estimator, check):
 7. Keep the encoder stateless before fitting. Do not learn categories or mappings in `__init__`. All information derived from the input data should be learned in fit.
 
 ## Summary
-Custom encoders in synthpop-py can be implemented following scikit-learn conventions by inheriting from `BaseEstimator` and `TransformerMixin`. 
+Custom encoders in synthpop-py can be implemented following sklearn conventions by inheriting from `BaseEstimator` and `TransformerMixin`. 
 The encoder should learn its mapping during the fit, and transform categorical values into numerical representations.
 Defining appropriate sklearn `__tags__` also helps ensure compatibility with sklearn validation and synthpop-py.
 
