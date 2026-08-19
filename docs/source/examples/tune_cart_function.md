@@ -1,15 +1,18 @@
 # Use the `tune_cart` function
 In the previous examples, we used the synthesis methods with their default configuration. This works well as a starting point, but the characteristics of a dataset may call for some additional tuning.
 
-For example, a dataset might contain many observations, where using larger leaf nodes could produce a more generalised model. Or categorical predictors might contain many levels, which makes them computationally heavy. As such, dimensionality reduction of the data, before passing it to the classifier, might be usefull.
+For example, a dataset may contain a large number of observations, in which case using larger leaf nodes can produce a more generalised model. Similarly, categorical predictors may contain many levels, making them computationally expensive to process. In such cases, reducing the dimensionality of the data before passing it to the classifier may be beneficial.
 
 The CART synthesis method can be configured by constructing a {class}`~synthpop.methods.cart_synth.CartMethod` instance and changing its individual components manually. However, this can involve configuring several underlying estimators separately from each other. How to do this will be explained in the following example: [Configure the CART components directly](./configure_cart_directly.md).
 
-For common CART tuning options however, synthpop-py provides the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. It lets us change the most commonly tuned parameters in one place and applies those settings consistently to the relevant CART components.
+For common CART tuning options, synthpop-py provides the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. It lets us change the most commonly tuned parameters in one place and applies those settings consistently to the relevant CART components.
 
-In this example, we will introduce how to use the convenience {func}`~synthpop.methods.cart_synth.tune_cart` function. More precisely, we will show 1). how to adjust the number of observations in a leaf node `n_leaves`, 2). number of PCA Components `n_components`, and 3) the consideration threshold for rare categories `rare_categories_threshold`.
+In this example, we will introduce how to use the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. More precisely, we will show how to adjust:
+1. the number of observations in a leaf node `n_leaves`;
+2. the number of PCA Components `n_components`; and
+3. the consideration threshold for rare categories `rare_categories_threshold`.
 
-## Implement tune_cart
+## Implement `tune_cart`
 Suppose we are working with the Titanic dataset and want every variable to use CART synthesis, but we want each decision tree to require at least 10 observations in a leaf.
 
 Instead of constructing a `CartMethod` and configuring each decision tree individually, we can use `tune_cart`:
@@ -39,15 +42,17 @@ synthesiser = Synthesiser(
 )
 ```
 The value `20` is passed to the `min_samples_leaf` parameter of the decision trees used for:
-- classification;
-- regression; and
-- predicting missing values.
+- :any:`classification <~synthpop.methods.cart_synth.TreeClassifierMethod>`;
+- :any:`regression <~synthpop.methods.cart_synth.TreeRegressorMethod>`; and
+- [predicting missing values](../api_reference/data_processing/Missing_value.rst).
+
+The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
 A decision tree works by repeatedly splitting the training data into smaller groups. With `n_leaves=20`, the tree cannot create a leaf containing fewer than 20 observations. This limits how specifically the tree can model the training data.
 
 This affects the synthetic data because the tree's predictions are based on these groups. With a **smaller** value, the tree can create smaller and more specific groups, allowing it to capture fine-grained relationships in the data. However, this also makes it easier for the tree to learn patterns that are specific to a small number of observations. This can result in the tree [overfitting](https://en.wikipedia.org/wiki/Overfitting) the original data, which results in less privacy protection.
 
-With a **larger** value, the tree must base its predictions on larger groups of observations. This generally produces a more generalised model and reduces the influence of individual or rare observations. The trade-off is that the tree may no longer be able to capture genuine complex relationships in the data, resulting in [underfitting](https://en.wikipedia.org/wiki/Overfitting#Underfitting:~:text=training%20and%20inference.-,Underfitting,-edit).
+With a **larger** value, the tree must base its predictions on larger groups of observations. This generally produces a more generalised and less complex model, reducing the influence of individual or rare observations and potentially lowering computational costs. The trade-off is that the tree may no longer be able to capture genuine complex relationships in the data, resulting in [underfitting](https://en.wikipedia.org/wiki/Overfitting#Underfitting:~:text=training%20and%20inference.-,Underfitting,-edit).
 
 For example, compared with the default:
 ```python
@@ -59,12 +64,10 @@ tune_cart(n_leaves=50)
 ```
 makes the CART models less specific: every prediction must be based on at least 50 training observations reaching the relevant leaf.
 
-The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
-
 ## Change the number of principal components
-CART uses a {class}`~synthpop.data_processing.encoders.PCAEncoder` to encode categorical predictors before they are passed to the classifier. This is necessary because the classifier operates on numerical features. Moreover, categorical variables contain many different categories, heavily increasing the computation cost.
+CART uses a {class}`~synthpop.data_processing.encoders.PCAEncoder` to encode categorical predictors before passing them to the classifier. This is necessary because the classifier operates on numeric features. Additionally, categorical variables can contain many levels, which can substantially increase the computational cost of the model.
 
-The `n_components` parameter controls the number of principal compents, and thus how much of this encoded information is retained by PCA.
+The `n_components` parameter controls the number of principal components and thus how much of this encoded information is retained by PCA.
 
 For example:
 ```python
@@ -217,7 +220,7 @@ all remaining columns   | `n_leaves=10`
 As with other synthesis methods, the method specified in `special_syn_method` overrides the default for that column.
 
 ## When should you use `tune_cart`?
-Initiating `CartMethod` manually remains the most flexible option when you need to customise individual components of the CART method. For example, if you want to replace the PCA encoder or use a different missing-value handling strategy, construct `CartMethod` and the underlying components directly:
+Constructing `CartMethod` manually remains the most flexible option when you need to customise individual components of the CART method. For example, if you want to replace the PCA encoder or use a different missing-value handling strategy, construct `CartMethod` and the underlying components directly:
 ```python
 CartMethod(
     regressor=TreeRegressorMethod(...),
