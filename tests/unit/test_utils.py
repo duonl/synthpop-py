@@ -379,13 +379,11 @@ RARE_CATEGORIES_WARN_CASES = [
     (np.array(unique_cats(9) * 5 + ["b"] * 55), 6),
     (np.array(unique_cats(9) * 5 + [np.nan] * 55), 6),  # same, but with nan.
 
-
     # nan is the rare category.
     (np.array([np.nan]*26 + ["b"] * 74), 52),
     (np.array([True] * 26 + [False] * 74), 52),  # boolean
 
 ]
-
 
 @pytest.mark.parametrize("x, threshold", RARE_CATEGORIES_WARN_CASES)
 def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
@@ -430,7 +428,6 @@ def test_warn_on_rare_category_no_name():
     ([np.nan] * 4 + ["b"] * 13, 5),  # same, but with nan.
     ([True] * 4 + [False] * 13, 5),  # same, but with boolean.
 
-    
 
     # 4*5 = 20 rows with values that occur 5 times
     # So 20% of the rows have a rare category
