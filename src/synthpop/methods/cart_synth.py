@@ -304,10 +304,10 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold:  Threshold for when a categorical value is considered rare.
-        If a categorical predictor contains values occurring fewer than this threshold, 
-        a warning is emitted to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occurring fewer than this threshold emit a warning.
+    :param rare_categories_threshold:  Threshold for determining whether a category is considered rare.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. 
+        This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        If set to an integer, categories occurring fewer than this threshold are considered rare.
         If set to ``0``, the check is disabled.
         Default value is 5.
 
@@ -562,16 +562,15 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
         For integers => 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
-    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
-        If a categorical predictor consist of more than 25% of values occurring fewer than this threshold, 
-        a warning is emitted to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+    :param rare_categories_threshold: Threshold for determining whether a category is considered rare.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
 
-        If set to an integer, categories occurring fewer than this threshold emit a warning.
-        If set to ``0``, the check is disabled.
+        If set to an integer, categories occurring fewer than this threshold are considered rare.
+        If set to ``0``, the rare-category check is disabled.
         If set to ``None``, the value of ``n_leaves`` is used.
-        The default value is ``None`` for :func:`tune_cart`, which means the threshold
-        defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
-        default threshold is also 5.
+       The default value is ``None`` for :func:`tune_cart`, so the threshold
+       defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
+       default threshold is also 5.
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
 
     :return: a CartMethod object with the parameters consistently applied.
