@@ -44,7 +44,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
     1             b
     2             c
 
-    As ``CopyMethod`` solely copies `y`, it can be called without `X`:
+    As ``CopyMethod`` does not use predictors to copy `y`, it can be called without `X`:
 
     >>> from synthpop.methods import CopyMethod
     >>> import pandas as pd

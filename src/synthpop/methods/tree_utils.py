@@ -221,7 +221,7 @@ class LeafNodeSampler:
             P(y = v | leaf) = count(v) / sum(counts in leaf)
 
         Note that calling this function twice gives the same return value.
-        See `User Guide 2 <../../user_guides/2_synthetic_data_generation.html>`__ 
+        See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__ 
         and `the API Reference on Reproducibility <../reproducibility/reproducibility.html>`__ for more information.
 
         :param leaf_ids: Leaf IDs of synthetic samples for which target values

@@ -19,7 +19,7 @@ Available synthesis methods are:
 (31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
-CART (Classification And Regression Trees) is the default synthesis method. Which can be used as follows:
+CART (Classification And Regression Trees) is the default synthesis method. It can be used as follows:
 ```python
 >>> from synthpop.methods import CartMethod
 
@@ -33,7 +33,7 @@ CART (Classification And Regression Trees) is the default synthesis method. Whic
 Name: length, dtype: float32
 ```                
 
-However, most users do not need to use it directly. It's main purpose is to be used within the {class}`~synthpop.synthesiser.Synthesiser` class:
+Most users should not construct this class directly. {ref}`Directly constructing <314-configuring-cart>` a `CartMethod` is intended for advanced use cases where the underlying components need to be customised. Instead, it should be configured through the {class}`~synthpop.synthesiser.Synthesiser` class.:
 
 ```python
 >>> from synthpop import Synthesiser
@@ -149,6 +149,7 @@ For the first column, no predictors are available. In that case, CART samples di
 - CART models only relationships captured by the available predictors. Important dependencies cannot be reproduced if relevant predictors are unavailable.
 - As part of the sequential synthesis framework, the available predictors depend on the column synthesis order. The ordering of predictors within a single CART model does not affect the fitted tree; only the selection of available predictors through the synthesis order matters.
 
+(314-configuring-cart)=
 ### 3.1.4. Configuring CART
 The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify hyperparameters of the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
@@ -207,7 +208,7 @@ new_target_column
 2                 1
 ```
 
-Or for intended use, directly from the {class}`~synthpop.synthesiser.Synthesiser` class:
+For the intended usage, specify this method when initiating the {class}`~synthpop.synthesiser.Synthesiser` class:
 
 ```python
 >>> from synthpop import Synthesiser
@@ -274,7 +275,7 @@ new_target_column
 2             <NA>
 ```
 
-Or for intended use, directly from the {class}`~synthpop.synthesiser.Synthesiser` class:
+For the intended usage, specify this method when initiating the {class}`~synthpop.synthesiser.Synthesiser` class:
 
 ```python
 >>> from synthpop import Synthesiser

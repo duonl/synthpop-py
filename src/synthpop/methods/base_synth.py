@@ -15,7 +15,7 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     A synthesis method in synthpop is an algorithm to synthesise a column of a dataset, based on already synthesised columns. 
     Specifically, such method learns a conditional distribution of a target column given one or multiple columns. 
-    A synthesis method inheriting from this class should work even if there are no predictors (so only a target).
+    Any synthesis method inheriting from this class should support synthesis when no predictors are provided, i.e. when only a target variable is available.
 
     See example `custom synthesis method <../../example/custom_synth.html>`__ to make your own synthesis method using the ``BaseSynthMethod``.
 

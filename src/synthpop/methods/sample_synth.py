@@ -44,7 +44,7 @@ class SampleMethod(BaseSynthMethod):
     1             c
     2             b
 
-    As ``SampleMethod`` solely samples from `y`, it can be called without `X`:
+    As ``SampleMethod`` does not use predictors to sample `y`, it can be called without `X`:
     
     >>> from synthpop.methods import SampleMethod
     >>> import pandas as pd

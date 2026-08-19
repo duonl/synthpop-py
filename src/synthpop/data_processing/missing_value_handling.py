@@ -64,7 +64,7 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
 class MissingValuePredictor(BaseMissingValueHandler):
     """
     Use a decision tree to predict which values are missing.
-    As such, it treats missingness itself as something that can be learned from the other columns.
+    As such, it treats missingness itself as something that can be learned from the relationships with other variables.
 
     Learns:
         P(z = 1 | X)
@@ -76,9 +76,9 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
-    During synthesis, the decision tree determines which leaf each row belongs to. 
+    During synthesis, the decision tree determines which leaf each observation belongs to. 
     A :py:obj`~synthpop.methods.tree_utils.LeafNodeSampler` then samples whether the target should be missing based on the missingness patterns observed in that leaf. 
-    This means that missing values are not inserted completely at random: the probability of a value being missing can depend on the characteristics of the row.
+    This means that missing values are not inserted completely at random: the probability of a value being missing depends on the characteristics of the observation.
 
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#predicting-missing-values>`__ for more
     in-depth information on the MissingValuePredictor.

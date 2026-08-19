@@ -26,10 +26,10 @@ class RandomStateManager:
     which independent seeds can be derived for individual components.
     Instances of this class can be used as a context manager to temporary switch seed:
 
-    See `the synthesis workflow user guide <../../user_guides/2_synthetic_data_generation.html>`__ 
+    See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__ 
     on why reproducibility is important.
 
-    The class can  is also  a context manager. Entering
+    The class is also  a context manager. Entering
     ``RandomStateManager(seed)`` temporarily replaces the current root seed.
     When leaving the context, both the previous root seed and its associated
     ``SeedSequence`` are restored:

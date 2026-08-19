@@ -117,7 +117,7 @@ class PCAEncoder(_BaseEncoder):
     >>> default_syn_method = tune_cart(n_components=1)
     >>> syn = Synthesiser(default_syn_method=default_syn_method)
 
-    See `alternative encoder <../../examples/alternative_encoder.html>`__ to customize encoder usage in synthpop-py.
+    For more configuration options, see the [configuring CART example](../../examples/configuring_cart_directly.md).
 
     The encoder can be used directly as follows (note that this is not the intended usage):
 
@@ -275,7 +275,7 @@ class MeanEncoder(_BaseEncoder):
     Transforms categorical data to numeric using mean encoding.
     The feature column `X` is encoded based on a numeric target column `y`.
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#mean-encoding>`__ 
-    for more in depth-information on PCA encoding
+    for more in depth-information on mean encoding
 
     Examples
     --------
