@@ -54,16 +54,6 @@ This affects the synthetic data because the tree's predictions are based on thes
 
 With a **larger** value, the tree must base its predictions on larger groups of observations. This generally produces a more generalised and less complex model, reducing the influence of individual or rare observations and potentially lowering computational costs. The trade-off is that the tree may no longer be able to capture genuine complex relationships in the data, resulting in [underfitting](https://en.wikipedia.org/wiki/Overfitting#Underfitting:~:text=training%20and%20inference.-,Underfitting,-edit).
 
-For example, compared with the default:
-```python
-tune_cart(n_leaves=5)
-```
-using:
-```python
-tune_cart(n_leaves=50)
-```
-makes the CART models less specific: every prediction must be based on at least 50 training observations reaching the relevant leaf.
-
 ## Change the number of principal components
 CART uses a {class}`~synthpop.data_processing.encoders.PCAEncoder` to encode categorical predictors before passing them to the classifier. This is necessary because the classifier operates on numeric features. Additionally, categorical variables can contain many levels, which can substantially increase the computational cost of the model.
 
