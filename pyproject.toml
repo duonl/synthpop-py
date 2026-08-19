@@ -20,10 +20,7 @@ authors = [
     {name = "Cas"},
 ]
 readme = "README.md"
-[project.urls]
-Documentation = "https://synthpop-py.readthedocs.io/en/develop/"
-Repository = "https://github.com/duonl/synthpop-py.git"
-Issues = "https://github.com/duonl/synthpop-py/issues"
+
 requires-python = ">=3.11"
 
 license = "EUPL-1.2"
@@ -32,6 +29,11 @@ dependencies = [
     "pandas (>=3.0.2,<4.0.0)",
     "plotly (>=6.5.2,<7.0.0)",
 ]
+
+[project.urls]
+Documentation = "https://synthpop-py.readthedocs.io/en/develop/"
+Repository = "https://github.com/duonl/synthpop-py.git"
+Issues = "https://github.com/duonl/synthpop-py/issues"
 
 [dependency-groups]
 docs = [
