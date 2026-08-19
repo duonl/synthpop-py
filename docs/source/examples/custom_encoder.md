@@ -1,8 +1,17 @@
 # Create a custom encoder
 
-Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
+Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories (which means 2^k-1 are required, with k the number of categories). synthpop-py implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
 However, you may want to use a different encoder for a specific use case. In this example we explain how to create a custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
+
+## Encoder requirements for synthpop
+For an encoder to be compatible with synthpop it should consider to have the following aspects:
+1. Return one dimensional arrays with the same shape, especially if the encoder is required to work with {class}`CartMethod`. However, if you also [build your own synthesis method](./custom_synth.md), there is more flexibility.
+2. [Cloneable estimator object](https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html), which allows synthpop-py to use the same encoder for the whole dataset.
+3. Missing value handling: Most encoders do not accept missing values in the data. As such a preprocessing step for missing values is required. synthpop-py has two methodology's for handling missing values: the {class}`~MissingValuePredictor` and {class}`~ReplaceMissingWithValue`.
+4. Reproducibility: Dependent on whether your encoder uses random numbers. In this case, synthpop-py has a {class}`~RandomStateManager` implementation.
+
+**For developers, these requirements are a must-have**, as they allow for a new encoder to seemingly fit into the synthpop framework. However, if you build an encoder for your own dataset you are free to leave out whatever is required for your use case.
 
 ## sklearn conventions
 In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from base `sklearn` objects explained below. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the package.
@@ -26,35 +35,47 @@ from typing import Self
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from sklearn.base import BaseEstimator
+from synthpop.reproducibility import RandomStateManager
+
+from synthpop.utils import str_dtype
 
 class CustomEncoder(BaseEstimator):
 
-    def __init__(self) -> None:
+    def __init__(self, random_state: int | None = None) -> None:
         super().__init__()
+        self.random_state = random_state
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
-        # Learn the unique categories
-        self.categories_ = np.unique(X).tolist()
+
+        RandomStateManager.set_root_seed(self.random_state)
+        # Exclude missing values when learning categories.
+        
+        self.mask_ =  ~pd.isna(X)
+        categories = np.unique(X[self.mask_])
+
+        self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: i
-            for i, category in enumerate(self.categories_)
+            category: RandomStateManager.create_instance_seed()
+            for category in self.categories_
         }
+
         return self
  ```
 
 We can now run:
 ```python
-X = ["cat", "dog", "cat", "bird"]
+X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
-encoder = CustomEncoder()
+encoder = CustomEncoder(random_state=12)
 encoder.fit(X)
 ```
 
 Now the learned parameter `mapping_` is a dictionairy that stores which type of animal (`X`) should be mapped to which integer value:
 ```python
 print(encoder.mapping_)
-{"bird": 0, "cat": 1, "dog": 2}
+{'bird': 570356716, 'cat': 741055479, 'dog': 2285044420}
 ```
 
 However this does not yet do anything with input data, it just learns a model.
@@ -68,42 +89,55 @@ from typing import Self
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
+from synthpop.reproducibility import RandomStateManager
+from synthpop.utils import str_dtype
 
 class CustomEncoder(TransformerMixin, BaseEstimator):
-
-    def __init__(self) -> None:
+    def __init__(self, random_state: int | None = None) -> None:
         super().__init__()
+        self.random_state = random_state
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
-        # Learn the unique categories
-        self.categories_ = np.unique(X).tolist()
+
+        RandomStateManager.set_root_seed(self.random_state)
+        # Exclude missing values when learning categories.
+        
+        self.mask_ =  ~pd.isna(X)
+        categories = np.unique(X[self.mask_])
+
+        self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: i
-            for i, category in enumerate(self.categories_)
+            category: RandomStateManager.create_instance_seed()
+            for category in self.categories_
         }
+
         return self
 
     def transform(self, X: npt.NDArray) -> npt.NDArray:
-        check_is_fitted(self, ['mapping_'])
-        # Convert categories to integers
-        return np.array([
+        check_is_fitted(self, ["mapping_"])
+
+        output = np.zeros(len(X))
+
+        output[self.mask_] = [
             self.mapping_[value]
-            for value in X
-        ])
+            for value in X[self.mask_]
+        ]
+        return np.array(output, dtype=np.float32)
  ```
 
 So we now have a function that is able to transform input data X to an output. If we now run the following code:
 ```python
-X = ["cat", "dog", "cat", "bird"]
+X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
-encoder = CustomEncoder()
+encoder = CustomEncoder(random_state=12)
 encoder.fit(X)
 values = encoder.transform(X)
-
 print(values)
-[1, 2, 1, 0]
+[7.4105549e+08 2.2850445e+09 0.0000000e+00 7.4105549e+08 0.0000000e+00
+ 5.7035674e+08]
 ```
 We see that we successfully managed to encode our animals into numbers.
 
@@ -119,35 +153,56 @@ Tags provide metadata about an estimator. sklearn can use this information when 
 In our case we find that we explicitly expect the data to be a one-dimensional categorical (list of strings). As such, we can inherent from the base class and mixin, and define specific tags from there:
 
 ```python
-class CustomEncoder(TransformerMixin, BaseEstimator):
+from typing import Self
 
-    def __init__(self) -> None:
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
+from synthpop.reproducibility import RandomStateManager
+from synthpop.utils import str_dtype
+
+class CustomEncoder(TransformerMixin, BaseEstimator):
+    def __init__(self, random_state: int | None = None) -> None:
         super().__init__()
+        self.random_state = random_state
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
 
         tags.input_tags.categorical = True
         tags.input_tags.one_d_array = True
+        tags.input_tags.allow_nan = True
 
         return tags
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
-        # Learn the unique categories
-        self.categories_ = np.unique(X).tolist()
+
+        RandomStateManager.set_root_seed(self.random_state)
+        # Exclude missing values when learning categories.
+        
+        self.mask_ =  ~pd.isna(X)
+        categories = np.unique(X[self.mask_])
+
+        self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: i
-            for i, category in enumerate(self.categories_)
+            category: RandomStateManager.create_instance_seed()
+            for category in self.categories_
         }
+
         return self
 
     def transform(self, X: npt.NDArray) -> npt.NDArray:
-        check_is_fitted(self, ['mapping_'])
-        # Convert categories to integers
-        return np.array([
+        check_is_fitted(self, ["mapping_"])
+
+        output = np.zeros(len(X))
+
+        output[self.mask_] = [
             self.mapping_[value]
-            for value in X
-        ])
+            for value in X[self.mask_]
+        ]
+        return np.array(output, dtype=np.float32)
  ```
 
 Now the general framework is ready to be used inside synthpop-py! See [alternative encoding using CART](alternative_encoder.md) on how to implement your encoder in synthpop.
