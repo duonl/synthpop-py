@@ -1,11 +1,11 @@
 # Mean Encoding
 ## 1. Introduction
-Mean encoding is a supervised encoding technique that transforms a categorical feature into a numeric representation by exploiting its relationship with a numerical target variable. Each category is replaced by the average value of the target for observations belonging to that category. The method preserves target-related structure in the categorical predictor while producing an one-dimensional numeric encoding. This encoding is a required step in our synthesis pipeline because the underlying decision tree models do not support categorical input variables.
+Mean encoding is a supervised encoding technique that transforms a categorical feature into a numeric representation by exploiting its relationship with a numeric target variable. Each category is replaced by the average value of the target for observations belonging to that category. The method preserves target-related structure in the categorical predictor while producing an one-dimensional numeric encoding. This encoding is a required step in our synthesis pipeline because the underlying decision tree models do not support categorical input variables.
 
 ## 2. Input and output
 The input for mean encoding consists of two columns:
 - A categorical feature with $m$ distinct levels to be encoded
-- A numerical target variable
+- A numeric target variable
 
 The output is a single numeric column that represents the encoded categorical feature.
 
@@ -17,7 +17,7 @@ The mean encoding process consists of the following steps:
 4. Application of the encoding map
 
 ### 3.1 Construction of the feature-target table
-A two-column table is constructed from the data, here the first column contains the categorical feature values and the second column contains the corresponding numerical target values. Each row represents one observation.
+A two-column table is constructed from the data, here the first column contains the categorical feature values and the second column contains the corresponding numeric target values. Each row represents one observation.
 
 ### 3.2 Grouping by feature level
 Let the categorical feature $X$ have distinct levels:

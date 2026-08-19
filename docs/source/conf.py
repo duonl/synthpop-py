@@ -86,3 +86,13 @@ intersphinx_mapping = {
         "https://scikit-learn.org/stable/objects.inv",
     ),
 }
+
+mermaid_init_js = """
+mermaid.initialize({
+    flowchart: {
+        diagramPadding: 0,
+        nodeSpacing: 10,
+        rankSpacing: 10
+    }
+});
+"""

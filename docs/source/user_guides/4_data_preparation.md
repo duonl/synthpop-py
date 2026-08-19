@@ -1,11 +1,11 @@
 # 4. Data preparation during synthesis
-Many synthesis methods in synthpop-py, most notably {class}`~synthpop.methods.cart_synth.CartMethod`, rely on machine learning models from `scikit-learn`. Because these models only accept numerical input, synthpop-py automatically prepares the data before fitting and generation.
+Many synthesis methods in synthpop-py, most notably {class}`~synthpop.methods.cart_synth.CartMethod`, rely on machine learning models from `scikit-learn`. Because these models only accept numeric input, synthpop-py automatically prepares the data before fitting and generation.
 
 Before a synthesis method such as CART is fitted, synthpop-py prepares the predictor variables according to their data type.
 
 For each target column:
 - numeric predictors (features) are used directly;
-- categorical predictors are converted into numerical representations using an encoder; and
+- categorical predictors are converted into numeric representations using an encoder; and
 - missing values in the target are handled differently depending on target type:
 
 For fitting a categorical target:
@@ -29,7 +29,7 @@ This section explains how categorical predictors are encoded, how missing values
 
 (41-encoding-categorical-predictors)=
 ## 4.1 Encoding categorical predictors
-[`Scikit-learn` decision trees](https://scikit-learn.org/stable/modules/tree.html) only accept numerical input. Therefore, categorical variables such as:
+[`Scikit-learn` decision trees](https://scikit-learn.org/stable/modules/tree.html) only accept numeric input. Therefore, categorical variables such as:
 ```text
 Colour
 ------
@@ -51,7 +51,7 @@ The encoder used depends on the target data type:
 
 (411-pca-encoding)=
 ### 4.1.1. PCA encoding
-The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numerical representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components <431_choosing_pca>`.
+The {class}`~synthpop.data_processing.encoders.PCAEncoder` method is used for categorical targets and produces a numeric representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components <431_choosing_pca>`.
 ```python
 >>> from synthpop.data_processing import PCAEncoder
 
@@ -224,7 +224,7 @@ P(z = 1 \mid x), \quad P(z = 0 \mid x).
 
 #### 4.2.2.1. Process
 1. Construct the missingness target vector.
-2. Apply mean encoding to the categorical predictors. Mean encoding is used as the boolean missingness vector is considered numerical.
+2. Apply mean encoding to the categorical predictors. Mean encoding is used as the boolean missingness vector is considered numeric.
 3. Fit a classifier for missingness:
 ```{math}
 P(z \mid x)

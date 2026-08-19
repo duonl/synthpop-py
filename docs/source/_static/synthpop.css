@@ -15,3 +15,15 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
   filter: invert(1.0) saturate(0.0);
   background: none;
 }
+
+.mermaid {
+    overflow-x: auto;
+    background: transparent !important;
+}
+
+.mermaid svg {
+    background: transparent;
+    max-width: none !important;
+    width: auto !important;
+    height: auto !important;
+}

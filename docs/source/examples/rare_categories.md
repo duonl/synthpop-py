@@ -124,7 +124,7 @@ As such, if the synthesis model reproduces this relationship exactly, a third-pa
 
 ### The impact of this problem
 
-The previous example demonstrates the mechanism by which overfitting can lead to [attribute disclosure](../user_guides/6_evaluating_privacy.md#612-attribute-disclosure). However, it is deliberately constructed: the same predictor values are used both to fit the synthesis model and to demonstrate the resulting disclosure. In a typical sequential synthesis workflow, the predictor variables themselves are synthesised, so the exact predictor values from the original dataset will not necessarily appear in the synthetic dataset.
+The previous example demonstrates the mechanism by which overfitting can lead to {ref}`attribute disclosure <612-attribute-disclosure>`. However, it is deliberately constructed: the same predictor values are used both to fit the synthesis model and to demonstrate the resulting disclosure. In a typical sequential synthesis workflow, the predictor variables themselves are synthesised, so the exact predictor values from the original dataset will not necessarily appear in the synthetic dataset.
 
 Nevertheless, the same privacy risk can occur in realistic settings when rare or unique categories are present in the data. If a rare category is reproduced in the synthetic dataset and a synthesis model has learned a strong relationship between that category and a sensitive variable, the sensitive value associated with the category may also be reproduced too accurately.
 

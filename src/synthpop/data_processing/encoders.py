@@ -240,7 +240,7 @@ class PCAEncoder(_BaseEncoder):
     # float32 is optimal for decision trees.
     def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:
         """
-        replaces each level of `X` with the numerical values determined in :py:meth:`fit`
+        replaces each level of `X` with the numeric values determined in :py:meth:`fit`
 
         :param X: Original column to be encoded.
         :return: Encoded column.

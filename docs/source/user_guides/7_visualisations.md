@@ -1,6 +1,6 @@
 # 7. Visualisations
 
-Synthetic data should be evaluated both quantitatively and visually. Quantitative metrics provide numerical measures of similarity between original and synthetic data, while visualisations provide an intuitive way to inspect whether important characteristics of the original data have been preserved.
+Synthetic data should be evaluated both quantitatively and visually. Quantitative metrics provide numeric measures of similarity between original and synthetic data, while visualisations provide an intuitive way to inspect whether important characteristics of the original data have been preserved.
 
 The synthpop-py package provides visualisations for assessing utility by comparing the original and synthetic datasets:
 
