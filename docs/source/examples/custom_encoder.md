@@ -2,7 +2,7 @@
 
 Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories (which means 2^k-1 are required, with k the number of categories). synthpop-py implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
-However, you may want to use a different encoder for a specific use case. In this example we explain how to create a custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
+However, you may want to use a different encoder for a specific use case. In this example we explain how to create a random custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
 
 ## Encoder requirements for synthpop
 For an encoder to be compatible with synthpop it should consider to have the following aspects:
@@ -11,7 +11,7 @@ For an encoder to be compatible with synthpop it should consider to have the fol
 3. Missing value handling: Most encoders do not accept missing values in the data. As such a preprocessing step for missing values is required. synthpop-py has two methodology's for handling missing values: the {class}`~MissingValuePredictor` and {class}`~ReplaceMissingWithValue`.
 4. Reproducibility: Dependent on whether your encoder uses random numbers. In this case, synthpop-py has a {class}`~RandomStateManager` implementation.
 
-**For developers, these requirements are a must-have**, as they allow for a new encoder to seemingly fit into the synthpop framework. However, if you build an encoder for your own dataset you are free to leave out whatever is required for your use case.
+**For developers, these requirements are a must-have**, as they allow for a new encoder to seemingly fit into the synthpop framework. However, if you build an encoder for your own dataset you are free to leave out whatever is required for your use case. In this example we will include all four requirements.
 
 ## sklearn conventions
 In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from base `sklearn` objects explained below. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the package.
@@ -28,7 +28,7 @@ class CustomEncoder(BaseEstimator):
         super().__init__()
  ```
  
- However, as of yet, this only learns all init parameters from BaseEstimator. Ideally we want to create a function that learns from the observed data. This can be done by defining a `fit` function:
+ However, as of yet, this only learns all init parameters from BaseEstimator. Ideally we want to create a function that learns from the observed data. This can be done by defining a `fit` function. The core concept of our fit function is to map categorical data to a random numerical values. As such, the following *should* suffice:
 
   ```python
 from typing import Self
@@ -37,12 +37,32 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.base import BaseEstimator
-from synthpop.reproducibility import RandomStateManager
-
-from synthpop.utils import str_dtype
 
 class CustomEncoder(BaseEstimator):
 
+    def __init__(self, random_state: int | None = None) -> None:
+        super().__init__()
+
+    def fit(self, X: npt.NDArray, y=None) -> Self:
+
+        categories = np.unique(X)
+        self.categories_ = categories.tolist()
+        self.mapping_ = {
+            category: np.random.rand()
+            for category in self.categories_
+        }
+
+        return self
+ ```
+
+### Reproducibility
+
+However, as of yet this is not a reproducible encoder. This is because {class}`np.random.rand`, will create a new number everytime fit is called, or the file is ran. Luckily, synthpop has built tools surrounding this problem of Reproducibility, using the {class}`RandomStateManager`. As such, one could now define:
+
+```python
+from synthpop.reproducibility import RandomStateManager
+
+class CustomEncoder(TransformerMixin, BaseEstimator):
     def __init__(self, random_state: int | None = None) -> None:
         super().__init__()
         self.random_state = random_state
@@ -50,10 +70,7 @@ class CustomEncoder(BaseEstimator):
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
         RandomStateManager.set_root_seed(self.random_state)
-        # Exclude missing values when learning categories.
-        
-        self.mask_ =  ~pd.isna(X)
-        categories = np.unique(X[self.mask_])
+        categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
@@ -62,8 +79,25 @@ class CustomEncoder(BaseEstimator):
         }
 
         return self
- ```
+```
 
+One could now call the ``CustomEncoder`` using a random_state argument to enforce reproducibility:
+```python
+encoder = CustomEncoder(random_state=12) # Arbitrary number
+```
+For more in depth information on the {class}`RandomStateManager`, please see the API reference or [Example: Make your synthesis reproducible](./reproducible_synthesis.md)
+
+### Handling missing values
+Handling missing values is a delicate task. Generally packages have different methodologies for this, for instance, `pandas` has `pd.NA`, whereas `numpy` uses `np.nan`. Moreover, defining a `numpy` array as follows:
+```python
+np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"])
+```
+casts to:
+```python
+["cat", "dog", "nan", "cat", "nan", "bird"]
+```
+
+Inside synthpop py we internally define a datatype that is able to combine categorical data (such as `str`) with missing values. This is defined as a {class}`np.dtypes.StringDType(na_object=np.nan)`, and stored in the `utils` module.
 We can now run:
 ```python
 X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
