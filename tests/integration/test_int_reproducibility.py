@@ -277,3 +277,26 @@ def test_leafnode_sampler_sample_determinism_with_same_seed():
     # repeated calls not advance the random state, unless a generator is input
     y3 = sampler1.sample_from_leaves(leaf_ids)
     assert np.array_equal(y1, y3)
+
+
+def test_tune_cart_is_reproducible():
+    """
+    Tests if synthesis done using tune_cart still satisfy the reproducibility requirements.
+    See issue #220.
+
+    """
+    obs = combined_regressor_and_classifier_test_data()
+
+    synth = Synthesiser(random_seed=1, default_syn_method=tune_cart(
+        rare_categories_threshold=0))
+    synth.fit(obs)
+    syn1 = synth.generate(2000)
+
+    synth2 = Synthesiser(random_seed=1, default_syn_method=tune_cart(
+        rare_categories_threshold=0))
+    synth2.fit(obs)
+    syn2 = synth2.generate(2000)
+    syn3 = synth2.generate(2000)
+
+    pd.testing.assert_frame_equal(syn1, syn2)
+    pd.testing.assert_frame_equal(syn3, syn2)
