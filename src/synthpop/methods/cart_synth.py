@@ -533,7 +533,7 @@ class CartMethod(base_synth.BaseSynthMethod):
         :raises NotFittedError: If the estimator has not been fitted.
         """
         if not hasattr(self, "target_name_"):
-            raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
+            raise NotFittedError("CartMethod is not fitted. Call `fit` first.")
 
         if input_features is None:
             if hasattr(self, "feature_names_in_"):
