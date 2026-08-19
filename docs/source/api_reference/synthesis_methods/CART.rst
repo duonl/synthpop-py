@@ -5,7 +5,7 @@ CART synthesis
    The module for **TreeClassifierMethod** and **TreeRegressorMethod** is not part of the stable public API.
    Interfaces may change without notice.
 
-.. note::
+.. note:: 
 
    A warning is emitted when CART is trained on a feature that consist for more than 25% of rare categories.
    If the features used to fit a CART model contain categories with rare values, there is a risk of :ref:`unintended attribute disclosure <612-attribute-disclosure>`.

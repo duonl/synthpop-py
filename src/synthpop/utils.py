@@ -170,6 +170,6 @@ def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None
             "which can pose a risk of undesirable attribute disclosure. \n"
             "Consider whether this risk is acceptable and adjust rare_categories_threshold if appropriate.\n"
             "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. \n"
-            "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html#synthpop.methods.cart_synth.tune_cart",
+            "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html",
             UserWarning
         )
