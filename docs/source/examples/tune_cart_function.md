@@ -15,7 +15,7 @@ In this example, we will introduce how to use the {func}`~synthpop.methods.cart_
 ## Implement `tune_cart`
 Suppose we are working with the Titanic dataset and want every variable to use CART synthesis, but we want each decision tree to require at least 10 observations in a leaf.
 
-Instead of constructing a `CartMethod` and configuring each decision tree individually, we can use `tune_cart`:
+Instead of constructing a `CartMethod` instance and configuring each decision tree individually, we can use `tune_cart`:
 ```python
 from synthpop import Synthesiser
 from synthpop.methods import tune_cart
@@ -42,8 +42,8 @@ synthesiser = Synthesiser(
 )
 ```
 The value `20` is passed to the `min_samples_leaf` parameter of the decision trees used for:
-- :any:`classification <~synthpop.methods.cart_synth.TreeClassifierMethod>`;
-- :any:`regression <~synthpop.methods.cart_synth.TreeRegressorMethod>`; and
+- {ref}`classification <~synthpop.methods.cart_synth.TreeClassifierMethod>`;
+- {ref}`regression <~synthpop.methods.cart_synth.TreeRegressorMethod>`; and
 - [predicting missing values](../api_reference/data_processing/Missing_value.rst).
 
 The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
