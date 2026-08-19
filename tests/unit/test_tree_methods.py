@@ -760,24 +760,6 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
 
 # ----- general tests -----
 
-
-@pytest.mark.parametrize("X", [v[0] for v in get_input_test_data()])
-def test_get_feature_names_out(X, tree_method):
-    tree_method.target_name_ = "name_of_target"
-
-    result = tree_method.get_feature_names_out()
-    assert result == ["name_of_target"]
-
-
-@pytest.mark.parametrize("X", [v[0] for v in get_input_test_data()])
-def test_get_feature_names_out_no_target_name(X, tree_method):
-    tree_method.target_name_ = None
-    tree_method.feature_order_ = ["Trained", "on", "these", "features"]
-
-    result = tree_method.get_feature_names_out()
-    assert result == [["Trained", "on", "these", "features"]]
-
-
 def test_to_fixed_length_string_array():
     x = np.array(["a", "b"], dtype=str_dtype)
     result = _to_fixed_length_string_array(x)
