@@ -527,8 +527,8 @@ def test_transform_requires_fit_missing_attribute(missing_attr):
 @pytest.mark.parametrize(
     "target_name, input_features, expected",
     [
-        ("synthetic", None, "synthetic"),
-        ("synthetic", ["a", "b"], "synthetic"),
+        ("synthetic", None, ["synthetic"]),
+        ("synthetic", ["a", "b"], ["synthetic"]),
         (None, ["a", "b"], ["a", "b"]),
         (None, None, []),
     ],
@@ -558,6 +558,14 @@ def test_get_feature_names_out_from_feature_names_in_():
     result = model.get_feature_names_out()
     np.testing.assert_array_equal(result, model.feature_names_in_)
 
+
+def test_get_feature_names_out_from_n_features_in():
+    model = CartMethod()
+    model.target_name_ = None
+    model.n_features_in_ = 3
+
+    result = model.get_feature_names_out()
+    np.testing.assert_array_equal(result, ["x0", "x1", "x2"])
 
 def test_get_feature_names_out_raises_unfitted():
     cart = CartMethod()

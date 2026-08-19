@@ -459,6 +459,7 @@ class CartMethod(base_synth.BaseSynthMethod):
                              f"{len(X)} != {len(y)}.")
 
         self.feature_names_in_ = list(X.columns)
+        self.n_features_in_ = X.shape[1]
         self.target_name_ = y.name
         self.target_dtype_ = y.dtype
 
@@ -520,6 +521,11 @@ class CartMethod(base_synth.BaseSynthMethod):
         If the original target column has no name (i.e. `None`), the input feature
         names are returned instead.
 
+        If `input_features` is not provided, fitted feature names are used.
+        If fitted feature names are not available, generic feature
+        names ``x0, x1, ..., x(n_features_in_ - 1)`` are generated when
+        `n_features_in_` is available.
+
         :param input_features: Names of the input columns. If not provided,
             uses the feature names stored during fitting (`feature_names_in_`).
         :return: Name of the synthesised target column, or the input feature names
@@ -527,15 +533,22 @@ class CartMethod(base_synth.BaseSynthMethod):
         :raises NotFittedError: If the estimator has not been fitted.
         """
         if not hasattr(self, "target_name_"):
-            raise NotFittedError("CartMethod is not fitted. Call `fit` first.")
+            raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
 
         if input_features is None:
-            input_features = getattr(self, "feature_names_in_", [])
+            if hasattr(self, "feature_names_in_"):
+                input_features = list(self.feature_names_in_)
+            elif hasattr(self, "n_features_in_"):
+                input_features = [
+                    f"x{i}" for i in range(self.n_features_in_)
+                ]
+            else:
+                input_features = []
 
         if self.target_name_ is None:
             return input_features
 
-        return self.target_name_
+        return [self.target_name_]
 
 
 def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_categories_threshold: int | None = None) -> CartMethod:
