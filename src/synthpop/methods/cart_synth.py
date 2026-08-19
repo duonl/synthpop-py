@@ -232,10 +232,10 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
-        If a categorical predictor contains values occurring fewer than this threshold, 
-        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occurring fewer than this threshold raise an exception.
+    :param rare_categories_threshold: Threshold for determining whether a category is considered rare.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. 
+        This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        If set to an integer, categories occurring fewer than this threshold are considered rare.
         If set to ``0``, the check is disabled.
         Default value is 5.
 
