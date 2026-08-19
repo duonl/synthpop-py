@@ -1,11 +1,11 @@
 # Create a custom encoder
 
-Encoding of categorical input features is a huge part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed and reduces the size of decision trees, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py inherently implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
+Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories. synthpop-py implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
 However, you may want to use a different encoder for a specific use case. This section explains how to create a custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
 
 ## sklearn conventions
-synthpop-py is build around base `sklearn` objects. In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from these base `sklearn` objects. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the software.
+In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from base `sklearn` objects explained below. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the package.
 
 ## BaseEstimator
  An estimator is an object that fits a model based on some training data and can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
@@ -19,7 +19,7 @@ class CustomEncoder(BaseEstimator):
         super().__init__()
  ```
  
- However, as of yet, this only learns all init parameters from BaseEstimator. Ideally we want to create a function that learns from the initial data. This can be done by defining a `fit` function:
+ However, as of yet, this only learns all init parameters from BaseEstimator. Ideally we want to create a function that learns from the observed data. This can be done by defining a `fit` function:
 
   ```python
 from typing import Self
@@ -105,7 +105,7 @@ values = encoder.transform(X)
 print(values)
 [1, 2, 1, 0]
 ```
-We see that we successfully managed to encode our animals into numbers. Ain't that awesome? 
+We see that we successfully managed to encode our animals into numbers.
 
 As you saw we also added `check_is_fitted` in our `transform` function. Even though this is not a requisite, we heavily recommend the use of this `sklearn` utility function as it checks whether required learned parameters are actually learned by `fit`. It will produce an `NotFittedError` in cases where one calls `transform` before `fit`.
 
