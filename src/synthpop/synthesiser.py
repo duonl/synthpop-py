@@ -24,7 +24,7 @@ class Synthesiser:
     :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartMethod. 
     :param special_syn_method: Dictionary of special synthesis method per variable. 
         If some variables should not follow the default_syn_method, they should be indicated in a dictionary
-        where keys are variable names and values are `BaseSynthMethod` instances or zero-argument callables returning `BaseSynthMethod` instances. 
+        where keys are variable names and values are `BaseSynthMethod` instances (like :class:`CartMethod`) or zero-argument callables returning `BaseSynthMethod` instances (like :func:`tune_cart`). 
         By default, there is no special synthesis method.
 
 
@@ -38,7 +38,7 @@ class Synthesiser:
     ``RandomStateManager`` while retaining reproducibility from
     ``Synthesiser(random_seed=...)``. 
 
-    If default_syn_method is callable, it is called once for each column that does not have a special synthesis method.
+    If a value of default_syn_method is callable, it is called once for each column that does not have a special synthesis method.
     If a value of special_syn_method is callable, it is called once when that column is fitted.
 
     Examples
