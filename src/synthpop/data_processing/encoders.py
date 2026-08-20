@@ -275,7 +275,7 @@ class MeanEncoder(_BaseEncoder):
     Transforms categorical data to numeric using mean encoding.
     The feature column `X` is encoded based on a numeric target column `y`.
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#mean-encoding>`__ 
-    for more in depth-information on mean encoding
+    for more in-depth information on mean encoding
 
     Examples
     --------
