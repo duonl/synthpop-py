@@ -365,7 +365,7 @@ def unique_cats(count):
 RARE_CATEGORIES_WARN_CASES = [
     # one row, so unique value , and more than quarter.
     (np.array(["a"]), 5),
-    (np.array(["a"]*4), 5),  # rowcount below threshold.
+    (np.array(["a"] * 4), 5),  # rowcount below threshold.
     (np.array(["a", "b", "c", "d", "e"]), 5),  # all values unique
     (np.array(unique_cats(100) * 5), 6),  # all categories rare
 

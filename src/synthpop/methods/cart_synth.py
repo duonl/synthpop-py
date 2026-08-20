@@ -573,7 +573,9 @@ def tune_cart(
         For integers ≥ 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
     :param rare_categories_threshold: Threshold for determining whether a category is considered rare.
-        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to
+        categories occurring fewer than this threshold. This warning helps prevent potential
+        :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
 
        If set to an integer, categories occurring fewer than this threshold are considered rare.
         If set to ``0``, the rare-category check is disabled.
