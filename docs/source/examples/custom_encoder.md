@@ -2,7 +2,7 @@
 
 Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories (which means $2^k-1$ are required, with $k$ the number of categories). synthpop-py implements two encoder methods: {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
-However, you may want to use a different encoder for a specific use case. In this example we explain how to create a custom encoder. Specifically one that maps categorical data to random numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
+However, you may want to use a different encoder for a specific use case. In this example we explain how to create a custom encoder. Specifically one that maps categorical data to random numerical values, while following sklearn conventions. If you would rather use an existing alternative encoder, see [configure cart directly](configure_cart_directly.md).
 
 ## Encoder requirements for synthpop
 For an encoder to be compatible with synthpop it should consider to have the following aspects:
@@ -14,10 +14,10 @@ For an encoder to be compatible with synthpop it should consider to have the fol
 **For developers, these requirements are a must-have**, as they allow for a new encoder to seemingly fit into the synthpop framework. However, if you build an encoder for your own dataset you are free to leave out whatever is required for your use case. In this example we will include all four requirements.
 
 ## sklearn conventions
-In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from base `sklearn` objects explained below. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the package.
+In order to be compatible with `sklearn`, and `synthpop`, a new estimator/encoder should also inherit from base `sklearn` objects explained below. This provides the standard interface and functionality required for your encoder to integrate seamlessly with the rest of the package (such as cloning).
 
 ## BaseEstimator
-An estimator is an object that fits a model based on some training data and can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
+An estimator is an object that fits a model based on some training data. Thereafter one can use that model to infer properties or make predictions on new data. It can be either a classifier or regressor. The base class for all estimators is [BaseEstimator](https://scikit-learn.org/dev/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator). As such, one can start by defining their own estimator as:
 
  ```python
 from sklearn.base import BaseEstimator
@@ -193,7 +193,7 @@ print(values)
 [7.4105549e+08 2.2850445e+09 0.0000000e+00 7.4105549e+08 0.0000000e+00
  5.7035674e+08]
 ```
-We see that we successfully managed to encode our animals into numbers.
+****We successfully managed to transform our animals into numbers!****![Tada](../images/tada_emoji.gif){width=25px}
 
 As you saw we also added `check_is_fitted` in our `transform` function. Even though this is not a requisite, we heavily recommend the use of this `sklearn` utility function as it checks whether required learned parameters are actually learned by `fit`. It will produce an `NotFittedError` in cases where one calls `transform` before `fit`.
 
@@ -285,7 +285,7 @@ print(syndata.head(5))
 4  bird  5
 ```
 
-For more information on implementing alternative methodologies in CART, see [alternative encoding using CART](alternative_encoder.md).
+For more information on implementing alternative methodologies in CART, see [configure cart directly](configure_cart_directly.md).
 
 ## Keep in mind:
 1. Test if your encoder works as expected. You can, for instance, check for sklearn compatibility by running [pytest](https://docs.pytest.org/en/stable/):
@@ -317,6 +317,6 @@ When implementing a custom encoder, it is important to validate one-dimensional 
 
 ## Next Steps
 With the custom encoder implemented and validated, the next step is to integrate it into synthpop-py. 
-See [alternative encoding using CART](./alternative_encoder.md) for an example of how to connect a custom encoder to the encoding workflow and use it during synthesis.
+See [configure cart directly](configure_cart_directly.md) for an example of how to connect a custom encoder to the encoding workflow and use it during synthesis.
 
 In the [following example](./custom_synth.md) we will explain how to build your own synthesis model.
