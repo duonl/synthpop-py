@@ -57,7 +57,7 @@ When configuring CART components directly, it is important to understand how syn
 This also applies to the `scikit-learn` estimators used by the standard CART configuration. When these estimators are created by synthpop-py, their random states are configured through `RandomStateManager`, so they are both reproducible and independently seeded.
 
 ### Supplying your own `scikit-learn` estimator
-The behaviour is different when you create a `scikit-learn` estimator yourself and pass it to CART as a component. This approach is described in more detail in the {ref}`next section <configure-underlying-decision-trees>`. For example:
+The behaviour is different when you create a `scikit-learn` estimator yourself and pass it to CART as a component. **The {ref}`next section <configure-underlying-decision-trees>` explains how to configure and supply custom `scikit-learn` estimators to CART**. For example:
 ```python
 from sklearn.tree import DecisionTreeClassifier
 
