@@ -51,6 +51,33 @@ The important point is that these components are not fixed parts of CART. They c
 
 This is the more flexible, but more complicated, alternative to the `tune_cart` convenience function we used in the [previous example](./tune_cart_function.md).
 
+## A note on reproducibility and random states
+When configuring CART components directly, it is important to understand how synthpop-py manages random states. The package uses {class}`~synthpop.reproducibility.RandomStateManager` to manage randomness throughout the synthesis process. When synthpop-py creates a component that requires randomness, it derives an independent seed from the root seed provided to `Synthesiser`. Consequently, setting the same `random_seed` on `Synthesiser` makes the random behaviour of package-created components reproducible while still giving each component an independent random stream. See [Example: Make your synthesis reproducible](reproducible_synthesis.md) for more information.
+
+This also applies to the `scikit-learn` estimators used by the standard CART configuration. When these estimators are created by synthpop-py, their random states are configured through `RandomStateManager`, so they are both reproducible and independently seeded.
+
+### Supplying your own `scikit-learn` estimator
+The behaviour is different when you create a `scikit-learn` estimator yourself and pass it to CART as a component. This approach is described in more detail in the {ref}`next section <configure-underlying-decision-trees>`. For example:
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+tree = DecisionTreeClassifier()
+```
+Because this estimator was created by the user, synthpop-py does not configure its `random_state` through `RandomStateManager`. If the estimator uses randomness, you should therefore set its `random_state` explicitly when reproducibility is required:
+```python
+tree = DecisionTreeClassifier(random_state=1)
+```
+However, a fixed `random_state` is a fixed seed. Unlike the components created by synthpop-py, it does not result in an independent random stream for each instance. This is particularly relevant when a configured `CartMethod` is used as `default_syn_method`, as shown in the examples on this page. `Synthesiser` clones the supplied default synthesis method for each column, so each cloned `DecisionTreeClassifier` retains `random_state=1`. The cloned estimators therefore start from the same random seed rather than receiving independent seeds from `RandomStateManager`.
+
+This does not mean that the entire synthesis process will produce identical results across columns: randomness elsewhere in the synthesis process is still managed independently. However, using the same fixed random state in multiple cloned `scikit-learn` components can result in repeated random behaviour and may therefore be undesirable.
+
+There are therefore two different approaches to keep in mind:
+- **Package-created `scikit-learn` components:** synthpop-py manages their random states through `RandomStateManager`, providing reproducibility while assigning independent random streams to different component instances.
+- **User-supplied `scikit-learn` components:** their `random_state` remains under your control. If you set a fixed value, that value is retained when the component is cloned rather than being replaced with an independent seed from `RandomStateManager`.
+
+When reproducibility is important, you should therefore set `random_state` explicitly on user-supplied stochastic `scikit-learn` components. However, using the same fixed `random_state` for multiple components is not equivalent to the independent-stream behaviour provided by synthpop-py's normal random-state management.
+
+(configure-underlying-decision-trees)=
 ## Configure the underlying decision trees
 The decision trees are responsible for dividing observations intro groups with similar target values. Their configuration therefore has a direct effect on how specific the resulting model can become.
 
@@ -70,12 +97,14 @@ cart = CartMethod(
         tree=DecisionTreeClassifier(
             min_samples_leaf=20,
             min_impurity_decrease=1e-6,
+            random_state=1,
         ),
     ),
     regressor=TreeRegressorMethod(
         tree=DecisionTreeRegressor(
             min_samples_leaf=20,
             min_impurity_decrease=1e-6,
+            random_state=1.
         ),
     ),
 )
@@ -117,7 +146,10 @@ from synthpop.data_processing import PCAEncoder
 cart = CartMethod(
         classifier=TreeClassifierMethod(
                 encoder = PCAEncoder(
-                        pca_transform=PCA(n_components=2)
+                        pca_transform=PCA(
+                                n_components=2,
+                                random_state=1,
+                        ),
                 ),
         ),
 )
@@ -133,6 +165,7 @@ PCAEncoder(
                 n_components=0.9,
                 whiten=True,
                 svd_solver="full",
+                random_state=1,
         ),
 )
 ```
@@ -199,6 +232,7 @@ from synthpop.data_processing import MeanEncoder, MissingValuePredictor
 missing_handler = MissingValuePredictor(
         tree=DecisionTreeClassifier(
                 min_samples_leaf=5,
+                random_state=1,
         ),
         encoder=MeanEncoder(),
 )
@@ -261,15 +295,18 @@ cart = CartMethod(
                 tree=DecisionTreeClassifier(
                         min_samples_leaf=20,
                         min_impurity_decrease=1e-8,  #default in CartMethod
+                        random_state=1,
                 ),
                 encoder=PCAEncoder(
                         pca_transform=PCA(
                                 n_components=0.9,
+                                random_state=1,
                         ),
                 ),
                 missing_handler=MissingValuePredictor(
                         tree=DecisionTreeClassifier(
                                 min_samples_leaf=10,
+                                random_state=1,
                         ),
                 ),
         ),
@@ -277,6 +314,7 @@ cart = CartMethod(
                 tree=DecisionTreeRegressor(
                         min_samples_leaf=5,
                         criterion="absolute_error",
+                        random_state=1,
                 ),
                 #encoder=OneHotEncoder(
                 #        handle_unknown="ignore",
@@ -285,6 +323,7 @@ cart = CartMethod(
                         tree=DecisionTreeClassifier(
                                 min_samples_leaf=15,
                                 max_depth=5,
+                                random_state=1,
                         ),
                         encoder=MeanEncoder(),  # default
                 ),
