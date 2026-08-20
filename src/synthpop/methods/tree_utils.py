@@ -111,7 +111,7 @@ class LeafNodeSampler:
     
     .. rubric:: Usage
 
-    One could use the tree sampler in a tree based synthesiser method as follows:
+    One could use the tree sampler in a tree-based synthesiser method as follows:
 
     >>> from sklearn.tree import BaseDecisionTree
     ...

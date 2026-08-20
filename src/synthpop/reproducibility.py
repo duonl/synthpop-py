@@ -83,7 +83,7 @@ class RandomStateManager:
     @classmethod
     def set_root_seed(cls, seed: int | Sequence[int] | npt.NDArray[np.integer] | None):
         """
-        Set the root seed and initializes its :py:obj:`~numpy.random.SeedSequence`.
+        Sets the root seed and initialises its :py:obj:`~numpy.random.SeedSequence`.
         The intended usage is within the Synthesiser class.
         """
 
@@ -104,7 +104,6 @@ class RandomStateManager:
         """
         Returns an independent integer seed derived from the root seed.
         It can also be used to initialise external dependencies that require integer seeds.
-        external dependencies (legacy).
         The instance seeds are integers to facilitate
         combining the root seed and instance seed.
 

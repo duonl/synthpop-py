@@ -21,7 +21,7 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
     Both fit and transform should work for numeric and categorical variables.
 
-    Note for child classes: consider cloning behaviour (https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html)
+    Note for child classes: consider `cloning behaviour <https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html>`__.
     """
 
     def __init__(self) -> None:
@@ -31,7 +31,7 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     @abstractmethod
     def fit(self, X: pd.DataFrame | None, y: pd.Series) -> Self:
         """
-        The `fit` method must learn all parameters required to synthesise the target variable from the provided features.
+        The ``fit`` method must learn all parameters required to synthesise the target variable from the provided features.
         It does not modify the input data and does not produce any output.
 
         There should be an implementation of missing values support in case of missing values in feature columns.
@@ -77,8 +77,8 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         Get output feature names and category names for transformation. This method is required to support the ``set_output(transform="pandas")`` API in scikit-learn.
         
-        See https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output 
-        and SLEP018 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html) and SLEP007 (https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html)
+       See the `developer API for ``set_out`` <puthttps://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output>`__,
+       `SLEP018 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html>`__ and `SLEP007 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html>`__.
         
         :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during ``fit`` are used.
         """

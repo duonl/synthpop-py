@@ -63,7 +63,7 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
 
 class MissingValuePredictor(BaseMissingValueHandler):
     """
-    Use a decision tree to predict which values are missing.
+    Predicts missing values using a decision tree.
     As such, it treats missingness itself as something that can be learned from the relationships with other variables.
 
     Learns:

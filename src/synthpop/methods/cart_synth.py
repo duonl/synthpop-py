@@ -404,7 +404,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     - dict[str, np.ndarray] for X
     - np.ndarray for y
 
-    The returned pandas Series preserves the dtype of the input target variable.
+    The returned pandas Series preserves the data type of the input target variable.
 
     :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 

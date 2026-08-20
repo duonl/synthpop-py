@@ -95,9 +95,9 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
 class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
-    The user can adjust the number of principal components by passing an instance of sklearn.decomposition.PCA to `pca_transform`.
+    The user can adjust the number of principal components by passing an instance of :class:`sklearn.decomposition.PCA` to `pca_transform`.
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#pca-encoding>`__ 
-    for more in depth-information on PCA encoding.
+    for more in-depth information on PCA encoding.
 
     :param pca_transform: The pca transform used. The default value is :class:`sklearn.decomposition.PCA`. 
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. 
@@ -117,7 +117,7 @@ class PCAEncoder(_BaseEncoder):
     >>> default_syn_method = tune_cart(n_components=1)
     >>> syn = Synthesiser(default_syn_method=default_syn_method)
 
-    For more configuration options, see the [configuring CART example](../../examples/configuring_cart_directly.md).
+    For more configuration options, see the `configuring CART example <../../examples/configuring_cart_directly.html>`__.
 
     The encoder can be used directly as follows (note that this is not the intended usage):
 
@@ -358,7 +358,7 @@ class MeanEncoder(_BaseEncoder):
     # float32 is optimal for decision trees.
     def transform(self, X: npt.NDArray) -> npt.NDArray[np.float32]:
         """
-        Apply mapping from fitting function to X and returns the encoded version ``X_transformed``
+        Applies mapping from fitting function to X and returns the encoded version ``X_transformed``
 
         :param X: Original column to be encoded
         :return: Encoded column

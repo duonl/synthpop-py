@@ -2,8 +2,8 @@ Reproducibility
 --------------------------------------------
 .. note::
 
-    The module for **Reproducibility** is not intended to be used directly by users 
-    It is embedded in the synthesisis process. Interfaces may change without notice.
+    The **Reproducibility**module is an internal component and should not be used directly.
+    It is integrated in the synthesisis process, and its interface may change without notice.
 
 
 .. automodule:: synthpop.reproducibility
