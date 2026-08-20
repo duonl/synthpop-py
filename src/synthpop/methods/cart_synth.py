@@ -570,7 +570,7 @@ def tune_cart(
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
         For integers ≥ 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
-    :param rare_categories_threshold: Threshold to determine whether a category is considered rare.
+    :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
         A warning is emitted when more than 25% of the observations in a categorical predictor belong to
         categories occurring fewer than this threshold. This warning helps prevent potential
         :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
@@ -585,7 +585,7 @@ def tune_cart(
         
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
     
-    :return: a callable that returns a CartMethod object with the parameters consistently applied.
+    :return: a callable that returns a ``CartMethod`` object with the parameters consistently applied.
 
     A zero-argument callable is returned instead of a ``CartMethod``
     instance so that the underlying estimators are constructed during
