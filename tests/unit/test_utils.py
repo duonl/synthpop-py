@@ -392,7 +392,7 @@ def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
 
     message_regex = f".* {txt_column_name}.*{txt_threshold}.*"
 
-    with pytest.warns(UserWarning, match=message_regex) as record:
+    with pytest.warns(UserWarning, match=message_regex):
         _warn_on_rare_category(
             x, threshold, name=f"column_with_threshold{threshold}")
 
