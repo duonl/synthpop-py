@@ -61,7 +61,7 @@ flowchart TD
     C --> H["Synthetic sample:<br/>draw randomly from<br/>[72, 75, 80]"]
 ```
 
-To reduce the risk of disclosing information about individual observations, a minimum number of observations per terminal leaf can be specified. This prevents CART from creating terminal leaves based on very small groups of observations. A higher minimum leaf size generally provides stronger protection against highly specific splits, but may reduce the algorithm's ability to capture detailed patterns in the data.
+To reduce the risk of disclosing information about individual observations, a minimum number of observations per terminal leaf can be specified. This prevents CART from creating terminal leaves based on very small groups of observations. A higher minimum leaf size generally provides stronger protection against highly specific splits, but may reduce the algorithm's ability to capture detailed patterns in the data. The default value in synthpop-py is 5 observations per leaf node.
 
 CART is recommended when:
 - preserving relationships between variables is important;
