@@ -4,13 +4,13 @@ Encoding of categorical input features is an important part of synthpop-py's int
 
 synthpop-py provides two built-in encoder methods: {class}`~synthpop.data_processing.encoders.MeanEncoder` is used when the target column is numeric, while {class}`~synthpop.data_processing.encoders.PCAEncoder` is used when target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>` for more theoretical background on encoding.
 
-In some cases, you may want to use a different encoding strategy. In this example we explain how to create a custom encode that maps categorical data to random numeric values while following the `scikit-learn` conventions. If you would rather use an existing alternative encoder, see [Example: configure cart directly](configure_cart_directly.md).
+In some cases, you may want to use a different encoding strategy. In this example we explain how to create a custom encoder that maps categorical data to random numeric values while following the `scikit-learn` conventions. If you would rather use an existing alternative encoder, see [Example: configure cart directly](configure_cart_directly.md).
 
 ## Encoder requirements for synthpop-py
 To integrate an encoder with synthpop-py, there are several requirements to consider. The requirements are particularly important when the encoder is used with {class}`~synthpop.methods.cart_synth.CartMethod`, which expects encoders to follow a specific interface.
 1. **Output shape:** The encoder should return a one-dimensional array with the same number of observations as the input. This is particularly important when the encoder is used with `CartMethod`. If you [build your own synthesis method](./custom_synth.md), you may have more flexibility in how the encoder represents its output.
 2. **Cloneability:** The encoder should be a [cloneable estimator object](https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html). This allows synthpop-py to create independent copies of the encoder when it is used across the dataset.
-3. **Missing values:** Many types datasets contain missing values. If the encoder does not support missing values itself, they must be handled before encoding. synthpop-py provides two approaches for handling missing values: the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
+3. **Missing values:** Many types of datasets contain missing values. If the encoder does not support missing values itself, they must be handled before encoding.
 4. **Reproducibility:** If the encoder uses randomness, its random behaviour should be controlled through a `random_state`. synthpop-py provides {class}`~synthpop.reproducibility.RandomStateManager` to manage random states consistently throughout the synthesis process.
 
 For **developers implementing an encoder for synthpop-py**, these requirements are a must as they allow the new encoder to integrate with the existing synthesis framework. However, if you are developing an encoder for a specific use case or your own synthesis method, you may not need to implement all of these features. In this example, we implement all four requirements.
@@ -141,7 +141,7 @@ print(encoder.mapping_)
 
 ### TransformerMixin
 
-The `fit` method learns the mapping from categorical values to numeric values, bu the encoder also needs a way to apply that learning mapping to data. Luckily, `scikit-learn` also provides a {class}`sklearn.base.TransformerMixin` for this purpose. By inheriting from `TransformerMixin`, our encoder follows the standard transformer interface and can implement a `transform` method that applies the mapping learned during `fit`.
+The `fit` method learns the mapping from categorical values to numeric values, but the encoder also needs a way to apply that learned mapping to data. 
 
 Our encoder can therefore be extended as follows:
 
@@ -262,7 +262,7 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
 With these tags in place, the encoder provides `scikit-learn` with the information it needs to understand the type of input it accepts.
 
 ## Use the custom encoder inside synthpop-py
-The custom encoder is now ready to be used in the synthpop-py environment. We can supply it to the CART components in the same way as the built-in encoders. Because both the classifier and regressor can use categorical predictors, we configure each component with an instance of our `CustomEncoder`:
+The custom encoder is now ready to be used with synthpop-py. We can supply it to the CART components in the same way as the built-in encoders. Because both the classifier and regressor can use categorical predictors, we configure each component with an instance of our `CustomEncoder`:
 
 ```python
 from synthpop import Synthesiser
