@@ -146,7 +146,7 @@ class Synthesiser:
         """
         Loops through the columns in ``X``, following ``column_order``, and calls the :py:meth:`fit` function of the synthesis method classes given in ``default_syn_method`` and ``special_syn_method``.
 
-        If the variable name is found in keys of ``special_syn_method``, its corresponding value is the object used to synthesise that variable. The `fit` method of that object will be called.
+        If the variable name is found in keys of ``special_syn_method``, its corresponding value is the object used to synthesise that variable. The ``fit`` method of that object will be called.
         Otherwise, we use the object defined in ``default_syn_method``.
 
         :param X: The original dataset used to fit the synthesiser.
@@ -163,7 +163,14 @@ class Synthesiser:
 
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
-        elif all(isinstance(item, int) for item in self.column_order):
+
+        elif not isinstance(self.column_order, list):
+            raise ValueError(
+                f"Synthesiser.column_order expects input to be a list of column names (str) "
+                f"or column indices (int), got {type(self.column_order).__name__} instead."
+            )
+
+        elif all(isinstance(item, int) and not isinstance(item, bool) for item in self.column_order):
 
             self._validate_column_order_unique(self.column_order)
 
@@ -179,15 +186,22 @@ class Synthesiser:
                     f"The following indices of Synthesiser.column_order are negative: {array_columns[negative_indices]}")
 
             self.column_order_ = X.columns[self.column_order].to_list()
-        elif not all(isinstance(item, str) for item in self.column_order):
-            raise ValueError(f"invalid column order: {self.column_order}")
-        else:
+
+        elif all(isinstance(item, str) for item in self.column_order):
+
             self._validate_column_order_unique(self.column_order)
             columns_not_in_df = set(self.column_order) - set(X.columns)
             if len(columns_not_in_df) > 0:
                 raise ValueError(
                     f"The following columns of Synthesiser.column_order are not in the dataframe: {sorted(columns_not_in_df)}")
             self.column_order_ = self.column_order
+
+        else:
+
+            raise ValueError(
+                f"Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), "
+                f"got datatypes {set(type(x).__name__ for x in self.column_order)} instead."
+            )
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
@@ -213,7 +227,7 @@ class Synthesiser:
         """
         Generate a synthetic dataset of ``n`` rows. 
 
-        This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in `fit`.
+        This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in ``fit``.
 
         :param n: Number of rows to generate for the synthetic dataset. Default is the same number of rows as the dataset on which the synthesiser was fitted. If one of the synthesis methods copies the original data, this parameter must be None.
         :param random_seed: A seed for randomness that overrides the generation seed without refitting the synthesiser.

@@ -17,6 +17,20 @@ class SampleMethod(BaseSynthMethod):
 
     Examples
     --------
+
+    :class:`SampleMethod` should be given as an argument to the :class:`Synthesiser`'s ``default_syn_method`` or ``special_syn_method``.
+    See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
+    `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
+
+    **Intended usage in the package is thus:**
+        
+    >>> from synthpop.methods import SampleMethod
+    >>> from synthpop import Synthesiser
+    ... 
+    >>> syn = Synthesiser(special_syn_method={"your_column_name" : SampleMethod()})
+
+    ``SampleMethod`` can be used directly as follows (note that this is not the intended usage):
+
     >>> from synthpop.methods import SampleMethod
     >>> import pandas as pd
     >>> y = pd.Series(["a", "b", "c"], name="target_column")
@@ -30,8 +44,8 @@ class SampleMethod(BaseSynthMethod):
     1             c
     2             b
 
-    Without X:
-
+    As ``SampleMethod`` does not use predictors to sample `y`, it can be called without `X`:
+    
     >>> from synthpop.methods import SampleMethod
     >>> import pandas as pd
     >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
