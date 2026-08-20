@@ -577,14 +577,17 @@ def tune_cart(
         categories occurring fewer than this threshold. This warning helps prevent potential
         :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
 
-       If set to an integer, categories occurring fewer than this threshold are considered rare.
-        If set to ``0``, the rare-category check is disabled.
-        If set to ``None``, the value of ``n_leaves`` is used.
-       The default value is ``None`` for :func:`tune_cart`, so the threshold
-       defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
-       default threshold is also 5.
+        - If set to an integer, categories occurring fewer than this threshold are considered rare.
+        - If set to ``0``, the rare-category check is disabled.
+        - If set to ``None``, the value of ``n_leaves`` is used.
+    
+        The default value is ``None`` for :func:`tune_cart`, so the threshold
+        defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
+        default threshold is also 5.
+        
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
-     :return: a callable that returns a CartMethod object with the parameters consistently applied.
+    
+    :return: a callable that returns a CartMethod object with the parameters consistently applied.
 
     A zero-argument callable is returned instead of a ``CartMethod``
     instance so that the underlying estimators are constructed during
