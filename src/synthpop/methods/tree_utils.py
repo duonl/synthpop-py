@@ -136,8 +136,6 @@ class LeafNodeSampler:
     >>>        leaf_ids = self.apply(X_syn)
     ...
     >>>        return self.tree_sampler_.sample_from_leaves(leaf_ids)
-    
-    See `Example: custom synthesis method <../../examples/custom_synth.html>`__ on how to create your own synthesis method.
     """
 
     def __init__(self, random_state: int | np.random.Generator | None = None) -> None:

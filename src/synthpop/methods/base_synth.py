@@ -77,8 +77,8 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         Get output feature names and category names for transformation. This method is required to support the ``set_output(transform="pandas")`` API in scikit-learn.
         
-       See the `developer API for ``set_out`` <puthttps://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output>`__,
-       `SLEP018 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html>`__ and `SLEP007 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html>`__.
+        See the developer API for ``set_output`` <https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output>`__,
+        `SLEP018 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html>`__ and `SLEP007 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html>`__.
         
         :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during ``fit`` are used.
         """

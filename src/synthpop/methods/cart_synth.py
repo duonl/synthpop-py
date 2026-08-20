@@ -396,13 +396,15 @@ class CartMethod(base_synth.BaseSynthMethod):
     When `X` has columns during ``transform`` that were not present during ``fit``, those columns are ignored.
 
     Input/output API uses pandas objects exclusively:
+
     - X must be a pandas DataFrame
     - y must be a pandas Series
     - transform returns a pandas Series
 
     Internal tree methods operate on:
-    - dict[str, np.ndarray] for X
-    - np.ndarray for y
+
+    - dict[str, np.ndarray] for `X`
+    - `np.ndarray` for `y`
 
     The returned pandas Series preserves the data type of the input target variable.
 

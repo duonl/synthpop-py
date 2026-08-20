@@ -280,7 +280,7 @@ class MeanEncoder(_BaseEncoder):
     Examples
     --------
     The :py:obj:`~synthpop.encoders.MeanEncoder` does not have changeable parameters.
-    For more configuration options, see the `configure CART example <../../examples/configuring_cart_directly.html>`__.
+    To change a tree methods encoder, please see the `configure CART example <../../examples/configuring_cart_directly.html>`__.
 
     :py:obj:`~synthpop.encoders.MeanEncoder` can be used directly as follows (note that this is not the intended usage):
 

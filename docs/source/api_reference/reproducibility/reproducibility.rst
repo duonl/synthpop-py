@@ -1,8 +1,9 @@
 Reproducibility
 --------------------------------------------
+
 .. note::
 
-    The **Reproducibility**module is an internal component and should not be used directly.
+    The **Reproducibility** module is an internal component and should not be used directly.
     It is integrated in the synthesisis process, and its interface may change without notice.
 
 
