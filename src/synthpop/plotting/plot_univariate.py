@@ -308,6 +308,7 @@ def plot_univariate_distributions(
     Examples
     --------
     Using the default parameters:
+    
     >>> import numpy as np
     >>> import pandas as pd
     >>> from synthpop.plotting import plot_univariate_distributions
@@ -349,7 +350,7 @@ def plot_univariate_distributions(
     ... )
     >>> for fig in plots:
     ...     fig.show()
-        
+            
     """
     if not isinstance(orig_df, pd.DataFrame):
         raise ValueError(f"The original data should be a pandas DataFrame, got {type(orig_df)} instead.")

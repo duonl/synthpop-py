@@ -19,7 +19,7 @@ Available synthesis methods are:
 (31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
-CART (Classification And Regression Trees) is the default synthesis method. 
+CART (Classification And Regression Trees) is the default synthesis method. It can be used as follows:
 ```python
 >>> from synthpop.methods import CartMethod
 
@@ -31,6 +31,15 @@ CART (Classification And Regression Trees) is the default synthesis method.
 1    70.0
 2    60.0
 Name: length, dtype: float32
+```                
+
+Most users should not construct this class directly. {ref}`Directly constructing <314-configuring-cart>` a `CartMethod` is intended for advanced use cases where the underlying components need to be customised. Instead, it should be configured through the {class}`~synthpop.synthesiser.Synthesiser` class.:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser()
+>>> synthetic_data = synth.fit(original_data).generate()
 ```                
 
 CART generates a column by learning an approximation of the conditional distribution:
@@ -140,6 +149,7 @@ For the first column, no predictors are available. In that case, CART samples di
 - CART models only relationships captured by the available predictors. Important dependencies cannot be reproduced if relevant predictors are unavailable.
 - As part of the sequential synthesis framework, the available predictors depend on the column synthesis order. The ordering of predictors within a single CART model does not affect the fitted tree; only the selection of available predictors through the synthesis order matters.
 
+(314-configuring-cart)=
 ### 3.1.4. Configuring CART
 The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify hyperparameters of the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
@@ -198,6 +208,15 @@ new_target_column
 2                 1
 ```
 
+For the intended usage, specify this method when initiating the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser(default_syn_method=SampleMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```                
+
 It approximates:
 ```{math}
 P(Y) \approx \hat{P}(Y)
@@ -255,6 +274,15 @@ new_target_column
 1             2
 2             <NA>
 ```
+
+For the intended usage, specify this method when initiating the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser(default_syn_method=CopyMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```       
 
 It implements:
 ```{math}

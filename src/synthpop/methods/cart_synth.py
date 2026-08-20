@@ -1,5 +1,5 @@
 """
-This module contains the CART method for synthesising data.
+This module contains the Classification and Regression Trees (CART) method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, Self
@@ -247,6 +247,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
+    ``TreeClassifierMethod`` can be used directly as follows (note that this is not the intended usage):
+
     >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np
     >>> from synthpop.utils import str_dtype
@@ -318,6 +320,8 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     Examples
     --------
+    ``TreeRegressorMethod`` can be used directly as follows (note that this is not the intended usage):
+
     >>> from synthpop.methods import TreeRegressorMethod
     >>> import numpy as np
     >>> from synthpop.utils import str_dtype
@@ -375,18 +379,20 @@ class CartMethod(base_synth.BaseSynthMethod):
     TreeClassifierMethod or TreeRegressorMethod depending on the dtype of `y`.
 
     When called without existing predictors (`X` is empty), CART automatically samples to create a synthetic `y`.
-    When `X` has columns during `transform` that were not present during `fit`, those columns are ignored.
+    When `X` has columns during ``transform`` that were not present during ``fit``, those columns are ignored.
 
     Input/output API uses pandas objects exclusively:
+
     - X must be a pandas DataFrame
     - y must be a pandas Series
     - transform returns a pandas Series
 
     Internal tree methods operate on:
-    - dict[str, np.ndarray] for X
-    - np.ndarray for y
 
-    The returned pandas Series preserves the dtype of the input target variable.
+    - dict[str, np.ndarray] for `X`
+    - `np.ndarray` for `y`
+
+    The returned pandas Series preserves the data type of the input target variable.
 
     :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 
@@ -395,6 +401,20 @@ class CartMethod(base_synth.BaseSynthMethod):
 
     Examples
     --------
+
+    :class:`CartMethod` should be given as an argument to the :class:`Synthesiser`'s ``default_syn_method``/``special_syn_method``.
+    See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
+    `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
+
+    **Intended usage in this package is:**
+        
+    >>> from synthpop.methods import CartMethod
+    >>> from synthpop import Synthesiser
+    ... 
+    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
+
+    ``CartMethod`` can be used directly as follows (note that this is not the intended usage):
+    
     >>> import pandas as pd
     >>> from synthpop.methods import CartMethod
     >>>

@@ -100,47 +100,54 @@ class LeafNodeSampler:
 
     The procedure consists of two phases:
 
-    1. Fitting phase (`fit_sampler`):
-        - Provide `leaf_ids` corresponding to each sample in `X`
+    1. Fitting phase (``fit_sampler``):
+        - Provide ``leaf_ids`` corresponding to each sample in `X`
         - Construct empirical distributions of `y` per leaf
-        - The resulting mapping is stored as:
-            leaf_id -> {target_value -> count}
+        - The resulting mapping is stored as: leaf_id -> {target_value -> count}
 
-    2. Sampling phase (`sample_from_leaves`):
-        - Provide `leaf_ids` for new samples (`X_syn`)
-        - A target value is sampled from the empirical distribution associated
-            with that leaf, with probabilities proportional to observed counts.
+    2. Sampling phase (``sample_from_leaves``):
+        - Provide ``leaf_ids`` for new samples (`X_syn`)
+        - A target value is sampled from the empirical distribution associated with that leaf, with probabilities proportional to observed counts.
+    
+    .. rubric:: Usage
 
-    Usage:
-    class TreeMethod(BaseDecisionTree):
-        def __init(tree_sampler: LeafNodeSampler | None = None):
-            self.tree_sampler = tree_sampler
+    One could use the tree sampler in a tree-based synthesiser method as follows:
 
-        def fit(self, X, y):
-            super().fit(X, y)
-            leaf_ids = self.apply(X)
-            if self.tree_sampler is None:
-                self.tree_sampler_= LeafNodeSampler()
-            else:
-                self.tree_sampler_ = clone(self.tree_sampler)
-            self.tree_sampler_.fit_sampler(leaf_ids, y)
-            return self
-
-        def transform(self, X_syn):
-            leaf_ids = self.apply(X_syn)
-            return self.tree_sampler_.sample_from_leaves(leaf_ids)
+    >>> from sklearn.tree import BaseDecisionTree
+    ...
+    >>> class TreeMethod(BaseDecisionTree):
+    ...
+    >>>    def __init__(self, tree_sampler: LeafNodeSampler | None = None):
+    >>>        self.tree_sampler = tree_sampler
+    ...
+    >>>    def fit(self, X, y):
+    >>>        super().fit(X, y)
+    ...
+    >>>        leaf_ids = self.apply(X)
+    >>>        if self.tree_sampler is None:
+    >>>            self.tree_sampler_= LeafNodeSampler()
+    >>>        else:
+    >>>            self.tree_sampler_ = clone(self.tree_sampler)
+    >>>        self.tree_sampler_.fit_sampler(leaf_ids, y)
+    ...
+    >>>        return self
+    ...
+    >>>    def transform(self, X_syn):
+    >>>        leaf_ids = self.apply(X_syn)
+    ...
+    >>>        return self.tree_sampler_.sample_from_leaves(leaf_ids)
     """
 
     def __init__(self, random_state: int | np.random.Generator | None = None) -> None:
         """
         Initialise the sampler.
         :param random_state: Controls the random number generation used for sampling.
-            - If `int`, it is used as a seed to initialise a new `numpy.random.Generator`
-                via `np.random.default_rng`. This generator is reset with each call so output
+            - If ``int``, it is used as a seed to initialise a new ``numpy.random.Generator``
+                via ``np.random.default_rng``. This generator is reset with each call so output
                 is consistent between calls.
-            - If `numpy.random.Generator`, it is used directly. This generator is not reset with each
+            - If ``numpy.random.Generator``, it is used directly. This generator is not reset with each
                 call, so the state advances with each call.
-            - If `None`, a default seed (42) is used to ensure reproducibility.
+            - If ``None``, a default seed (42) is used to ensure reproducibility.
         """
         self.random_state = random_state
 
@@ -148,11 +155,11 @@ class LeafNodeSampler:
         """
         Fit the sampler by constructing leaf-wise target histograms.
 
-        This function passes any missing or non-missing values of `y` to `tree`. However, at this point
-        in the CartMethod synthesis, missing values are not expected. So when missing values are seen in 
-        `y`, a warning will be raised.
+        This function passes any missing or non-missing values of `y` to ``treeMethod``. However, at this point
+        in the ``CartMethod`` synthesis, `missing values are handled <../data_processing/Missing_value.html>`__. So when missing values are seen in 
+        `y`, a warning will be raised. 
 
-        :param leaf_ids:Leaf identifiers assigned to each training sample `X`. Can be any
+        :param leaf_ids: Leaf identifiers assigned to each training sample `X`. Can be any
             Array-like of shape (n_samples,).
         :param y: Target values corresponding to the rows of `X`. Can be any 
             Array-like shape (n_samples,).
@@ -204,7 +211,7 @@ class LeafNodeSampler:
         """
         Generate synthetic target values for new samples.
 
-        For each input sample (`X_syn`), the corresponding `leaf_ids` are given. 
+        For each input sample (`X_syn`), the corresponding ``leaf_ids`` are given. 
         A target value (`y_syn`) is then sampled from the empirical distribution 
         associated with that leaf.
 
@@ -212,7 +219,8 @@ class LeafNodeSampler:
             P(y = v | leaf) = count(v) / sum(counts in leaf)
 
         Note that calling this function twice gives the same return value.
-        See the docs about reproducibility for more information.
+        See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__ 
+        and `the API Reference on Reproducibility <../reproducibility/reproducibility.html>`__ for more information.
 
         :param leaf_ids: Leaf IDs of synthetic samples for which target values
             should be generated. Array-like of shape (n_samples,)
@@ -280,11 +288,11 @@ class LeafNodeSampler:
         Create a new instance of the sampler with the same configuration.
 
         The method only copies initialisation parameters and does not copy
-        any fitted state (i.e., `_leaf_map` or `random_state_`).
-        Similar to sklearn's `clone()`.
+        any fitted state (i.e., ``_leaf_map`` or ``random_state_``).
+        Similar to sklearn's ``clone()``.
 
-        :return: A new, unfitted instance of `LeafNodeSampler()` with the 
-            same `random_state` setting.
+        :return: A new, unfitted instance of :class:`LeafNodeSampler` with the 
+            same ``random_state`` setting.
 
         Examples
         --------
