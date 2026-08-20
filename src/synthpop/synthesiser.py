@@ -163,6 +163,13 @@ class Synthesiser:
 
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
+
+        elif type(self.column_order) is not list:
+            raise ValueError(
+                f"Synthesiser.column_order expects input to be a list of column names (str) "
+                f"or column indices (int), got {type(self.column_order).__name__} instead."
+            )
+
         elif all(isinstance(item, int) for item in self.column_order):
 
             self._validate_column_order_unique(self.column_order)

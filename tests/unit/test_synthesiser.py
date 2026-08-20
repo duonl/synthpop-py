@@ -398,6 +398,12 @@ def test_synthesiser_fit_throws_on_empty_dataframe():
         ([0, 3, 2, 4], "The following indices of Synthesiser.column_order are out of bounds: [3 4]"),
         ([0, "b", 1], "invalid column order: [0, 'b', 1]"),
         ([0, -2, 1, -1], "The following indices of Synthesiser.column_order are negative: [-2 -1]"),
+        (pd.DataFrame({'a': [0,1,2,3,4], 'b': [5,6,7,8,9]}),
+        "Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), got DataFrame instead."),
+        (pd.Index(['a', 'b', 'c']),
+        "Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), got Index instead."),
+        (np.array(['a', 'b', 'c']),
+        "Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), got ndarray instead."),
     ]
 )
 def test_synthesiser_fit_throws_on_invalid_column_order(column_order, expected_message):
