@@ -13,6 +13,8 @@ CART synthesis
    :show-inheritance:
    :inherited-members: BaseEstimator,_MetadataRequester,_SetOutputMixin
 
+.. autofunction:: tune_cart
+
 .. warning::
    **TreeClassifierMethod** and **TreeRegressorMethod** are not part of the stable public API.
    They are internal components of CART, and their interfaces may change without notice.
