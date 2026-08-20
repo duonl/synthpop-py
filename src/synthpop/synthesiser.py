@@ -169,7 +169,7 @@ class Synthesiser:
                 f"Synthesiser.column_order expects input to be a list of column names (str) "
                 f"or column indices (int), got {type(self.column_order).__name__} instead."
             )
-        
+
         elif all(isinstance(item, int) and not isinstance(item, bool) for item in self.column_order):
 
             self._validate_column_order_unique(self.column_order)
@@ -195,12 +195,12 @@ class Synthesiser:
                 raise ValueError(
                     f"The following columns of Synthesiser.column_order are not in the dataframe: {sorted(columns_not_in_df)}")
             self.column_order_ = self.column_order
-        
+
         else:
             raise ValueError(
-                f"Invalid column order: {self.column_order} " 
+                f"Invalid column order: {self.column_order} "
                 f"Values in the list should be either solely column names (str) or column indices (int)."
-                )
+            )
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
