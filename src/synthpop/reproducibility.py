@@ -27,7 +27,9 @@ class RandomStateManager:
     Instances of this class can be used as a context manager to temporary switch seed:
 
     See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__ 
-    on why reproducibility is important.
+    on why reproducibility is important, and
+    `the Developers Guide: Using randomness in this package <../../developer/way_of_working/randomness.html>`__
+    on how to implement the RandomStateManager in estimators or synthpop components.
 
     The class is also  a context manager. Entering
     ``RandomStateManager(seed)`` temporarily replaces the current root seed.
