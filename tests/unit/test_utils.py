@@ -1,11 +1,12 @@
 import re
+import warnings
 
 import pytest
 import numpy as np
 import pandas as pd
 
 from synthpop.utils import (
-    _raise_on_rare_category,
+    _warn_on_rare_category,
     str_dtype,
     _validate_stringdtype_array,
     _validate_1d_target,
@@ -352,42 +353,60 @@ def test_to_standardised_array_dict_with_numpy_inputs():
     assert result["num"].dtype == np.float32
     assert result["cat"].dtype == str_dtype
 
-# ----- _raise_on_rare_category -----
+# ----- _warn_on_rare_category -----
 
 
-@pytest.mark.parametrize("x, threshold", [
-    (np.array(["a"]), 5),  # one row, so unique value by definition
+def unique_cats(count):
+    rng = np.random.default_rng(seed=123)
+
+    return [str(val) for val in rng.random(size=count)]
+
+
+RARE_CATEGORIES_WARN_CASES = [
+    # one row, so unique value , and more than quarter.
+    (np.array(["a"]), 5),
+    (np.array(["a"] * 4), 5),  # rowcount below threshold.
     (np.array(["a", "b", "c", "d", "e"]), 5),  # all values unique
-    # number of occurrences strictly lower than threshold
-    (np.array(["a"] * 5 + ["b"] * 6), 7),
-    # number of occurrences strictly lower than threshold, with missing values
-    (np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype), 7),
-    # number of occurrences strictly lower than threshold, with missing values
-    (np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype), 7),
-    (np.array([True] * 4 + [False] * 6), 5),  # boolean
-    (np.array([np.nan] * 6), 7),
-])
-def test_raise_on_rare_category_raises_below_threshold(x, threshold):
+    (np.array(unique_cats(100) * 5), 6),  # all categories rare
 
-    txt_threshold = re.escape(f"fewer than {threshold} times.")
+    # 6*5 = 30 rows with values that occur 5 times
+    # So 30% of the rows have a rare category
+    (np.array(unique_cats(6) * 5 + ["b"] * 70), 6),
+    (np.array(unique_cats(6) * 5 + [np.nan] * 70), 6),  # same, but with nan.
+
+    # 9*5 = 45 rows with values that occur 5 times
+    # So 45% of the rows have a rare category
+    (np.array(unique_cats(9) * 5 + ["b"] * 55), 6),
+    (np.array(unique_cats(9) * 5 + [np.nan] * 55), 6),  # same, but with nan.
+
+    # nan is the rare category.
+    (np.array([np.nan]*26 + ["b"] * 74), 52),
+    (np.array([True] * 26 + [False] * 74), 52),  # boolean
+
+]
+
+@pytest.mark.parametrize("x, threshold", RARE_CATEGORIES_WARN_CASES)
+def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
+    txt_threshold = re.escape(f"fewer than {threshold} times")
     txt_column_name = re.escape(f"column_with_threshold{threshold}")
 
-    message_regex = f".* {txt_column_name}.*{txt_threshold}"
+    message_regex = f".* {txt_column_name}.*{txt_threshold}.*"
 
-    with pytest.raises(ValueError, match=message_regex):
-        _raise_on_rare_category(
+    with pytest.warns(UserWarning, match=message_regex):
+        _warn_on_rare_category(
             x, threshold, name=f"column_with_threshold{threshold}")
 
 
-def test_raise_on_rare_category_no_name():
+def test_warn_on_rare_category_no_name():
     x_in = np.array(["a"], dtype=str_dtype)
 
-    txt_threshold = re.escape(f"fewer than 2 times.")
+    txt_threshold = re.escape(f"fewer than 2 times")
     txt_column_name = re.escape(f"unnamed predictor")
 
-    message_regex = f".* {txt_column_name}.*{txt_threshold}"
-    with pytest.raises(ValueError, match=message_regex):
-        _raise_on_rare_category(x_in, 2, name=None)
+    message_regex = f".* {txt_column_name}.*{txt_threshold}.*"
+    with pytest.warns(UserWarning, match=message_regex) as record:
+        _warn_on_rare_category(
+            x_in, 2, name=None)
 
 
 @pytest.mark.parametrize("x, threshold", [
@@ -401,25 +420,34 @@ def test_raise_on_rare_category_no_name():
     ([np.nan] * 7 + ["b"] * 10, 5),
     # number of occurrences exactly equal to threshold, with missing values.
     ([np.nan] * 5 + ["b"] * 6, 5),
-    # do not raise on nan only array containing a number of values equaling the threshold.
+    # do not raise on nan only array containing a number of values equalling the threshold.
     (np.array([np.nan] * 7), 7),
+
+    # number of 'a' is below threshold (rare category), but is less than 50% of the rows
+    (["a"] * 4 + ["b"] * 13, 5),
+    ([np.nan] * 4 + ["b"] * 13, 5),  # same, but with nan.
+    ([True] * 4 + [False] * 13, 5),  # same, but with boolean.
+
+
+    # 4*5 = 20 rows with values that occur 5 times
+    # So 20% of the rows have a rare category
+    (np.array(unique_cats(4) * 5 + ["b"] * 80), 6),
+    (np.array(unique_cats(4) * 5 + [np.nan] * 80), 6),  # same, but with nan.
+
+
 ])
-def test_raise_on_rare_category_does_not_raise_above_threshold(x, threshold):
-    x_in = np.array(x, dtype=str_dtype)
+def test_warn_on_rare_category_does_not_warn_below_quarter(x, threshold):
+    x_in = np.array(x)
 
-    assert _raise_on_rare_category(x_in, threshold, name="some_name") is None
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert _warn_on_rare_category(
+            x_in, threshold, name="some_name") is None
 
 
-@pytest.mark.parametrize("x", [
-    np.array(["a"]),  # one row, so unique value by definition
-    np.array(["a", "b", "c", "d", "e"]),  # all values unique
-    # number of occurrences strictly lower than threshold
-    np.array(["a"] * 5 + ["b"] * 6),
-    # number of occurrences strictly lower than threshold, with missing values
-    np.array([np.nan] * 5 + ["b"] * 6, dtype=str_dtype),
-    # number of occurrences strictly lower than threshold, with missing values
-    np.array([np.nan] * 10 + ["b"] * 6, dtype=str_dtype),
-    np.array([True] * 4 + [False] * 6),  # boolean
-])
-def test_raise_on_rare_category_check_disabled(x):
-    assert _raise_on_rare_category(x, 0, name="some_name") is None
+@pytest.mark.parametrize("x, threshold", RARE_CATEGORIES_WARN_CASES)
+def test_warn_on_rare_category_check_disabled(x, threshold):
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert _warn_on_rare_category(x, 0, name="some_name") is None
