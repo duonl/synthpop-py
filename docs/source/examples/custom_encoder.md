@@ -8,8 +8,8 @@ However, you may want to use a different encoder for a specific use case. In thi
 For an encoder to be compatible with synthpop it should consider to have the following aspects:
 1. Return one dimensional arrays with the same shape, especially if the encoder is required to work with {class}`CartMethod`. However, if you also [build your own synthesis method](./custom_synth.md), there is more flexibility.
 2. [Cloneable estimator object](https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html), which allows synthpop-py to use the same encoder for the whole dataset.
-3. Missing value handling: Most encoders do not accept missing values in the data. As such a preprocessing step for missing values is required. synthpop-py has two methodology's for handling missing values: the {class}`~MissingValuePredictor` and {class}`~ReplaceMissingWithValue`.
-4. Reproducibility: Dependent on whether your encoder uses random numbers. In this case, synthpop-py has a {class}`~RandomStateManager` implementation.
+3. Missing value handling: Most encoders do not accept missing values in the data. As such a preprocessing step for missing values is required. synthpop-py has two methodology's for handling missing values: the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
+4. Reproducibility: Dependent on whether your encoder uses random numbers. In this case, synthpop-py has a {class}`~synthpop.reproducibility.RandomStateManager` implementation.
 
 **For developers, these requirements are a must-have**, as they allow for a new encoder to seemingly fit into the synthpop framework. However, if you build an encoder for your own dataset you are free to leave out whatever is required for your use case. In this example we will include all four requirements.
 
@@ -57,7 +57,7 @@ class CustomEncoder(BaseEstimator):
 
 ### Reproducibility
 
-However, as of yet this is not a reproducible encoder. This is because {class}`np.random.rand`, will create a new number everytime fit is called, or the file is ran. Luckily, synthpop has built tools surrounding this problem of Reproducibility, using the {class}`RandomStateManager`. As such, one could now define:
+However, as of yet this is not a reproducible encoder. This is because {class}`np.random.rand`, will create a new number everytime fit is called, or the file is ran. Luckily, synthpop has built tools surrounding this problem of Reproducibility, using the {class}`synthpop.reproducibility.RandomStateManager`. As such, one could now define:
 
 ```python
 from synthpop.reproducibility import RandomStateManager
@@ -109,10 +109,32 @@ encoder.fit(X)
 Now the learned parameter `mapping_` is a dictionairy that stores which type of animal (`X`) should be mapped to which integer value:
 ```python
 print(encoder.mapping_)
-{'bird': 570356716, 'cat': 741055479, 'dog': 2285044420}
+{'bird': 570356716, 'cat': 741055479, 'dog': 2285044420, nan: 577497900}
 ```
 
-However this does not yet do anything with input data, it just learns a model.
+We see here that nan is also included with a mapping value. However, we might want to handle nan as a different/specific case we can easily access. As such, we can handle it manually:
+
+```python
+    def fit(self, X: npt.NDArray, y=None) -> Self:
+
+        RandomStateManager.set_root_seed(self.random_state)
+        categories = np.unique(X)
+
+        self.categories_ = categories.tolist()
+        self.mapping_ = {
+            category: RandomStateManager.create_instance_seed()
+            for category in self.categories_
+        }
+
+        self.mapping_[np.nan] = 0
+
+        return self
+```
+Now we have:
+```python
+print(encoder.mapping_)
+{'bird': 570356716, 'cat': 741055479, 'dog': 2285044420, nan: 0}
+```
 
 ## TransformerMixin
 
@@ -137,10 +159,7 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
         RandomStateManager.set_root_seed(self.random_state)
-        # Exclude missing values when learning categories.
-        
-        self.mask_ =  ~pd.isna(X)
-        categories = np.unique(X[self.mask_])
+        categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
@@ -148,16 +167,16 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
             for category in self.categories_
         }
 
+        self.mapping_[np.nan] = 0
+
         return self
 
     def transform(self, X: npt.NDArray) -> npt.NDArray:
         check_is_fitted(self, ["mapping_"])
 
-        output = np.zeros(len(X))
-
-        output[self.mask_] = [
+        output= [
             self.mapping_[value]
-            for value in X[self.mask_]
+            for value in X
         ]
         return np.array(output, dtype=np.float32)
  ```
@@ -214,10 +233,7 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
         RandomStateManager.set_root_seed(self.random_state)
-        # Exclude missing values when learning categories.
-        
-        self.mask_ =  ~pd.isna(X)
-        categories = np.unique(X[self.mask_])
+        categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
@@ -225,19 +241,18 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
             for category in self.categories_
         }
 
+        self.mapping_[np.nan] = 0
+
         return self
 
     def transform(self, X: npt.NDArray) -> npt.NDArray:
         check_is_fitted(self, ["mapping_"])
 
-        output = np.zeros(len(X))
-
-        output[self.mask_] = [
+        output= [
             self.mapping_[value]
-            for value in X[self.mask_]
+            for value in X
         ]
         return np.array(output, dtype=np.float32)
- ```
 
 Now the general framework is ready to be used inside synthpop-py! See [alternative encoding using CART](alternative_encoder.md) on how to implement your encoder in synthpop.
 
