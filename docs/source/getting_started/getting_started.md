@@ -19,5 +19,6 @@ For detailed information about available functions, classes, and parameters, see
 
 installation.md
 overview.md
+workflow.md
 your_first_synthesis.md
 ```
