@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 import warnings
 
-from synthpop.methods.cart_synth import CartMethod
+from synthpop.methods.cart_synth import CartMethod, tune_cart
 from synthpop.methods.copy_synth import CopyMethod
 from synthpop.methods.sample_synth import SampleMethod
 from synthpop.synthesiser import Synthesiser
@@ -617,8 +617,46 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
     # To surpass the Rare categories threshold
     obs = pd.concat((obs, obs, obs, obs, obs), axis=0)
 
-    synth = Synthesiser(random_seed=0)
+    synth = Synthesiser(random_seed=0, default_syn_method=tune_cart(
+        rare_categories_threshold=0))
     synth.fit(obs)
     with warnings.catch_warnings():
         warnings.simplefilter("error", pd.errors.PerformanceWarning)
         synth.generate(100)
+
+
+
+def test_tune_cart_applies_different_n_leaves():
+    data = pd.DataFrame({
+        "first": range(10),
+        "second": range(10, 20),
+    })
+
+    synthesiser = Synthesiser(
+        random_seed=74124,
+        special_syn_method={
+            "first": tune_cart(n_leaves=10, rare_categories_threshold=0),
+            "second": tune_cart(n_leaves=20, rare_categories_threshold=0),
+        },
+    )
+
+    synthesiser.fit(data)
+
+    assert synthesiser.models_["first"].method_.tree_.min_samples_leaf == 10
+    assert synthesiser.models_["second"].method_.tree_.min_samples_leaf == 20
+
+
+def test_synthesiser_accepts_callable_default_method():
+    original_data, _, _ = simulate_realistic_dataset_correlations(
+        n_samples=1000)
+    synth = Synthesiser(
+        random_seed=1,
+        default_syn_method=lambda: CartMethod(),
+    )
+
+    synth.fit(original_data)
+
+    assert isinstance(
+        synth.models_["first"],
+        CartMethod,
+    )

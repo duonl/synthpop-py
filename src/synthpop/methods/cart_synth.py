@@ -2,7 +2,7 @@
 This module contains the Classification and Regression Trees (CART) method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Self
+from typing import Any, Callable, Dict, Self
 
 import numpy as np
 import numpy.typing as npt
@@ -26,11 +26,12 @@ from synthpop.data_processing.encoders import MeanEncoder, PCAEncoder
 from synthpop.data_processing.missing_value_handling import (
     BaseMissingValueHandler,
     MissingValuePredictor,
-    ReplaceMissingWithValue
+    ReplaceMissingWithValue,
 )
 from synthpop.methods import base_synth
 import synthpop.methods.tree_utils as tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler
+import synthpop.methods.tree_utils as tree_utils
 from synthpop.reproducibility import RandomStateManager
 
 
@@ -103,7 +104,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         """
 
-        self.target_name_ = getattr(y, "name", None)
         if self.rare_categories_threshold > 0:
             for key, values in X.items():
                 is_numeric = pd.api.types.is_numeric_dtype(values.dtype)
@@ -202,18 +202,6 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         result = self.missing_handler_.post_synth_transform(X_val, sample)
 
         return result
-
-    def get_feature_names_out(self, input_features=None) -> list[str]:
-
-        check_is_fitted(self, "target_name_")
-
-        if input_features is None:
-            input_features = getattr(self, "feature_order_", [])
-
-        if self.target_name_ is None:
-            return [input_features]
-
-        return [self.target_name_]
 
     @abstractmethod
     def _get_encoder(self):
@@ -492,6 +480,7 @@ class CartMethod(base_synth.BaseSynthMethod):
                              f"{len(X)} != {len(y)}.")
 
         self.feature_names_in_ = list(X.columns)
+        self.n_features_in_ = X.shape[1]
         self.target_name_ = y.name
         self.target_dtype_ = y.dtype
 
@@ -547,20 +536,61 @@ class CartMethod(base_synth.BaseSynthMethod):
         )
 
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
-        check_is_fitted(self, ["method_"])
-        return self.method_.get_feature_names_out(input_features)
+        """
+        Return the name of the synthesised target column.
+
+        If the original target column has no name (i.e. `None`), the input feature
+        names are returned instead.
+
+        If `input_features` is not provided, fitted feature names are used.
+        If fitted feature names are not available, generic feature
+        names ``x0, x1, ..., x(n_features_in_ - 1)`` are generated when
+        `n_features_in_` is available.
+
+        :param input_features: Names of the input columns. If not provided,
+            uses the feature names stored during fitting (`feature_names_in_`).
+        :return: Name of the synthesised target column, or the input feature names
+            if the target column has no name.
+        :raises NotFittedError: If the estimator has not been fitted.
+        """
+        if not hasattr(self, "target_name_"):
+            raise NotFittedError("CartMethod is not fitted. Call `fit` first.")
+
+        if input_features is None:
+            if hasattr(self, "feature_names_in_"):
+                input_features = list(self.feature_names_in_)
+            elif hasattr(self, "n_features_in_"):
+                input_features = [
+                    f"x{i}" for i in range(self.n_features_in_)
+                ]
+            else:
+                input_features = []
+
+        if self.target_name_ is None:
+            return input_features
+
+        return [self.target_name_]
 
 
-def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_categories_threshold: int | None = None) -> CartMethod:
+def tune_cart(
+    n_leaves: int = 5,
+    n_components: int | float | None = None,
+    rare_categories_threshold: int | None = None,
+) -> Callable[[], CartMethod]:
     """
-    Shortcut to set parameters of the CartMethod.
+    Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a `factory function <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
+    The factory is normally passed directly to :class:`~synthpop.synthesiser.Synthesiser`.
+    The factory is called by :func:`~synthpop.synthesiser.Synthesiser.fit` to create a new :class:`~synthpop.methods.cart_synth.CartMethod` for each column.
+    
+    Calling `tune_cart(...)` returns a factory to use in the Synthesiser.
+    Calling `tune_cart(...)()` returns a `CartMethod` instance.
 
     :param n_leaves: minimum number of samples in the leaf nodes.\
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
         See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
     :param n_components: sets the number of principal components used in encoding in the classifier. \
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
-        For integers => 1, it is the number of principal components.\
+        For integers ≥ 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold, 
@@ -568,13 +598,18 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
 
         If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
-        If set to ``None``, the value of ``n_leaves`` is used.
         The default value is ``None`` for :func:`tune_cart`, which means the threshold
         defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
         default threshold is also 5.
-        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/examples_index>` for more information. TODO: add link to example about attribute disclosure.
+        See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
 
-    :return: a ``CartMethod`` object with the parameters consistently applied.
+    :return: a callable that returns a CartMethod object with the parameters consistently applied.
+
+    A zero-argument callable is returned instead of a ``CartMethod``
+    instance so that the underlying estimators are constructed during
+    ``Synthesiser.fit()``. This ensures that their random states are
+    derived from the ``Synthesiser.random_seed`` by
+    ``RandomStateManager``.
 
     Examples
     --------
@@ -593,25 +628,32 @@ def tune_cart(n_leaves: int = 5, n_components: int | float | None = None, rare_c
     else:
         effective_categories_threshold = rare_categories_threshold
 
-    return CartMethod(
-        regressor=TreeRegressorMethod(
-            rare_categories_threshold=effective_categories_threshold,
-            tree=DecisionTreeRegressor(
-                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+    def tune_cart_factory():
+        return CartMethod(
+            regressor=TreeRegressorMethod(
+                rare_categories_threshold=effective_categories_threshold,
+                tree=DecisionTreeRegressor(
+                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                    min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                    random_state=RandomStateManager.create_instance_seed()
+                ),
+                missing_handler=MissingValuePredictor(
+                    tree=DecisionTreeClassifier(min_samples_leaf=n_leaves,
+                                                random_state=RandomStateManager.create_instance_seed())
+                )
             ),
-            missing_handler=MissingValuePredictor(
-                tree=DecisionTreeClassifier(min_samples_leaf=n_leaves)
-            )
-        ),
-        classifier=TreeClassifierMethod(
-            rare_categories_threshold=effective_categories_threshold,
-            tree=DecisionTreeClassifier(
-                min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
-                min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
-            ),
-            encoder=PCAEncoder(
-                pca_transform=PCA(n_components=n_components)
+            classifier=TreeClassifierMethod(
+                rare_categories_threshold=effective_categories_threshold,
+                tree=DecisionTreeClassifier(
+                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                    min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
+                    random_state=RandomStateManager.create_instance_seed(),
+                ),
+                encoder=PCAEncoder(
+                    pca_transform=PCA(n_components=n_components,
+                                      random_state=RandomStateManager.create_instance_seed())
+                )
             )
         )
-    )
+
+    return tune_cart_factory

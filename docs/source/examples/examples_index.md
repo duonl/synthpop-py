@@ -34,7 +34,7 @@ using_different_methods_for_different_columns.md
 :caption: Configuring CART
 
 tune_cart_function.md
-alternative_encoder.md
+configure_cart_directly.md
 
 ```
 

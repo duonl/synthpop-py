@@ -87,9 +87,15 @@ class SampleMethod(BaseSynthMethod):
         else:
             self.random_state_ = self.random_state
 
+        # for sklearn compatibility
         if X is not None:
-            self.feature_names_in_ = getattr(X, "columns", None)
-
+            if not isinstance(X, pd.DataFrame):
+                raise TypeError(
+                    f"X must be a pandas DataFrame, got {type(X)} instead."
+                )
+            self.feature_names_in_ = list(X.columns)
+            self.n_features_in_ = X.shape[1]
+            
         return self
     
     def transform(self, X: pd.DataFrame | None) -> pd.Series:
@@ -117,14 +123,38 @@ class SampleMethod(BaseSynthMethod):
 
         return pd.Series(sampled, name=self.target_name_, dtype=self.target_dtype_)
         
-    def get_feature_names_out(self, input_features=None) -> list[str]:
+    def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
+        """
+        Return the name of the synthesised target column.
+
+        If the original target column has no name (i.e. `None`), the input feature
+        names are returned instead.
+
+        If `input_features` is not provided, fitted feature names are used.
+        If fitted feature names are not available, generic feature
+        names ``x0, x1, ..., x(n_features_in_ - 1)`` are generated when
+        `n_features_in_` is available.
+
+        :param input_features: Names of the input columns. If not provided,
+            uses the feature names stored during fitting (`feature_names_in_`).
+        :return: Name of the synthesised target column, or the input feature names
+            if the target column has no name.
+        :raises NotFittedError: If the estimator has not been fitted.
+        """
         if not hasattr(self, "target_name_"):
             raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
-        
+
         if input_features is None:
-            input_features = getattr(self, "feature_names_in_", [])
+            if hasattr(self, "feature_names_in_"):
+                input_features = list(self.feature_names_in_)
+            elif hasattr(self, "n_features_in_"):
+                input_features = [
+                    f"x{i}" for i in range(self.n_features_in_)
+                ]
+            else:
+                input_features = []
 
         if self.target_name_ is None:
-            return [input_features]
+            return input_features
 
         return [self.target_name_]
