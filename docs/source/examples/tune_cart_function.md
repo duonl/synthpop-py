@@ -42,8 +42,8 @@ synthesiser = Synthesiser(
 )
 ```
 The value `20` is passed to the `min_samples_leaf` parameter of the decision trees used for:
-- {ref}`classification <~synthpop.methods.cart_synth.TreeClassifierMethod>`;
-- {ref}`regression <~synthpop.methods.cart_synth.TreeRegressorMethod>`; and
+- {class}`classification <~synthpop.methods.cart_synth.TreeClassifierMethod>`;
+- {class}`regression <~synthpop.methods.cart_synth.TreeRegressorMethod>`; and
 - [predicting missing values](../api_reference/data_processing/Missing_value.rst).
 
 The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
