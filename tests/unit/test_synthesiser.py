@@ -396,11 +396,11 @@ def test_synthesiser_fit_throws_on_empty_dataframe():
         (["a", "d", "c", "x"],
          "The following columns of Synthesiser.column_order are not in the dataframe: ['d', 'x']"),
         ([0, 3, 2, 4], "The following indices of Synthesiser.column_order are out of bounds: [3 4]"),
-        ([0, "b", 1], "Invalid column order: [0, 'b', 1] "
-         "Values in the list should be either solely column names (str) or column indices (int)."),
+        ([0, "b", 1],  "Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), "
+         "got datatypes {'str', 'int'} instead."),
         ([0, -2, 1, -1], "The following indices of Synthesiser.column_order are negative: [-2 -1]"),
-        ([True, False, True, False], "Invalid column order: [True, False, True, False] "
-         "Values in the list should be either solely column names (str) or column indices (int)."),
+        ([True, False, True, False], "Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), "
+         "got datatypes {'bool'} instead."),
         (pd.DataFrame({'a': [0, 1, 2, 3, 4], 'b': [5, 6, 7, 8, 9]}),
          "Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), got DataFrame instead."),
         (pd.Index(['a', 'b', 'c']),

@@ -197,9 +197,10 @@ class Synthesiser:
             self.column_order_ = self.column_order
 
         else:
+
             raise ValueError(
-                f"Invalid column order: {self.column_order} "
-                f"Values in the list should be either solely column names (str) or column indices (int)."
+                f"Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), "
+                f"got datatypes {set(type(x).__name__ for x in self.column_order)} instead."
             )
 
         self.models_ = {}
