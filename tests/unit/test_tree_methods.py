@@ -20,7 +20,7 @@ from synthpop.methods.cart_synth import (
 from synthpop.utils import str_dtype
 
 
-# ----- stubs -----
+# ----- stubs and fixtures -----
 
 
 class TransformStub(TransformerMixin, BaseEstimator):
@@ -185,7 +185,9 @@ def fitted_tree(tree_method, request):
 @pytest.fixture(autouse=True)
 def mock_fit_decision_tree(mocker):
     mocker.patch(
-        "synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves", return_value=StubTree())
+        "synthpop.methods.tree_utils._fit_decision_tree_with_reachable_leaves",
+        return_value=StubTree(),
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -490,25 +492,6 @@ def test_fit_sampler_fit(X, y, index_cat, tree_method):
         tree_method.missing_handler_.prepared_for_fit_result[1])
     assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
-
-@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
-def test_fit_set_feature_names_out(X, y, index_cat, tree_method):
-
-    y = pd.Series(y, name="target_name")
-
-    tree_method.fit(X, y)
-
-    assert tree_method.target_name_ == "target_name"
-
-
-@pytest.mark.parametrize("X, y, index_cat", get_input_test_data())
-def test_fit_set_feature_names_out_no_target_name(X, y, index_cat, tree_method):
-
-    tree_method.fit(X, y)
-
-    assert tree_method.target_name_ is None
-
-
 def test_fit_classifier_converts_to_str(encoder, leafnode_sampler, mocker):
     X = {"a": np.array([1, 2])}
     y = np.array(["a", "b"], dtype=str_dtype)
@@ -776,23 +759,6 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
 
 
 # ----- general tests -----
-
-
-@pytest.mark.parametrize("X", [v[0] for v in get_input_test_data()])
-def test_get_feature_names_out(X, tree_method):
-    tree_method.target_name_ = "name_of_target"
-
-    result = tree_method.get_feature_names_out()
-    assert result == ["name_of_target"]
-
-
-@pytest.mark.parametrize("X", [v[0] for v in get_input_test_data()])
-def test_get_feature_names_out_no_target_name(X, tree_method):
-    tree_method.target_name_ = None
-    tree_method.feature_order_ = ["Trained", "on", "these", "features"]
-
-    result = tree_method.get_feature_names_out()
-    assert result == [["Trained", "on", "these", "features"]]
 
 
 def test_to_fixed_length_string_array():

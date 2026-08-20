@@ -103,6 +103,99 @@ def test_synthesiser_fit_special_syn_method():
     assert synth.models_["c"].name == "method for c"
 
 
+def test_synthesiser_fit_callable_method():
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6],
+    })
+
+    counter = 0
+
+    def def_method_factory():
+        nonlocal counter
+        counter += 1
+        return StubSynthMethod(name=f"method{counter}")
+
+    def special_method_factory():
+        nonlocal counter
+        counter += 1
+        return StubSynthMethod(name=f"special_method{counter}")
+
+    synth = Synthesiser(
+        random_seed=2,
+        default_syn_method=def_method_factory,
+        special_syn_method={
+            "a": special_method_factory,
+            "c": special_method_factory,
+        },
+    )
+
+    synth.fit(test_data)
+
+    assert synth.models_["a"].name == "special_method1"
+    assert synth.models_["b"].name == "method2"
+    assert synth.models_["c"].name == "special_method3"
+
+
+def test_synthesiser_fit_raises_on_wrong_return_of_callable_default_method():
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6],
+    })
+
+    def method():
+        return np.array([])  # returns something other than a synthesis method
+
+    synth = Synthesiser(
+        random_seed=2,
+        default_syn_method=method,
+    )
+
+    with pytest.raises(TypeError, match=".*default_syn_method.*BaseSynthMethod"):
+        synth.fit(test_data)
+
+
+def test_synthesiser_fit_raises_on_factory_returns_callable():
+
+    def wrong_factory():
+        return lambda: 0
+
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6],
+    })
+
+    synth = Synthesiser(
+        random_seed=2,
+        default_syn_method=wrong_factory,
+    )
+
+    with pytest.raises(TypeError, match=".*default_syn_method.*another callable.*BaseSynthMethod"):
+        synth.fit(test_data)
+
+
+def test_synthesiser_fit_raises_on_wrong_return_of_callable_special_method():
+    test_data = pd.DataFrame({
+        "a": [1, 2],
+        "b": [3, 4],
+        "c": [5, 6],
+    })
+
+    def method():
+        return np.array([])  # returns something other than a synthesis method
+
+    synth = Synthesiser(
+        random_seed=2,
+        special_syn_method={"b": method},
+    )
+
+    with pytest.raises(TypeError, match=r".*special_syn_method.* 'b'.*BaseSynthMethod"):
+        synth.fit(test_data)
+
+
 def test_synthesiser_fit_default_synthesis():
     synth_method = StubSynthMethod()
     test_data = pd.DataFrame({
