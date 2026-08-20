@@ -1,15 +1,15 @@
 # Create a custom encoder
 
-Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories (which means 2^k-1 are required, with k the number of categories). synthpop-py implements two encoder methods. {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
+Encoding of categorical input features is an important part of synthpop-py's internal workflow. Encoding categorical features vastly improves the computation speed, as leaf nodes can be fitted in numerical intervals instead of single value categories (which means $2^k-1$ are required, with $k$ the number of categories). synthpop-py implements two encoder methods: {class}`~synthpop.data_processing.encoders.MeanEncoder` is used if the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` if the target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`, for more theoretical background on encoding.
 
-However, you may want to use a different encoder for a specific use case. In this example we explain how to create a random custom encoder. Specifically one that maps categorical data to numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
+However, you may want to use a different encoder for a specific use case. In this example we explain how to create a custom encoder. Specifically one that maps categorical data to random numerical values while following sklearn conventions. If you would rather use an existing alternative encoder, see [alternative encoding using CART](alternative_encoder.md).
 
 ## Encoder requirements for synthpop
 For an encoder to be compatible with synthpop it should consider to have the following aspects:
-1. Return one dimensional arrays with the same shape, especially if the encoder is required to work with {class}`CartMethod`. However, if you also [build your own synthesis method](./custom_synth.md), there is more flexibility.
+1. Return one dimensional arrays with the same shape, especially if the encoder is required to work with {class}`~synthpop.methods.cart_synth.CartMethod`. However, if you also [build your own synthesis method](./custom_synth.md), there is more flexibility.
 2. [Cloneable estimator object](https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html), which allows synthpop-py to use the same encoder for the whole dataset.
-3. Missing value handling: Most encoders do not accept missing values in the data. As such a preprocessing step for missing values is required. synthpop-py has two methodology's for handling missing values: the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
-4. Reproducibility: Dependent on whether your encoder uses random numbers. In this case, synthpop-py has a {class}`~synthpop.reproducibility.RandomStateManager` implementation.
+3. Missing value handling: Many types of data have missing values. As such, if the encoding method itself does not accept missing values a preprocessing step is required. synthpop-py has two methodology's for handling missing values: the {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`.
+4. Reproducibility: Dependent on whether your encoder implements a random state. In this case, synthpop-py has a {class}`~synthpop.reproducibility.RandomStateManager` implementation.
 
 **For developers, these requirements are a must-have**, as they allow for a new encoder to seemingly fit into the synthpop framework. However, if you build an encoder for your own dataset you are free to leave out whatever is required for your use case. In this example we will include all four requirements.
 
@@ -28,7 +28,7 @@ class CustomEncoder(BaseEstimator):
         super().__init__()
  ```
  
- However, as of yet, this only learns all init parameters from BaseEstimator. Ideally we want to create a function that learns from the observed data. This can be done by defining a `fit` function. The core concept of our fit function is to map categorical data to a random numerical values. As such, the following *should* suffice:
+ However, as of yet, this only learns all init parameters from `BaseEstimator`. Ideally, we want to create a function that learns a mapping from the observed data. This can be done by defining a fit function. The core concept of our fit function is to map categorical data to a random numerical value. As such, the following *should* suffice:
 
   ```python
 from typing import Self
@@ -40,7 +40,7 @@ from sklearn.base import BaseEstimator
 
 class CustomEncoder(BaseEstimator):
 
-    def __init__(self, random_state: int | None = None) -> None:
+    def __init__() -> None:
         super().__init__()
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
@@ -57,12 +57,12 @@ class CustomEncoder(BaseEstimator):
 
 ### Reproducibility
 
-However, as of yet this is not a reproducible encoder. This is because {class}`np.random.rand`, will create a new number everytime fit is called, or the file is ran. Luckily, synthpop has built tools surrounding this problem of Reproducibility, using the {class}`synthpop.reproducibility.RandomStateManager`. As such, one could now define:
+Even though this fitting function will define a mapping for all values in X, it is not a reproducible encoder. This is because {class}`np.random.rand`, will create a new number everytime fit is called, or the file is ran. Luckily, synthpop has built tools surrounding this problem of Reproducibility, using the {class}`~synthpop.reproducibility.RandomStateManager`. Using that class, one could now define:
 
 ```python
 from synthpop.reproducibility import RandomStateManager
 
-class CustomEncoder(TransformerMixin, BaseEstimator):
+class CustomEncoder(BaseEstimator):
     def __init__(self, random_state: int | None = None) -> None:
         super().__init__()
         self.random_state = random_state
@@ -85,21 +85,22 @@ One could now call the ``CustomEncoder`` using a random_state argument to enforc
 ```python
 encoder = CustomEncoder(random_state=12) # Arbitrary number
 ```
-For more in depth information on the {class}`RandomStateManager`, please see the API reference or [Example: Make your synthesis reproducible](./reproducible_synthesis.md)
+For more in depth information on the {class}`~synthpop.reproducibility.RandomStateManager`, please see the API reference or [Example: Make your synthesis reproducible](./reproducible_synthesis.md)
 
 ### Handling missing values
-Handling missing values is a delicate task. Generally packages have different methodologies for this, for instance, `pandas` has `pd.NA`, whereas `numpy` uses `np.nan`. Moreover, defining a `numpy` array as follows:
+Handling missing values is a delicate task. Generally packages have different methodologies and definitions for missing values, for instance, `pandas` has `pd.NA`, whereas `numpy` uses `np.nan`. Moreover, defining a `numpy` array as follows:
 ```python
 np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"])
 ```
-casts to:
+removes the missing values, as it is cast to:
 ```python
 ["cat", "dog", "nan", "cat", "nan", "bird"]
 ```
 
-Inside synthpop py we internally define a datatype that is able to combine categorical data (such as `str`) with missing values. This is defined as a {class}`np.dtypes.StringDType(na_object=np.nan)`, and stored in the `utils` module.
+Inside synthpop-py we internally define a datatype that is able to combine categorical data (such as `str`) with missing values. This is defined as a {class}`np.dtypes.StringDType(na_object=np.nan)`, and stored in the `utils` module.
 We can now run:
 ```python
+from synthpop.utils import str_dtype
 X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
 encoder = CustomEncoder(random_state=12)
@@ -112,7 +113,7 @@ print(encoder.mapping_)
 {'bird': 570356716, 'cat': 741055479, 'dog': 2285044420, nan: 577497900}
 ```
 
-We see here that nan is also included with a mapping value. However, we might want to handle nan as a different/specific case we can easily access. As such, we can handle it manually:
+We see here that nan is also included with a mapping value. However, we might want to handle nan as a different/specific case we can easily access. As such, we handle it manually:
 
 ```python
     def fit(self, X: npt.NDArray, y=None) -> Self:
@@ -176,12 +177,12 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
 
         output= [
             self.mapping_[value]
-            for value in X
+            for value in X.flatten()
         ]
         return np.array(output, dtype=np.float32)
  ```
 
-So we now have a function that is able to transform input data X to an output. If we now run the following code:
+So we now have a function that is able to transform input data X to an output, using the `mapping_` as is learned by `fit`. If we now run the following code:
 ```python
 X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
@@ -250,11 +251,41 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
 
         output= [
             self.mapping_[value]
-            for value in X
+            for value in X.flatten()
         ]
         return np.array(output, dtype=np.float32)
+```
+Now the general framework is ready to be used inside synthpop-py:
 
-Now the general framework is ready to be used inside synthpop-py! See [alternative encoding using CART](alternative_encoder.md) on how to implement your encoder in synthpop.
+```python
+from synthpop import Synthesiser
+from synthpop.methods import CartMethod, TreeClassifierMethod, TreeRegressorMethod
+
+Cart_Custom_Encoder = CartMethod(
+    regressor=TreeRegressorMethod(
+        encoder=CustomEncoder(),
+    ),
+    classifier=TreeClassifierMethod(
+        encoder=CustomEncoder(),
+    )
+)
+
+X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"]*10, dtype=str_dtype)
+Y = np.array([0,1,2,3,3,5]*10) # times 10 make a larger set
+
+synth = Synthesiser(12, default_syn_method=Cart_Custom_Encoder)
+synth.fit(pd.DataFrame({'a' : X, 'b': Y}))
+syndata = synth.generate()
+print(syndata.head(5))
+      a  b
+0   cat  0
+1   NaN  2
+2   NaN  2
+3   cat  3
+4  bird  5
+```
+
+For more information on implementing alternative methodologies in CART, see [alternative encoding using CART](alternative_encoder.md).
 
 ## Keep in mind:
 1. Test if your encoder works as expected. You can, for instance, check for sklearn compatibility by running [pytest](https://docs.pytest.org/en/stable/):
@@ -265,7 +296,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 def test(estimator, check):
     check(estimator)
 ```
-2. synthpop-py expects encoders to be one dimensional, write your functions accordingly and validate the input where appropriate. Make sure the encoder receives the expected one-dimensional categorical input and provide a useful error message when it does not.
+2. synthpop-py's `CartMethod` expects encoders to be one dimensional, write your functions accordingly and validate the input where appropriate. Make sure the encoder receives the expected one-dimensional categorical input and provide a useful error message when it does not.
 
 3. Handle unseen categories. The data passed to transform may contain categories that were not present when fit was called. Your encoder should therefore define how unseen categories are handled, for example by assigning them a default value or raising a clear error.
 
@@ -288,4 +319,4 @@ When implementing a custom encoder, it is important to validate one-dimensional 
 With the custom encoder implemented and validated, the next step is to integrate it into synthpop-py. 
 See [alternative encoding using CART](./alternative_encoder.md) for an example of how to connect a custom encoder to the encoding workflow and use it during synthesis.
 
-In the [following example](./custom_encoder.md) we will explain how to build your own synthesis model.
+In the [following example](./custom_synth.md) we will explain how to build your own synthesis model.
