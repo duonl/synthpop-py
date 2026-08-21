@@ -40,46 +40,46 @@ A common approach for evaluating identity disclosure is to measure how closely s
 ### 6.1.2. Attribute disclosure
 Attribute disclosure occurs when a third-party learns sensitive information about an individual, even without identifying the exact record.
 
-A sensitive attribute is an attribute whose value is considered confidential and could cause harm or reveal private information if inferred about an individual. Examples include medical diagnoses, income, political affiliation or other personal characteristics. In the context of attribute disclosure, the concern is that a third-party who already knows an individual's quasi-identifying characteristics (such as age, sex or location) may use the synthetic data to infer the value of one or more sensitive attributes with high confidence.
+A sensitive attribute is an attribute whose value is considered confidential and could cause harm or reveal private information if inferred about an individual. Examples include medical diagnoses, income, political affiliation or other personal characteristics. In the context of attribute disclosure, the concern is that a third-party who already knows an individual's quasi-identifying characteristics, such as age, sex or location, may use the synthetic data to infer the value of one or more sensitive attributes with high confidence.
 
 For example, if an individual is known to belong to a particular group and the synthetic data reveal that all individuals in that group share a sensitive attribute, a third-party may infer information about the individual.
 
 Attribute disclosure can occur when:
--  Relationships between quasi-identifiers and sensitive attributes are preserved too strongly.
-- Rare groups have little variation in sensitive attributes.
-- The synthetic data reveal deterministic relationships from the original data.
-
-Preventing attribute disclosure requires considering not only whether individual records can be identified, but also whether sensitive information can be inferred from preserved statistical relationships.
-
-#### 6.1.2.1 Rare categories and overfitting
-
-Categories with very few records in the data, so-called rare categories, can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, synthesis models may be able to reproduce relationships for those rare values too accurately.
-
-This can occur when a synthesis model overfits the original data. For example, suppose a categorical predictor contains a unique value for every observation. A classification model may be able to split the data into groups that contain only a single target value, including very small groups. When synthetic values are subsequently sampled from these groups, there may be little or no randomness in the generated values. This means that the relationship between the predictor and target column will be almost exactly reproduced. As a result, the synthetic target column may closely match the original target column.
-
-This is particularly relevant when rare categories are associated with sensitive attributes. If a rare category corresponds to a small group of individuals and the relationship between that category and a sensitive variable is preserved too accurately during the synthesis process, the synthetic data may allow a third-party to infer sensitive information about members of that group. This is a form of attribute disclosure.
-
-For example, consider a dataset containing a categorical variable that identifies a small group and a variable describing a sensitive characteristic of those individuals.
-If the synthesis model learns a deterministic relationship between the two variables, the synthetic dataset may reproduce that relationship even though the individual records themselves are not directly copied.
-A person with external knowledge about the group could then use the synthetic data to infer the sensitive characteristic.
-
-While preserving relationships between variables is generally an objective of the synthesis method it can also increase the risk of attribute disclosure, particularly for small groups or individual records.
-
-Generally, the risk of attribute disclosure can be increased by:
-
+* strong or deterministic relationships between quasi-identifiers and sensitive variables;
 * categorical variables with many rare or unique categories;
 * small subgroups with little variation in sensitive attributes;
-* strong or deterministic relationships between quasi-identifiers and sensitive variables;
 * synthesis models that overfit small groups; and
 * synthesis methods that reproduce original relationships with little or no added uncertainty.
 
-The presence and characteristics of rare categories should therefore be carefully assessed. In particular, users should examine whether small or rare groups are represented in the synthetic data and whether sensitive attributes associated with these groups are preserved in a way that increases disclosure risk.
+Preventing attribute disclosure therefore requires considering not only whether individual records can be identified, but also whether sensitive information can be inferred from relationships preserved in the synthetic data.
 
-This risk is not specific to any particular synthesis method. It depends on the interaction between the characteristics of the original data, the synthesis model, and the specific synthesis configuration. A model that captures common categories well may still overfit rare categories or small subgroups.
+#### 6.1.2.1 Highly predictive relationships
+A strong relationship between a quasi-identifier and a sensitive attribute can create attribute disclosure risk when the relationship is preserved too accurately in the synthetic data. This risk can arise even when the predictor is not rare and the synthesis model has not overfitted the data.
 
-A synthetic dataset should therefore not be assumed to be provide strong privacy protection simply because individual records are not explicitly copied. Privacy evaluation should also consider whether the synthesis process has preserved relationships within rare groups in a way that could enable inference of sensitive information.
+For example, suppose that individuals with a particular combination of age, occupation and location almost always have the same value for a sensitive attribute. If the synthesis model preserves this relationship closely, a third party who knows those characteristics about an individual may be able to infer the individual's sensitive attribute from the synthetic data.
 
-For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce sensitive attributes, see the [Risk of privacy loss due to rare categories example](../examples/rare_categories.md).
+The risk is particularly high when the relationship is deterministic or nearly deterministic. In such cases, preserving the relationship with high fidelity may leave little uncertainty about the sensitive attribute. Adding more randomness to the synthesis process may reduce the disclosure risk, but may also reduce the statistical utility of the synthetic data.
+
+This illustrates an important privacy-utility trade-off. Relationships between variables are generally important for producing useful synthetic data, but preserving a relationship involving a sensitive attribute can also make that attribute easier to infer. The objective is therefore not necessarily to remove all relationships, but to assess whether the relationships that are preserved provide sufficient information to enable sensitive attributes to be inferred.
+
+The risk should be assessed in the context of the information reasonably available to a potential data recipient. A relationship may present little disclosure risk if the relevant quasi-identifying information is not available outside the dataset. Conversely, a relationship may present substantial risk where the quasi-identifiers can readily be obtained from external sources.
+
+Highly predictive relationships can therefore create attribute disclosure risk independently of model overfitting. Even a well-fitting synthesis model may preserve a strong relationship from the original data if that relationship is genuinely present in the source population. In such cases, changing model parameters intended to reduce overfitting may provide limited additional protection.
+
+#### 6.1.2.2. Rare categories and overfitting
+Categories with very few records in the data, so-called rare categories, can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, a synthesis model may create very small and highly homogeneous groups, increasing the risk of overfitting the original data.
+
+For example, suppose a categorical predictor contains a unique value for every observation. A classification model may be able to split the data into groups that are highly homogeneous with respect to the target, including groups containing relatively few observations. If synthetic target values are subsequently sampled from these groups, there may be little uncertainty in the generated values. The relationship between the predictor and target may therefore be reproduced very closely.
+
+To reduce this risk, we recommend considering CART with a minimum number of observations per leaf node. Increasing the minimum leaf size can prevent the model from creating very small groups based on rare or unique values. This can force observations that would otherwise be separated into small groups to be modelled together, introducing more variability when synthetic values are generated. However, the effectiveness of this approach depends on the structure of the data and it does not by itself guarantee protection against disclosure. See {ref}`Guide 3.1.4: Configuring CART <314-configuring-cart>`  and [Example: The tune_cart function](../examples/tune_cart_function.md) for information on how to adjust the minimum leaf size parameter.
+
+For example, consider a dataset with 100 observations where a predictor has a unique value for every observation and the target has 10 possible values. CART could create 10 leaves containing approximately 10 observations each, even with a minimum leaf size of 5. If each leaf corresponds predominantly to one target value, the predictor can still provide substantial information about the target despite the relatively large leaf size. With 200 observations, the same structure could result in leaves containing approximately 20 observations each. In such cases, increasing the minimum leaf size may have little effect because the underlying structure of the data already allows the target to be inferred from the predictor.
+
+This illustrates an important distinction between model overfitting and relationships that are inherently highly predictive in the original data. Increasing the minimum leaf size can reduce some forms of overfitting by preventing the model from creating very small, highly homogeneous groups. It cannot necessarily remove the risk when the source data itself contains a strong or deterministic relationship between a predictor and a target. In such cases, accurately preserving the relationship may inherently limit the extent to which privacy can be protected while retaining the utility of the data.
+
+The appropriate minimum leaf size should therefore be selected based on the structure of the data, balancing the reduction of overfitting against the ability of the model to preserve meaningful relationships. In datasets with repeated and non-unique predictor values, increasing the minimum leaf size may be more effective because it can combine observations that would otherwise form small groups. In contrast, where a predictor is highly informative about the target regardless of the model configuration, adjusting the leaf size may provide limited additional protection.
+
+For a worked example demonstrating how rare or unique categories can cause a synthesis model to overfit and reproduce sensitive attributes, see [Example: Risk of privacy loss due to rare categories](../examples/rare_categories.md).
 
 ### 6.1.3. Membership disclosure
 Membership disclosure occurs when a third-party can determine whether a particular individual was included in the original dataset.

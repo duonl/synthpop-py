@@ -760,6 +760,7 @@ def test_transform_returns_nan_array_when_all_missing_true(X, index_cat, fitted_
 
 # ----- general tests -----
 
+
 def test_to_fixed_length_string_array():
     x = np.array(["a", "b"], dtype=str_dtype)
     result = _to_fixed_length_string_array(x)
