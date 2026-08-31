@@ -70,7 +70,7 @@ During initialisation ([`Synthesiser()`](../api_reference/synthesiser_class/synt
 - **`column_order`**  
   Defines the order in which variables are synthesised.  
   This order is structurally important: each variable is generated conditional on previously generated variables.
-  More information about how to choose the can be found in {ref}` section 2.2.4: Changing the column order <224-column-order>`.
+  More information about how to choose the column order can be found in {ref}` section 2.2.4: Changing the column order <224-column-order>`.
   If not specified, the column order of the original dataset will be used.
 
 - **`default_syn_method`**  

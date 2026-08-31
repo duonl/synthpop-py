@@ -4,7 +4,7 @@ import pytest
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.exceptions import NotFittedError
 
-from synthpop.methods.cart_synth import CartMethod
+from synthpop.methods.cart_synth import CartMethod, tune_cart
 from synthpop.utils import str_dtype
 
 
@@ -598,3 +598,12 @@ def test_clone_works_and_fitted_cart_does_not_preserve_state():
     assert hasattr(cloned, "classifier")
     assert hasattr(cart, "regressor")
     assert hasattr(cart, "classifier")
+
+
+# tune_cart
+
+def test_tune_cart_returns_cart_method():
+    method_factory = tune_cart()
+    method = method_factory()
+
+    assert isinstance(method, CartMethod)

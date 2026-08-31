@@ -19,7 +19,7 @@ Available synthesis methods are:
 (31-cart-synthesis)=
 ## 3.1. CART synthesis (default method)
 
-CART (Classification And Regression Trees) is the default synthesis method. 
+CART (Classification And Regression Trees) is the default synthesis method. It can be used as follows:
 ```python
 >>> from synthpop.methods import CartMethod
 
@@ -31,6 +31,15 @@ CART (Classification And Regression Trees) is the default synthesis method.
 1    70.0
 2    60.0
 Name: length, dtype: float32
+```                
+
+Most users should not construct this class directly. {ref}`Directly constructing <314-configuring-cart>` a `CartMethod` is intended for advanced use cases where the underlying components need to be customised. Instead, it should be configured through the {class}`~synthpop.synthesiser.Synthesiser` class.:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser()
+>>> synthetic_data = synth.fit(original_data).generate()
 ```                
 
 CART generates a column by learning an approximation of the conditional distribution:
@@ -61,10 +70,14 @@ flowchart TD
     C --> H["Synthetic sample:<br/>draw randomly from<br/>[72, 75, 80]"]
 ```
 
+To reduce the risk of disclosing information about individual observations, a minimum number of observations per terminal leaf can be specified. This prevents CART from creating terminal leaves based on very small groups of observations. A higher minimum leaf size generally provides stronger protection against highly specific splits, but may reduce the algorithm's ability to capture detailed patterns in the data. The default value in synthpop-py is 5 observations per leaf node.
+
 CART is recommended when:
 - preserving relationships between variables is important;
 - realistic conditional distributions are required;
-- interpretability of local structure matters.
+- interpretability of local structure matters;
+- limiting the influence of outliers is important for privacy.
+
 
 (311-algorithm)=
 ### 3.1.1. Algorithm
@@ -140,6 +153,7 @@ For the first column, no predictors are available. In that case, CART samples di
 - CART models only relationships captured by the available predictors. Important dependencies cannot be reproduced if relevant predictors are unavailable.
 - As part of the sequential synthesis framework, the available predictors depend on the column synthesis order. The ordering of predictors within a single CART model does not affect the fitted tree; only the selection of available predictors through the synthesis order matters.
 
+(314-configuring-cart)=
 ### 3.1.4. Configuring CART
 The behaviour of the CART synthesis method can be customised by replacing or configuring its individual components. For example, users can modify hyperparameters of the underlying decision trees, change the categorical encoder or select a different missing value handling strategy.
 
@@ -177,7 +191,7 @@ Which can then be passed in the {class}`~synthpop.synthesiser.Synthesiser`:
 >>> Synthesiser(default_syn_method=tuned_cart)
 ```
 Currently `tune_cart` supports the following parameters:
-- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree.
+- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree. Consider increasing its value to preserve privacy by limiting influence of outliers on the synthesis model.
 - `n_components`: configures the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
 
 ---
@@ -197,6 +211,15 @@ new_target_column
 1              <NA>
 2                 1
 ```
+
+For the intended usage, specify this method when initiating the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser(default_syn_method=SampleMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```                
 
 It approximates:
 ```{math}
@@ -255,6 +278,15 @@ new_target_column
 1             2
 2             <NA>
 ```
+
+For the intended usage, specify this method when initiating the {class}`~synthpop.synthesiser.Synthesiser` class:
+
+```python
+>>> from synthpop import Synthesiser
+
+>>> synth = Synthesiser(default_syn_method=CopyMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```       
 
 It implements:
 ```{math}

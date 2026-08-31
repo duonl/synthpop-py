@@ -15,6 +15,20 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
     Examples
     --------
+
+    :class:`CopyMethod` should be given as an argument to the :class:`Synthesiser`'s ``default_syn_method`` or ``special_syn_method``.
+    See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
+    `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
+
+    **Intended usage in the package is thus:**
+        
+    >>> from synthpop.methods import CopyMethod
+    >>> from synthpop import Synthesiser
+    ... 
+    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CopyMethod()})
+
+    The ``CopyMethod`` can be used directly as follows (note that this is not the intended usage):
+
     >>> from synthpop.methods import CopyMethod
     >>> import pandas as pd
     >>> 
@@ -30,7 +44,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
     1             b
     2             c
 
-    Without X:
+    As ``CopyMethod`` does not use predictors to copy `y`, it can be called without `X`:
 
     >>> from synthpop.methods import CopyMethod
     >>> import pandas as pd
