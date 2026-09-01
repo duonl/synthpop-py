@@ -253,8 +253,7 @@ class CustomSynth(BaseSynthMethod):
         )
 
     def get_feature_names_out(self, input_features=None):
-        if not hasattr(self, "target_name_"):
-            raise NotFittedError("CustomSynthMethod is not fitted. Call `fit` first.")
+        check_is_fitted(self, ["target_name_"])
 
         if input_features is None:
             if hasattr(self, "feature_names_in_"):
@@ -282,7 +281,7 @@ from synthpop import Synthesiser
 
 synth = Synthesiser(
     special_syn_method={
-        "B": CustomSynth(),
+        "A": CustomSynth(),
     },
 )
 
