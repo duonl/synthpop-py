@@ -40,7 +40,7 @@ class CustomSynth(BaseSynthMethod):
 
 However, as you can see, this class does not yet learn or generate anything. We will implement the behaviour step by step.
 
-## Fit a custom synthesis method
+### Fit a custom synthesis method
 The `fit` method is responsible for learning everything required to generate the synthetic target variable. It receives:
 - `X`: the predictor variables that are available when the target is synthesised. These may be `None` if the target has no predictors.
 - `y`: the original target variable that the method should learn to synthesise.
@@ -114,7 +114,7 @@ print(synth.value_)
 # 32.5
 ```
 
-## Transforming the data
+### Transforming the data
 The `transform` method uses the parameters learned during `fit` to generate synthetic target values.
 
 For our example, we generate the learned value once for every row in the input data:
@@ -182,7 +182,7 @@ print(values)
 
 As you can see, `fit` learns the value from the original target (and predictors, if supplied), while `transform` uses that learned value to generate a synthetic version of the target.
 
-## Providing output feature names
+### Providing get_feature_names_out
 
 {class}`~synthpop.methods.base_synth.BaseSynthMethod` also requires `get_feature_names_out`. This method follows the `scikit-learn` estimator interface and reports the name of the feature produced by the estimator. See the [get_feature_names_out documentation](https://scikit-learn.org/stable/glossary.html#term-get_feature_names_out) for more information.
 
@@ -191,8 +191,7 @@ For all current synthesis methods in synthpop-py, the output has the same name a
 Nevertheless, a custom synthesis method should implement the method to follow the expected interface. Following the `scikit-learn conventions`, we can define it as follows:
 ```python
 def get_feature_names_out(self, input_features=None):
-    if not hasattr(self, "target_name_"):
-        raise NotFittedError("CustomSynthMethod is not fitted. Call `fit` first.")
+    check_is_fitted(self, ["target_name_"])
 
     if input_features is None:
         if hasattr(self, "feature_names_in_"):

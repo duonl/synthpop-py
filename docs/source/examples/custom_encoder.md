@@ -71,12 +71,13 @@ class CustomEncoder(BaseEstimator):
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
-        RandomStateManager.set_root_seed(self.random_state)
+        self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
+        rng = RandomStateManager.create_rng(self.random_state_)
         categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: RandomStateManager.create_instance_seed()
+            category: rng.random()
             for category in self.categories_
         }
 
@@ -84,9 +85,10 @@ class CustomEncoder(BaseEstimator):
 ```
 The encoder can now be instantiated with a fixed `random_state` to make its random behaviour reproducible.
 ```python
+RandomStateManager.set_root_seed(0)
 encoder = CustomEncoder(random_state=12) # Arbitrary number
 ```
-For more information about the {class}`~synthpop.reproducibility.RandomStateManager`, please see the API reference or [Example: Make your synthesis reproducible](./reproducible_synthesis.md)
+For more information about the {class}`~synthpop.reproducibility.RandomStateManager`, please see the API reference, [Example: Make your synthesis reproducible](./reproducible_synthesis.md), or for developers [Developer Guide: Using randomness in this package](../developer/way_of_working/randomness.md)
 
 #### Handling missing values
 Handling missing values is a delicate task. Different Python libraries represent missing values differently. For example, `pandas` uses `pd.NA`, while `numpy` uses `np.nan`. In addition, `numpy` may convert an array containing strings and `np.nan` to a string array, causing the missing values to be represented as the string `"nan"` rather than as actual missing values.
@@ -105,6 +107,7 @@ synthpop-py provides a datatype that is able to combine categorical data (such a
 from synthpop.utils import str_dtype
 X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
+RandomStateManager.set_root_seed(0)
 encoder = CustomEncoder(random_state=12)
 encoder.fit(X)
 ```
@@ -112,7 +115,7 @@ encoder.fit(X)
 The resulting `mapping_` is a dictionary that stores which type of animal (`X`) should be mapped to which integer value:
 ```python
 print(encoder.mapping_)
-{'bird': 570356716, 'cat': 741055479, 'dog': 2285044420, nan: 577497900}
+{'bird': 0.42366158937171916, 'cat': 0.6306062562352069, 'dog': 0.28937982790273686, nan: 0.21039328747277808}
 ```
 
 We may, however, want to treat missing values separately from the observed categories. We can therefore assign a specific encoded value to `np.nan`:
@@ -120,12 +123,13 @@ We may, however, want to treat missing values separately from the observed categ
 ```python
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
-        RandomStateManager.set_root_seed(self.random_state)
+        self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
+        rng = RandomStateManager.create_rng(self.random_state_)
         categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: RandomStateManager.create_instance_seed()
+            category: rng.random()
             for category in self.categories_
         }
 
@@ -136,7 +140,7 @@ We may, however, want to treat missing values separately from the observed categ
 Now we have:
 ```python
 print(encoder.mapping_)
-{'bird': 570356716, 'cat': 741055479, 'dog': 2285044420, nan: 0}
+{'bird': 0.42366158937171916, 'cat': 0.6306062562352069, 'dog': 0.28937982790273686, nan: 0}
 ```
 
 ### TransformerMixin
@@ -163,12 +167,13 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
-        RandomStateManager.set_root_seed(self.random_state)
+        self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
+        rng = RandomStateManager.create_rng(self.random_state_)
         categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: RandomStateManager.create_instance_seed()
+            category: rng.random()
             for category in self.categories_
         }
 
@@ -190,12 +195,12 @@ The encoder is now able to transform input data `X` to an output, using the `map
 ```python
 X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
+RandomStateManager.set_root_seed(0)
 encoder = CustomEncoder(random_state=12)
 encoder.fit(X)
 values = encoder.transform(X)
 print(values)
-# [7.4105549e+08 2.2850445e+09 0.0000000e+00 7.4105549e+08 0.0000000e+00
-#  5.7035674e+08]
+# [0.63060623 0.28937984 0.         0.63060623 0.         0.4236616 ]
 ```
 ****We successfully managed to transform our animals into numbers!****![Tada](../images/tada_emoji.gif){width=25px}
 
@@ -237,12 +242,13 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
-        RandomStateManager.set_root_seed(self.random_state)
+        self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
+        rng = RandomStateManager.create_rng(self.random_state_)
         categories = np.unique(X)
 
         self.categories_ = categories.tolist()
         self.mapping_ = {
-            category: RandomStateManager.create_instance_seed()
+            category: rng.random()
             for category in self.categories_
         }
 
@@ -287,8 +293,8 @@ print(syndata.head(5))
 #       a  b
 # 0   cat  0
 # 1   NaN  2
-# 2   NaN  2
-# 3   cat  3
+# 2   NaN  3
+# 3   cat  0
 # 4  bird  5
 ```
 
