@@ -141,7 +141,7 @@ print(encoder.mapping_)
 
 ### TransformerMixin
 
-The `fit` method learns the mapping from categorical values to numeric values, but the encoder also needs a way to apply that learned mapping to data. 
+The `fit` method learns the mapping from categorical values to numeric values, but the encoder also needs a way to apply that learned mapping to incoming data. 
 
 Our encoder can therefore be extended as follows:
 
@@ -208,7 +208,7 @@ When creating a custom estimator or transformer that follows the `scikit-learn` 
 
 Tags provide metadata about an estimator that `scikit-learn` can use for tasks such as validating inputs, running estimator checks, and determining how the estimator can be used within the broader `scikit-learn` ecosystem.
 
-Our encoder expects one-dimensional categorical input and allows missing values. We can communicate these requirements by overriding `__sklearn_tags__`:
+Our encoder expects one-dimensional categorical input and allows missing values. We can communicate these requirements by overriding the initial `__sklearn_tags__`:
 
 ```python
 from typing import Self

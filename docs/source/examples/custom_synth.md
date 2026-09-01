@@ -1,7 +1,7 @@
 # Create a custom synthesis method
-Synthesis methods are the centre of synthpop-py's synthesis workflow. A synthesis method learns how to generate a target column, optionally using predictor columns that have already been synthesised. synthpop-py provides several built-in synthesis methods, but you may want to implement your own method for a particular use case. See [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md) for an overview of the synthesis methods provided by synthpop-y.
+Synthesis methods are the centre of synthpop-py's synthesis workflow. A synthesis method learns how to generate a target column, optionally using predictor columns that have already been synthesised. synthpop-py provides several built-in synthesis methods, but you may want to implement your own method for a particular use case. See [User Guide 3: Synthesis methods](../user_guides/3_synthesis_methods.md) for an overview of the synthesis methods provided by synthpop-py.
 
-This example shows how to implement a custom synthesis method that follows the [`scikit-learn` conventions](https://scikit-learn.org/stable/developers/develop.html) used throughout synthpop-py. The example method is deliberately: for a numeric target, it generates the mean of the observed values; for a categorical target, it generates the most frequent value.
+This example shows how to implement a custom synthesis method that follows the [`scikit-learn` conventions](https://scikit-learn.org/stable/developers/develop.html) used throughout synthpop-py. The example method is deliberately simple: for a numeric target, it generates the mean of the observed values; for a categorical target, it generates the most frequent value.
 
 ## BaseSynthMethod
 All synthesis methods in synthpop-py inherit from {class}`~synthpop.methods.base_synth.BaseSynthMethod`.
@@ -16,7 +16,7 @@ A synthesis method should implement three main methods:
 
 A synthesis method must also support cases where there are no predictors (i.e. `X` is `None` or an empty dictionary) available yet. synthpop-py synthesises datasets sequentially. As a result, the first column will never have predictors available.
 
-A minimal custom synthesis method therefore looks like this:
+Altogether, a minimal custom synthesis method should be structured like this:
 
 ```python
 from typing import Self
@@ -38,14 +38,14 @@ class CustomSynth(BaseSynthMethod):
         return []
 ```
 
-However, as you can see, this class does not yet learn or generate anything. We can implement this behaviour step by step.
+However, as you can see, this class does not yet learn or generate anything. We will implement the behaviour step by step.
 
 ## Fit a custom synthesis method
 The `fit` method is responsible for learning everything required to generate the synthetic target variable. It receives:
 - `X`: the predictor variables that are available when the target is synthesised. These may be `None` if the target has no predictors.
 - `y`: the original target variable that the method should learn to synthesise.
 
-As a simple example, we can create a method that learns the mean of a numeric target and the mode of a categorical target:
+As four our example, we will create a method that learns the mean of a numeric target and the mode of a categorical target:
 
 ```python
 from typing import Self
@@ -186,7 +186,7 @@ As you can see, `fit` learns the value from the original target (and predictors,
 
 {class}`~synthpop.methods.base_synth.BaseSynthMethod` also requires `get_feature_names_out`. This method follows the `scikit-learn` estimator interface and reports the name of the feature produced by the estimator. See the [get_feature_names_out documentation](https://scikit-learn.org/stable/glossary.html#term-get_feature_names_out) for more information.
 
-For most synthesis methods in synthpop-py, the output has the same name as the target that was passed to fit. Therefore, `get_feature_names_out` has a relatively limited role here. It becomes more useful for components that change the number or names of features, such as dimensionality-reduction methods.
+For all current synthesis methods in synthpop-py, the output has the same name as the target that was passed to fit. Therefore, `get_feature_names_out` has a relatively limited role here. It becomes more useful for components that change the number or names of features, such as dimensionality-reduction methods.
 
 Nevertheless, a custom synthesis method should implement the method to follow the expected interface. Following the `scikit-learn conventions`, we can define it as follows:
 ```python
@@ -304,7 +304,7 @@ See [Change the default synthesis method](./changing_the_default_method.md) and 
 When implementing a custom synthesis method, consider the following:
 1. **Inherit from `BaseSynthMethod`.** This provides the interface expected by synthpop-py.
 
-2. **Implement `fit`, `transform`, and `get_feature_names_out`. `fit` should learn all parameters required for synthesis, `transform` should use those parameters to generate synthetic values, and `get_feature_names_out` should report the generated output name.
+2. **Implement `fit`, `transform`, and `get_feature_names_out`**. `fit` should learn all parameters required for synthesis, `transform` should use those parameters to generate synthetic values, and `get_feature_names_out` should report the generated output name.
 
 3. **Support both predictors and no predictors.** `X` may contain predictor columns that have already been synthesised, but it may also be `None` when the target has no predictors.
 
