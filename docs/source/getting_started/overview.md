@@ -29,13 +29,3 @@ Future development will be guided by user feedback and the needs of the syntheti
 synthpop-py is maintained by a team of three developers from the Dutch Ministry of Education, Culture and Science.
 
 The project currently has approximately 1.5 FTE of development capacity committed for at least one year.
-
-# License 
-
-```{literalinclude} ../../../LICENSE.md
-```
-
-# Governance
-
-```{literalinclude} ../../../GOVERNANCE.md
-```

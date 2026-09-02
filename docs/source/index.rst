@@ -13,6 +13,7 @@
    examples/examples_index
    api_reference/synthpop
    developer/developer_index
+   about_us/about_us
 
 synthpop-py documentation
 ==========================
