@@ -1,5 +1,5 @@
 """
-This module contains the CART method for synthesising data.
+This module contains the Classification and Regression Trees (CART) method for synthesising data.
 """
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, Self
@@ -109,7 +109,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
                 is_numeric = pd.api.types.is_numeric_dtype(values.dtype)
                 is_boolean = pd.api.types.is_bool_dtype(values.dtype)
                 if (not is_numeric) or is_boolean:
-                    utils._raise_on_rare_category(
+                    utils._warn_on_rare_category(
                         x=values,
                         rare_threshold=self.rare_categories_threshold,
                         name=key,
@@ -233,10 +233,9 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
-        If a categorical predictor contains values occurring fewer than this threshold, 
-        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occurring fewer than this threshold raise an exception.
+    :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. 
+        This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to ``0``, the check is disabled.
         Default value is 5.
 
@@ -248,6 +247,8 @@ class TreeClassifierMethod(_AbstractTreeMethod):
 
     Examples
     --------
+    ``TreeClassifierMethod`` can be used directly as follows (note that this is not the intended usage):
+
     >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np
     >>> from synthpop.utils import str_dtype
@@ -305,10 +306,9 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_processing.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
-    :param rare_categories_threshold:  Threshold for when a categorical value is considered rare.
-        If a categorical predictor contains values occurring fewer than this threshold, 
-        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
-        If set to an integer, categories occurring fewer than this threshold raise an exception.
+    :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. 
+        This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to ``0``, the check is disabled.
         Default value is 5.
 
@@ -320,6 +320,8 @@ class TreeRegressorMethod(_AbstractTreeMethod):
 
     Examples
     --------
+    ``TreeRegressorMethod`` can be used directly as follows (note that this is not the intended usage):
+
     >>> from synthpop.methods import TreeRegressorMethod
     >>> import numpy as np
     >>> from synthpop.utils import str_dtype
@@ -377,18 +379,20 @@ class CartMethod(base_synth.BaseSynthMethod):
     TreeClassifierMethod or TreeRegressorMethod depending on the dtype of `y`.
 
     When called without existing predictors (`X` is empty), CART automatically samples to create a synthetic `y`.
-    When `X` has columns during `transform` that were not present during `fit`, those columns are ignored.
+    When `X` has columns during ``transform`` that were not present during ``fit``, those columns are ignored.
 
     Input/output API uses pandas objects exclusively:
+
     - X must be a pandas DataFrame
     - y must be a pandas Series
     - transform returns a pandas Series
 
     Internal tree methods operate on:
-    - dict[str, np.ndarray] for X
-    - np.ndarray for y
 
-    The returned pandas Series preserves the dtype of the input target variable.
+    - dict[str, np.ndarray] for `X`
+    - `np.ndarray` for `y`
+
+    The returned pandas Series preserves the data type of the input target variable.
 
     :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 
@@ -397,6 +401,20 @@ class CartMethod(base_synth.BaseSynthMethod):
 
     Examples
     --------
+
+    :class:`CartMethod` should be given as an argument to the :class:`Synthesiser`'s ``default_syn_method``/``special_syn_method``.
+    See examples `default synthesis method <../../examples/changing_the_default_method.html>`__ and
+    `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
+
+    **Intended usage in this package is:**
+        
+    >>> from synthpop.methods import CartMethod
+    >>> from synthpop import Synthesiser
+    ... 
+    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
+
+    ``CartMethod`` can be used directly as follows (note that this is not the intended usage):
+    
     >>> import pandas as pd
     >>> from synthpop.methods import CartMethod
     >>>
@@ -567,23 +585,28 @@ def tune_cart(
 
     :param n_leaves: minimum number of samples in the leaf nodes.\
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
-        See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.
+        See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.\
+        Consider increasing this parameter to preserve privacy by limiting influence of outliers on the synthesis model.
     :param n_components: sets the number of principal components used in encoding in the classifier. \
         For float values between 0 and 1, it is the percentage of variance that should be explained by the principal components.\
         For integers ≥ 1, it is the number of principal components.\
         See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for more information.
-    :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
-        If a categorical predictor contains values occurring fewer than this threshold, 
-        an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+    :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to
+        categories occurring fewer than this threshold. This warning helps prevent potential
+        :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
 
-        If set to an integer, categories occurring fewer than this threshold raise an exception.
-        If set to ``0``, the check is disabled.
-        The default value is ``None`` for :func:`tune_cart`, which means the threshold
+        - If set to an integer, categories occurring fewer than this threshold are considered rare.
+        - If set to ``0``, the rare-category check is disabled.
+        - If set to ``None``, the value of ``n_leaves`` is used.
+    
+        The default value is ``None`` for :func:`tune_cart`, so the threshold
         defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
         default threshold is also 5.
+        
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
-
-    :return: a callable that returns a CartMethod object with the parameters consistently applied.
+    
+    :return: a callable that returns a ``CartMethod`` object with the parameters consistently applied.
 
     A zero-argument callable is returned instead of a ``CartMethod``
     instance so that the underlying estimators are constructed during

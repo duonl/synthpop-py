@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
@@ -144,7 +146,7 @@ def _to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
     return {key: _standardise_array_dtypes(value) for key, value in data.items()}
 
 
-def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None) -> None:
+def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None) -> None:
 
     m_nan = pd.isna(x)
     _, counts = np.unique(x[~m_nan], return_counts=True)
@@ -156,12 +158,18 @@ def _raise_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | Non
         else f"predictor {name}"
     )
 
-    if (counts < rare_threshold).any() or (0 < n_nan < rare_threshold):
-        raise ValueError(
-            f"Categorical {predictor} contains a category occurring fewer than {rare_threshold} times.\n "
+    n_rows_with_rare_values = np.sum(counts, where=(counts < rare_threshold))
+
+    if (0 < n_nan < rare_threshold):
+        n_rows_with_rare_values += n_nan
+
+    if n_rows_with_rare_values * 4 > x.shape[0]:  # times 4 because of the 25% mark
+        warnings.warn(
+            f"Categorical {predictor} contains categories occurring fewer than {rare_threshold} times for more than 25% of the rows.\n "
             "This may allow the CART method to copy target values for small groups,\n "
             "which can pose a risk of undesirable attribute disclosure. \n"
             "Consider whether this risk is acceptable and adjust rare_categories_threshold if appropriate.\n"
             "This check can be disabled by setting rare_categories_threshold=0 in `tune_cart()`. \n"
-            "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html#synthpop.methods.cart_synth.tune_cart"
+            "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html",
+            UserWarning
         )

@@ -1,4 +1,4 @@
-Encoder
+Encoding
 --------------------------------------------
 
 .. automodule:: synthpop.data_processing.encoders

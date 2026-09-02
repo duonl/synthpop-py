@@ -85,6 +85,10 @@ intersphinx_mapping = {
         "https://scikit-learn.org/stable/",
         "https://scikit-learn.org/stable/objects.inv",
     ),
+    "numpy": (
+        "https://numpy.org/doc/stable/",
+        "https://numpy.org/doc/stable/objects.inv",
+    ),
 }
 
 mermaid_init_js = """

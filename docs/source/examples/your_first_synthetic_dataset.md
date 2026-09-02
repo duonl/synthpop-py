@@ -153,6 +153,10 @@ These visualisations allow us to compare variables one by one. As seen in the pl
 
 More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`.
 
+### Evaluate Privacy
+
+An important notion to be made is that synthetic data is not equal to data without any privacy-sensitive information. As such, before sharing/publishing your results, you should consider if sensitive information can be inferred from the generated synthetic data. Please see:  [User Guide 6: Evaluating Privacy](../user_guides/6_evaluating_privacy.md) and [Example: Risk of privacy loss due to rare categories](./rare_categories.md).
+
 ## Next steps
 
 Congratulations, you have created and evaluated your first synthetic dataset.
