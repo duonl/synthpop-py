@@ -8,7 +8,7 @@ In some cases, you may want to use a different encoding strategy. In this exampl
 
 ## Encoder requirements for synthpop-py
 To integrate an encoder with synthpop-py, there are several requirements to consider. The requirements are particularly important when the encoder is used together with {class}`~synthpop.methods.cart_synth.CartMethod`, which expects encoders to follow a specific interface.
-1. **Output shape:** The encoder should return a one-dimensional array with the same number of observations as the input. This is particularly important when the encoder is used with `CartMethod`. If you [build your own synthesis method](./custom_synth), you may have more flexibility in how the encoder represents its output.
+1. **Output shape:** The encoder should also be return an array with shape (N,1), with N the same number of observations as the input. This is particularly important when the encoder is used with `CartMethod`. If you [build your own synthesis method](./custom_synth), you may have more flexibility in how the encoder represents its output.
 2. **Cloneability:** The encoder should be a [cloneable estimator object](https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html). This allows synthpop-py to create independent copies of the encoder when it is used across the dataset.
 3. **Missing values:** Many types of datasets contain missing values. If the encoder does not support missing values itself, they must be handled before encoding.
 4. **Reproducibility:** If the encoder uses randomness, its random behaviour should be controlled through a `random_state`. Synthpop-py provides {class}`~synthpop.reproducibility.RandomStateManager` to manage random states consistently throughout the synthesis process. See [the developer guide on reproducibility](../developer/way_of_working/randomness) for developers.
@@ -91,7 +91,7 @@ encoder = CustomEncoder(random_state=12) # Arbitrary number
 For more information about the {class}`~synthpop.reproducibility.RandomStateManager`, please see the API reference, [Example: Make your synthesis reproducible](./reproducible_synthesis.md), or for developers [Developer Guide: Using randomness in this package](../developer/way_of_working/randomness.md)
 
 #### Handling missing values
-Handling missing values is a delicate task. Different Python libraries represent missing values differently. For example, `pandas` uses `pd.NA`, while `numpy` uses `np.nan`. In addition, `numpy` may convert an array containing strings and `np.nan` to a string array, causing the missing values to be represented as the string `"nan"` rather than as actual missing values.
+Handling missing values is a delicate task. Different Python libraries represent missing values differently. For example, `pandas` uses `pd.NA`, while `numpy` uses `np.nan`. In addition, `numpy` will convert an array containing strings and `np.nan` to a string array, causing the missing values to be represented as the string `"nan"` rather than as actual missing values.
 
 For example:
 ```python
