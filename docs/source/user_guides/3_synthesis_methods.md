@@ -21,7 +21,9 @@ Available synthesis methods are:
 
 CART (Classification And Regression Trees) is the default synthesis method in synthpop-py. It models the conditional distribution of each target column given the columns that have already been synthesised.
 
-### Intended usage {toc=False}
+:::
+
+### Intended usage
 
 CART is normally used through the {class}`~synthpop.synthesiser.Synthesiser`, which orchestrates the sequential synthesis of the complete dataset:
 ```python
@@ -42,6 +44,8 @@ Because CART is the default method, this is equivalent to explicitly configuring
 Both approaches use the same synthesis method. Explicitly passing `CartMethod()` is therefore only necessary when you want to make the choice of synthesis method explicit or customise its configuration. See {ref}`Guide 3.1.4: Configuring CART <314-configuring-cart` and the [Configure CART directly example](../examples/configure_cart_directly.md) for more information.
 
 The method can also be configured for a specific column using `special_syn_method`. See {ref}`Guide 2.2.3: Column-level control <223-column-level-control>`.
+
+:::
 
 ### How CART works {toc=False}
 
