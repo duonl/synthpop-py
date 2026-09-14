@@ -110,6 +110,7 @@ Other available methods are:
 
 More information about these methods can be found in [Guide 3: Synthesis methods](3_synthesis_methods.md).
 
+(223-column-level-control)=
 ### 2.2.3. Column-level control
 
 Different variables can use different synthesis methods:

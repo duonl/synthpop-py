@@ -1,5 +1,5 @@
 (5-evaluating-utility)=
-# 5. Evaluating utility
+# 5. Evaluating and improving utility
 Synthetic data utility describes how well synthetic data preserve the statistical properties and analytical usefulness of the original data.
 
 A synthetic dataset with high utility should resemble the original dataset in important aspects, such as marginal distributions, relationships between variables, and patterns relevant for downstream analyses. However, utility is application dependent: a dataset intended for exploratory analysis may require different utility properties than a dataset intended for training machine learning models or estimating statistical quantities.
