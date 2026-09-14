@@ -8,10 +8,10 @@ In some cases, you may want to use a different encoding strategy. If you would r
 
 ## Encoder requirements for synthpop-py
 To integrate an encoder with synthpop-py, there are several requirements to consider. The requirements are particularly important when the encoder is used together with {class}`~synthpop.methods.cart_synth.CartMethod`, which expects encoders to follow a specific interface.
-1. **Output shape:** The encoder should return a dimensional array of size (N,m), with N the same number of observations as the input. The dimension m may be arbitrary and depend on the specific encoder. If you [build your own synthesis method](./custom_synth), you may have more flexibility in how the encoder represents its output.
+1. **Output shape:** The encoder should return a two-dimensional array with shape `(N, m)`, where `N` is the number of observations in the input and `m` is the number of features produced by the encoder. If you [build your own synthesis method](./custom_synth), you may have more flexibility in how the encoder represents its output.
 2. **Cloneability:** The encoder should be a [cloneable estimator object](https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html). This allows synthpop-py to create independent copies of an encoder when it is used across the dataset.
 3. **Missing values:** Many types of datasets contain missing values. If the encoder does not support missing values itself, they must be handled before encoding.
-4. **Reproducibility:** If the encoder uses randomness, its random behaviour should be controlled through a `random_state`. Synthpop-py provides {class}`~synthpop.reproducibility.RandomStateManager` to manage random states consistently throughout the synthesis process. See [the developer guide on reproducibility](../developer/way_of_working/randomness) for developers.
+4. **Reproducibility:** If the encoder uses randomness, its random behaviour should be controlled through a `random_state`. Synthpop-py provides {class}`~synthpop.reproducibility.RandomStateManager` to manage random states consistently throughout the synthesis process. See [the developer guide on reproducibility](../developer/way_of_working/randomness) for more information on this topic.
 
 For **developers implementing an encoder for current synthesis methods in synthpop-py**, these requirements are a must as they allow the new encoder to integrate with the existing synthesis framework. However, if you are developing an encoder for a specific use case or your own synthesis method, you may find that not all features are required to be implemented. Here, we will implement all four requirements.
 
@@ -20,12 +20,14 @@ In order for an encoder to be compatible with synthpop-py, it should also follow
 
 Generally this implies two things:
 1. A synthpop-py encoder should inherit from the base class {class}`~sklearn.base.BaseEstimator` and mixin class for transformers {class}`~sklearn.base.TransformerMixin`
-2. Define [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags) to declare the encoder’s capabilities and input requirements, allowing scikit-learn and synthpop-py to validate and test the estimator appropriately.
+2. Define [estimator tags](https://scikit-learn.org/stable/developers/develop.html#estimator-tags) to declare the encoder’s capabilities and input requirements, allowing `scikit-learn` and synthpop-py to validate and test the estimator appropriately.
 
-For more information on developing `scikit-learn` estimators and using other mixins, see the [scikit-learn developer guide](https://scikit-learn.org/dev/developers/develop.html#). In this example we explain how to create a custom encoder that maps categorical data to random numeric values while following the synthpop-py requirements.
+For more information on developing `scikit-learn` estimators and using other mixins, see the [scikit-learn developer guide](https://scikit-learn.org/dev/developers/develop.html#). In this example, we explain how to create a custom encoder that maps categorical data to random numeric values while following the synthpop-py requirements.
 
-## BaseEstimator: Cloning and fit function
-An estimator is an object that learns parameters from training data and can subsequently use those parameters to transform new data or make predictions. For a custom encoder, the `fit` function is used to learn the mapping from categorical values to their encoded representations. A minimal encoder can therefore start by inheriting from {class}`~sklearn.base.BaseEstimator`:
+## BaseEstimator: Cloning and `fit` method
+An estimator is an object that learns parameters from training data and can subsequently use those learned parameters to transform data or make predictions. For a custom encoder, the `fit` method is responsible for learning the mapping from categorical values to their numercal representations. 
+
+To follow `scikit-learn` convention, a custom encoder should inherit from {class}`~sklearn.base.BaseEstimator`. A minimal encoder can therefore start as follows:
 
  ```python
 from sklearn.base import BaseEstimator
@@ -41,18 +43,23 @@ class CustomEncoder(BaseEstimator):
         return self
  ```
 
-An additional benefit of inheriting from {class}`~sklearn.base.BaseEstimator` is that it allows for a `clone` functionality. Inside synthpop-py's {class}`~synthpop.methods.cart_synth.CartMethod` cloning is used as follows:
+Another benefit of inheriting from {class}`~sklearn.base.BaseEstimator` is support for `scikit-learn`'s cloning conventoins. Cloning allows synthpop-py to create independent copies of an estimator while preserving its configuration.
+
+For example, {class}`~synthpop.methods.cart_synth.CartMethod` uses cloning when creating and configuring its internal components:
 
 ```python
 from sklearn import clone
 def _new_encoder(self):
     clone(self.encoder) if self.encoder is not None else self._get_encoder()
 ```
-Where the function `_get_encoder()` is the default {class}`~synthpop.data_processing.encoders.MeanEncoder` and {class}`~synthpop.data_processing.encoders.PCAEncoder`, which are used when the target column is numerical or categorical respectively. 
+Here, `_get_encoder()` selects the default encoder used by {class}`~synthpop.methods.cart_synth.CartMethod`:
+{class}`~synthpop.data_processing.encoders.MeanEncoder` when the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` when the target column is categorical.
 
-### The fit function
+### The fit method
 
-Even though we defined a general lay-out and a fit function in the previous step, this only "learns" all initialisation parameters from `BaseEstimator`. However, in this example we would like to create a `fit` function that learns how to map categorical data to a random numeric value. As such, the following should suffice for now:
+Although we defined the basic structure of our encoder in the previous step, it does not yet learn anything from the input data. Inheriting from `BaseEstimator` provides the standard estimator interface and support for functionality such as cloning, but the encoder still needs a `fit` method that learns parameters from the training data.
+
+In this example, we want `fit` to learn a mapping that assigns each observed categorical value a random numeric value. For now, the following implementation is sufficient:
 
   ```python
 from typing import Self
@@ -81,7 +88,9 @@ class CustomEncoder(BaseEstimator):
 
 ## Reproducibility
 
-One problem with the function above is that it is not reproducible. The encoder defined above learns a mapping for every category, but each call to {class}`np.random.rand`, generates new random values. As such, fitting the encoder multiple times can result in different mappings. To make the encoder reproducible, its randomness should instead be controlled by a `random_state`. synthpop-py provides {class}`~synthpop.reproducibility.RandomStateManager` for managing random states throughout the synthesis process. We can modify the encoder to accept a `random_state` and use {class}`~synthpop.reproducibility.RandomStateManager`:
+One limitation of the method above is that it is not reproducible. Although the encoder learns a mapping for each category, every call to {class}`np.random.rand` generates new random values. As a result, fitting the encoder multiple times can produce different mappings.
+
+To make the encoder reproducible, its randomness should instead be controlled through a `random_state`. synthpop-py provides {class}`~synthpop.reproducibility.RandomStateManager` to manage random states throughout the synthesis process. We can therefore modify the encoder to accept a `random_state` and use {class}`~synthpop.reproducibility.RandomStateManager` when generating the numeric mapping:
 
 ```python
 from synthpop.reproducibility import RandomStateManager
@@ -166,11 +175,11 @@ print(encoder.mapping_)
 {'bird': 0.42366158937171916, 'cat': 0.6306062562352069, 'dog': 0.28937982790273686, nan: 0}
 ```
 
-## TransformerMixin: define a transform function
+## TransformerMixin: define a transform method
 
 The `fit` method learns the mapping from categorical values to numeric values, but the encoder also needs a way to apply that learned mapping to incoming data. 
 
-With a `transform` function our encoder can therefore be extended as follows:
+With a `transform` method our encoder can therefore be extended as follows:
 
 ```python
 from typing import Self
@@ -213,17 +222,23 @@ class CustomEncoder(TransformerMixin, BaseEstimator):
         ]
         return np.array(output, dtype=np.float32)
  ```
-As you may have noticed, we also added `check_is_fitted` in our `transform` function. Even though this is not strictly required, we recommend the use of it because it verifies that the attributes learned during `fit` are available before `transform` is called. If `transform` is called before `fit`, it raises a `NotFittedError` rather than failing later with a less informative error.
+As you may have noticed, we also added `check_is_fitted` in our `transform` method. Even though this is not strictly required, we recommend the use of it because it verifies that the attributes learned during `fit` are available before `transform` is called. If `transform` is called before `fit`, it raises a `NotFittedError` rather than failing later with a less informative error.
 
 ## Output shape
 
-Even though our encoder is now fully functional, it still misses the last synthpop-py requirement: the correct output shape. An encoder's transform function should return shape (N, m), with N the number of datapoints, and m an arbitrary number. Since we currently return a 1D array, we can just transpose it:
+Even though our encoder is now fully functional, it still needs to satistfy the last synthpop-py requirement: returning the expected output shape.
+
+ An encoder's `transform` method should return a two-dimensional array with shape `(N, m)`, where `N` is the number of input observations and `m` is the number of features produced by the encoder.
+ 
+ Our encoder currently produces one numeric value for each input observation, resulting in a one-dimensional array with shape `(N,)`. In this case, there is only one output feature (`m = 1`), so we need to reshape the array from `(N,)` to `(N, 1)`.
+ 
+ We can do this by adding a new axis to the output:
 
 ```python
 return np.array(output, dtype=np.float32).reshape(-1, 1)
 ```
 
-The encoder is now able to transform input data `X` to an output in shape (N,1), using the `mapping_` learned during `fit`. Altogether the entire framework will look like:
+The encoder is now able to transform input data `X` to an output in shape `(N, 1)`, using the `mapping_` learned during `fit`. Altogether the entire framework will look like:
 ```python
 X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"], dtype=str_dtype)
 
