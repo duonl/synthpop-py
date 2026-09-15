@@ -85,7 +85,7 @@ CART is recommended when:
 
 A minimum number of observations per terminal leaf can be specified to prevent the tree from creating leaves based on very small groups of observations. Increasing the minimum leaf size generally reduces the risk of highly specific splits and limits the influence of individual observations, but can also reduce the model's ability to capture detailed patterns. The default value in synthpop-py is 5 observations per leaf.
 
-<p class="fake-h3"><strong>Direct use of CartMethod</strong></p>
+<p class="fake-h3"><strong>Internal use of CartMethod</strong></p>
 
 {class}`~synthpop.methods.cart_synth.CartMethod` implements the synthesis-method interface used by {class}`~synthpop.synthesiser.Synthesiser`. It can therefore also be fitted and used directly:
 
@@ -104,9 +104,7 @@ Name: length, dtype: float32
 
 Here, `X` contains the predictor columns that have already been synthesised, while `y` is the observed target column that the method learns to synthesise. After fitting, `transform(X)` generates values for that target based on the supplied predictors.
 
-This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `CartMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. In particular, `Synthesiser` determines the column synthesis order and supplies previously generated synthetic columns as predictors.
-
-Most users should therefore use `Synthesiser` rather than {ref}`Constructing a CART method directly <314-configuring-cart>`. Direct construction is primarily intended for advanced use cases where the underlying [components need to be customised](../examples/configure_cart_directly.md).
+This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `CartMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. In particular, `Synthesiser` determines the column synthesis order and supplies previously generated synthetic columns as predictors. When synthesising a dataset, `Synthesiser` should generally be used so that `CartMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
 
 (311-algorithm)=
 ### 3.1.1. Algorithm
@@ -204,8 +202,9 @@ The resulting method can be passed to {class}`~synthpop.synthesiser.Synthesiser`
 ```
 
 Currently, `tune_cart` supports:
-- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. It is passed to `min_samples_leaf` in each [`scikit-learn` tree](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html). Increasing this value can improve privacy by limiting the influence of individual components, but may also reduce the model's ability to capture fine-grained patterns.
+- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. It is passed to `min_samples_leaf` in each [`scikit-learn` tree](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html). Increasing this value can improve privacy by limiting the influence of individual components, but may also reduce the model's ability to capture fine-grained patterns. More information about this can be found in {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>`.
 - `n_components`: sets the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
+- `rare_categories_threshold`: sets the number of observations below which a categorical predictor values is considered rare. A warning is raised when rare categories account for at least 25% of the observations. See the {class}`API reference <synthpop.methods.cart_synth.tune_cart>` or the {ref}` examples <example-rare-category-tune-cart>` for more information.
 
 For more detailed customisation, {class}`~synthpop.methods.cart_synth.CartMethod` and its underlying components can be constructed directly:
 ```python
@@ -292,7 +291,7 @@ Because `SampleMethod` samples directly from the empirical distribution, it pres
 
 However, sampling independently does not preserve associations between variables. For example, if income varies systematically with age in the original data, applying `SampleMethod` independently to both columns will reproduce their individual marginal distributions but not their relationship. When preserving such conditional relationships is important, a method such as {ref}`CART synthesis <31-cart-synthesis>` is generally more appropriate.
 
-<p class="fake-h3"><strong>Direct use of SampleMethod</strong></p>
+<p class="fake-h3"><strong>Internal use of SampleMethod</strong></p>
 
 {class}`~synthpop.methods.sample_synth.SampleMethod` implements the synthesis-method interface used by {class}`~synthpop.synthesiser.Synthesiser`. It can therefore also be fitted and used directly:
 ```python
@@ -309,9 +308,7 @@ new_target_column
 
 Unlike methods such as `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
 
-This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `SampleMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset.
-
-Most users should therefore use Synthesiser rather than constructing `SampleMethod` directly. Direct use is primarily useful when working with an individual synthesis method or when building a custom synthesis workflow.
+This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `SampleMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `SampleMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
 
 ### 3.2.1. Algorithm
 For each target column $Y$ assigned to `SampleMethod`, the following steps are performed:
@@ -427,7 +424,7 @@ Because there is a one-to-one correspondence between synthetic and observed rows
 
 Because the method reproduces values exactly, it should **not** be used for sensitive or identifying variables unless their direct disclosure has been explicitly assessed and accepted. For guidance on assessing the privacy implications of retaining original values, see {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>`.
 
-<p class="fake-h3"><strong>Direct use of CopyMethod</strong></p>
+<p class="fake-h3"><strong>Internal use of CopyMethod</strong></p>
 
 {class}`~synthpop.methods.copy_synth.CopyMethod` implements the synthesis-method interface used by {class}`~synthpop.synthesiser.Synthesiser`. It can therefore also be fitted and used directly:
 ```python
@@ -446,7 +443,7 @@ Here, `y` is the observed target column. `CopyMethod` does not require predictor
 
 After fitting, `transform(None)` returns the stored observed values unchanged.
 
-This illustrates how an individual synthesis method operates, but it is not normally necessary to use `CopyMethod` directly. For a complete dataset, {class}`~synthpop.synthesiser.Synthesiser` should generally be used so that `CopyMethod` can be assigned to the appropriate columns through `special_syn_method`.
+This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `CopyMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `CopyMethod` can be assigned to the appropriate columns through the `special_syn_method` parameter.
 
 ### 3.3.1. Algorithm
 
