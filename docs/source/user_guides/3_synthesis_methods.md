@@ -104,7 +104,7 @@ Name: length, dtype: float32
 
 Here, `X` contains the predictor columns that have already been synthesised, while `y` is the observed target column that the method learns to synthesise. After fitting, `transform(X)` generates values for that target based on the supplied predictors.
 
-This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `CartMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. In particular, `Synthesiser` determines the column synthesis order and supplies previously generated synthetic columns as predictors. When synthesising a dataset, `Synthesiser` should generally be used so that `CartMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
+This illustrates how an individual synthesis method operates, but it is generally not how a complete dataset should be synthesised. `CartMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. In particular, `Synthesiser` determines the column synthesis order and supplies previously generated synthetic columns as predictors. When synthesising a dataset, `Synthesiser` should generally be used so that `CartMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
 
 (311-algorithm)=
 ### 3.1.1. Algorithm
@@ -308,7 +308,7 @@ new_target_column
 
 Unlike methods such as `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
 
-This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `SampleMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `SampleMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
+This illustrates how an individual synthesis method operates, but it is generally not how a complete dataset should be synthesised. `SampleMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `SampleMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
 
 ### 3.2.1. Algorithm
 For each target column $Y$ assigned to `SampleMethod`, the following steps are performed:
@@ -443,7 +443,7 @@ Here, `y` is the observed target column. `CopyMethod` does not require predictor
 
 After fitting, `transform(None)` returns the stored observed values unchanged.
 
-This illustrates how an individual synthesis method operates, but it is not normally how a complete dataset is synthesised. `CopyMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `CopyMethod` can be assigned to the appropriate columns through the `special_syn_method` parameter.
+This illustrates how an individual synthesis method operates, but it is generally not how a complete dataset should be synthesised. `CopyMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `CopyMethod` can be assigned to the appropriate columns through the `special_syn_method` parameter.
 
 ### 3.3.1. Algorithm
 
