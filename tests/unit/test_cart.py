@@ -77,7 +77,7 @@ class StubClassifier(TransformerMixin, BaseEstimator):
             }),
             pd.Series([1, 2]),
             TypeError,
-            "CartMethod does not support datetime predictor",
+            "CartMethod does not support datetime",
         ),
         (
             pd.DataFrame({"a": [1, 2]}),
@@ -86,7 +86,7 @@ class StubClassifier(TransformerMixin, BaseEstimator):
                 name="target",
             ),
             TypeError,
-            "CartMethod does not support datetime target",
+            "CartMethod does not support datetime",
         ),
     ],
 )
@@ -389,7 +389,7 @@ def test_transform_rejects_datetime_predictors():
 
     with pytest.raises(
         TypeError,
-        match="CartMethod does not support datetime predictor",
+        match="CartMethod does not support datetime",
     ):
         cart.transform(X)
 
