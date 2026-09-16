@@ -19,7 +19,7 @@ If you still need help, please open a [new GitHub issue](https://github.com/duon
 - the versions of synthpop-py and relevant dependencies;
 - your operating system and Python version.
 
-This information helps us understand respond to your question as soon as possible.
+This information helps us understand and respond to your question as soon as possible.
 
 <!--
 You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
@@ -49,7 +49,7 @@ AI-assisted contributions are not prohibited. However, contributors remain respo
 
 If you use an AI tool to generate or modify code, you must understand the resulting code sufficiently to explain and maintain it during review. You are also responsible for ensuring that your contribution complies with the legal notice above and does not introduce content that cannot be contributed under the project's licence.
 
-This policy may be updated as the use of AI-assisted development evolves.
+**Disclaimer:** This policy may be updated as the use of AI-assisted development evolves.
 
 ### Reporting bugs
 
