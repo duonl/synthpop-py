@@ -79,7 +79,7 @@ synthpop-py is designed for structured tabular datasets. It currently supports:
 * ordinal variables; and
 * missing values.
 
-The package is not currently designed for unstructured data such as free text, images, audio, or time-series data. Synthesis is performed one tabular dataset at a time. synthpop-py does not synthesise an entire relational database as a single unit, and it does not provide explicit support for relational structures such as primary key/foreign key relationships.
+The package is not currently designed for unstructured data such as free text, images, audio, or time-series data. Synthesis is performed on one tabular dataset at a time. synthpop-py does not synthesise an entire relational database as a single unit, and it does not provide explicit support for relational structures such as primary key/foreign key relationships.
 
 ### Synthesis methods
 
