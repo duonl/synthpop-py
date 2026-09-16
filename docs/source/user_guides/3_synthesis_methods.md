@@ -39,7 +39,7 @@ Because CART is the default method, this is equivalent to explicitly configuring
 >>> synthetic_data = synth.fit(original_data).generate()
 ```
 
-Both approaches use the same synthesis method. Explicitly passing `CartMethod()` is therefore only necessary when you want to make the choice of synthesis method explicit or customise its configuration. See {ref}`Guide 3.1.4: Configuring CART <314-configuring-cart` and the [Configure CART directly example](../examples/configure_cart_directly.md) for more information.
+Both approaches use the same synthesis method. Explicitly passing `CartMethod()` is therefore only necessary when you want to make the choice of synthesis method explicit or customise its configuration. See {ref}`Guide 3.1.4: Configuring CART <314-configuring-cart>` and the [Configure CART directly example](../examples/configure_cart_directly.md) for more information.
 
 The method can also be configured for a specific column using `special_syn_method`. See {ref}`Guide 2.2.3: Column-level control <223-column-level-control>`.
 
@@ -81,7 +81,7 @@ CART is recommended when:
 - non-linear relationships need to be captured;
 - preserving local variability is important;
 - interpretability of the learned local structure is useful; or
-- limiting the influence of individual observations through minimum leaf sizes is important for privacy (see {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories` for more information).
+- limiting the influence of individual observations through minimum leaf sizes is important for privacy (see {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>` for more information).
 
 A minimum number of observations per terminal leaf can be specified to prevent the tree from creating leaves based on very small groups of observations. Increasing the minimum leaf size generally reduces the risk of highly specific splits and limits the influence of individual observations, but can also reduce the model's ability to capture detailed patterns. The default value in synthpop-py is 5 observations per leaf.
 
