@@ -71,6 +71,23 @@ class StubClassifier(TransformerMixin, BaseEstimator):
             ValueError,
             "X and y must contain the same number of samples",
         ),
+        (
+            pd.DataFrame({
+                "a": pd.to_datetime(["2026-01-01", "2026-01-02"]),
+            }),
+            pd.Series([1, 2]),
+            TypeError,
+            "CartMethod does not support datetime predictor",
+        ),
+        (
+            pd.DataFrame({"a": [1, 2]}),
+            pd.Series(
+                pd.to_datetime(["2026-01-01", "2026-01-02"]),
+                name="target",
+            ),
+            TypeError,
+            "CartMethod does not support datetime target",
+        ),
     ],
 )
 def test_fit_validates_inputs(X, y, expected, message):
@@ -355,6 +372,24 @@ def test_transform_rejects_missing_columns():
     with pytest.raises(
         ValueError,
         match="missing required columns",
+    ):
+        cart.transform(X)
+
+def test_transform_rejects_datetime_predictors():
+    cart = CartMethod()
+
+    cart.method_ = StubRegressor()
+    cart.feature_names_in_ = ["date"]
+    cart.target_name_ = "target"
+    cart.target_dtype_ = np.float32
+
+    X = pd.DataFrame({
+        "date": pd.to_datetime(["2026-01-01", "2026-01-02"]),
+    })
+
+    with pytest.raises(
+        TypeError,
+        match="CartMethod does not support datetime predictor",
     ):
         cart.transform(X)
 
