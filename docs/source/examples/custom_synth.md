@@ -5,16 +5,16 @@ This example shows how to implement a custom synthesis method that follows the [
 
 ## BaseSynthMethod
 All synthesis methods in synthpop-py inherit from {class}`~synthpop.methods.base_synth.BaseSynthMethod`.
-This class defines the interface that a synthesis method must provide to work with the {class}`~synthpop.synthesiser.Synthesiser`.
+This class defines the interface that a synthesis method must implement to work with the {class}`~synthpop.synthesiser.Synthesiser`.
 
 A synthesis method should implement three main methods:
 
 - `fit`: learn the parameters required to synthesise the target from the original target and, where applicable, the predictor variables.
 - `transform`: generate synthetic target values using the parameters learned by `fit`.
-- `get_feature_names_out`: report the name of the output produces by the method.
+- `get_feature_names_out`: report the name of the feature produced by the method.
 
 
-A synthesis method must also support cases where there are no predictors (i.e. `X` is `None` or an empty dictionary) available yet. synthpop-py synthesises datasets sequentially. As a result, the first column will never have predictors available.
+A synthesis method must also support cases where no predictors are available (i.e. `X` is `None` or an empty dictionary). synthpop-py synthesises datasets sequentially. As a result, the first column will never have predictors available.
 
 Altogether, a minimal custom synthesis method should be structured like this:
 
@@ -188,7 +188,7 @@ As you can see, `fit` learns the value from the original target (and predictors,
 
 For all current synthesis methods in synthpop-py, the output has the same name as the target that was passed to fit. Therefore, `get_feature_names_out` has a relatively limited role here. It becomes more useful for components that change the number or names of features, such as dimensionality-reduction methods.
 
-Nevertheless, a custom synthesis method should implement the method to follow the expected interface. Following the `scikit-learn conventions`, we can define it as follows:
+Nevertheless, a custom synthesis method should implement the method to follow the expected interface. Following `scikit-learn` conventions, we can define it as follows:
 ```python
 def get_feature_names_out(self, input_features=None):
     check_is_fitted(self, ["target_name_"])
@@ -314,7 +314,7 @@ When implementing a custom synthesis method, consider the following:
 
 7. **Handle missing values explicitly.** A synthesis method should define how missing values in both predictors and the target are handled. synthpop-py provides {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`. However, you are free to implement your own strategy.
 
-8. **Support the data types required by your method.** If your algorithm requires numeric inputs, categorical encoding may be necessary. synthpop-py provides {class}`~synthpop.data_processing.encoders.MeanEncoder` and {class}`~synthpop.data_processing.encoders.PCAEncoder` fro this purpose. Again, you are free to implement your own custom encoder; see [Example: Custom Encoder](./custom_encoder.md).
+8. **Support the data types required by your method.** If your algorithm requires numeric inputs, categorical encoding may be necessary. synthpop-py provides {class}`~synthpop.data_processing.encoders.MeanEncoder` and {class}`~synthpop.data_processing.encoders.PCAEncoder` for this purpose. Again, you are free to implement your own custom encoder; see [Example: Custom Encoder](./custom_encoder.md).
 
 9. **Consider cloning behaviour.** If your synthesis method accepts another estimator as a constructor parameter, ensure that it follows `scikit-learn`'s cloning conventions. In particular, store estimator parameters unchanged in `__init__` so that {class}`sklearn.base.clone` can recreate the estimator correctly.
 
@@ -323,11 +323,11 @@ When implementing a custom synthesis method, consider the following:
 ## Summary
 Custom synthesis methods in synthpop-py can be implemented by inheriting from {class}`~synthpop.methods.base_synth.BaseSynthMethod` and implementing the required `fit`, `transform`, and `get_feature_names_out` methods.
 
-The fit method learns the parameters required to synthesise a target variable, while transform uses those parameters to generate synthetic values. A synthesis method must support both cases where predictor variables are available and cases where there are no predictors.
+The `fit` method learns the parameters required to synthesise a target variable, while `transform` uses those parameters to generate synthetic values. A synthesis method must support both cases where predictor variables are available and cases where there are no predictors.
 
 Once implemented, the method can be supplied to {class}`~synthpop.synthesiser.Synthesiser` through `default_syn_method` or `special_syn_method`.
 
-The example in this guide deliberately uses a simple mean/mode strategy. In practice `CustomSynth` can be replaced by any synthesis algorithm that implements the {class}`~synthpop.methods.base_synth.BaseSynthMethod` interface.
+The example in this guide deliberately uses a simple mean/mode strategy. In practice, `CustomSynth` can be replaced by any synthesis algorithm that implements the {class}`~synthpop.methods.base_synth.BaseSynthMethod` interface.
 
 ## Next steps
 With a custom synthesis method implemented, the next step is to adapt the example to your synthesis algorithm and implement the appropriate handling of predictors, categorical and numeric variables, and missing values.
