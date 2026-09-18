@@ -27,3 +27,11 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
     width: auto !important;
     height: auto !important;
 }
+
+.fake-h3 {
+    font-size: 1.25em;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
