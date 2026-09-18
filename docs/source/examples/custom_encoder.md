@@ -102,7 +102,11 @@ class CustomEncoder(BaseEstimator):
 
     def fit(self, X: npt.NDArray, y=None) -> Self:
 
-        self.random_state_ = RandomStateManager.create_instance_seed() if self.random_state is None else self.random_state
+        self.random_state_ = (
+            RandomStateManager.create_instance_seed()
+            if self.random_state is None
+            else self.random_state
+        )
         rng = RandomStateManager.create_rng(self.random_state_)
         categories = np.unique(X)
 
@@ -332,8 +336,8 @@ Cart_Custom_Encoder = CartMethod(
     )
 )
 
-X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"]*10, dtype=str_dtype)
-Y = np.array([0,1,2,3,3,5]*10) # times 10 make a larger set
+X = np.array(["cat", "dog", np.nan, "cat", np.nan, "bird"] * 10, dtype=str_dtype)
+Y = np.array([0, 1, 2, 3, 3, 5] * 10) # times 10 make a larger set
 
 synth = Synthesiser(12, default_syn_method=Cart_Custom_Encoder)
 synth.fit(pd.DataFrame({'a' : X, 'b': Y}))
