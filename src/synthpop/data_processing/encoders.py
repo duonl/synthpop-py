@@ -291,7 +291,11 @@ class MeanEncoder(_BaseEncoder):
     >>> encoder.fit(X, y)
     >>> X_transformed = encoder.transform(X)
     >>> X_transformed
-    array([0.5, 0.5, 1.,  1.,  3. ], dtype=float32)
+    array([[0.5],
+           [0.5],
+           [1. ],
+           [1. ],
+           [3. ]], dtype=float32)
     """
 
     def __init__(self) -> None:
