@@ -6,7 +6,7 @@ synthpop-py follows a workflow for generating and evaluating synthetic data:
 
 Start with an original dataset containing the variables you want to synthesize. synthpop-py uses [pandas](https://pandas.pydata.org/docs/index.html) as its primary data interface.
 
-Datasets should be provided as a `pandas.DataFrame`, where rows represent observations and columns represent variables. Data cleaning and most preprocessing steps are outside the scope of synthpop-py and should be performed by the user before synthesis.
+Datasets should be provided as a `pandas.DataFrame`, where rows represent observations and columns represent variables. Data cleaning and most preprocessing steps are outside the scope of synthpop-py for now and should be performed by the user before synthesis.
 
 ## 2. Configure the synthesis process
 
