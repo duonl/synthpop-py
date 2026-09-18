@@ -457,6 +457,27 @@ class CartMethod(base_synth.BaseSynthMethod):
                 self.classifier) if self.classifier is not None else TreeClassifierMethod()
         )
 
+    def _validate_no_datetime(
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+    ) -> None:
+        """Validate that predictors and target do not contain datetime data."""
+        datetime_columns = X.select_dtypes(
+            include=["datetime"]
+        ).columns.tolist()
+
+        if y is not None and pd.api.types.is_datetime64_any_dtype(y.dtype):
+            datetime_columns.append(y.name)
+
+        if datetime_columns:
+            raise TypeError(
+                f"CartMethod does not support datetime variable(s): "
+                f"{datetime_columns}. "
+                "Transform datetime variables to a numeric or categorical "
+                "representation before fitting or transforming."
+            ) 
+
     def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
         """
         Fits the CART synthesiser by assessing the data type of the target variable and
@@ -470,13 +491,19 @@ class CartMethod(base_synth.BaseSynthMethod):
         if not isinstance(X, pd.DataFrame):
             raise TypeError(
                 f"X must be a pandas DataFrame, got {type(X)} instead.")
+        
         if not isinstance(y, pd.Series):
             raise TypeError(
                 f"y must be a pandas Series, got {type(y)} instead.")
+        
         if len(X) != len(y):
-            raise ValueError(f"X and y must contain the same number of samples: "
-                             f"{len(X)} != {len(y)}.")
+            raise ValueError(
+                f"X and y must contain the same number of samples: "
+                f"{len(X)} != {len(y)}."
+            )
 
+        self._validate_no_datetime(X, y)
+        
         self.feature_names_in_ = list(X.columns)
         self.n_features_in_ = X.shape[1]
         self.target_name_ = y.name
@@ -520,6 +547,8 @@ class CartMethod(base_synth.BaseSynthMethod):
             col for col in self.feature_names_in_ if col not in X.columns]
         if missing_cols:
             raise ValueError(f"X is missing required columns: {missing_cols}.")
+
+        self._validate_no_datetime(X[self.feature_names_in_])
 
         # preserve original feature ordering used during fit
         X_dict = utils._to_standardised_array_dict(X[self.feature_names_in_])
