@@ -184,14 +184,14 @@ For common tuning options, synthpop-py provides the convenience function {func}`
 ```python
 >>> from synthpop.methods import tune_cart
 
->>> tuned_cart = tune_cart(n_leaves=10, n_components=1)
+>>> tuned_cart = tune_cart(min_samples_leaf=10, n_components=1)
 ```
 Which can then be passed in the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
 >>> Synthesiser(default_syn_method=tuned_cart)
 ```
 Currently `tune_cart` supports the following parameters:
-- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree. Consider increasing its value to preserve privacy by limiting influence of outliers on the synthesis model.
+- `min_samples_leaf`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. Passed to `min_samples_leaf` in each `scikit-learn` tree. Consider increasing its value to preserve privacy by limiting influence of outliers on the synthesis model.
 - `n_components`: configures the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
 
 ---

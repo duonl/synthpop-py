@@ -1,5 +1,5 @@
 # Configure the CART components directly
-In the [previous example](./tune_cart_function.md), we used {func}`~synthpop.methods.cart_synth.tune_cart` to adjust the most common CART settings. This is the most convenient approach when we want to change parameters such as the minimum leaf size (`n_leaves`) or the number of PCA components (`n_components`).
+In the [previous example](./tune_cart_function.md), we used {func}`~synthpop.methods.cart_synth.tune_cart` to adjust the most common CART settings. This is the most convenient approach when we want to change parameters such as the minimum leaf size (`min_samples_leaf`) or the number of PCA components (`n_components`).
 
 Sometimes, however, we need more control. For example, we might want to:
 - change a parameter of the underlying decision tree;
@@ -83,7 +83,7 @@ The decision trees are responsible for dividing observations intro groups with s
 
 With `tune_cart`, we can change the minimum leaf size:
 ```python
-tune_cart(n_leaves=10)
+tune_cart(min_samples_leaf=10)
 ```
 When configuring the components directly, we can instead construct the appropriate `scikit-learn` tree (`DecisionTreeClassifier` or `DecisionTreeRegressor`) ourselves and pass it to the corresponding tree method (`TreeClassifierMethod` or `TreeRegressorMethod`). This allows you to change any of the tree's parameters and, where supported, use a different compatible tree estimator.
 
@@ -355,7 +355,7 @@ This is the level of control that is not possible with `tune_cart`.
 At this point, there are two ways to customise CART. Use {func}`~synthpop.methods.cart_synth.tune_cart` when the parameters you need are among its common tuning options:
 ```python
 tune_cart(
-        n_leaves=5,
+        min_samples_leaf=5,
         n_components=None,
         rate_categories_threshold=5,
 )

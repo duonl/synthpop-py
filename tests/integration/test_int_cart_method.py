@@ -556,7 +556,7 @@ def test_cart_method_raises_on_rare_category(y):
         "column": np.array(feature, dtype=str_dtype)
     }
 
-    method = tune_cart(n_leaves=2)()
+    method = tune_cart(min_samples_leaf=2)()
 
     with pytest.warns(UserWarning, match=".* contains categories occurring fewer than 2 times.*"):
         result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
@@ -571,7 +571,7 @@ def test_tune_cart_disable_rare_categories_check():
         "column": np.array(feature, dtype=str_dtype)
     }
 
-    method = tune_cart(n_leaves=2, rare_categories_threshold=0)()
+    method = tune_cart(min_samples_leaf=2, rare_categories_threshold=0)()
 
     result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
