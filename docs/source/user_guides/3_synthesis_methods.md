@@ -23,19 +23,18 @@ CART (Classification And Regression Trees) is the default synthesis method in sy
 
 <p class="fake-h3"><strong>Intended usage</strong></p>
 
-CART should be used through the {class}`~synthpop.synthesiser.Synthesiser`, which orchestrates the sequential synthesis of the complete dataset:
+{class}`~synthpop.methods.cart_synth.CartMethod` should be used through the {class}`~synthpop.synthesiser.Synthesiser`'s `default_syn_method` or `special_syn_method`, and not be used directly. The intended usage is therefore:
 ```python
 >>> from synthpop import Synthesiser
-
->>> synth = Synthesiser()
->>> synthetic_data = synth.fit(original_data).generate()
-```
-
-Because CART is the default method, this is equivalent to explicitly configuring it as the default:
-```python
 >>> from synthpop.methods import CartMethod
 
 >>> synth = Synthesiser(default_syn_method=CartMethod())
+>>> synthetic_data = synth.fit(original_data).generate()
+```
+
+Which, as CART is already the default method, is equivalent to calling the {class}`~synthpop.synthesiser.Synthesiser` without functional argument:
+```python
+>>> synth = Synthesiser()
 >>> synthetic_data = synth.fit(original_data).generate()
 ```
 
@@ -81,13 +80,13 @@ CART is recommended when:
 - non-linear relationships need to be captured;
 - preserving local variability is important;
 - interpretability of the learned local structure is useful; or
-- limiting the influence of individual observations through minimum leaf sizes is important for privacy (see {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>` for more information).
+- limiting the influence of individual observations is important for privacy (see {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>` for more information).
 
-A minimum number of observations per terminal leaf can be specified to prevent the tree from creating leaves based on very small groups of observations. Increasing the minimum leaf size generally reduces the risk of highly specific splits and limits the influence of individual observations, but can also reduce the model's ability to capture detailed patterns. The default value in synthpop-py is 5 observations per leaf.
+A minimum number of observations per terminal leaf can be specified to prevent the tree from creating leaves based on very small groups of observations. Increasing the minimum leaf size generally reduces the risk of highly specific splits and limits the influence of individual observations, but can also reduce the model's ability to capture detailed patterns. The default value in synthpop-py is 5 observations per leaf. See {ref}`Guide 3.1.4: Configuring CART <314-configuring-cart>` to learn how to change the minimum number of observations per leaf.
 
-<p class="fake-h3"><strong>Internal use of CartMethod</strong></p>
+<p class="fake-h3"><strong>CartMethod API</strong></p>
 
-{class}`~synthpop.methods.cart_synth.CartMethod` implements the synthesis-method interface used by {class}`~synthpop.synthesiser.Synthesiser`. It can therefore also be fitted and used directly:
+For advanced use cases, `CartMethod` can also be implemented without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `CartMethod` can be fitted and transformed directly as follows:
 
 ```python
 >>> from synthpop.methods import CartMethod
@@ -126,6 +125,7 @@ For the first column, no predictors are available. In that case, CART samples di
    The predictors and target are prepared before fitting the decision tree:
    - Categorical predictors are encoded using the appropriate encoder By default, {ref}`PCA encoding <411-pca-encoding>` is used for categorical targets and {ref}`mean encoding <412-mean-encoding>` for numeric targets. This preprocessing is required because `scikit-learn` decision trees operate on numeric predictors. For more details, see {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>`;
    - Missing values in the target variable are handled according to the target type because `scikit-learn` cannot be fitted when the target contains missing values. For more details, see {ref}`Guide 4.2: Handling missing values <42-handling-missing-values>`.
+
 
 3. **Fit the decision tree**
    
@@ -246,6 +246,7 @@ Unlike {class}`~synthpop.methods.cart_synth.CartMethod`, `SampleMethod` does not
 For synthesising a complete dataset, specify `SampleMethod` when creating the {class}`~synthpop.synthesiser.Synthesiser`:
 ```python
 >>> from synthpop import Synthesiser
+>>> from synthpop.methods import SampleMethod
 
 >>> synth = Synthesiser(default_syn_method=SampleMethod())
 >>> synthetic_data = synth.fit(original_data).generate()
@@ -291,9 +292,10 @@ Because `SampleMethod` samples directly from the empirical distribution, it pres
 
 However, sampling independently does not preserve associations between variables. For example, if income varies systematically with age in the original data, applying `SampleMethod` independently to both columns will reproduce their individual marginal distributions. However, it will generally not reproduce the intervariable relationship. When preserving such conditional relationships is important, a method such as {ref}`CART synthesis <31-cart-synthesis>` is generally desired.
 
-<p class="fake-h3"><strong>Internal use of SampleMethod</strong></p>
+<p class="fake-h3"><strong>SampleMethod API</strong></p>
 
-{class}`~synthpop.methods.sample_synth.SampleMethod` implements the synthesis-method interface used by {class}`~synthpop.synthesiser.Synthesiser`. It can therefore also be fitted and used directly:
+For advanced use cases, `SampleMethod` can also be implemented without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `SampleMethod` can be fitted and transformed directly as follows:
+
 ```python
 >>> from synthpop.methods import SampleMethod
 
@@ -306,7 +308,7 @@ new_target_column
 2                 1
 ```
 
-Unlike methods such as `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
+Unlike `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
 
 This illustrates how an individual synthesis method operates, but it is generally not how a complete dataset should be synthesised. `SampleMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `SampleMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
 
@@ -345,7 +347,7 @@ For each target column $Y$ assigned to `SampleMethod`, the following steps are p
 
    For each synthetic observation, sample one value independently from the empirical distribution
    ```{math}
-   Y^{syn} \sim \hat{P}(Y)
+   Y_{\mathrm{syn}} \sim \hat{P}(Y)
    ```
    Sampling is performed with replacement, so the same observed value can be generated multiple times. The resulting synthetic column therefore has the same expected marginal distribution as the original column, but generation is not conditioned on any other variables.
 
@@ -403,7 +405,7 @@ In this example, column `a` is copied directly from the original dataset, while 
 
 For a target column $Y$, `CopyMethod` does not estimate a distribution or conditional relationship. Instead, it preserves the original value associated with each row:
 ```{math}
-Y_i^{syn} = Y_i^{obs}
+Y_{\mathrm{syn},i} = Y_{\mathrm{obs},i}
 ```
 for every row $i$.
 
@@ -424,9 +426,10 @@ Because there is a one-to-one correspondence between synthetic and observed rows
 
 Because the method reproduces values exactly, it should **not** be used for sensitive or identifying variables unless their direct disclosure has been explicitly assessed and accepted. For guidance on assessing the privacy implications of retaining original values, see {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>`.
 
-<p class="fake-h3"><strong>Internal use of CopyMethod</strong></p>
+<p class="fake-h3"><strong>CopyMethod API</strong></p>
 
-{class}`~synthpop.methods.copy_synth.CopyMethod` implements the synthesis-method interface used by {class}`~synthpop.synthesiser.Synthesiser`. It can therefore also be fitted and used directly:
+For advanced use cases, `CopyMethod` can also be implemented without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `CopyMethod` can be fitted and transformed directly as follows:
+
 ```python
 >>> from synthpop.methods import CopyMethod
 
@@ -453,7 +456,7 @@ For each target column $Y$ assigned to `CopyMethod`, the following steps are per
 
    The observed target column is retained:
    ```{math}
-   Y \leftarrow Y^{obs}
+   Y \leftarrow Y_{\mathrm{obs}}
    ```
 
 2. **Enforce row consistency**
@@ -463,7 +466,7 @@ For each target column $Y$ assigned to `CopyMethod`, the following steps are per
 3. **Generate synthetic values**
    During generation, return the stored values without modification:
    ```{math}
-   Y^{syn} = Y^{obs}
+   Y_{\mathrm{syn}} = Y_{\mathrm{obs}}
    ```
 
 ### 3.3.2. Properties
@@ -496,7 +499,7 @@ The main limitation of `CopyMethod` is that it provides no synthesis or privacy 
 |---|---|---|---|---|---|---|
 | {class}`~synthpop.methods.cart_synth.CartMethod` | $P(Y \mid X)$ | Yes | Yes | Conditional relationships | Conditional distribution | General-purpose synthesis |
 | {class}`~synthpop.methods.sample_synth.SampleMethod` | $P(Y)$ | No | Yes | No | Marginal distribution | Fast baseline, simple synthesis |
-| {class}`~synthpop.methods.copy_synth.CopyMethod` | $Y^{syn} = Y^{obs}$ | No | No | No | Exact observed values | Identifiers, structural columns |
+| {class}`~synthpop.methods.copy_synth.CopyMethod` | $Y_{\mathrm{syn}} = Y_{\mathrm{obs}}$ | No | No | No | Exact observed values | Identifiers, structural columns |
 
 
 ---
