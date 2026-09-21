@@ -8,7 +8,7 @@ The CART synthesis method can be configured by constructing a {class}`~synthpop.
 For common CART tuning options, synthpop-py provides the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. It lets us change the most commonly tuned parameters in one place and applies those settings consistently to the relevant CART components.
 
 In this example, we will introduce how to use the {func}`~synthpop.methods.cart_synth.tune_cart` convenience function. More precisely, we will show how to adjust:
-1. the number of observations in a leaf node `n_leaves`;
+1. the number of observations in a leaf node `min_samples_leaf`;
 2. the number of PCA Components `n_components`; and
 3. the consideration threshold for rare categories `rare_categories_threshold`.
 
@@ -20,7 +20,7 @@ Instead of constructing a `CartMethod` instance and configuring each decision tr
 from synthpop import Synthesiser
 from synthpop.methods import tune_cart
 
-tuned_cart = tune_cart(n_leaves=10)
+tuned_cart = tune_cart(min_samples_leaf=10)
 
 synthesiser = Synthesiser(
     random_seed=1,
@@ -31,14 +31,14 @@ synthesiser.fit(data)
 
 synthetic_data = synthesiser.generate()
 ```
-Here, `tune_cart(n_leaves=10)` returns a [factory](https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)) that creates a `CartMethod` configured with `n_leaves=10`.
+Here, `tune_cart(min_samples_leaf=10)` returns a [factory](https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)) that creates a `CartMethod` configured with `min_samples_leaf=10`.
 
 ## Control the size of the decision tree leaves
-The `n_leaves` parameter controls the minimum number of observations in each leaf of the decision tree used by CART. For example, defining the minimum number to be 20:
+The `min_samples_leaf` parameter controls the minimum number of observations in each leaf of the decision tree used by CART. For example, defining the minimum number to be 20:
 ```python
 synthesiser = Synthesiser(
     random_seed=1,
-    default_syn_method=tune_cart(n_leaves=20),
+    default_syn_method=tune_cart(min_samples_leaf=20),
 )
 ```
 
@@ -49,7 +49,7 @@ The value `20` is passed to the `min_samples_leaf` parameter of the decision tre
 
 The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
-A decision tree works by repeatedly splitting the training data into smaller groups. With `n_leaves=20`, the tree cannot create a leaf containing fewer than 20 observations. This limits how specifically the tree can model the training data.
+A decision tree works by repeatedly splitting the training data into smaller groups. With `min_samples_leaf=20`, the tree cannot create a leaf containing fewer than 20 observations. This limits how specifically the tree can model the training data.
 
 This affects the synthetic data because the tree's predictions are based on these groups. With a **smaller** value, the tree can create smaller and more specific groups, allowing it to capture fine-grained relationships in the data. However, this also makes it easier for the tree to learn patterns that are specific to a small number of observations. This can result in the tree [overfitting](https://en.wikipedia.org/wiki/Overfitting) the original data, which results in less privacy protection.
 
@@ -131,17 +131,17 @@ The warning is intended to draw attention to a potential privacy risk rather tha
 
 A lower `rare_categories_threshold` means that fewer categories are considered rare. A higher threshold is more conservative because more categories can be classified as rare.
 
-By default, `rare_categories_threshold` is `None`. In that case, `tune_cart` uses the value of `n_leaves` as the threshold. This means:
+By default, `rare_categories_threshold` is `None`. In that case, `tune_cart` uses the value of `min_samples_leaf` as the threshold. This means:
 ```python
 tune_cart()
 ```
-has an effective rare-category threshold of `5`, because `n_leaves` defaults to `5`.
+has an effective rare-category threshold of `5`, because `min_samples_leaf` defaults to `5`.
 
 Similarly:
 ```python
-tune_cart(n_leaves=10)
+tune_cart(min_samples_leaf=10)
 ```
-has an effective threshold of `10`, unless `rare_categories_threshold` is explicitly specified. This means that changing `n_leaves` can also change which categories are considered rare unless you provide an explicit threshold.
+has an effective threshold of `10`, unless `rare_categories_threshold` is explicitly specified. This means that changing `min_samples_leaf` can also change which categories are considered rare unless you provide an explicit threshold.
 
 If you want to disable the check entirely, set the threshold to `0`:
 ```python
@@ -157,7 +157,7 @@ With the check disabled, synthesis will no longer warn about rare categorical va
 The tree parameters control different aspects of CART:
 **Parameter** | **What changes?** | **Potential effect**
 --------------|-------------------|---------------------
-`n_leaves` | How small a group a decision tree can base a prediction on | Larger values produce more generalised trees; smaller values allow more specific patterns
+`min_samples_leaf` | How small a group a decision tree can base a prediction on | Larger values produce more generalised trees; smaller values allow more specific patterns
 `n_components` | How much encoded categorical information is given to the classifier | Fewer components simplify the representation but may discard useful information
 `rare_categories_threshold` | Which rare categorical values are considered rare | Higher values classify more values as rare and can therefore trigger the privacy warning more easily
 
@@ -169,7 +169,7 @@ For example, suppose we want to:
 We can configure all three behaviours in one place:
 ```python
 tuned_cart = tune_cart(
-    n_leaves=10,
+    min_samples_leaf=10,
     n_components=0.9,
     rare_categories_threshold=3,
 )
@@ -190,9 +190,9 @@ A tuned CART factory can also be used with [`special_syn_method`](./using_differ
 ```python
 synthesiser = Synthesiser(
     random_seed=1,
-    default_syn_method=tune_cart(n_leaves=10),
+    default_syn_method=tune_cart(min_samples_leaf=10),
     special_syn_method={
-        "fare": tune_cart(n_leaves=20),
+        "fare": tune_cart(min_samples_leaf=20),
     },
 )
 
@@ -205,8 +205,8 @@ The resulting configuration is:
 
 **Column**              | **CART configuration**
 ---                     | ---
-`fare`                  | `n_leaves=20`
-all remaining columns   | `n_leaves=10`
+`fare`                  | `min_samples_leaf=20`
+all remaining columns   | `min_samples_leaf=10`
 
 As with other synthesis methods, the method specified in `special_syn_method` overrides the default for that column.
 
@@ -221,7 +221,7 @@ CartMethod(
 If you only need to adjust the common CART parameters exposed by `tune_cart`, however, the convenience function is usually the simpler choice:
 ```python
 tune_cart(
-    n_leaves=5,
+    min_samples_leaf=5,
     n_components=None,
     rare_categories_threshold=None,
 )
@@ -234,7 +234,7 @@ This keeps the configuration concise while ensuring that the corresponding CART 
 The available parameters are:
 **Parameter**  | **Purpose**
 ----------------------------| ---
-`n_leaves`                  | Sets the minimum number of observations in the leaf nodes of the decision trees.
+`min_samples_leaf`                  | Sets the minimum number of observations in the leaf nodes of the decision trees.
 `n_components`              | Controls the number of principal components retained by the PCA encoder.
 `rare_categories_threshold` | Determines which categorical predictor values are considered rare. A warning is raised when rare categories account for at least 25% of the observations.
 
