@@ -283,6 +283,17 @@ def test_pca_fit_constant_feature():
     assert np.array_equal(
         result.mapping_["a"], np.array([0], dtype=np.float32))
 
+def test_pca_fit_input_features_is_full_nan():
+
+    stub_pca_transform = TransformStub()
+    encoder = PCAEncoder(pca_transform=stub_pca_transform)
+
+    X = np.array([np.nan, np.nan]) 
+    y = np.array([1,2])
+    
+    encoder.fit(X, y)
+
+    assert encoder.mapping_ == {}
 
 def test_pca_fit_empty_input():
     """
@@ -322,7 +333,6 @@ def test_pca_fit_exception_on_row_mismatch():
     ):
         encoder.fit(np.array(["a", "b"], dtype=str_dtype),
                     np.array(["a", "b", "c"], dtype=str_dtype))
-
 
 # ----- transform tests -----
 

@@ -362,6 +362,20 @@ def test_fitting_handles_all_missing_target(y):
     assert res.method_._all_missing
     assert res.target_name_ == 'c'
 
+def test_fitting_accepts_features_nan():
+    cart = CartMethod()
+    
+    X = pd.DataFrame(
+            {
+                "a": np.array([np.nan, np.nan], dtype=str_dtype),
+                "b": np.array([np.nan, np.nan], dtype=str_dtype),
+            },
+        )
+    y = pd.Series(['c', 'd'], name='c')
+    res = cart.fit(X, y)
+
+    assert cart.feature_names_in_ == ["a", "b"]
+    assert cart.target_name_ == "c"
 
 @pytest.mark.parametrize(
     "y, dtype",
