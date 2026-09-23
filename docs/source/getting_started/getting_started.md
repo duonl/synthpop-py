@@ -9,7 +9,7 @@ If you are new to synthpop-py, we recommend following these guides in order:
 2. **{doc}`Workflow, structure and key concepts <workflow>`** — Learn about the synthesis workflow, key concepts, and how synthpop-py approaches synthetic data generation.
 3. **{doc}`Your first synthesis <your_first_synthesis>`** — Create your first synthetic dataset and inspect the results.
 
-If you want to know more about synthpop-py, please see the {doc}`../about_us/about_us`.
+If you want to know more about synthpop-py, please see the {doc}`../about_us/about_us` page.
 
 After completing these steps, explore more advanced examples and workflows in the {doc}`../user_guides/user_guides_index`.
 
