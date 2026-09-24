@@ -1,4 +1,4 @@
-# 6. Evaluating privacy
+# 6. Evaluating and improving privacy
 Synthetic data is designed to preserve useful statistical properties of the original data while reducing the risk of disclosing information about individuals. Privacy evaluation assesses whether the synthetic dataset could reveal sensitive information about individuals represented in the original dataset.
 
 Privacy and utility are inherently connected. Increasing the similarity between synthetic and original data can improve analytical usefulness, but may also increase privacy risks. Conversely, stronger privacy protection may require reducing the amount of information retained from the original data.
@@ -66,6 +66,7 @@ The risk should be assessed in the context of the information reasonably availab
 
 Highly predictive relationships can therefore create attribute disclosure risk independently of model overfitting. Even a well-fitting synthesis model may preserve a strong relationship from the original data if that relationship is genuinely present in the source population. In such cases, changing model parameters intended to reduce overfitting may provide limited additional protection.
 
+(6122-rare-categories)=
 #### 6.1.2.2. Rare categories and overfitting
 Categories with very few records in the data, so-called rare categories, can create additional privacy risks when generating synthetic data. When a categorical variable contains rare or unique values, a synthesis model may create very small and highly homogeneous groups, increasing the risk of overfitting the original data.
 

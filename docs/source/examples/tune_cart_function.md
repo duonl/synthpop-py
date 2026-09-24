@@ -91,6 +91,7 @@ keeps enough components to explain 90% of its variance.
 
 For more information about the role of PCA in CART, see {ref}`Guide 4.1.1: PCA encoding <411-pca-encoding>`.
 
+(example-rare-category-tune-cart)=
 ## Configure the rare-category check
 CART can check categorical predictors for values that occur only a small number of times. This is a privacy safeguard: a very rare category can make it easier for information about an individual to be inferred from the synthetic data. See the example on [risk of privacy loss due to rare categories](rare_categories.md) for more information about this specific privacy caveat.
 
