@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn import config_context
 from sklearn.decomposition import PCA
@@ -99,3 +100,14 @@ def test_pca_encoding_not_broken_by_setoutput_api():
     assert np.array_equal(before, after), (
         "Scikit-learn's set_output API breaks PCA encoding"
     )
+
+def test_pca_encoding_fit_transform_input_and_outputs_full_nan():
+    X = np.array([np.nan, np.nan, np.nan, np.nan, np.nan],dtype=str_dtype)
+    y = np.array(["x", "x", "y", "z", "w"], dtype=str_dtype)
+
+    encoder = PCAEncoder()
+
+    result = encoder.fit_transform(X=X, y=y)
+
+    assert np.isnan(result).all() # np.isnan solely returns true on np.nan, not pd.NA
+    assert result.dtype == np.float32

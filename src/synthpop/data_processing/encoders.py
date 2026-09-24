@@ -200,6 +200,10 @@ class PCAEncoder(_BaseEncoder):
         if X_val.shape[0] != y_val.shape[0]:
             raise ValueError("Number of observations in X and y do not match")
 
+        if np.isnan(X_val).all():
+            self.mapping_ = {} # If X is fully nan, mapping_ should be an empty dictionairy, just like MeanEncoder
+            self.n_features_out_ = 1
+            return self
         # the core of this implementation
 
         # The alternative to using pandas here is either use scipy or DIY.
@@ -210,6 +214,7 @@ class PCAEncoder(_BaseEncoder):
                              for k in missing_contingency_table.index}
             self.n_features_out_ = 1
             return self
+        
         x_such_that_y_is_not_always_missing = missing_contingency_table[
             missing_contingency_table[False] != 0].index
 
