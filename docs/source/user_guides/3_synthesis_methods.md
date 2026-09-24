@@ -86,7 +86,7 @@ A minimum number of observations per terminal leaf can be specified to prevent t
 
 <p class="fake-h3"><strong>CartMethod API</strong></p>
 
-For advanced use cases, `CartMethod` can also be implemented without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `CartMethod` can be fitted and transformed directly as follows:
+For advanced use cases, `CartMethod` can also be used without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `CartMethod` can be fitted and transformed directly as follows:
 
 ```python
 >>> from synthpop.methods import CartMethod
@@ -308,7 +308,7 @@ new_target_column
 2                 1
 ```
 
-Unlike `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
+Unlike `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` can receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
 
 This illustrates how an individual synthesis method operates, but it is generally not how a complete dataset should be synthesised. `SampleMethod` operates on one target column at a time, whereas {class}`~synthpop.synthesiser.Synthesiser` orchestrates the synthesis of the complete dataset. When synthesising a dataset, `Synthesiser` should generally be used so that `SampleMethod` can be assigned to the appropriate columns through the `default_syn_method` or `special_syn_method` parameters.
 
@@ -428,7 +428,7 @@ Because the method reproduces values exactly, it should **not** be used for sens
 
 <p class="fake-h3"><strong>CopyMethod API</strong></p>
 
-For advanced use cases, `CopyMethod` can also be implemented without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `CopyMethod` can be fitted and transformed directly as follows:
+For advanced use cases, `CopyMethod` can also be used without the synthesis-method interface used by the `Synthesiser` class. This allows the user to implement their own framework around their synthesis method. `CopyMethod` can be fitted and transformed directly as follows:
 
 ```python
 >>> from synthpop.methods import CopyMethod
