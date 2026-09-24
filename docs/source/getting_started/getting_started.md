@@ -6,8 +6,10 @@ synthpop-py is a Python package for generating synthetic tabular data while pres
 
 If you are new to synthpop-py, we recommend following these guides in order:
 1. **{doc}`Installation <installation>`** — Install synthpop-py.
-2. **{doc}`About synthpop-py <overview>`** — Learn about the synthesis workflow, key concepts, and how synthpop-py approaches synthetic data generation.
+2. **{doc}`Workflow, structure and key concepts <workflow>`** — Learn about the synthesis workflow, key concepts, and how synthpop-py approaches synthetic data generation.
 3. **{doc}`Your first synthesis <your_first_synthesis>`** — Create your first synthetic dataset and inspect the results.
+
+If you want to know more about synthpop-py, please see the {doc}`../about_us/about_us` page.
 
 After completing these steps, explore more advanced examples and workflows in the {doc}`../user_guides/user_guides_index`.
 
@@ -18,6 +20,6 @@ For detailed information about available functions, classes, and parameters, see
 :hidden:
 
 installation.md
-overview.md
+workflow.md
 your_first_synthesis.md
 ```
