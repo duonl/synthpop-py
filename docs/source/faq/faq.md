@@ -78,4 +78,4 @@ If you still need help, you can [open a new GitHub issue](https://github.com/duo
 
 For problems involving large datasets, also include the approximate dataset size and why you need to synthesise the dataset at that scale. This helps us understand the use case and improve support for large datasets.
 
-See [here](../../../CONTRIBUTING.md) for more detailed guidance on how to submit a GitHub issue.
+See the [Contributing guide](../developer/contributing_to_package.md) for more detailed guidance on how to submit a GitHub issue.
