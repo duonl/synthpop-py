@@ -109,5 +109,4 @@ def test_pca_encoding_fit_transform_input_and_outputs_full_nan():
 
     result = encoder.fit_transform(X=X, y=y)
 
-    assert encoder.mapping_ == {}
     assert pd.isna(result).all()

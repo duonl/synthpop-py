@@ -201,7 +201,7 @@ class PCAEncoder(_BaseEncoder):
             raise ValueError("Number of observations in X and y do not match")
 
         if np.isnan(X_val).all():
-            self.mapping_ = {} # If X is fully nan, mapping_ should return an empty dictionairy, just like MeanEncoder
+            self.mapping_ = {} # If X is fully nan, mapping_ should be an empty dictionairy, just like MeanEncoder
             self.n_features_out_ = 1
             return self
         # the core of this implementation
