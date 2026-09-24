@@ -192,7 +192,7 @@ For common tuning requirements, synthpop-py provides the convenience function {f
 ```python
 >>> from synthpop.methods import tune_cart
 
->>> tuned_cart = tune_cart(n_leaves=10, n_components=1, rare_categories_threshold=0)
+>>> tuned_cart = tune_cart(min_samples_leaf=10, n_components=1, rare_categories_threshold=0)
 ```
 
 The resulting method can be passed to {class}`~synthpop.synthesiser.Synthesiser`:
@@ -201,7 +201,7 @@ The resulting method can be passed to {class}`~synthpop.synthesiser.Synthesiser`
 ```
 
 Currently, `tune_cart` supports:
-- `n_leaves`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. It is passed to `min_samples_leaf` in each [`scikit-learn` tree](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html). Increasing this value can improve privacy by limiting the influence of individual components, but may also reduce the model's ability to capture fine-grained patterns. More information about this can be found in {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>`.
+- `min_samples_leaf`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. It is passed to `min_samples_leaf` in each [`scikit-learn` tree](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html). Increasing this value can improve privacy by limiting the influence of individual components, but may also reduce the model's ability to capture fine-grained patterns. More information about this can be found in {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>`.
 - `n_components`: sets the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
 - `rare_categories_threshold`: sets the number of observations below which a categorical predictor values is considered rare. A warning is raised when rare categories account for at least 25% of the observations. See the {class}`API reference <synthpop.methods.cart_synth.tune_cart>` or the {ref}` examples <example-rare-category-tune-cart>` for more information.
 
