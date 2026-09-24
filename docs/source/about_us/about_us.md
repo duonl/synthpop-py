@@ -4,7 +4,7 @@
 It is based on the established [synthpop R package](https://www.synthpop.org.uk/), but provides a modern python interface and software architecture specifically designed for usability, reproducibility, maintainability and extensibility.
 
 synthpop-py is developed at [**DUO (Dienst Uitvoering Onderwijs)**](https://duo.nl/particulier/), 
-the executive organisation of the Dutch Ministry of Education, Culture and Science.
+part of the Dutch Ministry of Education, Culture and Science.
 
 ## Why synthetic data?
 
