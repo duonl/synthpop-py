@@ -626,7 +626,7 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
 
 
 
-def test_tune_cart_applies_different_n_leaves():
+def test_tune_cart_applies_different_min_samples_leaf():
     data = pd.DataFrame({
         "first": range(10),
         "second": range(10, 20),
@@ -635,8 +635,8 @@ def test_tune_cart_applies_different_n_leaves():
     synthesiser = Synthesiser(
         random_seed=74124,
         special_syn_method={
-            "first": tune_cart(n_leaves=10, rare_categories_threshold=0),
-            "second": tune_cart(n_leaves=20, rare_categories_threshold=0),
+            "first": tune_cart(min_samples_leaf=10, rare_categories_threshold=0),
+            "second": tune_cart(min_samples_leaf=20, rare_categories_threshold=0),
         },
     )
 

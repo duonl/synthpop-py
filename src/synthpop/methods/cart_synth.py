@@ -457,6 +457,27 @@ class CartMethod(base_synth.BaseSynthMethod):
                 self.classifier) if self.classifier is not None else TreeClassifierMethod()
         )
 
+    def _validate_no_datetime(
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+    ) -> None:
+        """Validate that predictors and target do not contain datetime data."""
+        datetime_columns = X.select_dtypes(
+            include=["datetime"]
+        ).columns.tolist()
+
+        if y is not None and pd.api.types.is_datetime64_any_dtype(y.dtype):
+            datetime_columns.append(y.name)
+
+        if datetime_columns:
+            raise TypeError(
+                f"CartMethod does not support datetime variable(s): "
+                f"{datetime_columns}. "
+                "Transform datetime variables to a numeric or categorical "
+                "representation before fitting or transforming."
+            ) 
+
     def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
         """
         Fits the CART synthesiser by assessing the data type of the target variable and
@@ -470,13 +491,19 @@ class CartMethod(base_synth.BaseSynthMethod):
         if not isinstance(X, pd.DataFrame):
             raise TypeError(
                 f"X must be a pandas DataFrame, got {type(X)} instead.")
+        
         if not isinstance(y, pd.Series):
             raise TypeError(
                 f"y must be a pandas Series, got {type(y)} instead.")
+        
         if len(X) != len(y):
-            raise ValueError(f"X and y must contain the same number of samples: "
-                             f"{len(X)} != {len(y)}.")
+            raise ValueError(
+                f"X and y must contain the same number of samples: "
+                f"{len(X)} != {len(y)}."
+            )
 
+        self._validate_no_datetime(X, y)
+        
         self.feature_names_in_ = list(X.columns)
         self.n_features_in_ = X.shape[1]
         self.target_name_ = y.name
@@ -520,6 +547,8 @@ class CartMethod(base_synth.BaseSynthMethod):
             col for col in self.feature_names_in_ if col not in X.columns]
         if missing_cols:
             raise ValueError(f"X is missing required columns: {missing_cols}.")
+
+        self._validate_no_datetime(X[self.feature_names_in_])
 
         # preserve original feature ordering used during fit
         X_dict = utils._to_standardised_array_dict(X[self.feature_names_in_])
@@ -571,7 +600,7 @@ class CartMethod(base_synth.BaseSynthMethod):
 
 
 def tune_cart(
-    n_leaves: int = 5,
+    min_samples_leaf: int = 5,
     n_components: int | float | None = None,
     rare_categories_threshold: int | None = None,
 ) -> Callable[[], CartMethod]:
@@ -583,7 +612,7 @@ def tune_cart(
     Calling `tune_cart(...)` returns a factory to use in the Synthesiser.
     Calling `tune_cart(...)()` returns a `CartMethod` instance.
 
-    :param n_leaves: minimum number of samples in the leaf nodes.\
+    :param min_samples_leaf: minimum number of samples in the leaf nodes.\
         This parameter is applied to the decision trees used for classification, regression, and predicting missing values. \
         See `sklearn.tree.DecisionTreeClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`_ for more information.\
         Consider increasing this parameter to preserve privacy by limiting influence of outliers on the synthesis model.
@@ -598,10 +627,10 @@ def tune_cart(
 
         - If set to an integer, categories occurring fewer than this threshold are considered rare.
         - If set to ``0``, the rare-category check is disabled.
-        - If set to ``None``, the value of ``n_leaves`` is used.
+        - If set to ``None``, the value of ``min_samples_leaf`` is used.
     
         The default value is ``None`` for :func:`tune_cart`, so the threshold
-        defaults to ``n_leaves``. Since ``n_leaves`` defaults to 5, the effective
+        defaults to ``min_samples_leaf``. Since ``min_samples_leaf`` defaults to 5, the effective
         default threshold is also 5.
         
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
@@ -621,13 +650,13 @@ def tune_cart(
     >>> import pandas as pd
     >>> data = pd.DataFrame({"a": [1], "b": [2]})
     >>> synth = Synthesiser(random_seed=10,
-    ... default_syn_method=tune_cart(n_leaves=10), 
-    ... special_syn_method={"b": tune_cart(n_leaves=20)})
+    ... default_syn_method=tune_cart(min_samples_leaf=10), 
+    ... special_syn_method={"b": tune_cart(min_samples_leaf=20)})
 
     """
 
     if rare_categories_threshold is None:
-        effective_categories_threshold = n_leaves
+        effective_categories_threshold = min_samples_leaf
     else:
         effective_categories_threshold = rare_categories_threshold
 
@@ -636,19 +665,19 @@ def tune_cart(
             regressor=TreeRegressorMethod(
                 rare_categories_threshold=effective_categories_threshold,
                 tree=DecisionTreeRegressor(
-                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                    min_samples_leaf=min_samples_leaf,    # equivalent to minbucket in synthpop-r
                     min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
                     random_state=RandomStateManager.create_instance_seed()
                 ),
                 missing_handler=MissingValuePredictor(
-                    tree=DecisionTreeClassifier(min_samples_leaf=n_leaves,
+                    tree=DecisionTreeClassifier(min_samples_leaf=min_samples_leaf,
                                                 random_state=RandomStateManager.create_instance_seed())
                 )
             ),
             classifier=TreeClassifierMethod(
                 rare_categories_threshold=effective_categories_threshold,
                 tree=DecisionTreeClassifier(
-                    min_samples_leaf=n_leaves,    # equivalent to minbucket in synthpop-r
+                    min_samples_leaf=min_samples_leaf,    # equivalent to minbucket in synthpop-r
                     min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
                     random_state=RandomStateManager.create_instance_seed(),
                 ),

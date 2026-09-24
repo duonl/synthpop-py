@@ -48,7 +48,7 @@ The package supports datasets containing:
 - categorical variables; and
 - missing values.
 
-The package is currently not designed for generating unstructured or time-series data.
+The package is currently not designed for generating unstructured data such as free text, images, audio, or time-series. Synthesis is performed on one tabular dataset at a time. synthpop-py does not currently synthesise an entire relational database as a single unit, and it does not provide explicit support for relational structures such as primary key/foreign key relationships. If your data consists of multiple related tables, relationships between those tables must therefore be handled separately, outside the synthesis workflow.
 
 ---
 
