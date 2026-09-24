@@ -8,6 +8,8 @@ Welcome to synthpop-py. In this example, you'll learn the complete workflow for 
 4. Generate synthetic data.
 5. Evaluate the utility of the synthetic data by comparing marginal distributions and pairwise relationships.
 
+If you get stuck along the way, take a look at our [FAQ](../faq/faq.md) for answers to common questions and issues.
+
 ## Load the data
 
 We begin with an existing dataset. The diabetes dataset contains measurements from diabetes patients and a target variable representing disease progression. The dataset contains only continuous variables.
