@@ -14,7 +14,7 @@
    api_reference/synthpop
    developer/developer_index
    about_us/about
-   faq/faq
+   FAQ <faq/faq>
 
 synthpop-py documentation
 ==========================
