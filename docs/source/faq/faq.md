@@ -5,6 +5,7 @@ This page collects common questions and issues that may arise when using synthpo
 ## CART synthesis
 <details>
 <summary> Why am I seeing a rare-category warning?</summary>
+
 ### Why am I seeing a rare-category warning?
 You may see a warning such as:
 
@@ -31,7 +32,9 @@ Disabling the check ony suppresses the warning; it does not remove the underlyin
 ## Performance
 <details>
 <summary> Why is my synthesis taking so long? </summary>
-<br>
+
+### Why is my synthesis taking so long?
+
 Synthesis time depends on both the size and structure of your dataset. In general, synthetic data generation takes longer as the number of rows and variables increases. Some types of variables can also make synthesis considerably more computationally intensive.
 
 <br>
