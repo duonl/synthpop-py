@@ -34,6 +34,8 @@ Disabling the check ony suppresses the warning; it does not remove the underlyin
 <br>
 Synthesis time depends on both the size and structure of your dataset. In general, synthetic data generation takes longer as the number of rows and variables increases. Some types of variables can also make synthesis considerably more computationally intensive.
 
+<br>
+
 One such example is a categorical variable with many possible values (high cardinality). synthpop-py synthesises variables sequentially, using previously synthesised variables as predictors. This means that a variable with many categories can affect the computational cost of not only its own synthesis, but also the synthesis of variables that use it as a predictor.
 
 The default {class}`~synthpop.methods.cart_synth.CartMethod` performs preprocessing of categorical data before fitting the decision tree. In particular, principal component analysis (PCA) can be used to represent categorical data with a smaller number of components. When a categorical predictor has many possible values, this preprocessing and the subsequent tree fitting can become computationally expensive. If that variable is then used as a predictor for several later variables, this computational cost can occur repeatedly during the sequential synthesis process.
