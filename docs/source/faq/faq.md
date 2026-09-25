@@ -18,11 +18,11 @@ Consider whether the rare categories are appropriate for use as a predictor and 
 ```python
 tune_cart(rare_categories_threshold=10)
 ```
-A higher threshold classifies more categories as rare and makes the check more conservative. A lower threshold classifier fewer categories as rare. By default, `rare_categories_threshold` follows `min_samples_leaf`. More details can be found in [this example](../examples/tune_cart_function.md. You can also disable the check by setting the threshold to `0`:
+A higher threshold classifies more categories as rare and makes the check more conservative. A lower threshold classifies fewer categories as rare. By default, `rare_categories_threshold` takes the value of the `min_samples_leaf` parameter. More details can be found in [this example](../examples/tune_cart_function.md). You can also disable the check by setting the threshold to `0`:
 ```python
 tune_cart(rare_categories_threshold=0)
 ```
-Disabling the check ony suppresses the warning; it does not remove the underlying privacy risk. See the {ref}`User Guide <6122-rare-categories>` and [Examples](../examples/rare_categories.md) for more information about this risk. Disabling the check can also be done when {ref}`configuring CART directly <314-configuring-cart>`. See [this example](../examples/configure_cart_directly.md) to see how.
+Disabling the check ony suppresses the warning; it does not remove the underlying privacy risk. See the {ref}`User Guide <6122-rare-categories>` and [Example: Risk of privacy loss due to rare categories](../examples/rare_categories.md) for more information about this risk. Disabling the check can also be done when {ref}`configuring CART directly <314-configuring-cart>`. See [Example: Configure CART directly](../examples/configure_cart_directly.md) to see how.
 
 
 
@@ -32,16 +32,16 @@ Disabling the check ony suppresses the warning; it does not remove the underlyin
 <details>
 <summary> Why is my synthesis taking so long? </summary>
 <br>
-Synthesis time depends on both the size and structure of your dataset. In general, synthesis takes longer as the number of rows and variables increases. Some types of variables can also make synthesis considerably more computationally intensive.
+Synthesis time depends on both the size and structure of your dataset. In general, synthetic data generation takes longer as the number of rows and variables increases. Some types of variables can also make synthesis considerably more computationally intensive.
 
-One important example is a categorical variable with many possible values (high cardinality). synthpop-py synthesises variables sequentially, using previously synthesised variables as predictors. This means that a variable with many categories can affect the computational cost of not only its own synthesis, but also the synthesis of variables that use it as a predictor.
+One such example is a categorical variable with many possible values (high cardinality). synthpop-py synthesises variables sequentially, using previously synthesised variables as predictors. This means that a variable with many categories can affect the computational cost of not only its own synthesis, but also the synthesis of variables that use it as a predictor.
 
 The default {class}`~synthpop.methods.cart_synth.CartMethod` performs preprocessing of categorical data before fitting the decision tree. In particular, principal component analysis (PCA) can be used to represent categorical data with a smaller number of components. When a categorical predictor has many possible values, this preprocessing and the subsequent tree fitting can become computationally expensive. If that variable is then used as a predictor for several later variables, this computational cost can occur repeatedly during the sequential synthesis process.
 
 <p class="fake-h3"><strong>What can I do?</strong></p>
 
 **Consider whether the high-cardinality variable needs to be used as a categorical predictor.**<br>
-First, consider whether the predictor-target relationship makes sense for the variables involved. If a categorical variable has a very large number of possible values, ask whether it is appropriate to use it as a predictor for the target variable. Depending on the meaning of the variables, another representation or synthesis strategy may be more appropriate.
+First, consider whether the predictor-target relationship makes sense for the variables involved. If a categorical variable has a very large number of possible values, ask whether it is appropriate to use it as a predictor for the target variable. Depending on the meaning of the variables, another representation or synthesis strategy may be more appropriate. For instance by changing the synthesis order or synthesising in strata. More on this below.
 
 **Reduce the number of principal components.**<br>
 CART uses principal components when processing categorical data. Reducing the number of components can reduce the computational cost of this preprocessing and the subsequent modelling. However, using fewer components can also remove information from the representation of the categorical data, so this is a trade-off between computational cost and the information available to the model.
