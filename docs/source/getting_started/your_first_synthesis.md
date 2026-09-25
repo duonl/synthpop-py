@@ -9,6 +9,8 @@ In this guide, you'll create your first synthetic dataset with synthpop-py. We'l
 
 This example introduces the core workflow. For a more detailed example, including utility evaluation with univariate distributions and S_pMSE, see the [**Your first synthetic dataset**](../examples/your_first_synthetic_dataset.md) example in the [Examples module](../examples/examples_index.md). The example there follows the same workflow as this guide, but explores the evaluation of the synthetic data in more detail.
 
+If you get stuck along the way, take a look at our [FAQ](../faq/faq.md) for answers to common questions and issues.
+
 ## Loading the data
 We begin with an existing dataset. The diabetes dataset contains measurements from diabetes patients and a target variable representing disease progression. The dataset contains only continuous variables.
 

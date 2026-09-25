@@ -13,7 +13,11 @@ If you want to know more about synthpop-py, please see the {doc}`../about_us/abo
 
 After completing these steps, explore more advanced examples and workflows in the {doc}`../user_guides/user_guides_index`.
 
+If you get stuck along the way, take a look at our [FAQ](../faq/faq.md) for answers to common questions and issues.
+
 For detailed information about available functions, classes, and parameters, see the {doc}`../api_reference/synthpop`.
+
+
 
 ```{toctree}
 :maxdepth: 1
