@@ -5,7 +5,7 @@ This page collects common questions and issues that may arise when using synthpo
 ## CART synthesis
 <details>
 <summary> Why am I seeing a rare-category warning?</summary>
-<br>
+### Why am I seeing a rare-category warning?
 You may see a warning such as:
 
 > Categorical predictor contains categories occurring fewer than 5 times for more than 25% of the rows.
