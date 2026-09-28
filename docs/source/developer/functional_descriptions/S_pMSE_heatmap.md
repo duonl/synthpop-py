@@ -1,9 +1,9 @@
-# S_pSME Heatmap Visualisation
+# S_pMSE Heatmap Visualisation
 ## 1. Introduction
-This method provides a visual representation of the pairwise relationships between variables based on their S_pSME values. Its purpose is to enable quick identification of variable combinations whose relationship has been poorly synthesised.
+This method provides a visual representation of the pairwise relationships between variables based on their S_pMSE values. Its purpose is to enable quick identification of variable combinations whose relationship has been poorly synthesised.
 
 ## 2. Input and output
-The method requires a dataset in which each record describes a pair of variables together with an associated S_pSME value. Each record represents the symmetric relationship between two variables. The output is a square heatmap in which all unique variables are displayed on both the horizontal and vertical axes. Each cell in the matrix contains the S_pSME value for the corresponding variable pair, encoded using a colour scale. The result is a compact and interpretable overview of all pairwise S_pMSE relationships.
+The method requires a dataset in which each record describes a pair of variables together with an associated S_pMSE value. Each record represents the symmetric relationship between two variables. The output is a square heatmap in which all unique variables are displayed on both the horizontal and vertical axes. Each cell in the matrix contains the S_pMSE value for the corresponding variable pair, encoded using a colour scale. The result is a compact and interpretable overview of all pairwise S_pMSE relationships.
 
 ## 3. Detailed process
 ### 3.1 Construction of the symmetric S_pMSE matrix
@@ -15,7 +15,7 @@ Continuous S_pMSE values are mapped to discrete intervals that represent meaning
 The colour scheme shall be sequential, colour-blind friendly, print-friendly, and retain sufficient contrast when reproduced in greyscale. Suitable palettes include the discretised versions of the  `plotly` colour scales *YlOrBr* and *Reds*, or the *iridescent* and *YlOrBr* palettes from the `tol_colors` python package.
 
 ### 3.3 Visual encoding and rendering
-The matrix is converted into a heatmap where the cells show the S_pSME values and are coloured according to our predefined groups. Both axes are labelled with variable names and a legend (colour bar) provides a clear mapping between colours and S_pMSE ranges. To improve readability with a large number of variables, tooltips should be added to see which cell represents which variable pair relationship. Optionally, the heatmap can be saved as a static image file. If interactive rendering is enabled, the heatmap is displayed to the active graphical output device. Rendering is optional and context-dependent, and does not affect the saved image output.
+The matrix is converted into a heatmap where the cells show the S_pMSE values and are coloured according to our predefined groups. Both axes are labelled with variable names and a legend (colour bar) provides a clear mapping between colours and S_pMSE ranges. To improve readability with a large number of variables, tooltips should be added to see which cell represents which variable pair relationship. Optionally, the heatmap can be saved as a static image file. If interactive rendering is enabled, the heatmap is displayed to the active graphical output device. Rendering is optional and context-dependent, and does not affect the saved image output.
 
 ## 4. Mathematical properties and constraints
 The resulting matrix is always square and symmetric. The visual scale is similar in all plots for easy comparison.

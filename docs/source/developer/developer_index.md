@@ -30,6 +30,7 @@ way_of_working/randomness.md
 :maxdepth: 1
 :caption: Functional Descriptions
 
+Index <functional_descriptions/index_functional_descriptions.md>
 Synthesis workflow <functional_descriptions/index_synthesis_workflow.md>
 Data preparation <functional_descriptions/index_data_preparation.md>
 Synthesis methods <functional_descriptions/index_synthesis_methods.md>

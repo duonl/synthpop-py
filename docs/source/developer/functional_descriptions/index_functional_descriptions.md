@@ -26,7 +26,7 @@ METH-->COPY["<a href='Copy-method.html'>Copy method</a>"]
 METH-->SAMPLE["<a href='Sample-method.html'>Sample method</a>"]
 
 EVAL-->UTIL["Utility metrics:<br/><a href='S_pMSE.html'>Pairwise S_pMSE</a>"]
-EVAL-->PLOT["Plotting:<br/><a href='univariate_distributions.html'>Univariate distributions</a><br/><a href='S_pMSE heatmap.html'>Pairwise S_pMSE heatmap</a>"]
+EVAL-->PLOT["Plotting:<br/><a href='univariate_distributions.html'>Univariate distributions</a><br/><a href='S_pMSE_heatmap.html'>Pairwise S_pMSE heatmap</a>"]
 
 SUP-->REPR["<a href='reproducibility.html'>Reproducibility and randomness</a>"]
 ```
