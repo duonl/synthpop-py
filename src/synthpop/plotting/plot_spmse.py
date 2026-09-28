@@ -132,7 +132,6 @@ def _make_heatmap(
             y=matrix.index,
             text=text_matrix.values,
             texttemplate="<b>%{text}</b>",
-            textfont= dict(size=20),
             hovertemplate=(
                 "x: %{x}<br>"
                 "y: %{y}<br>"
