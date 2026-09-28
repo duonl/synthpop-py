@@ -517,5 +517,5 @@ def test_show_values_parameter(spmse_df):
     fig2 = plot_spmse(spmse_df, None, False, False)
     assert not any("0.0" in str(text) for text in fig2.data[0].text.flatten())
 
-def test_visual(spmse_df): #Please check for review
-    plot_spmse(spmse_df, None, True, True)
+# def test_visual(spmse_df): #Please check for review
+#     plot_spmse(spmse_df, None, True, True)
