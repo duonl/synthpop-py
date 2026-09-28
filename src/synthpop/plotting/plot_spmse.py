@@ -54,7 +54,7 @@ def _make_matrix(df: pd.DataFrame, value_string="S_pMSE") -> pd.DataFrame:
     return matrix.iloc[::-1]
 
 
-def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
+def _make_text_matrix(matrix: pd.DataFrame, show_values: bool) -> pd.DataFrame:
     """
     Convert a numeric matrix into a string matrix for plotting.
 
@@ -63,11 +63,15 @@ def _make_text_matrix(matrix: pd.DataFrame) -> pd.DataFrame:
     is undefined because the variable is constant.
 
     :param matrix: NxN numpy matrix
+    :param show_values: boolean for whether the S_pmse values are shown
 
     return: an NxN matrix
     """
-    text_matrix = matrix.round(2).astype(str)
 
+    if show_values:
+        text_matrix = matrix.round(2).astype(str)
+    else:
+        return pd.DataFrame("", index=matrix.index, columns=matrix.columns) # empty frame with nothing
     text_matrix = text_matrix.mask(
         matrix.isna(),
         "UNDEFINED",
@@ -118,6 +122,9 @@ def _make_heatmap(
     :return: A Plotly Figure containing the S_pMSE heatmap.
     """
 
+    width = 986
+    height = 850
+
     fig = go.Figure(
         data=go.Heatmap(
             z=matrix.values,
@@ -125,6 +132,7 @@ def _make_heatmap(
             y=matrix.index,
             text=text_matrix.values,
             texttemplate="<b>%{text}</b>",
+            textfont= dict(size=20),
             hovertemplate=(
                 "x: %{x}<br>"
                 "y: %{y}<br>"
@@ -145,12 +153,12 @@ def _make_heatmap(
         ),
 
         layout=dict(
-            title="S_pMSE Heatmap",
+            title="Two-way utility: S_pMSE for pairs of variables",
             title_x=0.5,
             font=dict(family="Arial", size=15),
-            width=986,
-            height=850,
-            xaxis=dict(side="top"),
+            width=width,
+            height=height,
+            xaxis=dict(side="bottom"),
             yaxis=dict(scaleanchor="x", scaleratio=1)  # Make it a Cube
         )
     )
@@ -158,7 +166,7 @@ def _make_heatmap(
     return fig
 
 
-def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = False) -> go.Figure:
+def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = False, show_values: bool = True) -> go.Figure:
     """
     Create a heatmap visualisation of pairwise S_pMSE values.
 
@@ -182,6 +190,8 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
         parent directories). If `None` (default), no permanent output file is created.
     :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. 
         Default is `False`. In headless environments this parameter should be set to `False`.
+    :param show_values: Whether to show the S_pMSE values in the heatmap cells.
+        Default is `True`. When `False`, only the color coding is shown.
 
     :return: A Plotly Figure containing a heatmap of pairwise S_pMSE values with
         bin-based colouring and S_pMSE values in the bins.
@@ -242,7 +252,7 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     spmse = _categorise_spmse(spmse, bins)
 
     matrix_orig = _make_matrix(spmse, "S_pMSE")
-    text_matrix = _make_text_matrix(matrix_orig)
+    text_matrix = _make_text_matrix(matrix_orig, show_values)
 
     matrix = _make_matrix(spmse, "category")
     matrix += 1
