@@ -15,15 +15,15 @@ This warning means that a categorical predictor used by {class}`~synthpop.method
 
 <p class="fake-h3"><strong>What can I do?</strong></p>
 
-Consider whether the rare categories are appropriate for use as a predictor and whether the associated privacy risk is acceptable. You can adjust the threshold using {func}`~synthpop.methods.cart_synth.tune_cart`:
+Consider whether the rare categories are appropriate for use as a predictor and whether the associated privacy risk is acceptable. You can adjust the `rare_categories_threshold` using {func}`~synthpop.methods.cart_synth.tune_cart`:
 ```python
 tune_cart(rare_categories_threshold=10)
 ```
-A higher threshold classifies more categories as rare and makes the check more conservative. A lower threshold classifies fewer categories as rare. By default, `rare_categories_threshold` takes the value of the `min_samples_leaf` parameter. More details can be found in [this example](../examples/tune_cart_function.md). You can also disable the check by setting the threshold to `0`:
+A higher threshold classifies more categories as rare and makes the check more conservative. A lower threshold classifies fewer categories as rare. By default, `rare_categories_threshold` takes the value of the `min_samples_leaf` parameter. More details can be found in [Example: Use the tune_cart function](../examples/tune_cart_function.md). You can also disable the check by setting the threshold to `0`:
 ```python
 tune_cart(rare_categories_threshold=0)
 ```
-Disabling the check ony suppresses the warning; it does not remove the underlying privacy risk. See the {ref}`User Guide <6122-rare-categories>` and [Example: Risk of privacy loss due to rare categories](../examples/rare_categories.md) for more information about this risk. Disabling the check can also be done when {ref}`configuring CART directly <314-configuring-cart>`. See [Example: Configure CART directly](../examples/configure_cart_directly.md) to see how.
+Disabling the check ony suppresses the warning; it does not remove the underlying privacy risk. See the {ref}`User Guide:  Rare categories and overfitting <6122-rare-categories>` and [Example: Risk of privacy loss due to rare categories](../examples/rare_categories.md) for more information about this risk. Disabling the check can also be done when {ref}`configuring CART directly <314-configuring-cart>`. See [Example: Configure CART directly](../examples/configure_cart_directly.md) to see how.
 
 
 
@@ -35,7 +35,7 @@ Disabling the check ony suppresses the warning; it does not remove the underlyin
 
 ### Why is my synthesis taking so long?
 
-Synthesis time depends on both the size and structure of your dataset. In general, synthetic data generation takes longer as the number of rows and variables increases. Some types of variables can also make synthesis considerably more computationally intensive.
+Synthesis time depends on both the size and structure of your dataset. In general, synthetic data generation takes longer as the number of rows and variables increases. Some specific types of variables can also make a synthesis considerably more computationally intensive.
 
 <br>
 
@@ -46,13 +46,13 @@ The default {class}`~synthpop.methods.cart_synth.CartMethod` performs preprocess
 <p class="fake-h3"><strong>What can I do?</strong></p>
 
 **Consider whether the high-cardinality variable needs to be used as a categorical predictor.**<br>
-First, consider whether the predictor-target relationship makes sense for the variables involved. If a categorical variable has a very large number of possible values, ask whether it is appropriate to use it as a predictor for the target variable. Depending on the meaning of the variables, another representation or synthesis strategy may be more appropriate. For instance by changing the synthesis order or synthesising in strata. More on this below.
+First, consider whether the predictor-target relationship makes sense for the variables involved. If a categorical variable has a very large number of possible values, ask whether it is appropriate to use it as a predictor for the target variable. Depending on the meaning of the variables, another representation or synthesis strategy may be more appropriate. For instance, by changing the synthesis order or synthesising in strata. More on this below.
 
 **Reduce the number of principal components.**<br>
-CART uses principal components when processing categorical data. Reducing the number of components can reduce the computational cost of this preprocessing and the subsequent modelling. However, using fewer components can also remove information from the representation of the categorical data, so this is a trade-off between computational cost and the information available to the model.
+CART implements a principal component method to process categorical data. Reducing the number of components can reduce the computational cost of this preprocessing and the subsequent modelling. However, using fewer components can also remove information from the representation of the categorical data, so this is a trade-off between computational cost and the information available to the model.
 
 **Consider changing the synthesis order.**<br>
-synthpop-py uses previously synthesised variables as predictors. Therefore, the synthesis order determines which variables are available as predictors for each subsequent variable. If a high-cardinality variable is currently synthesised early in the column order, it may be used as a predictor for many later variables. Moving it later in the synthesis order means that it will not be available as a predictor for those earlier variables, which can reduce the amount of computation required for subsequent models. However, moving the variable to the end does not necessarily make the synthesis of that variable itself faster. The variable still has to be synthesised using the predictors that precede it. Changing the order is therefore most useful when the high-cardinality variable is expensive primarily because it is being used as a predictor for many other variables.
+synthpop-py uses previously synthesised variables as predictors for the target column. Therefore, the synthesis order determines which variables are available as predictors for each subsequent variable. If a high-cardinality variable is placed early in the synthesis column order, it will be used as a predictor for many later variables. Moving it later in the synthesis order means that it will not be available as a predictor for those earlier variables, which can reduce the amount of computation required for subsequent models. However, moving the variable to the end does not necessarily make the synthesis of that variable itself faster. 
 
 Changing the synthesis order can also affect the statistical utility of the synthetic data. The order should therefore be chosen based on both computational considerations and the relationships that you want to preserve. See {ref}`User Guide 2.2.4: Changing the column order <224-column-order>` and [Example: Change the synthesis order](../examples/changing_the_synthesis_order.md)for more information.
 
