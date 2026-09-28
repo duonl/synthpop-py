@@ -16,6 +16,7 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
   background: none;
 }
 
+/* Make mermaid diagram backgrounds transparent and more readable with max-width */
 .mermaid {
     overflow-x: auto;
     background: transparent !important;
@@ -28,6 +29,7 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
     height: auto !important;
 }
 
+/* Create the look of a heading, but make sure it does not show up on the right side bar*/
 .fake-h3 {
     font-size: 1.25em;
     font-weight: 500;

@@ -30,18 +30,14 @@ way_of_working/randomness.md
 :maxdepth: 1
 :caption: Functional Descriptions
 
-functional_descriptions/SynthpopSynthesis
-functional_descriptions/CART
-functional_descriptions/Copy-method
-functional_descriptions/Sample-method
-functional_descriptions/Mean-encoding
-functional_descriptions/PCA-encoding
-functional_descriptions/MissingValuePredictor
-functional_descriptions/S_pMSE
-functional_descriptions/plotting
-functional_descriptions/reproducibility
+Synthesis workflow <functional_descriptions/index_synthesis_workflow.md>
+Data preparation <functional_descriptions/index_data_preparation.md>
+Synthesis methods <functional_descriptions/index_synthesis_methods.md>
+Evaluation <functional_descriptions/index_evaluation.md>
+Supporting functionality <functional_descriptions/index_supporting_functionality.md>
 
 ```
+
 
 ```{toctree}
 :maxdepth: 1

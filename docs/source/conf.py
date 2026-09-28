@@ -32,7 +32,8 @@ html_css_files = [
 ]
 
 html_theme_options = {
-    "show_nav_level": 2,
+    "show_nav_level": 1,
+    "navigation_depth": 2,
     "icon_links": [
         {
             "name": "GitHub",
