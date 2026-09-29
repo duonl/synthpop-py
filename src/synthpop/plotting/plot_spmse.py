@@ -71,7 +71,8 @@ def _make_text_matrix(matrix: pd.DataFrame, show_values: bool) -> pd.DataFrame:
     if show_values:
         text_matrix = matrix.round(2).astype(str)
     else:
-        return pd.DataFrame("", index=matrix.index, columns=matrix.columns) # empty frame with nothing
+        # empty frame with nothing
+        return pd.DataFrame("", index=matrix.index, columns=matrix.columns)
     text_matrix = text_matrix.mask(
         matrix.isna(),
         "UNDEFINED",
@@ -157,8 +158,10 @@ def _make_heatmap(
             font=dict(family="Arial", size=15),
             width=width,
             height=height,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
             xaxis=dict(side="bottom"),
-            yaxis=dict(scaleanchor="x", scaleratio=1)  # Make it a Cube
+            yaxis=dict(scaleanchor="x", scaleratio=1),  # Make it a Cube
         )
     )
 
