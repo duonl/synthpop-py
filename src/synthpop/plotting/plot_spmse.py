@@ -22,7 +22,7 @@ def _categorise_spmse(spmse: pd.DataFrame, bins: Sequence[float]) -> pd.DataFram
 
     :return: 4xN pandas DataFrame with new categorised column
     """
-    spmse["category"] = np.digitize(spmse['S_pMSE'], bins=bins, right=True)
+    spmse["category"] = np.digitize(spmse["S_pMSE"], bins=bins, right=True)
     return spmse
 
 
@@ -88,8 +88,11 @@ def _get_colour_scale() -> list:
     Helper function to obtain the discrete colour scale used for the S_pMSE bins.
     """
 
-    colours = ['rgb(225, 225, 225)'] + ['rgb(255, 255, 255)'] + \
-        px.colors.sequential.YlOrBr[:5]
+    colours = (
+        ["rgb(225, 225, 225)"]
+        + ["rgb(255, 255, 255)"]
+        + px.colors.sequential.YlOrBr[:5]
+    )
 
     n = len(colours)
     colour_scale = []
@@ -103,10 +106,10 @@ def _get_colour_scale() -> list:
 
 
 def _make_heatmap(
-        matrix: pd.DataFrame,
-        text_matrix: pd.DataFrame,
-        colour_scale: list,
-        bin_labels: Sequence[str]
+    matrix: pd.DataFrame,
+    text_matrix: pd.DataFrame,
+    colour_scale: list,
+    bin_labels: Sequence[str],
 ) -> go.Figure:
     """
     Generate an interactive Plotly heatmap of the categorised S_pMSE matrix.
@@ -134,10 +137,7 @@ def _make_heatmap(
             text=text_matrix.values,
             texttemplate="<b>%{text}</b>",
             hovertemplate=(
-                "x: %{x}<br>"
-                "y: %{y}<br>"
-                "value: %{text}"
-                "<extra></extra>"
+                "x: %{x}<br>" "y: %{y}<br>" "value: %{text}" "<extra></extra>"
             ),
             colorscale=colour_scale,
             zmin=0,
@@ -149,11 +149,10 @@ def _make_heatmap(
                 title="S_pMSE bins",
                 outlinecolor="black",
                 outlinewidth=2,
-            )
+            ),
         ),
-
         layout=dict(
-            title="Two-way utility: S_pMSE for pairs of variables",
+            title="Pairwise S_pMSE",
             title_x=0.5,
             font=dict(family="Arial", size=15),
             width=width,
@@ -162,13 +161,18 @@ def _make_heatmap(
             plot_bgcolor="rgba(0,0,0,0)",
             xaxis=dict(side="bottom"),
             yaxis=dict(scaleanchor="x", scaleratio=1),  # Make it a Cube
-        )
+        ),
     )
 
     return fig
 
 
-def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: bool = False, show_values: bool = True) -> go.Figure:
+def plot_spmse(
+    spmse: pd.DataFrame,
+    save_path: str | None = None,
+    show_plot: bool = False,
+    show_values: bool = True,
+) -> go.Figure:
     """
     Create a heatmap visualisation of pairwise S_pMSE values.
 
@@ -179,18 +183,18 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
     The displayed S_pMSE values are grouped into predefined bins and
     represented using a discrete sequential colour scale.
 
-    If a saving location is provided, the generated heatmap is written to `spmse.pdf` in the specified directory. 
+    If a saving location is provided, the generated heatmap is written to `spmse.pdf` in the specified directory.
     If interactive rendering is enabled, the figure is displayed using the active Plotly renderer.
 
-    :param spmse: DataFrame containing the pairwise standardised propensity mean squared error values. 
-        The dataframe must contain exactly the columns `['column1', 'column2', 'S_pMSE']` 
-        where `column1` and `column2` identify the variable pair and `S_pMSE` contains the corresponding pairwise S_pMSE value. 
+    :param spmse: DataFrame containing the pairwise standardised propensity mean squared error values.
+        The dataframe must contain exactly the columns `['column1', 'column2', 'S_pMSE']`
+        where `column1` and `column2` identify the variable pair and `S_pMSE` contains the corresponding pairwise S_pMSE value.
         You can obtain this dataframe by running :func:`~synthpop.utility_metrics.spmse.pairwise_spmse`.
     :param save_path: Directory where the output PDF is written.
         If a relative path is provided, it is resolved relative to the current working
         directory. The directory is created if it does not already exist (including)
         parent directories). If `None` (default), no permanent output file is created.
-    :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer. 
+    :param show_plot: Whether to display the heatmap interactively using the active Plotly renderer.
         Default is `False`. In headless environments this parameter should be set to `False`.
     :param show_values: Whether to show the S_pMSE values in the heatmap cells.
         Default is `True`. When `False`, only the color coding is shown.
@@ -230,24 +234,28 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
 
     if not isinstance(spmse, pd.DataFrame):
         raise ValueError(
-            f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead.")
+            f"The S_pMSE data should be a pandas DataFrame, got {type(spmse)} instead."
+        )
 
-    if not list(spmse.columns) == ['column1', 'column2', 'S_pMSE']:
+    if not list(spmse.columns) == ["column1", "column2", "S_pMSE"]:
 
         raise ValueError(
             "The S_pMSE dataframe must contain exactly "
             "the columns ['column1', 'column2', 'S_pMSE']."
         )
-    if pd.isna(spmse['S_pMSE']).any():
-        raise ValueError(
-            "The S_pMSE dataframe must not contain missing values"
-        )
+    if pd.isna(spmse["S_pMSE"]).any():
+        raise ValueError("The S_pMSE dataframe must not contain missing values")
     spmse = spmse.copy(deep=False)
 
     bins = [0, 3, 10, 30, 100, np.inf]
     bin_labels = [
-        "UNDEFINED", "CONSTANT VARIABLE", "(0,3]", "(3,10]",
-        "(10,30]", "(30,100]", '(100,+)'
+        "UNDEFINED",
+        "CONSTANT VARIABLE",
+        "(0,3]",
+        "(3,10]",
+        "(10,30]",
+        "(30,100]",
+        "(100,+)",
     ]
 
     # pairwise_spmse does not return nan
@@ -273,15 +281,9 @@ def plot_spmse(spmse: pd.DataFrame, save_path: str | None = None, show_plot: boo
 
         output_dir = Path(save_path)
 
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-        output_file = (
-            output_dir
-            / "spmse.pdf"
-        )
+        output_file = output_dir / "spmse.pdf"
 
         fig.write_image(output_file)
 

@@ -315,7 +315,7 @@ def test_make_heatmap_layout(heatmap_inputs):
         bin_labels,
     )
 
-    assert fig.layout.title.text == "Two-way utility: S_pMSE for pairs of variables"
+    assert fig.layout.title.text == "Pairwise S_pMSE"
     assert fig.layout.title.x == 0.5
     assert fig.layout.width == 986
     assert fig.layout.height == 850
