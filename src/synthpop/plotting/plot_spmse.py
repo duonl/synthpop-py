@@ -244,7 +244,8 @@ def plot_spmse(
             "the columns ['column1', 'column2', 'S_pMSE']."
         )
     if pd.isna(spmse["S_pMSE"]).any():
-        raise ValueError("The S_pMSE dataframe must not contain missing values")
+        raise ValueError(
+            "The S_pMSE dataframe must not contain missing values")
     spmse = spmse.copy(deep=False)
 
     bins = [0, 3, 10, 30, 100, np.inf]
