@@ -59,6 +59,7 @@ extensions = [
     'myst_parser',
     'sphinxcontrib.mermaid',
     "sphinx.ext.intersphinx",
+    "sphinxcontrib.images",
 ]
 myst_enable_extensions = [
     "dollarmath",

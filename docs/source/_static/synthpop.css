@@ -35,3 +35,9 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
     margin-top: 1em;
     margin-bottom: 0.5em;
 }
+
+/*For zoombox */
+.lb-image {
+    max-width: 95vw !important;
+    max-height: 95vh !important;
+}
