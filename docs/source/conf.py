@@ -67,7 +67,7 @@ myst_enable_extensions = [
     "attrs_inline",
 ]
 
-myst_heading_anchors = 3
+myst_heading_anchors = 4
 
 autodoc_member_order = "bysource"
 
