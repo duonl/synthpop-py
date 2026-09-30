@@ -49,5 +49,5 @@ documentation
 ```{toctree}
 :maxdepth: 1
 :caption: Contributing
-contributing_placeholder
+contributing_to_package
 ```

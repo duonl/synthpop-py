@@ -200,7 +200,7 @@ class Synthesiser:
 
             raise ValueError(
                 f"Synthesiser.column_order expects input to be a list of column names (str) or column indices (int), "
-                f"got datatypes {set(type(x).__name__ for x in self.column_order)} instead."
+                f"got datatypes {sorted(set(type(x).__name__ for x in self.column_order))} instead."
             )
 
         self.models_ = {}
