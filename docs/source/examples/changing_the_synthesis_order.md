@@ -8,9 +8,9 @@ When evaluating the synthetic data using the S_pMSE heatmap, you may have notice
 Reminder: the S_pMSE is influenced by the number of observations in the original and synthetic datasets. Generating more synthetic rows may result in larger S_pMSE values, even if the underlying quality of the synthesis has not changed, because small differences can be estimated more precisely. Therefore, S_pMSE values are most meaningful when comparing synthesis methods or parameter settings on datasets of the same size.
 ```
 
-Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Most relationships are preserved well, but the pairwise relationships involving `fare` have substantially larger S_pMSE values than the others. This suggests that relationships involving `fare` are not being reproduced as well as desired.
+Although the univariate distributions closely matched those of the original dataset, the S_pMSE heatmap tells a different story. Most relationships are preserved well. Where the variables embarked and embark_town show consistently the highest S_pMSE values.
 
-This does not necessarily mean that the synthesiser performed poorly. Instead, it suggests that the default synthesis settings are not optimal for this dataset.
+This does not necessarily mean that the synthesiser performed poorly. Instead, it might suggests that the default synthesis settings are not optimal for this dataset.
 
 One of the most effective ways to improve the preservation of relationships is to change the **synthesis order**.
 
@@ -96,7 +96,7 @@ More information about the sequential synthesis procedure is available in [User 
 
 ## Choose a different order
 
-Looking at the original S_pMSE heatmap, many of the largest values involve `fare`. For example, the relationships between `fare` and `survived`, `pclass`, `class`, `adult_male` and `alone` all have considerably larger S_pMSE values than most other pairs.
+Looking at the original S_pMSE heatmap, many of the largest values involve `fare`. For example, the relationships between `fare` and `age`, `deck`, `embark` all have large S_pMSE values.
 
 A simple strategy is therefore to move `fare` to the end of the synthesis order. Since variables are synthesised sequentially, moving `fare` to the end of the synthesis order allows its synthesis model to use all other variables as predictors. This additional information may help preserve relationships involving `fare`.
 
@@ -154,9 +154,9 @@ plot_new = plot_spmse(spmse_new, show_plot=True)
 ```
 
 ![S_pMSE heatmap of Titanic dataset with new column order](../images/titanic_spmse_2.png)
-The new heatmap shows that changing the synthesis order improved several relationships involving `fare`. For example, the S_pMSE value between `fare` and `survived` decreased from approximately 53 to 41, while the relationship between `fare` and `pclass` decreases from approximately 54 to 37.
+The new heatmap shows that changing the synthesis order improved several relationships involving `fare`. For example, the S_pMSE value between `fare` and `deck` decreased from approximately 6.06 to 4.47.
 
-The improvement is encouraging, but `fare` is still involved in many of the largest S_pMSE values. In addition, the updated heatmap reveals that some relationships involving `embark_town` are now less preserved.
+The improvement is encouraging, but `fare` is still involved in many of the largest S_pMSE values. In addition, the updated heatmap reveals that some relationships involving `age` are now less preserved.
 
 This illustrates an important point: changing the synthesis order is rarely a one-shot optimisation. Instead, it is often useful to make a small change, evaluate the result, and then decide on the next refinement.
 

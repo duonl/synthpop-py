@@ -10,7 +10,7 @@ For this example, we use the [Titanic dataset](https://github.com/mwaskom/seabor
 import seaborn as sns
 
 data = sns.load_dataset("titanic")
-
+data['fare'] = data['fare'].astype(np.float32)
 data.head(3)
 ```
 The first three rows of the dataset are:
@@ -21,6 +21,10 @@ The first three rows of the dataset are:
 |  2 |          1 |        3 | female |    26 |       0 |       0 |  7.925  | S          | Third   | woman | False        | nan    | Southampton   | yes     | True    |   
 
 The dataset contains information about passengers aboard the Titanic, including demographic characteristics, ticket information, and whether each passenger survived.
+
+```{warning}
+The casting to float32 is currently required due to a bug.
+```
 
 ## Create and fit the Synthesiser
 First, we create and fit the synthesiser as in the previous examples.

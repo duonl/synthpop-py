@@ -16,9 +16,10 @@ First, we load the dataset and convert it to a pandas DataFrame.
 
 ```python
 from sklearn.datasets import load_diabetes
+import numpy as np
 
 diabetes = load_diabetes(as_frame=True)
-data = diabetes.frame
+data = diabetes.frame.astype(np.float32)
 
 data.head(3)
 ```
@@ -32,6 +33,10 @@ The first three rows of the dataset are:
 | 2 |   0.0852989 |  0.0506801 |  0.0444512 | -0.00567042 |  -0.0455995 | -0.0341945 | -0.0323559 | -0.00259226 | 0.00286131 | -0.0259303 |    141 |
 
 Each row represents one observation in the original dataset. Our goal is generate a new dataset with the same structure, but containing synthetic data instead of the original data.
+
+```{warning}
+The casting to float32 is currently required due to a bug.
+```
 
 ## Create a synthesiser
 
