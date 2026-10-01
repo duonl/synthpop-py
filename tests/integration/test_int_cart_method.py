@@ -6,7 +6,7 @@ import pytest
 
 from synthpop.data_processing.missing_value_handling import (
     MissingValuePredictor,
-    ReplaceMissingWithValue
+    ReplaceMissingWithValue,
 )
 from synthpop.methods.cart_synth import (
     CartMethod,
@@ -136,10 +136,7 @@ def test_transform_accepts_extra_columns():
         }
     )
 
-    y = pd.Series(
-        [10.0, 20.0, 30.0, 40.0],
-        name="target"
-    )
+    y = pd.Series([10.0, 20.0, 30.0, 40.0], name="target")
 
     cart = tune_cart(rare_categories_threshold=0)()
     cart.fit(X_fit, y)
@@ -282,10 +279,10 @@ def test_fit_transform_with_missing_values_in_predictors():
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series(["A", None, "A", "B"]*100, dtype="string", name="target"),
-        pd.Series([1, 2, np.nan, 4]*100, name="target"),
-        pd.Series([True, False, True, pd.NA]*100, name="target"),
-        pd.Series([1, None, 2, np.nan]*100, name="target"),
+        pd.Series(["A", None, "A", "B"] * 100, dtype="string", name="target"),
+        pd.Series([1, 2, np.nan, 4] * 100, name="target"),
+        pd.Series([True, False, True, pd.NA] * 100, name="target"),
+        pd.Series([1, None, 2, np.nan] * 100, name="target"),
     ],
 )
 def test_fit_transform_with_missing_values_in_target(y):
@@ -308,21 +305,18 @@ def test_fit_transform_with_missing_values_in_target(y):
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series([1, 2, 3, 4], name='target', dtype=np.int64),
-        pd.Series([1, 2, 3, 4], name='target', dtype=np.float64),
-        pd.Series([1, 2, 3, 4], name='target', dtype=np.float32),
-        pd.Series([1, 2, 3, 4], name='target', dtype="Int64"),
-        pd.Series([1.1, 2.2, 3.3, 4.4], name='target', dtype="Float32"),
-
-        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="str"),
-        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="string"),
-        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype=str_dtype),
-
-        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="object"),
-        pd.Series(['x', 'y', 'x', 'y'], name='target', dtype="category"),
-
-        pd.Series([True, False, True, False], name='target', dtype="boolean"),
-        pd.Series([True, False, True, False], name='target', dtype=np.bool_),
+        pd.Series([1, 2, 3, 4], name="target", dtype=np.int64),
+        pd.Series([1, 2, 3, 4], name="target", dtype=np.float64),
+        pd.Series([1, 2, 3, 4], name="target", dtype=np.float32),
+        pd.Series([1, 2, 3, 4], name="target", dtype="Int64"),
+        pd.Series([1.1, 2.2, 3.3, 4.4], name="target", dtype="Float32"),
+        pd.Series(["x", "y", "x", "y"], name="target", dtype="str"),
+        pd.Series(["x", "y", "x", "y"], name="target", dtype="string"),
+        pd.Series(["x", "y", "x", "y"], name="target", dtype=str_dtype),
+        pd.Series(["x", "y", "x", "y"], name="target", dtype="object"),
+        pd.Series(["x", "y", "x", "y"], name="target", dtype="category"),
+        pd.Series([True, False, True, False], name="target", dtype="boolean"),
+        pd.Series([True, False, True, False], name="target", dtype=np.bool_),
     ],
 )
 def test_cart_preserves_target_dtype_end_to_end(y):
@@ -343,9 +337,9 @@ def test_cart_preserves_target_dtype_end_to_end(y):
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series([None, None], name='c'),
-        pd.Series([np.nan, np.nan], name='c'),
-        pd.Series([pd.NA, pd.NA], name='c'),
+        pd.Series([None, None], name="c"),
+        pd.Series([np.nan, np.nan], name="c"),
+        pd.Series([pd.NA, pd.NA], name="c"),
     ],
 )
 def test_fitting_handles_all_missing_target(y):
@@ -360,15 +354,31 @@ def test_fitting_handles_all_missing_target(y):
 
     res = cart.fit(X, y)
     assert res.method_._all_missing
-    assert res.target_name_ == 'c'
+    assert res.target_name_ == "c"
+
+
+def test_fitting_accepts_features_nan():
+    cart = CartMethod()
+
+    X = pd.DataFrame(
+        {
+            "a": np.array([np.nan, np.nan], dtype=str_dtype),
+            "b": np.array([np.nan, np.nan], dtype=str_dtype),
+        },
+    )
+    y = pd.Series(["c", "d"], name="c")
+    res = cart.fit(X, y)
+
+    assert cart.feature_names_in_ == ["a", "b"]
+    assert cart.target_name_ == "c"
 
 
 @pytest.mark.parametrize(
     "y, dtype",
     [
-        (pd.Series([None, None], name='c', dtype='object'), 'object'),
-        (pd.Series([np.nan, np.nan], name='c', dtype=np.float64), np.float64),
-        (pd.Series([pd.NA, pd.NA], name='c',  dtype='string'), 'string'),
+        (pd.Series([None, None], name="c", dtype="object"), "object"),
+        (pd.Series([np.nan, np.nan], name="c", dtype=np.float64), np.float64),
+        (pd.Series([pd.NA, pd.NA], name="c", dtype="string"), "string"),
     ],
 )
 def test_transform_handles_entire_nan_array(y, dtype):
@@ -394,11 +404,9 @@ def test_transform_handles_entire_nan_array(y, dtype):
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series([1.1, 2.2, np.nan, 4.4] * 5,
-                  dtype=np.float64, name="target"),
-        pd.Series([1, 2, np.nan, 4] * 5,
-                  dtype="Float64", name="target"),
-    ]
+        pd.Series([1.1, 2.2, np.nan, 4.4] * 5, dtype=np.float64, name="target"),
+        pd.Series([1, 2, np.nan, 4] * 5, dtype="Float64", name="target"),
+    ],
 )
 def test_regressor_method_and_replace_missing_with_value(y):
     X = pd.DataFrame(
@@ -430,18 +438,18 @@ def test_regressor_method_and_replace_missing_with_value(y):
 @pytest.mark.parametrize(
     "y, expected_none_missing ",
     [
-        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
-                   dtype=str, name="target"), False),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
-                   dtype=str_dtype, name="target"), False),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
-                   dtype="category", name="target"), False),
-        (pd.Series(['a', 'b', np.nan, 'c'] * 10,
-                   dtype=object, name="target"), False),
-
-        (pd.Series(['a', 'b', 'N.a.N', 'c'] * 10,
-                   dtype=str, name="target"), True),
-    ]
+        (pd.Series(["a", "b", np.nan, "c"] * 10, dtype=str, name="target"), False),
+        (
+            pd.Series(["a", "b", np.nan, "c"] * 10, dtype=str_dtype, name="target"),
+            False,
+        ),
+        (
+            pd.Series(["a", "b", np.nan, "c"] * 10, dtype="category", name="target"),
+            False,
+        ),
+        (pd.Series(["a", "b", np.nan, "c"] * 10, dtype=object, name="target"), False),
+        (pd.Series(["a", "b", "N.a.N", "c"] * 10, dtype=str, name="target"), True),
+    ],
 )
 def test_classifier_method_and_missing_value_predictor(y, expected_none_missing):
     X = pd.DataFrame(
@@ -478,23 +486,18 @@ def test_classifier_method_and_missing_value_predictor(y, expected_none_missing)
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series([1, 2, 3, 4] * 5, name='target', dtype=np.int64),
-        pd.Series([1, 2, 3, 4] * 5, name='target', dtype=np.float64),
-        pd.Series([1, 2, 3, 4] * 5, name='target', dtype=np.float32),
-        pd.Series([1, 2, 3, 4] * 5, name='target', dtype="Int64"),
-        pd.Series([1.1, 2.2, 3.3, 4.4] * 5, name='target', dtype="Float32"),
-
-        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="str"),
-        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="string"),
-        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype=str_dtype),
-
-        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="object"),
-        pd.Series(['x', 'y', 'x', 'y'] * 5, name='target', dtype="category"),
-
-        pd.Series([True, False, True, False] * 5,
-                  name='target', dtype="boolean"),
-        pd.Series([True, False, True, False] * 5,
-                  name='target', dtype=np.bool_),
+        pd.Series([1, 2, 3, 4] * 5, name="target", dtype=np.int64),
+        pd.Series([1, 2, 3, 4] * 5, name="target", dtype=np.float64),
+        pd.Series([1, 2, 3, 4] * 5, name="target", dtype=np.float32),
+        pd.Series([1, 2, 3, 4] * 5, name="target", dtype="Int64"),
+        pd.Series([1.1, 2.2, 3.3, 4.4] * 5, name="target", dtype="Float32"),
+        pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype="str"),
+        pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype="string"),
+        pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype=str_dtype),
+        pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype="object"),
+        pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype="category"),
+        pd.Series([True, False, True, False] * 5, name="target", dtype="boolean"),
+        pd.Series([True, False, True, False] * 5, name="target", dtype=np.bool_),
     ],
 )
 def test_missing_handler_does_not_mutate_output_no_missing(y):
@@ -517,18 +520,15 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
             regressor=TreeRegressorMethod(
                 tree=None, missing_handler=ReplaceMissingWithValue(missing_marker=-8)
             ),
-
             classifier=TreeClassifierMethod(
                 tree=None, missing_handler=MissingValuePredictor()
-            )
+            ),
         )
 
         cart_different_missing_handling.fit(X, y)
-        out_different_missing_handling = cart_different_missing_handling.transform(
-            X)
+        out_different_missing_handling = cart_different_missing_handling.transform(X)
 
-    pd.testing.assert_series_equal(
-        out_standard, out_different_missing_handling)
+    pd.testing.assert_series_equal(out_standard, out_different_missing_handling)
 
 
 @pytest.mark.parametrize(
@@ -552,13 +552,13 @@ def test_cart_method_raises_on_rare_category(y):
 
     feature = [str(val) for val in rng.random(size=30)]
 
-    X = {
-        "column": np.array(feature, dtype=str_dtype)
-    }
+    X = {"column": np.array(feature, dtype=str_dtype)}
 
     method = tune_cart(min_samples_leaf=2)()
 
-    with pytest.warns(UserWarning, match=".* contains categories occurring fewer than 2 times.*"):
+    with pytest.warns(
+        UserWarning, match=".* contains categories occurring fewer than 2 times.*"
+    ):
         result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
 
@@ -567,9 +567,7 @@ def test_tune_cart_disable_rare_categories_check():
     feature = ["x", "y", "z"] * 10
     y = [1, 2, 3] * 10
     feature[3] = "unique value"
-    X = {
-        "column": np.array(feature, dtype=str_dtype)
-    }
+    X = {"column": np.array(feature, dtype=str_dtype)}
 
     method = tune_cart(min_samples_leaf=2, rare_categories_threshold=0)()
 

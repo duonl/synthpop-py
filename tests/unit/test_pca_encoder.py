@@ -8,7 +8,6 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from synthpop.data_processing.encoders import PCAEncoder
 from synthpop.utils import str_dtype
 
-
 # ----- stubs -----
 
 
@@ -53,11 +52,10 @@ def get_pca_return_and_dict():
     }
     return [
         (pca_return_value, expected_dict),
-        (pd.DataFrame(
-            pca_return_value,
-            columns=["pca0", "pca1", "pca2"],
-            index=["a", "b"]
-        ),
+        (
+            pd.DataFrame(
+                pca_return_value, columns=["pca0", "pca1", "pca2"], index=["a", "b"]
+            ),
             expected_dict,
         ),
     ]
@@ -69,11 +67,13 @@ def get_test_data_full():
     X = np.array(["a", "a", "b", "b"], dtype=str_dtype)
     y = np.array(["x", "x", "y", "z"], dtype=str_dtype)
 
-    expected_input_pca = np.array([  # centred table        contingency table
-        # x y z                      #   x   y    z              x   y  z
-        [1, -1, -1],  # a                 a [1, -0.5, -0.5],      a [2, 0, 0]
-        [-1, 1, 1],  # b                   b [-1, 0.5, 0.5]        b [0, 1, 1]
-    ])  # sigma =   1   1/2,   1/2
+    expected_input_pca = np.array(
+        [  # centred table        contingency table
+            # x y z                      #   x   y    z              x   y  z
+            [1, -1, -1],  # a                 a [1, -0.5, -0.5],      a [2, 0, 0]
+            [-1, 1, 1],  # b                   b [-1, 0.5, 0.5]        b [0, 1, 1]
+        ]
+    )  # sigma =   1   1/2,   1/2
 
     input_with_np_arrays = [
         (X, y, expected_input_pca, pca_result, expected_dict)
@@ -95,11 +95,13 @@ def get_test_data_target_constants():
     X = np.array(["a", "a", "a", "b"], dtype=str_dtype)
     y = np.array(["x", "x", "x", "x"], dtype=str_dtype)
 
-    expected_input_pca = np.array([  # centred table      contingency table
-        # x y z                            x                   x
-        [1],  # a                       a  [ 1]              a   [3]
-        [-1],  # b                      b  [-1]              b   [1]
-    ])  # 1 = sigma
+    expected_input_pca = np.array(
+        [  # centred table      contingency table
+            # x y z                            x                   x
+            [1],  # a                       a  [ 1]              a   [3]
+            [-1],  # b                      b  [-1]              b   [1]
+        ]
+    )  # 1 = sigma
     return [(X, y, expected_input_pca, expected_input_pca, {"a": [1], "b": [-1]})]
 
 
@@ -120,13 +122,15 @@ def get_test_data_missing_target():
     # y = np.array(["x", None,"y", "z", None, None])
     # Target is always missing for X=c, but not always missing for X=a
 
-    expected_input_pca = np.array([  # centred table        contingency table
-        # x  y  z  'None'                   x      y        z    'None'                  x  y  z  'None'
-        # a                 a [0.5, -0.5, -0.5,     0.5 ],               a [1, 0, 0,    1   ]
-        [1, -1, -1, 1],
-        # b                   b [-0.5, 0.5, 0.5,     -0.5 ]                b [0, 1, 1,    0   ]
-        [-1, 1, 1, -1],
-    ])  # sigma=   1/2   1/2,   1/2      1/2
+    expected_input_pca = np.array(
+        [  # centred table        contingency table
+            # x  y  z  'None'                   x      y        z    'None'                  x  y  z  'None'
+            # a                 a [0.5, -0.5, -0.5,     0.5 ],               a [1, 0, 0,    1   ]
+            [1, -1, -1, 1],
+            # b                   b [-0.5, 0.5, 0.5,     -0.5 ]                b [0, 1, 1,    0   ]
+            [-1, 1, 1, -1],
+        ]
+    )  # sigma=   1/2   1/2,   1/2      1/2
 
     regular_target = [
         (
@@ -156,29 +160,33 @@ def get_test_data_feature_missing():
     # X = np.array(["a", None, "b", "b"])
     y = np.array(["x", "x", "y", "z"])
 
-    expected_input_pca = np.array([  # centred table        contingency table
-        # x y z                      #   x   y    z              x   y  z
-        [1, -1, -1],  # a                 a [0.5, -0.5, -0.5],      a [1, 0, 0]
-        [-1, 1, 1],  # b                   b [-0.5, 0.5, 0.5]        b [0, 1, 1]
-    ])
+    expected_input_pca = np.array(
+        [  # centred table        contingency table
+            # x y z                      #   x   y    z              x   y  z
+            [1, -1, -1],  # a                 a [0.5, -0.5, -0.5],      a [1, 0, 0]
+            [-1, 1, 1],  # b                   b [-0.5, 0.5, 0.5]        b [0, 1, 1]
+        ]
+    )
     return [
         (
             np.array(["a", np.nan, "b", "b"], dtype=str_dtype),
             y,
             expected_input_pca,
             pca_result,
-            expected_dict
+            expected_dict,
         )
         for pca_result, expected_dict in get_pca_return_and_dict()
     ]
 
 
 def get_test_data_fit():
-    return [*get_test_data_full(),
-            *get_test_data_missing_target(),
-            *get_test_data_feature_missing(),
-            *get_test_data_target_constants(),
-            *get_test_data_target_constant_missing()]
+    return [
+        *get_test_data_full(),
+        *get_test_data_missing_target(),
+        *get_test_data_feature_missing(),
+        *get_test_data_target_constants(),
+        *get_test_data_target_constant_missing(),
+    ]
 
 
 def assert_dict(expected, actual):
@@ -193,7 +201,7 @@ def assert_dict(expected, actual):
 
 
 def validate_mapping(result_mapping, pca_result, expected_keys):
-    for (i, key) in enumerate(expected_keys):
+    for i, key in enumerate(expected_keys):
         assert np.allclose(
             result_mapping[key],
             pca_result[i],
@@ -220,11 +228,7 @@ def validate_set_inout_count(result_encoder, expected_n_feat):
     get_test_data_fit(),
 )
 def test_pca_fit_numeric_correctness(
-    X,
-    y,
-    expected_input_for_PCA,
-    pca_result,
-    expected_dict
+    X, y, expected_input_for_PCA, pca_result, expected_dict
 ):
     """
     test that the correct numeric output is produced for each numeric input.
@@ -280,8 +284,20 @@ def test_pca_fit_constant_feature():
     assert result.n_features_out_ == 1
     assert result.pca_transform is stub_pca_transform
     assert not hasattr(result.pca_transform, "transform_X_")
-    assert np.array_equal(
-        result.mapping_["a"], np.array([0], dtype=np.float32))
+    assert np.array_equal(result.mapping_["a"], np.array([0], dtype=np.float32))
+
+
+def test_pca_fit_input_features_is_full_nan():
+
+    stub_pca_transform = TransformStub()
+    encoder = PCAEncoder(pca_transform=stub_pca_transform)
+
+    X = np.array([np.nan, np.nan])
+    y = np.array([1, 2])
+
+    encoder.fit(X, y)
+
+    assert encoder.mapping_ == {}
 
 
 def test_pca_fit_empty_input():
@@ -306,12 +322,16 @@ def test_pca_fit_exception_on_not_1d_datatype():
 
     # assert that a ValueError is raised when X has multiple columns.
     with pytest.raises(ValueError):
-        encoder.fit(np.array([["a", np.nan], ["b", "c"]], dtype=str_dtype),
-                    np.array(["a", np.nan, "b", "b"]))
+        encoder.fit(
+            np.array([["a", np.nan], ["b", "c"]], dtype=str_dtype),
+            np.array(["a", np.nan, "b", "b"]),
+        )
 
     with pytest.raises(ValueError):
-        encoder.fit(np.array([["a", None, "b", "b"]]),
-                    np.array([["a", np.nan], ["b", "c"]], dtype=str_dtype))
+        encoder.fit(
+            np.array([["a", None, "b", "b"]]),
+            np.array([["a", np.nan], ["b", "c"]], dtype=str_dtype),
+        )
 
 
 def test_pca_fit_exception_on_row_mismatch():
@@ -320,8 +340,10 @@ def test_pca_fit_exception_on_row_mismatch():
         ValueError,
         match="Number of observations in X and y do not match",
     ):
-        encoder.fit(np.array(["a", "b"], dtype=str_dtype),
-                    np.array(["a", "b", "c"], dtype=str_dtype))
+        encoder.fit(
+            np.array(["a", "b"], dtype=str_dtype),
+            np.array(["a", "b", "c"], dtype=str_dtype),
+        )
 
 
 # ----- transform tests -----
@@ -331,8 +353,9 @@ def get_test_data_transform():
     shapes = [-1, (-1, 1)]
     data = [
         (
-            np.array(["a", "a", "b", "b", "c", np.nan, "c"],
-                     dtype=str_dtype).reshape(s),  # X
+            np.array(["a", "a", "b", "b", "c", np.nan, "c"], dtype=str_dtype).reshape(
+                s
+            ),  # X
             {  # mapping_
                 "a": [1.2, 3.4],
                 "b": [np.nan, np.nan],
@@ -350,9 +373,11 @@ def get_test_data_transform():
                     [np.nan, np.nan],
                     [5.6, 7.8],  # c
                 ],
-                dtype=np.float32
-            )
-        ) for s in shapes]
+                dtype=np.float32,
+            ),
+        )
+        for s in shapes
+    ]
 
     return data
 
@@ -416,8 +441,8 @@ def test_pca_transform_exception_on_new_value():
         ValueError,
         match=(
             "transform received categories that were not observed during fitting\. "
-            "Unseen values: \[\'b\'\]\. Ensure input was fitted"
-        )
+            "Unseen values: \['b'\]\. Ensure input was fitted"
+        ),
     ):
         encoder.transform(np.array(["b", "c"]))
 
@@ -441,9 +466,8 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
         [
             [1.2, 3.4],  # a
             [np.nan, np.nan],  # None
-
         ],
-        dtype=np.float32
+        dtype=np.float32,
     )
 
     assert np.array_equal(expected_result, result, equal_nan=True)
@@ -459,7 +483,7 @@ def test_pca_transform_given_fitted_estimator_when_transforming_missing_values()
         "check_dont_overwrite_parameters": "tests with multiple features",
         "check_n_features_in_after_fitting": "tests with multiple features",
         "check_fit_score_takes_y": "tests with a score component",
-    }
+    },
 )
 def test_pca_encoder_is_sklearn_compatible(estimator, check):
     check(estimator)
