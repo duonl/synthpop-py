@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # Functional descriptions
 
 This section describes the functional behaviour of the main components of synthpop-py. It explains what each component does, how it fits into the synthesis process, and the assumptions and constraints that govern its behaviour.
