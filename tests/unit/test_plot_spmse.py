@@ -128,7 +128,7 @@ def test_make_matrix_reindexes_missing_axis_labels():
 # ----- _make_text_matrix tests -----
 
 
-def test_make_text_matrix_test():
+def test_make_text_matrix_test_show_values():
     """
     Test that checks the text matrix
     """
@@ -139,7 +139,7 @@ def test_make_text_matrix_test():
         [56., np.nan, 473842.49323234233, 8.],
     ])
 
-    matrix = _make_text_matrix(matrix)
+    matrix = _make_text_matrix(matrix, show_values=True)
 
     output = pd.DataFrame(
         [
@@ -152,6 +152,29 @@ def test_make_text_matrix_test():
 
     pd.testing.assert_frame_equal(output, matrix)
 
+def test_make_text_matrix_test_show_no_values():
+    """
+    Test that checks the text matrix
+    """
+    matrix = pd.DataFrame([
+        [np.nan, 0., 1.0, 46.485343962786234],
+        [0., 0., 3.0000001, np.nan],
+        [2.9999999, 9., 46.432222523765427, 10534.],
+        [56., np.nan, 473842.49323234233, 8.],
+    ])
+
+    matrix = _make_text_matrix(matrix, show_values=False)
+
+    output = pd.DataFrame(
+        [
+            ["", "", "", ""],
+            ["", "", "", ""],
+            ["", "", "", ""],
+            ["", "", "", ""],
+        ],
+    )
+
+    pd.testing.assert_frame_equal(output, matrix)
 
 # ----- _get_colour_scale tests -----
 
@@ -292,11 +315,11 @@ def test_make_heatmap_layout(heatmap_inputs):
         bin_labels,
     )
 
-    assert fig.layout.title.text == "S_pMSE Heatmap"
+    assert fig.layout.title.text == "Pairwise S_pMSE"
     assert fig.layout.title.x == 0.5
     assert fig.layout.width == 986
     assert fig.layout.height == 850
-    assert fig.layout.xaxis.side == "top"
+    assert fig.layout.xaxis.side == "bottom"
     assert fig.layout.yaxis.scaleanchor == "x"
     assert fig.layout.yaxis.scaleratio == 1
 
@@ -481,5 +504,18 @@ def test_no_input_change(spmse_df):
 
     pd.testing.assert_frame_equal(spmse_df, original_df)
 
+
+def test_show_values_parameter(spmse_df):
+    """
+    Test that show_values parameter works correctly
+    """
+    # Test with show_values=True
+    fig1 = plot_spmse(spmse_df, None, False, True)
+    assert any("0.0" in str(text) for text in fig1.data[0].text.flatten())
+
+    # Test with show_values=False
+    fig2 = plot_spmse(spmse_df, None, False, False)
+    assert not any("0.0" in str(text) for text in fig2.data[0].text.flatten())
+
 # def test_visual(spmse_df): #Please check for review
-#     plot_spmse(spmse_df, None, True)
+#     plot_spmse(spmse_df, None, True, True)
