@@ -59,8 +59,10 @@ extensions = [
     'sphinx_design',
     'myst_parser',
     'sphinxcontrib.mermaid',
-    "sphinx.ext.intersphinx",
+    'sphinx.ext.intersphinx',
+    'sphinx_copybutton',
 ]
+
 myst_enable_extensions = [
     "dollarmath",
     "amsmath",
