@@ -83,6 +83,10 @@ source_suffix = {
     '.md': 'markdown',
 }
 
+copybutton_prompt_text = r">>> |\.\.\. |\$ "
+copybutton_prompt_is_regexp = True
+copybutton_remove_prompts = True
+
 intersphinx_mapping = {
     "sklearn": (
         "https://scikit-learn.org/stable/",
