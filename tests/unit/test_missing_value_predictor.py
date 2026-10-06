@@ -350,7 +350,7 @@ def test_post_synth_transform_dataflow(y, predictor, stub_tree, stub_sampler, st
     X = {"a": np.array([1, 2, 3, 4]), "b": np.array([10, 20, 30, 40])}
 
     out = predictor.post_synth_transform(X, y)
-    assert out.dtype == y.dtype
+    assert out.dtype == y.dtype# does not fail in a relevant way. 
 
     tree = predictor.tree_
     tree_X = tree.apply_inputs

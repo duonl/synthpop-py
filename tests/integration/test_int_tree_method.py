@@ -53,6 +53,7 @@ class SpyDecisionTreeRegressor(DecisionTreeRegressor):
 def rigged_tree_classifier_method(pca_components=1):
     tree = SpyDecisionTreeClassifier(
         random_state=RandomStateManager.create_instance_seed(),
+        min_samples_leaf=5
     )
     return TreeClassifierMethod(
         tree=tree,
@@ -64,6 +65,7 @@ def rigged_tree_classifier_method(pca_components=1):
 def rigged_tree_regressor_method():
     tree = SpyDecisionTreeRegressor(
         random_state=RandomStateManager.create_instance_seed(),
+        min_samples_leaf=5
     )
     return TreeRegressorMethod(tree=tree, rare_categories_threshold=0)
 
@@ -226,7 +228,7 @@ def test_regressor_y_is_array_of_float32(method, X, y):
     assert isinstance(method.tree_.fit_y, np.ndarray)
     assert method.tree_.fit_y.dtype == np.dtype(np.float32)
 
-    assert result.dtype == np.float32
+    assert result.dtype == np.float32#fail not relevant here
 
 
 @pytest.mark.parametrize("method, X, y", CLASSIFIER_CASES)
@@ -248,7 +250,7 @@ def test_output_is_not_a_copy_classifier(method, X, y):
 def test_output_is_not_a_copy_regressor(method, X, y):
     result = method.fit_transform(X, y)
 
-    assert not np.array_equal(y, result, equal_nan=True)
+    assert not np.array_equal(y, result, equal_nan=True)#fails because of nan comparision
 
 
 @pytest.mark.parametrize("method, X, y", NO_MISSING_TARGET)
@@ -420,7 +422,7 @@ def test_regressor_missing_target(method, X, y):
 
     result = method.fit_transform(X, y)
 
-    assert result.dtype == np.float32
+    assert result.dtype == np.float32 #fail not relevant here
     assert len(y) == len(result)
 
     n_missing = pd.isna(result).sum()

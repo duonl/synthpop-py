@@ -15,7 +15,7 @@ from synthpop.data_processing.encoders import MeanEncoder
 from synthpop.methods import tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
 from synthpop.reproducibility import RandomStateManager
-from synthpop.utils import _validate_1d_target, _validate_2d_dict
+from synthpop.utils import _validate_1d_target, _validate_2d_dict, dtype_to_nan
 
 
 class BaseMissingValueHandler(metaclass=ABCMeta):
@@ -237,10 +237,12 @@ class MissingValuePredictor(BaseMissingValueHandler):
         missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
         missing_mask = np.asarray(missing_mask).astype(bool)
 
-        if pd.api.types.is_numeric_dtype(y_val):
-            y_out = y_val.astype(np.float32).copy()
-        else:
-            y_out = y_val.copy()
+        # if pd.api.types.is_numeric_dtype(y_val):
+        #     y_out = y_val.astype(np.float32).copy()
+        # else:
+        #     y_out = y_val.copy()
+
+        y_out = y_val.copy().astype(np.object_)
 
         y_out[missing_mask] = np.nan
 
@@ -306,6 +308,8 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         super().__init__()
         self.missing_marker = missing_marker
 
+
+
     def prepare_data_for_fit(self, X: Dict[str, npt.NDArray], y: npt.NDArray) -> tuple[Dict[str, npt.NDArray], npt.NDArray]:
         """
         Replaces missing values in the target with "N.a.N."
@@ -317,6 +321,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         """
 
         n_samples = X[next(iter(X))].shape[0]
+        self.dtype_ = y.dtype
         y_val = _validate_1d_target(y.copy(), n_samples)
 
         missing_mask = pd.isna(y_val)
@@ -339,9 +344,16 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """
 
-        y_val = _validate_1d_target(y.copy(), None)
+        y_val = _validate_1d_target(y.copy(), None).astype(np.object_)
 
-        y_val[y_val == self.missing_marker] = np.nan
+        nan_representation = dtype_to_nan(self.dtype_)
+        # A floating point array can have missing values, represented by np.nan (either 32 bit or 64 bit nan)
+        # A string array can use np.nan as well since we use stringdtype
+        # but if it is a numpy array and the dtype is integer (int64), then it cannot have missing values.
+        # Pandas does have some support for this (https://pandas.pydata.org/docs/user_guide/integer_na.html).
+        # https://pandas.pydata.org/docs/user_guide/missing_data.html
+
+        y_val[y_val == self.missing_marker] = nan_representation
 
         return y_val
 

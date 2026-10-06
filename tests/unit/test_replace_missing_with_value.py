@@ -152,6 +152,7 @@ def test_post_synth_transform_correct_on_data(x, y_in, y_exp, missing_marker):
     else:
         transform = ReplaceMissingWithValue(missing_marker=missing_marker)
 
+
     y_res = transform.post_synth_transform(x, y_in)
     assert np.array_equal(y_res, y_exp, equal_nan=True)
     assert y_res.dtype == y_exp.dtype
