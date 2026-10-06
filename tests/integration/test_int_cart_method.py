@@ -574,3 +574,16 @@ def test_tune_cart_disable_rare_categories_check():
     result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
     assert result[3] == y[3], "attribute disclosure for sample 3"
+
+def test_cart_method_floatingpoint_error():
+    x = pd.DataFrame({
+        "x1":[1,2,3,4,5]
+    })
+    y = pd.Series([0.1,1.1,2.1,3.3,5.5])
+
+    cart = CartMethod()
+    result = cart.fit_transform(x,y)
+
+    # fails due to floating point problems:
+    # assert {1.100000023841858, 2.0999999046325684, 3.299999952316284, 5.5} in {0.1, 1.1, 2.1, 3.3, 5.5}
+    assert set(result) in set(y)
