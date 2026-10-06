@@ -11,6 +11,7 @@ from sklearn.exceptions import NotFittedError
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
 import synthpop.reproducibility
+from utils import _progress_bar
 
 SynMethodCallable = Callable[[], BaseSynthMethod]
 
@@ -205,9 +206,17 @@ class Synthesiser:
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
-        with synthpop.reproducibility.RandomStateManager(seed=self.random_seed):
-            for i, y in enumerate(self.column_order_):
+        with synthpop.reproducibility.RandomStateManager(seed=self.random_seed), _progress_bar() as pbar:
+            task_id = pbar.add_task(
+            "Fitting",
+            total=len(self.column_order_),
+            )
 
+            for i, y in enumerate(self.column_order_):
+                pbar.update(
+                task_id, advance=1,
+                description=f"[bold magenta]Fitting[/] - [cyan]column:[/] {self.column_order_[i]}",
+            )
                 if i == 0:
                     predictors = pd.DataFrame(
                         {"init": np.zeros(X.shape[0], dtype=int)})
