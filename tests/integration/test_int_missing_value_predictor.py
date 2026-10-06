@@ -106,7 +106,7 @@ def test_missingness_determinism(predictor):
 
     out1 = predictor.post_synth_transform(X, y_input)
     out2 = predictor.post_synth_transform(X, y_input)
-
+# does not fail in a relevant way. 
     assert np.array_equal(out1, out2, equal_nan=True)
 
 
@@ -125,7 +125,7 @@ def test_full_pipeline_stability(predictor):
     out = predictor.post_synth_transform(X, y_input)
 
     assert out.shape == y_input.shape
-    assert np.all(np.isfinite(out[~np.isnan(out)]))
+    assert np.all(np.isfinite(out[~np.isnan(out)]))# does not fail in a relevant way. 
 
 
 def test_encoded_values_are_numeric(predictor):
