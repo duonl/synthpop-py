@@ -5,6 +5,16 @@ import numpy as np
 import numpy.typing as npt
 from typing import Dict
 
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    MofNCompleteColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+) # progressbar
+
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
 
 
@@ -173,3 +183,31 @@ def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None
             "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html",
             UserWarning
         )
+
+def _progress_bar(transient: bool = False, disable: bool = False) -> Progress:
+    """
+    Function that returns the progressbar configuration used throughout synthpop
+    
+    :param disable: disables the progressbar
+    :param transient: removes the progressbar from logging after completion
+    :return: progressbar instance
+    """
+    return Progress(SpinnerColumn(
+        spinner_name="line",
+        style="yellow",
+    ),
+    TextColumn(
+        "{task.description}",
+        justify="left",
+    ),
+    BarColumn(
+        complete_style="dark_orange",
+        finished_style="bold green",
+        pulse_style="dark_orange",
+    ),
+    MofNCompleteColumn(),
+    TimeElapsedColumn(),
+    TimeRemainingColumn(),
+    transient=transient,
+    disable=disable,
+    )
