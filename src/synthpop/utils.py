@@ -121,7 +121,7 @@ def _standardise_array_dtypes(X: npt.ArrayLike) -> npt.NDArray:
     if is_numeric:
         result = np.array(
             [v if not pd.isna(v) else np.nan for v in flat],
-            dtype=np.float32,
+            #dtype=np.float32, Do not cast to float32 for this tryout
         )
 
     else:
@@ -173,3 +173,14 @@ def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None
             "See https://synthpop-py.readthedocs.io/en/develop/api_reference/synthesis_methods/CART.html",
             UserWarning
         )
+
+def dtype_to_nan(dtype):
+
+    if np.issubdtype(dtype,np.floating):
+        return np.nan
+
+    if np.issubdtype(dtype,np.integer):
+        return pd.NA
+
+    if dtype == str_dtype:
+        return np.nan

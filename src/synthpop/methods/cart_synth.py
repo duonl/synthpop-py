@@ -370,7 +370,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         return y.astype(np.float32, copy=False)
 
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
-        return super().transform(X).astype(np.float32, copy=False)
+        return super().transform(X)#.astype(np.float32, copy=False)
 
 
 class CartMethod(base_synth.BaseSynthMethod):
@@ -517,6 +517,8 @@ class CartMethod(base_synth.BaseSynthMethod):
         else:
             self.method_ = self._new_classifier()
 
+        # y_array is already casted to float32
+        # y is float64 at this point
         self.method_.fit(X_dict, y_array)
 
         return self
