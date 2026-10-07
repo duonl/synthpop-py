@@ -238,7 +238,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
         missing_mask = np.asarray(missing_mask).astype(bool)
 
-        y_out = np.array(y_val,copy=True,dtype=self.dtype_)
+        y_out = np.array(y_val, copy=True, dtype=self.dtype_)
         if missing_mask.any():
             y_out[missing_mask] = np.nan
 
@@ -272,7 +272,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     in-depth information on the ``ReplaceMissingWithValue``.
 
     :param missing_marker: The value to replace missing values with.
-    
+
     Examples
     --------
 
@@ -338,7 +338,8 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """
 
-        y_val = np.array(_validate_1d_target(y.copy(), None), copy=True,dtype = self.dtype_)
+        y_val = np.array(_validate_1d_target(y, None),
+                         copy=True, dtype=self.dtype_)
 
         missing_mask = y_val == self.missing_marker
 
