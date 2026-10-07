@@ -369,9 +369,6 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     def _convert_y(self, y: npt.NDArray) -> npt.NDArray:
         return y.astype(np.float32, copy=False)
 
-    def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
-        return super().transform(X)
-
 
 class CartMethod(base_synth.BaseSynthMethod):
     """
