@@ -226,8 +226,6 @@ def test_regressor_y_is_array_of_float32(method, X, y):
     assert isinstance(method.tree_.fit_y, np.ndarray)
     assert method.tree_.fit_y.dtype == np.dtype(np.float32)
 
-    assert result.dtype == np.float32
-
 
 @pytest.mark.parametrize("method, X, y", CLASSIFIER_CASES)
 def test_classifier_result_is_array_of_str_dtype(method, X, y):
@@ -420,7 +418,7 @@ def test_regressor_missing_target(method, X, y):
 
     result = method.fit_transform(X, y)
 
-    assert result.dtype == np.float32
+    assert result.dtype == y.dtype
     assert len(y) == len(result)
 
     n_missing = pd.isna(result).sum()

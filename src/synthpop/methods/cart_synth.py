@@ -370,7 +370,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         return y.astype(np.float32, copy=False)
 
     def transform(self, X: Dict[str, npt.NDArray]) -> npt.NDArray:
-        return super().transform(X).astype(np.float32, copy=False)
+        return super().transform(X)
 
 
 class CartMethod(base_synth.BaseSynthMethod):
