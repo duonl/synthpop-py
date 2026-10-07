@@ -492,6 +492,7 @@ def test_fit_sampler_fit(X, y, index_cat, tree_method):
         tree_method.missing_handler_.prepared_for_fit_result[1])
     assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
+
 def test_fit_classifier_converts_to_str(encoder, leafnode_sampler, mocker):
     X = {"a": np.array([1, 2])}
     y = np.array(["a", "b"], dtype=str_dtype)

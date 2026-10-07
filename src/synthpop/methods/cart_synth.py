@@ -407,14 +407,14 @@ class CartMethod(base_synth.BaseSynthMethod):
     `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
 
     **Intended usage in this package is:**
-        
+
     >>> from synthpop.methods import CartMethod
     >>> from synthpop import Synthesiser
     ... 
     >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
 
     ``CartMethod`` can be used directly as follows (note that this is not the intended usage):
-    
+
     >>> import pandas as pd
     >>> from synthpop.methods import CartMethod
     >>>
@@ -476,7 +476,7 @@ class CartMethod(base_synth.BaseSynthMethod):
                 f"{datetime_columns}. "
                 "Transform datetime variables to a numeric or categorical "
                 "representation before fitting or transforming."
-            ) 
+            )
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
         """
@@ -491,11 +491,11 @@ class CartMethod(base_synth.BaseSynthMethod):
         if not isinstance(X, pd.DataFrame):
             raise TypeError(
                 f"X must be a pandas DataFrame, got {type(X)} instead.")
-        
+
         if not isinstance(y, pd.Series):
             raise TypeError(
                 f"y must be a pandas Series, got {type(y)} instead.")
-        
+
         if len(X) != len(y):
             raise ValueError(
                 f"X and y must contain the same number of samples: "
@@ -503,7 +503,7 @@ class CartMethod(base_synth.BaseSynthMethod):
             )
 
         self._validate_no_datetime(X, y)
-        
+
         self.feature_names_in_ = list(X.columns)
         self.n_features_in_ = X.shape[1]
         self.target_name_ = y.name
@@ -608,7 +608,7 @@ def tune_cart(
     Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a `factory function <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
     The factory is normally passed directly to :class:`~synthpop.synthesiser.Synthesiser`.
     The factory is called by :func:`~synthpop.synthesiser.Synthesiser.fit` to create a new :class:`~synthpop.methods.cart_synth.CartMethod` for each column.
-    
+
     Calling `tune_cart(...)` returns a factory to use in the Synthesiser.
     Calling `tune_cart(...)()` returns a `CartMethod` instance.
 
@@ -628,13 +628,13 @@ def tune_cart(
         - If set to an integer, categories occurring fewer than this threshold are considered rare.
         - If set to ``0``, the rare-category check is disabled.
         - If set to ``None``, the value of ``min_samples_leaf`` is used.
-    
+
         The default value is ``None`` for :func:`tune_cart`, so the threshold
         defaults to ``min_samples_leaf``. Since ``min_samples_leaf`` defaults to 5, the effective
         default threshold is also 5.
-        
+
         See :ref:`the user guide <612-attribute-disclosure>` and :doc:`the examples <../../examples/rare_categories>` for more information.
-    
+
     :return: a callable that returns a ``CartMethod`` object with the parameters consistently applied.
 
     A zero-argument callable is returned instead of a ``CartMethod``
