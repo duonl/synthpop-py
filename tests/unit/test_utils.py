@@ -226,7 +226,7 @@ def test_standardise_array_dtypes_numeric_output_has_float64_dtype(y):
     # The reason is a bare-python array does not have a dtype.
     # We should not always cast to float64 either, since we could loose information there.
     # The best we can do is check that it is a numeric dtype.
-    assert np.issubdtype(result.dtype,np.number)
+    assert np.issubdtype(result.dtype, np.number)
 
 
 @pytest.mark.parametrize("y", get_one_var_data_num_standardise_array_dtypes())
@@ -342,7 +342,7 @@ def test_to_standardised_array_dict_preserves_2d_column_shapes():
     # The reason is a bare-python array does not have a dtype.
     # We should not always cast to float64 either, since we could loose information there.
     # The best we can do is check that it is a numeric dtype.
-    assert np.issubdtype(result["a"].dtype,np.number)
+    assert np.issubdtype(result["a"].dtype, np.number)
     assert result["b"].dtype == str_dtype
 
 
@@ -399,6 +399,7 @@ RARE_CATEGORIES_WARN_CASES = [
     (np.array([True] * 26 + [False] * 74), 52),  # boolean
 
 ]
+
 
 @pytest.mark.parametrize("x, threshold", RARE_CATEGORIES_WARN_CASES)
 def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
