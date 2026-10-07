@@ -53,6 +53,7 @@ class SpyDecisionTreeRegressor(DecisionTreeRegressor):
 def rigged_tree_classifier_method(pca_components=1):
     tree = SpyDecisionTreeClassifier(
         random_state=RandomStateManager.create_instance_seed(),
+        min_samples_leaf=5
     )
     return TreeClassifierMethod(
         tree=tree,
@@ -64,6 +65,7 @@ def rigged_tree_classifier_method(pca_components=1):
 def rigged_tree_regressor_method():
     tree = SpyDecisionTreeRegressor(
         random_state=RandomStateManager.create_instance_seed(),
+        min_samples_leaf=5
     )
     return TreeRegressorMethod(tree=tree, rare_categories_threshold=0)
 
