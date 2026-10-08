@@ -63,7 +63,7 @@ def _make_text_matrix(matrix: pd.DataFrame, show_values: bool) -> pd.DataFrame:
     is undefined because the variable is constant.
 
     :param matrix: NxN numpy matrix
-    :param show_values: boolean for whether the S_pmse values are shown
+    :param show_values: Whether the S_pMSE values are shown in the plot
 
     return: an NxN matrix
     """
