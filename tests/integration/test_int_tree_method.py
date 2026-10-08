@@ -53,6 +53,7 @@ class SpyDecisionTreeRegressor(DecisionTreeRegressor):
 def rigged_tree_classifier_method(pca_components=1):
     tree = SpyDecisionTreeClassifier(
         random_state=RandomStateManager.create_instance_seed(),
+        min_samples_leaf=5
     )
     return TreeClassifierMethod(
         tree=tree,
@@ -64,6 +65,7 @@ def rigged_tree_classifier_method(pca_components=1):
 def rigged_tree_regressor_method():
     tree = SpyDecisionTreeRegressor(
         random_state=RandomStateManager.create_instance_seed(),
+        min_samples_leaf=5
     )
     return TreeRegressorMethod(tree=tree, rare_categories_threshold=0)
 
@@ -225,8 +227,6 @@ def test_regressor_y_is_array_of_float32(method, X, y):
 
     assert isinstance(method.tree_.fit_y, np.ndarray)
     assert method.tree_.fit_y.dtype == np.dtype(np.float32)
-
-    assert result.dtype == np.float32
 
 
 @pytest.mark.parametrize("method, X, y", CLASSIFIER_CASES)
@@ -420,7 +420,7 @@ def test_regressor_missing_target(method, X, y):
 
     result = method.fit_transform(X, y)
 
-    assert result.dtype == np.float32
+    assert result.dtype == y.dtype
     assert len(y) == len(result)
 
     n_missing = pd.isna(result).sum()

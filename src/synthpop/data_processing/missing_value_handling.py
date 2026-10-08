@@ -138,6 +138,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         """
         # input validation
         X_val, n_samples = _validate_2d_dict(X)
+        self.dtype_ = y.dtype
         y_val = _validate_1d_target(y, n_samples)
 
         self.feature_order_ = list(X_val.keys())
@@ -237,12 +238,9 @@ class MissingValuePredictor(BaseMissingValueHandler):
         missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
         missing_mask = np.asarray(missing_mask).astype(bool)
 
-        if pd.api.types.is_numeric_dtype(y_val):
-            y_out = y_val.astype(np.float32).copy()
-        else:
-            y_out = y_val.copy()
-
-        y_out[missing_mask] = np.nan
+        y_out = np.array(y_val, copy=True, dtype=self.dtype_)
+        if missing_mask.any():
+            y_out[missing_mask] = np.nan
 
         return y_out
 
@@ -274,7 +272,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     in-depth information on the ``ReplaceMissingWithValue``.
 
     :param missing_marker: The value to replace missing values with.
-    
+
     Examples
     --------
 
@@ -317,6 +315,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         """
 
         n_samples = X[next(iter(X))].shape[0]
+        self.dtype_ = y.dtype
         y_val = _validate_1d_target(y.copy(), n_samples)
 
         missing_mask = pd.isna(y_val)
@@ -339,9 +338,13 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """
 
-        y_val = _validate_1d_target(y.copy(), None)
+        y_val = np.array(_validate_1d_target(y, None),
+                         copy=True, dtype=self.dtype_)
 
-        y_val[y_val == self.missing_marker] = np.nan
+        missing_mask = y_val == self.missing_marker
+
+        if missing_mask.any():
+            y_val[missing_mask] = np.nan
 
         return y_val
 
