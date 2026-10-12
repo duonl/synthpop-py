@@ -15,6 +15,7 @@
    FAQ <faq/faq>
    developer/developer_index
    about_us/about_us
+   release_notes/index
 
 synthpop-py documentation
 ==========================
