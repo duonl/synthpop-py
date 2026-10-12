@@ -35,7 +35,7 @@ Each row represents one observation in the original dataset. Our goal is generat
 ## Creating a synthesiser
 Now we create a {class}`~synthpop.synthesiser.Synthesiser` object.
 ```python
-from synthpop.synthesiser import Synthesiser
+from synthpop import Synthesiser
 
 synthesiser = Synthesiser(random_seed=1)
 ```
@@ -72,7 +72,7 @@ The generated dataset has the same columns as the original dataset:
 |---:|------------:|-----------:|------------:|------------:|-----------:|-----------:|-----------:|------------:|-----------:|-----------:|---------:|
 |  0 |  0.00175052 | -0.0446416 | -0.00405033 |  0.00810098 |  0.0218222 |  0.0412743 | -0.0434008 |  0.039106   | -0.0545396 | -0.0176461 |      128 |
 |  1 |  0.0598711  |  0.0506801 | -0.0212953  |  0.00465813 |  0.0644768 |  0.0494162 |  0.0302319 | -0.00259226 |  0.0383939 | -0.0052198 |      196 |
-|  2 | -0.0817979  | -0.0446416 | -0.0816528  | -0.0400989  | -0.0455994 | -0.0370128 |  0.0339135 | -0.0394934  | -0.0891334 | -0.092204  |       72 |
+|  2 | -0.0817979  | -0.0446416 | -0.0816528  | -0.0400989  | -0.0455995 | -0.0370128 |  0.0339135 | -0.0394934  | -0.0891334 | -0.092204  |       72 |
 
 ****Congratulations, you have created your first synthetic dataset!****
 ![Tada](../images/tada_emoji.gif){width=25px}
@@ -95,7 +95,7 @@ synthetic_data.describe()
 
 You can also compare individual variable distributions. For example, the following function creates visualisations of the  marginal distributions of the variables:
 ```python
-from synthpop.plotting.plot_univariate import plot_univariate_distributions
+from synthpop.plotting import plot_univariate_distributions
 
 figures = plot_univariate_distributions(
     orig_df=data,
