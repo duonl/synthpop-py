@@ -76,7 +76,7 @@ Potential issues include:
 
 ### 7.1.2. Categorical variables
 
-![Bar chart of sex distribution comparison](../images/sex_distribution.png)
+![Bar chart of sex distribution comparison](../images/sex_distribution.png) <br>
 For categorical variables, the visualisation displays the relative frequency of each category in the original and synthetic datasets. This allows datasets with different numbers of observations to be compared directly.
 
 Categories occurring in only one of the datasets are also shown, allowing users to identify categories that were lost or introduced during synthesis.
