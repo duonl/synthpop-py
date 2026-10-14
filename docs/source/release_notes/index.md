@@ -1,5 +1,5 @@
 # Release notes
-This is the list of changes to synthpop-py between each release. For install and upgrade instructions, see [Installation](../getting_started/installation.md).
+This is the list of changes to synthpop-py between each release. For install and upgrade instructions, please see [Installation](../getting_started/installation.md).
 
 ## Version 1
 ```{toctree}
