@@ -55,7 +55,7 @@ Depending on the synthesis method, small deviations are expected due to sampling
 
 ### 7.1.1. Numeric variables
 
-![Histogram of age distribution comparison](../images/age_distribution.png)
+![Histogram of age distribution comparison](../images/your_first_synthetic_data_univariate_distributions.png)
 For numeric variables, the visualisation displays overlapping histograms of the original and synthetic distributions.
 
 The histograms are normalised as densities, allowing datasets with different numbers of observations to be compared directly.
