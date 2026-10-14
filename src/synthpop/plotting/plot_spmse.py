@@ -217,7 +217,7 @@ def plot_spmse(
     >>>
     >>> print(spmse)
       column1 column2  S_pMSE
-    0     Age     Age     12.
+    0     Age     Age    12.0
     1     Age  Income     2.5
     2     Age     Sex    15.3
     3  Income  Income     0.0

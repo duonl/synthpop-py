@@ -98,7 +98,10 @@ class MissingValuePredictor(BaseMissingValueHandler):
     >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np
     >>>
-    >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
+    >>> X = {
+    ...     "num": np.array([25, 30, 35, 40]),
+    ...     "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan)),
+    ... }
     >>> y = np.array([1.0, np.nan, 3.0, np.nan])
     >>>
     >>> mvp = MissingValuePredictor()
@@ -112,7 +115,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
     >>> y_synth = np.array([10, 20, 30, 40])
     >>> y_final = mvp.post_synth_transform(X, y_synth)
     >>> y_final
-    array([10., nan, nan, 40.])
+    array([10., nan, nan, 40.])  # may vary due to randomness
 
     """
 
@@ -284,14 +287,14 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     >>> import numpy as np
     >>> from synthpop.data_processing import ReplaceMissingWithValue
     >>>
-    >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
-    >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+    >>> X = {"col1": np.array(["a", "b", "c", "c"], dtype=np.dtypes.StringDType(na_object=np.nan))}
+    >>> y = np.array(["x", "y", np.nan, "z"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>>
     >>> replace_missing = ReplaceMissingWithValue()
-    >>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+    >>> x_res, y_res = replace_missing.prepare_data_for_fit(X, y)
     >>>
     >>> x_res
-    array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))
+    {'col1': array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))}
     >>>
     >>> y_res
     array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))

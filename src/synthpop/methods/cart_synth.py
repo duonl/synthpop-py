@@ -51,7 +51,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param missing_handler: handler for missing values in the target variable.
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
-        If a categorical predictor contains values occurring fewer than this threshold, 
+        If a categorical predictor contains values occurring fewer than this threshold,
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
@@ -95,8 +95,8 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         """
         Fit to predict `y` using `X`
 
-        If the target consists entirely of missing values, 
-        the estimator records this state and returns without fitting a tree. 
+        If the target consists entirely of missing values,
+        the estimator records this state and returns without fitting a tree.
         Subsequent calls to transform() produce an all-missing output
 
         :param X: features to predict `y`.
@@ -234,7 +234,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
-        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. 
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold.
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to ``0``, the check is disabled.
         Default value is 5.
@@ -249,15 +249,15 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     --------
     ``TreeClassifierMethod`` can be used directly as follows (note that this is not the intended usage):
 
-    >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np
+    >>> from synthpop.methods import TreeClassifierMethod
     >>> from synthpop.utils import str_dtype
     >>>
     >>> X = {
-    ...         "column1":np.array([1.1, 2.2]),
-    ...         "column2":np.array([1.4, 1.2]),
-    ...         "column3":np.array(["a", "b"], dtype=str_dtype)
-    ...         }
+    ...     "column1": np.array([1.1, 2.2]),
+    ...     "column2": np.array([1.4, 1.2]),
+    ...     "column3": np.array(["a", "b"], dtype=str_dtype),
+    ... }
     >>> y = np.array(["x", "y"], dtype=str_dtype)
     >>>
     >>> tree_method = TreeClassifierMethod()
@@ -265,7 +265,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     TreeClassifierMethod()
     >>>
     >>> tree_method.transform(X)
-    array(['x', 'y'], dtype=StringDType(na_object=nan))
+    array(['x', 'y'], dtype=StringDType(na_object=nan))  # may vary due to randomness
 
     """
 
@@ -307,7 +307,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
     :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
-        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold. 
+        A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold.
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to ``0``, the check is disabled.
         Default value is 5.
@@ -327,10 +327,10 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     >>> from synthpop.utils import str_dtype
     >>>
     >>> X = {
-    ...         "column1":np.array([1.1, 2.2]),
-    ...         "column2":np.array([1.4, 1.2]),
-    ...         "column3":np.array(["a", "b"], dtype=str_dtype)
-    ...         }
+    ...     "column1":np.array([1.1, 2.2]),
+    ...     "column2":np.array([1.4, 1.2]),
+    ...     "column3":np.array(["a", "b"], dtype=str_dtype),
+    ... }
     >>> y = np.array([1, 2], dtype=np.float32)
     >>>
     >>> tree_method = TreeRegressorMethod()
@@ -338,7 +338,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     TreeRegressorMethod()
     >>>
     >>> tree_method.transform(X)
-    array([1., 2.], dtype=float32)
+    array([1., 2.], dtype=float32)  # may vary due to randomness
 
     """
 
@@ -393,7 +393,7 @@ class CartMethod(base_synth.BaseSynthMethod):
 
     :class:`CartMethod` is the default method in :class:`Synthesiser`. As required by its parent class :class:`BaseSynthMethod`, fit and transform methods are implemented.
 
-    :param regressor: a TreeRegressorMethod object. It is the selected algorithm if the target variable is numeric. 
+    :param regressor: a TreeRegressorMethod object. It is the selected algorithm if the target variable is numeric.
     :param classifier: a TreeClassifierMethod object. It is the selected algorithm if the target variable is non-numeric.
 
     Examples
@@ -407,8 +407,8 @@ class CartMethod(base_synth.BaseSynthMethod):
 
     >>> from synthpop.methods import CartMethod
     >>> from synthpop import Synthesiser
-    ... 
-    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
+    ...
+    >>> syn = Synthesiser(special_syn_method={"your_column_name": CartMethod()})
 
     ``CartMethod`` can be used directly as follows (note that this is not the intended usage):
 
@@ -419,21 +419,21 @@ class CartMethod(base_synth.BaseSynthMethod):
     >>> y_num = pd.Series([50, 60, 70], name='length', dtype='float32')
     >>> y_cat = pd.Series(['A', 'B', 'AB'], name='blood type', dtype='string')
     >>> method = CartMethod()
-    >>> method.fit(X, y_num)                                                                                                                                                                                                    
-    CartMethod()                                                                                                                                                                                                                
-    >>> method.transform(X)                                                                                                                                                                                                     
-    0    50.0                                                                                                                                                                                                                   
-    1    70.0                                                                                                                                                                                                                   
-    2    60.0                                                                                                                                                                                                                   
-    Name: length, dtype: float32
+    >>> method.fit(X, y_num)
+    CartMethod()
+    >>> method.transform(X)
+    0    50.0
+    1    70.0
+    2    60.0
+    Name: length, dtype: float32  # may vary due to randomness
     >>>
-    >>> method.fit(X, y_cat)                                                                                                                                                                                                    
-    CartMethod()  
-    >>> method.transform(X)                                                                                                                                                                                                     
-    0     A                                                                                                                                                                                                                     
-    1    AB                                                                                                                                                                                                                     
-    2     B                                                                                                                                                                                                                     
-    Name: blood type, dtype: string         
+    >>> method.fit(X, y_cat)
+    CartMethod()
+    >>> method.transform(X)
+    0     A
+    1    AB
+    2     B
+    Name: blood type, dtype: string  # may vary due to randomness
     """
 
     def __init__(self,
@@ -602,7 +602,7 @@ def tune_cart(
     rare_categories_threshold: int | None = None,
 ) -> Callable[[], CartMethod]:
     """
-    Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a `factory function <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_. 
+    Shortcut to set parameters of the CartMethod. ``tune_cart(...)`` returns a `factory function <https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)>`_.
     The factory is normally passed directly to :class:`~synthpop.synthesiser.Synthesiser`.
     The factory is called by :func:`~synthpop.synthesiser.Synthesiser.fit` to create a new :class:`~synthpop.methods.cart_synth.CartMethod` for each column.
 
@@ -646,9 +646,20 @@ def tune_cart(
     >>> from synthpop import Synthesiser
     >>> import pandas as pd
     >>> data = pd.DataFrame({"a": [1], "b": [2]})
+    >>> tuned_cart = tune_cart(
+    ...     min_samples_leaf=10,
+    ...     n_components=1,
+    ...     rare_categories_threshold=0,
+    ... )
     >>> synth = Synthesiser(random_seed=10,
-    ... default_syn_method=tune_cart(min_samples_leaf=10), 
-    ... special_syn_method={"b": tune_cart(min_samples_leaf=20)})
+    ...     default_syn_method=tuned_cart,
+    ...     special_syn_method={"b": tune_cart(min_samples_leaf=20)},
+    ... )
+    >>> synth.fit(data)
+    <synthpop.synthesiser.Synthesiser object at 0x00000144BAA5F230>
+    >>> synth.generate()
+       a  b
+    0  1  2
 
     """
 
