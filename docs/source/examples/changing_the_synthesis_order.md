@@ -59,7 +59,7 @@ The first variable is synthesised without predictors. In the default synthesis m
 
 For example, with the default order,
 
-<div class="small-synthesis-order>
+<div class="small-synthesis-order">
 
 ```{mermaid}
 flowchart TB
