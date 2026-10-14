@@ -5,7 +5,7 @@ In the previous example, we generated a synthetic version of the Titanic dataset
 When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
 ![S_pMSE heatmap of the Titanic dataset](../images/syn_order_spmse_1.png)
 
-The S_pMSE heatmap shows us that most relationships are reproduced well. Pairwise relationships involving `embark_town` or `embarked` show slightly larger S_pMSE values, meaning that those relationships were less preserved in the synthetic data.
+The S_pMSE heatmap shows us that most relationships are reproduced well. Pairwise relationships involving `embark_town` or `embarked` show slightly larger S_pMSE values, meaning that those relationships were less well preserved in the synthetic data compared to others.
 
 This does not necessarily mean that the synthesiser performed poorly. Instead, it suggests that the default synthesis settings might not be optimal for this dataset.
 
@@ -196,7 +196,7 @@ plot_3 = plot_spmse(spmse_3, show_plot=True)
 ![S_pMSE heatmap of Titanic dataset with another column order](../images/syn_order_spmse_3.png)
 This time, the result is not an improvement. Several S_pMSE values are higher than in the previous heatmap, and the relationship between `embarked` and `embark_town` now has an S_pMSE value above 10.
 
-This demonstrates an important limitation of changing the synthesis order: giving a variable more predictors does not necessarily improve the preservation of every relationship involving that variable. The synthesis model for `embarked` now has access to many more variables, but it must use those predictors to model `embarked` conditional on the synthetic values generated for the predictors. If those predictors are strongly dependent on 'embarked' it is possible they themselves are not optimally synthesised. Changing the order therefore changes the conditional distribution being modelled and can affect the resulting relationships positively or negatively.
+This demonstrates an important limitation of changing the synthesis order: giving a variable more predictors does not necessarily improve the preservation of every relationship involving that variable. The synthesis model for `embarked` now has access to many more variables, but it must use those predictors to model `embarked` conditional on the synthetic values generated for the predictors. If those predictors are strongly dependent on 'embarked', it is possible they themselves are not optimally synthesised. Changing the order therefore changes the conditional distribution being modelled and can affect the resulting relationships positively or negatively.
 
 ## Try one final synthesis order
 The previous experiments show that moving a variable to the last position in the synthesis order can have mixed effects. 
