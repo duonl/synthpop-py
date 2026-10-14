@@ -160,7 +160,7 @@ This illustrates an important point: changing the synthesis order is rarely a on
 ## Try another synthesis order
 The S_pMSE heatmap also shows that relationships involving `embarked` are less well preserved. We can therefore try another change to the synthesis order by moving `embarked` to the end as well.
 
-In the original synthesis order, `embarked` is synthesised relatively early and can use only the seven variables that appear before it as predictors. Moving it later gives its synthesis model access to more information. Because `embark_town` has already been moved to the end, we place `embarked` after it. This allows `embarked` to use all other variables.
+In the original synthesis order, `embarked` is synthesised relatively early and can solely use the seven variables that appear before it as predictors. Moving it later gives its synthesis model access to more information. Because `embark_town` has already been moved to the end, we place `embarked` after it. This allows `embarked` to use all other variables.
 
 
 ```python
@@ -196,10 +196,10 @@ plot_3 = plot_spmse(spmse_3, show_plot=True)
 ![S_pMSE heatmap of Titanic dataset with another column order](../images/syn_order_spmse_3.png)
 This time, the result is not an improvement. Several S_pMSE values are higher than in the previous heatmap, and the relationship between `embarked` and `embark_town` now has an S_pMSE value above 10.
 
-This demonstrates an important limitation of changing the synthesis order: giving a variable more predictors does not necessarily improve the preservation of every relationship involving that variable. The synthesis model for `embarked` now has access to many more variables, but it must use those predictors to model `embarked` conditional on the synthetic values generated for them. Changing the order therefore changes the conditional distribution being modelled and can affect the resulting relationships positively or negatively.
+This demonstrates an important limitation of changing the synthesis order: giving a variable more predictors does not necessarily improve the preservation of every relationship involving that variable. The synthesis model for `embarked` now has access to many more variables, but it must use those predictors to model `embarked` conditional on the synthetic values generated for the predictors. If those predictors are strongly dependent on 'embarked' it is possible they themselves are not optimally synthesised. Changing the order therefore changes the conditional distribution being modelled and can affect the resulting relationships positively or negatively.
 
 ## Try one final synthesis order
-The previous experiments show that moving a variable last in the synthesis order can have mixed effects. Although `embarked` has access to more predictors, several relationships were less well preserved. This is an important reminder that synthesis order changes the conditional distributions being modelled, so its effects can be positive or negative.
+The previous experiments show that moving a variable to the last position in the synthesis order can have mixed effects. 
 
 For a final experiment, we can instead move `deck` to the end of the synthesis order.
 
@@ -238,7 +238,7 @@ plot_4 = plot_spmse(spmse_4, show_plot=True)
 
 This change improves several of the S_pMSE values involving `deck`. Interestingly, the relationship between `fare` and `embark_town` is also better preserved. The univariate distribution of `embark_town`, shown by the `embark_town`-`embark_town` cell, also improves.
 
-One possible explanation is that moving `deck` later changes which variables are available when `embark_town` is synthesised. In the previous order, `deck` was available as a predictor for `embark_town`. In this order, it is not. The result suggests that deck may not provide enough useful information for synthesising `embark_town`, or that including it introduces additional complexity or noise that makes the synthesis model less accurate.
+One possible explanation is that synthesising `deck` as the last variable changes which variables are available when `embark_town` is synthesised. In the previous order, `deck` was available as a predictor for `embark_town`. In this order, it is not. As such, the result suggests that deck may not provide enough useful information for synthesising `embark_town`, or that including it introduces additional complexity or noise that makes the synthesis model less accurate.
 
 This is an important lesson: more predictors are not necessarily better predictors. A variable can contain little useful information for a particular synthesis model, or it can introduce noise, sparsity or additional modelling difficulty. Changing the synthesis order can therefore improve utility not only by adding useful predictors, but also by preventing potentially unhelpful variables from being used as predictors.
 
@@ -264,9 +264,9 @@ The S_pMSE heatmap can help identify such variables. If a variable repeatedly ap
 ### Consider variables with substantial missingness
 Variables with a large amount of missing data can sometimes benefit from being placed later in the synthesis order. Missingness reduces the amount of observed information available for modelling the variable and its relationships with other variables. Placing the variable later gives its synthesis model access to a larger set of previously synthesised variables, which may provide additional information for predicting its observed values and, depending on the synthesis method, its missingness pattern.
 
-There is another reason to consider placing variables with substantial missingness later. A variable with many missing values may provide less reliable information when used as a predictor for other variables. Placing it later means that fewer subsequent synthesis models depend on it, reducing the extent to which its missingness and synthetic values can propagate through the synthesis process.
+There is another reason to consider placing variables with substantial missingness later. A variable with many missing values may provide less reliable information when used as a predictor for other variables. Placing it later means that fewer subsequent synthesis models depend on it, reducing the extent to which its missingness and synthetic values can propagate through the synthesis process. However, in some cases the fact that data is missing also carries information.
 
-However, missingness alone is not a reason to place a variable last. If a variable is an important predictor of other variables, it may still be beneficial to synthesise it early so that its synthetic values are available to subsequent models. The appropriate position therefore depends on whether the variable is primarily a difficult target to synthesise or an informative predictor for other variables.
+As such, missingness alone is not a reason to place a variable last. If a variable is an important predictor of other variables, it may still be beneficial to synthesise it early so that its synthetic values are available to subsequent models. The appropriate position therefore depends on whether the variable is primarily a difficult target to synthesise or an informative predictor for other variables.
 
 ### Consider high-cardinality variables
 High-cardinality categorical variables can be difficult to synthesise accurately, particularly when they contain many rare categories. When used as predictors, these variables can also introduce uncertainty into subsequent synthesis models. Generating them later in the synthesis order can therefore reduce the propagation of errors from a difficult or uncertain variable to variables synthesised after it.
