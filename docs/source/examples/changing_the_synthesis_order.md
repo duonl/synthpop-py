@@ -60,6 +60,10 @@ The first variable is synthesised without predictors. In the default synthesis m
 For example, with the default order,
 
 ```{mermaid}
+---
+zoom:
+---
+
 flowchart LR
     A["survived"]
     B["pclass"]
