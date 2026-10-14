@@ -59,6 +59,8 @@ The first variable is synthesised without predictors. In the default synthesis m
 
 For example, with the default order,
 
+<div class="small-synthesis-order>
+
 ```{mermaid}
 flowchart TB
     A["survived"]
@@ -79,6 +81,7 @@ flowchart TB
 
     A-->B-->C-->D-->E-->F-->G-->H-->I-->J-->K-->L-->M-->N-->O
 ```
+</div>
 
 the model for `alone` can use all fourteen measurements as predictors. However, the model for `alive` cannot use `alone`, because `alone` has not yet been synthesised. Every variable can only use the variables before it in the synthesis order as predictors. Variables generated later therefore have access to more information than variables generated earlier.
 

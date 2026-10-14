@@ -29,6 +29,11 @@ html[data-theme=dark] .sd-card img[src*='.svg'] {
     height: auto !important;
 }
 
+/* Smaller diagram for synthesis order example */
+.small-synthesis-order .mermaid svg {
+  max-width: 350px !important;
+}
+
 /* Create the look of a heading, but make sure it does not show up on the right side bar*/
 .fake-h3 {
     font-size: 1.25em;
