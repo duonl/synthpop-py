@@ -404,7 +404,8 @@ def test_transform_handles_entire_nan_array(y, dtype):
 @pytest.mark.parametrize(
     "y",
     [
-        pd.Series([1.1, 2.2, np.nan, 4.4] * 5, dtype=np.float64, name="target"),
+        pd.Series([1.1, 2.2, np.nan, 4.4] * 5,
+                  dtype=np.float64, name="target"),
         pd.Series([1, 2, np.nan, 4] * 5, dtype="Float64", name="target"),
     ],
 )
@@ -438,17 +439,22 @@ def test_regressor_method_and_replace_missing_with_value(y):
 @pytest.mark.parametrize(
     "y, expected_none_missing ",
     [
-        (pd.Series(["a", "b", np.nan, "c"] * 10, dtype=str, name="target"), False),
+        (pd.Series(["a", "b", np.nan, "c"] *
+         10, dtype=str, name="target"), False),
         (
-            pd.Series(["a", "b", np.nan, "c"] * 10, dtype=str_dtype, name="target"),
+            pd.Series(["a", "b", np.nan, "c"] * 10,
+                      dtype=str_dtype, name="target"),
             False,
         ),
         (
-            pd.Series(["a", "b", np.nan, "c"] * 10, dtype="category", name="target"),
+            pd.Series(["a", "b", np.nan, "c"] * 10,
+                      dtype="category", name="target"),
             False,
         ),
-        (pd.Series(["a", "b", np.nan, "c"] * 10, dtype=object, name="target"), False),
-        (pd.Series(["a", "b", "N.a.N", "c"] * 10, dtype=str, name="target"), True),
+        (pd.Series(["a", "b", np.nan, "c"] * 10,
+         dtype=object, name="target"), False),
+        (pd.Series(["a", "b", "N.a.N", "c"] *
+         10, dtype=str, name="target"), True),
     ],
 )
 def test_classifier_method_and_missing_value_predictor(y, expected_none_missing):
@@ -496,8 +502,10 @@ def test_classifier_method_and_missing_value_predictor(y, expected_none_missing)
         pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype=str_dtype),
         pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype="object"),
         pd.Series(["x", "y", "x", "y"] * 5, name="target", dtype="category"),
-        pd.Series([True, False, True, False] * 5, name="target", dtype="boolean"),
-        pd.Series([True, False, True, False] * 5, name="target", dtype=np.bool_),
+        pd.Series([True, False, True, False] * 5,
+                  name="target", dtype="boolean"),
+        pd.Series([True, False, True, False] * 5,
+                  name="target", dtype=np.bool_),
     ],
 )
 def test_missing_handler_does_not_mutate_output_no_missing(y):
@@ -526,9 +534,11 @@ def test_missing_handler_does_not_mutate_output_no_missing(y):
         )
 
         cart_different_missing_handling.fit(X, y)
-        out_different_missing_handling = cart_different_missing_handling.transform(X)
+        out_different_missing_handling = cart_different_missing_handling.transform(
+            X)
 
-    pd.testing.assert_series_equal(out_standard, out_different_missing_handling)
+    pd.testing.assert_series_equal(
+        out_standard, out_different_missing_handling)
 
 
 @pytest.mark.parametrize(
@@ -574,3 +584,24 @@ def test_tune_cart_disable_rare_categories_check():
     result = method.fit_transform(pd.DataFrame(X), pd.Series(y))
 
     assert result[3] == y[3], "attribute disclosure for sample 3"
+
+
+def test_cart_method_floatingpoint_error():
+    """
+    tests that no floating point errors are introduced by CART.
+    Floating point errors are picked up by several utility metrics.
+    Machine learning algorithms might get confused by it too.
+    Privacy metrics might give too optimistic results due to this.
+    See #289
+    """
+    x = pd.DataFrame({
+        "x1": [1, 2, 3, 4, 5],
+    })
+    y = pd.Series([0.1, 1.1, 2.1, 3.3, 5.5])
+
+    cart = CartMethod()
+    result = cart.fit_transform(x, y)
+
+    # fails due to floating point problems:
+    # assert {1.100000023841858, 2.0999999046325684, 3.299999952316284, 5.5} in {0.1, 1.1, 2.1, 3.3, 5.5}
+    assert len(set(result) - set(y)) == 0

@@ -98,7 +98,10 @@ class MissingValuePredictor(BaseMissingValueHandler):
     >>> from synthpop.data_processing import MissingValuePredictor
     >>> import numpy as np
     >>>
-    >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
+    >>> X = {
+    ...     "num": np.array([25, 30, 35, 40]),
+    ...     "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan)),
+    ... }
     >>> y = np.array([1.0, np.nan, 3.0, np.nan])
     >>>
     >>> mvp = MissingValuePredictor()
@@ -112,7 +115,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
     >>> y_synth = np.array([10, 20, 30, 40])
     >>> y_final = mvp.post_synth_transform(X, y_synth)
     >>> y_final
-    array([10., nan, nan, 40.])
+    array([10., nan, nan, 40.])  # may vary due to randomness
 
     """
 
@@ -138,6 +141,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         """
         # input validation
         X_val, n_samples = _validate_2d_dict(X)
+        self.target_dtype_ = y.dtype
         y_val = _validate_1d_target(y, n_samples)
 
         self.feature_order_ = list(X_val.keys())
@@ -237,12 +241,9 @@ class MissingValuePredictor(BaseMissingValueHandler):
         missing_mask = self.tree_sampler_.sample_from_leaves(leaf_ids)
         missing_mask = np.asarray(missing_mask).astype(bool)
 
-        if pd.api.types.is_numeric_dtype(y_val):
-            y_out = y_val.astype(np.float32).copy()
-        else:
-            y_out = y_val.copy()
-
-        y_out[missing_mask] = np.nan
+        y_out = np.array(y_val, copy=True, dtype=self.target_dtype_)
+        if missing_mask.any():
+            y_out[missing_mask] = np.nan
 
         return y_out
 
@@ -274,7 +275,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     in-depth information on the ``ReplaceMissingWithValue``.
 
     :param missing_marker: The value to replace missing values with.
-    
+
     Examples
     --------
 
@@ -286,14 +287,14 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     >>> import numpy as np
     >>> from synthpop.data_processing import ReplaceMissingWithValue
     >>>
-    >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
-    >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+    >>> X = {"col1": np.array(["a", "b", "c", "c"], dtype=np.dtypes.StringDType(na_object=np.nan))}
+    >>> y = np.array(["x", "y", np.nan, "z"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>>
     >>> replace_missing = ReplaceMissingWithValue()
-    >>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+    >>> x_res, y_res = replace_missing.prepare_data_for_fit(X, y)
     >>>
     >>> x_res
-    array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))
+    {'col1': array(['a', 'b', 'c', 'c'], dtype=StringDType(na_object=nan))}
     >>>
     >>> y_res
     array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
@@ -317,6 +318,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         """
 
         n_samples = X[next(iter(X))].shape[0]
+        self.target_dtype_ = y.dtype
         y_val = _validate_1d_target(y.copy(), n_samples)
 
         missing_mask = pd.isna(y_val)
@@ -339,9 +341,16 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         :return:  The synthesised target with missing values.
         """
 
-        y_val = _validate_1d_target(y.copy(), None)
+        y_val = np.array(
+            _validate_1d_target(y, None),
+            copy=True,
+            dtype=self.target_dtype_,
+        )
 
-        y_val[y_val == self.missing_marker] = np.nan
+        missing_mask = y_val == self.missing_marker
+
+        if missing_mask.any():
+            y_val[missing_mask] = np.nan
 
         return y_val
 

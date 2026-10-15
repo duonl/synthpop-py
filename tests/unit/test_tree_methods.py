@@ -492,6 +492,7 @@ def test_fit_sampler_fit(X, y, index_cat, tree_method):
         tree_method.missing_handler_.prepared_for_fit_result[1])
     assert tree_method.tree_sampler is not tree_method.tree_sampler_
 
+
 def test_fit_classifier_converts_to_str(encoder, leafnode_sampler, mocker):
     X = {"a": np.array([1, 2])}
     y = np.array(["a", "b"], dtype=str_dtype)
@@ -662,7 +663,7 @@ def test_transform_raises_error_when_not_fitted(X, tree_method):
         tree_method.transform(X)
 
 
-def test_regressor_transform_returns_float32(leafnode_sampler):
+def test_regressor_transform_returns_after_post_synth_transform(leafnode_sampler):
     X = {"a": np.array([1, 2])}
     y = np.array([1, 2.0], dtype=np.float64)
 
@@ -690,7 +691,6 @@ def test_regressor_transform_returns_float32(leafnode_sampler):
     assert np.array_equal(
         result, tree_method.missing_handler_.post_synth_transform_result
     )
-    assert result.dtype == np.float32
 
 
 def test_classifier_transform_returns_str_dtype(leafnode_sampler):
