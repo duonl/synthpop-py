@@ -121,6 +121,5 @@ def test_pca_fit_input_features_is_nan_for_y_not_nan():
     X = np.array([np.nan, np.nan, np.nan, np.nan, 'a', np.nan, 'b', 'c', np.nan, np.nan, 'd'], dtype=str_dtype)
     y = np.array(['e', 'e', 'e', 'f', np.nan, np.nan, np.nan, np.nan, 'e', 'e', np.nan], dtype=str_dtype)
 
-    encoder.fit_transform(X, y)
-
-    # assert is as of yet unsure
+    result = encoder.fit_transform(X, y)
+    assert np.isnan(result).all()
