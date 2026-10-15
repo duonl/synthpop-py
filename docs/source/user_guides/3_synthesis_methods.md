@@ -303,7 +303,6 @@ For advanced use cases, `SampleMethod` can also be implemented without the synth
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = SampleMethod(random_state=10).fit(None, y)
 >>> model.transform(None)
-new_target_column
 0              <NA>
 1              <NA>
 2                 1
@@ -438,7 +437,6 @@ For advanced use cases, `CopyMethod` can also be used without the synthesis-meth
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)
 >>> model.transform(None)
-new_target_column
 0             1
 1             2
 2             <NA>
