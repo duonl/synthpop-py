@@ -210,7 +210,7 @@ class PCAEncoder(_BaseEncoder):
         missing_contingency_table = pd.crosstab(X_val, pd.isna(y_val))
 
         # edge case for: y is entirely nan, y is not nan but X is nan, y is nan but X is not nan.
-        if (np.isnan(y_val)+np.isnan(X_val)).all(): 
+        if (np.isnan(y_val) | np.isnan(X_val)).all(): 
             self.mapping_ = {k: [np.nan]
                              for k in missing_contingency_table.index}
             self.n_features_out_ = 1
