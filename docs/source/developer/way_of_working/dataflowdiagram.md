@@ -10,7 +10,9 @@ The diagrams below show the data flow of using a Synthesiser with the default `C
 
 <details open>
 <summary>Show/hide diagram</summary>
+
 `t_dtype` is the data type of the observed target (`y`).
+
 ```{mermaid}
 ---
 zoom:
@@ -91,6 +93,7 @@ flowchart TD
 
 <details open>
 <summary>Show/hide diagram</summary>
+
 `t_dtype` is the data type of the observed target (`y`).
 
 ```{mermaid}
@@ -164,6 +167,7 @@ Data flows for the {class}`~synthpop.data_processing.missing_value_handling.Miss
 
 <details>
 <summary>Show/hide diagram</summary>
+
 `t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
@@ -214,6 +218,7 @@ flowchart TD
 
 <details>
 <summary>Show/hide diagram</summary>
+
 `t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
@@ -263,6 +268,7 @@ The diagram below shows the flow for fitting a numeric variable using the defaul
 
 <details>
 <summary>Show/hide diagram</summary>
+
 `t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
@@ -373,11 +379,12 @@ The diagram below shows the flow for generating a numeric variable using the def
 <details>
 <summary>Show/hide diagram</summary>
 
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
 ---
-`t_dtype` is the data type of the observed target (`y`).
+
 flowchart LR
       subgraph input
             FEATURES[("Previously synthesised data<br/>X: pd.DataFrame<br/>Previously generated columns")] 
