@@ -10,7 +10,7 @@ The diagrams below show the data flow of using a Synthesiser with the default `C
 
 <details open>
 <summary>Show/hide diagram</summary>
-
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -91,6 +91,7 @@ flowchart TD
 
 <details open>
 <summary>Show/hide diagram</summary>
+`t_dtype` is the data type of the observed target (`y`).
 
 ```{mermaid}
 ---
@@ -114,7 +115,7 @@ flowchart TD
 
       CMT --> CONV["Convert data representation<br/><br/>X:<br/>pd.DataFrame → Dict[str, np.ndarray]"]
 
-      CONV --> TYPE{{"Stored TreeMethod type. Let t_dtype be the dtype of the observed data"}}
+      CONV --> TYPE{{"Stored TreeMethod type."}}
 
       TYPE -->|numeric| TR["TreeRegressorMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
       TYPE -->|categorical| TC["TreeClassifierMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
@@ -163,7 +164,7 @@ Data flows for the {class}`~synthpop.data_processing.missing_value_handling.Miss
 
 <details>
 <summary>Show/hide diagram</summary>
-
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -213,7 +214,7 @@ flowchart TD
 
 <details>
 <summary>Show/hide diagram</summary>
-
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -262,7 +263,7 @@ The diagram below shows the flow for fitting a numeric variable using the defaul
 
 <details>
 <summary>Show/hide diagram</summary>
-
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -376,7 +377,7 @@ The diagram below shows the flow for generating a numeric variable using the def
 ---
 zoom:
 ---
-
+`t_dtype` is the data type of the observed target (`y`).
 flowchart LR
       subgraph input
             FEATURES[("Previously synthesised data<br/>X: pd.DataFrame<br/>Previously generated columns")] 
@@ -405,7 +406,7 @@ flowchart LR
 
       LS_R --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)<br/><br/>Output:<br/>y: np.ndarray[t_dtype]<br/><br/>Predict which values should be missing"]
 
-      MVP --> SERIES["Create synthetic column<br/>pd.Series<br/>dtype: float32<br/>name: target column"]
+      MVP --> SERIES["Create synthetic column<br/>pd.Series<br/>dtype: t_dtype <br/>name: target column"]
 
       SERIES --> DONE["TreeRegressorMethod.transform() completed<br/>CartMethod.transform() completed<br/><br/>Add generated column to synthetic dataset"]
 ```
