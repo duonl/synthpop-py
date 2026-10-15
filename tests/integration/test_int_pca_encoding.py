@@ -112,3 +112,15 @@ def test_pca_encoding_fit_transform_input_and_outputs_full_nan():
     #  np.isnan solely returns true on np.nan, not pd.NA
     assert np.isnan(result).all()
     assert result.dtype == np.float32
+
+
+def test_pca_fit_input_features_is_nan_for_y_not_nan():
+
+    encoder = PCAEncoder()
+
+    X = np.array([np.nan, np.nan, np.nan, np.nan, 'a', np.nan, 'b', 'c', np.nan, np.nan, 'd'], dtype=str_dtype)
+    y = np.array(['e', 'e', 'e', 'f', np.nan, np.nan, np.nan, np.nan, 'e', 'e', np.nan], dtype=str_dtype)
+
+    encoder.fit_transform(X, y)
+
+    # assert is as of yet unsure
