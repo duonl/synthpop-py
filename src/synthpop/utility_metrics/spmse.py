@@ -25,7 +25,7 @@ def _standardise_spmse_dtype(X: pd.Series) -> npt.NDArray:
 
     The numeric dtype differs from the utils.standardise_array_dtypes, which returns float32.
 
-    :param X: 1D array to standardise 
+    :param X: 1D array to standardise
     """
 
     is_numeric = pd.api.types.is_numeric_dtype(np.asanyarray(X))
@@ -79,10 +79,10 @@ def _get_numeric_bins(
     """
     Determine bin edges for discretising a numeric column for S_pMSE computation.
 
-    Quantile-based binning is used by default and the preferred method. 
-    If fewer than three bins contain data, equal-width binning is used instead. 
+    Quantile-based binning is used by default and the preferred method.
+    If fewer than three bins contain data, equal-width binning is used instead.
     For consistency with synthpop-R, bins are defined to be left-closed.
-    The upper edge of the final bin is adjusted so that the maximum value 
+    The upper edge of the final bin is adjusted so that the maximum value
     is included in the last left-closed interval.
 
     :param column: Numeric column used to determine the bin edges.
@@ -130,7 +130,7 @@ def _preprocess_columns(
     """
     Preprocess the original and synthetic dataframes prior to S_pMSE calculation.
 
-    Missing values are standardised to ``np.nan`` across all columns. 
+    Missing values are standardised to ``np.nan`` across all columns.
     Numeric columns are discretised into bins
 
     :param o_df: Original dataframe
@@ -307,7 +307,7 @@ def pairwise_spmse(
     # Start calculations for preprocessing here
     o_df, s_df = _preprocess_columns(o_df, s_df, max_bins)
 
-    # Calculate joint frequency tables and s_pmse calculations below
+    # Calculate joint frequency tables and S_pMSE calculations below
     rows = []
 
     for col1, col2 in combinations_with_replacement(o_df.columns, 2):

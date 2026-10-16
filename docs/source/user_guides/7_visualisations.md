@@ -25,7 +25,7 @@ The univariate distribution visualisation compares each variable in the original
 >>> from synthpop.plotting import plot_univariate_distributions
 
 >>>> plots = plot_univariate_distributions(
-...     original_data, 
+...     original_data,
 ...     synthetic_data,
 ...     save_path=None,
 ...     interactive=False)
@@ -119,7 +119,7 @@ The HTML file can be opened in a web browser and retains the interactive `plotly
 The `interactive` parameter controls whether the generated HTML visualisation is automatically opened in the default web browser.
 
 ```python
->>> plot_univarate_distributions(
+>>> plot_univariate_distributions(
 ...     original_data,
 ...     synthetic_data,
 ...     interactive=True

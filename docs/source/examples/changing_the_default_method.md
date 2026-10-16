@@ -32,7 +32,7 @@ data = data[
 data.head(3)
 ```
 The first three rows are:
-|    |   survived |   pclass | sex    |   age |   sibsp |   parch |    fare | embarked   
+|    |   survived |   pclass | sex    |   age |   sibsp |   parch |    fare | embarked
 |---:|-----------:|---------:|:-------|------:|--------:|--------:|--------:|:-----------|
 |  0 |          0 |        3 | male   |    22 |       1 |       0 |  7.25   | S          |
 |  1 |          1 |        1 | female |    38 |       1 |       0 | 71.2833 | C          |
@@ -40,7 +40,7 @@ The first three rows are:
 
 
 ## The default CART synthesis method
-The default synthesis method of synthpop-py is CART. Therefore, calling the `Synthesiser` without arguments automatically uses the CarthMethod:
+The default synthesis method of synthpop-py is CART. Therefore, calling the `Synthesiser` without arguments automatically uses the CartMethod:
 ```python
 from synthpop import Synthesiser
 
