@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.exceptions import NotFittedError
 
 from synthpop.methods.base_synth import BaseSynthMethod
-import synthpop.methods.tree_utils 
+import synthpop.methods.tree_utils
 from synthpop.reproducibility import RandomStateManager
 
 
@@ -23,41 +23,44 @@ class SampleMethod(BaseSynthMethod):
     `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
 
     **Intended usage in the package is thus:**
-        
+
     >>> from synthpop.methods import SampleMethod
     >>> from synthpop import Synthesiser
-    ... 
-    >>> syn = Synthesiser(special_syn_method={"your_column_name" : SampleMethod()})
+    ...
+    >>> syn = Synthesiser(special_syn_method={"your_column_name": SampleMethod()})
 
     ``SampleMethod`` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.methods import SampleMethod
     >>> import pandas as pd
+    >>>
+    >>> X = pd.DataFrame({"X": [1, 2, 3]})
     >>> y = pd.Series(["a", "b", "c"], name="target_column")
     >>>
     >>> model = SampleMethod()
     >>> model.fit(X, y)
     SampleMethod()
     >>> model.transform(X)
-    target_column
     0             a
     1             c
     2             b
+    Name: target_column, dtype: str  # may vary due to randomness
 
     As ``SampleMethod`` does not use predictors to sample `y`, it can be called without `X`:
-    
+
     >>> from synthpop.methods import SampleMethod
     >>> import pandas as pd
+    >>>
     >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
     >>>
     >>> model = SampleMethod(random_state=10)
     >>> model.fit(None, y)
     SampleMethod(random_state=10)
     >>> model.transform(None)
-    new_target_column
-    0              <NA>
-    1              <NA>
-    2                 1
+    0    <NA>
+    1       2
+    2       2
+    Name: new_target_column, dtype: object
     """
 
     def __init__(self, random_state: int | None = None) -> None:
@@ -95,14 +98,14 @@ class SampleMethod(BaseSynthMethod):
                 )
             self.feature_names_in_ = list(X.columns)
             self.n_features_in_ = X.shape[1]
-            
+
         return self
-    
+
     def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         Draws samples with replacement from the empirical distribution.
 
-        :param X: DataFrame of already synthesised features. Determines output size. Can also be `None`. 
+        :param X: DataFrame of already synthesised features. Determines output size. Can also be `None`.
             In that case the output size is the same as the size of the fitted `y`.
         :return: Synthetic column sampled from original distribution.
         """
@@ -115,14 +118,14 @@ class SampleMethod(BaseSynthMethod):
             or not hasattr(self, "target_dtype_")
         ):
             raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
-        
+
         n = len(X) if X is not None else self.n_samples_
         rng = RandomStateManager.create_rng(seed=self.random_state_)
-        
+
         sampled = synthpop.methods.tree_utils._sample_array(rng, self.counts_, self.values_, n)
 
         return pd.Series(sampled, name=self.target_name_, dtype=self.target_dtype_)
-        
+
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
         """
         Return the name of the synthesised target column.

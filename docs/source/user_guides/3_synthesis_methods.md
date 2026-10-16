@@ -90,15 +90,16 @@ For advanced use cases, `CartMethod` can also be used without the synthesis-meth
 
 ```python
 >>> from synthpop.methods import CartMethod
+>>> import pandas as pd
 
 >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
->>> y = pd.Series([50.0, 60.0, 70.0], dtype='float32', name='length')
+>>> y = pd.Series([50.0, 60.0, 70.0], name='length')
 >>> method = CartMethod().fit(X, y)
 >>> method.transform(X)
 0    50.0
 1    70.0
 2    60.0
-Name: length, dtype: float32
+Name: length, dtype: float64
 ```
 
 Here, `X` contains the predictor columns that have previously been synthesised, while `y` is the observed target column that the method learns to synthesise. After fitting, `transform(X)` generates values for that target column, based on the supplied predictors.
@@ -302,10 +303,10 @@ For advanced use cases, `SampleMethod` can also be implemented without the synth
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = SampleMethod(random_state=10).fit(None, y)
 >>> model.transform(None)
-new_target_column
 0              <NA>
 1              <NA>
 2                 1
+Name: new_target_column, dtype: object
 ```
 
 Unlike `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` can receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
@@ -436,10 +437,10 @@ For advanced use cases, `CopyMethod` can also be used without the synthesis-meth
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)
 >>> model.transform(None)
-new_target_column
 0             1
 1             2
 2             <NA>
+Name: new_target_column, dtype: object
 ```
 
 Here, `y` is the observed target column. `CopyMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors.

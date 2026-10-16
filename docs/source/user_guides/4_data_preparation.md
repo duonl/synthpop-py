@@ -53,6 +53,7 @@ The encoder used depends on the target data type:
 ### 4.1.1. PCA encoding
 The {class}`~synthpop.data_preparation.encoders.PCAEncoder` method is used for categorical targets and produces a numeric representation of categorical levels based on their relationship with the target. By default, all principal components are retained, although users can reduce the dimensionality by configuring the underlying {class}`sklearn PCA <sklearn:sklearn.decomposition.PCA>` transformation, see the example in {ref}`section 4.3.1: Choosing the number of principal components <431_choosing_pca>`.
 ```python
+>>> import numpy as np
 >>> from synthpop.data_preparation import PCAEncoder
 
 >>> X = np.array(["a", "a", "b", "b", "c"])
@@ -156,11 +157,12 @@ This separation allows synthpop-py to reproduce both the generated values and th
 For categorical synthesis, missing values in the target are transformed into a valid categorical state before tree training using {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`.
 ```python
 >>> from synthpop.data_preparation import ReplaceMissingWithValue
+>>> from synthpop.utils import str_dtype
 
->>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
->>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
+>>> X = {"column1": np.array(["a", "b", "c", "c"])}
+>>> y = np.array(["x", "y", np.nan, "z"], dtype=str_dtype)
 >>> replace_missing = ReplaceMissingWithValue()
->>> x_res,y_res = replace_missing.prepare_data_for_fit(X,y)
+>>> x_res, y_res = replace_missing.prepare_data_for_fit(X, y)
 >>> y_res
 array(['x', 'y', 'N.a.N.', 'z'], dtype=StringDType(na_object=nan))
 >>> replace_missing.post_synth_transform(x_res, y_res)

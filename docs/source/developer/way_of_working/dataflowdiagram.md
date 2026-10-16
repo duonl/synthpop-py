@@ -11,6 +11,8 @@ The diagrams below show the data flow of using a Synthesiser with the default `C
 <details open>
 <summary>Show/hide diagram</summary>
 
+`t_dtype` is the data type of the observed target (`y`).
+
 ```{mermaid}
 ---
 zoom:
@@ -30,18 +32,18 @@ flowchart TD
 
       CMF --> CONV["Convert data representation<br/><br/>X:<br/>pd.DataFrame → Dict[str, np.ndarray]<br/><br/>y:<br/>pd.Series → np.ndarray"]
 
-      CONV --> TYPE{{"Target dtype"}}
+      CONV --> TYPE{{"Target dtype (t_dtype)"}}
 
-      TYPE -->|numeric| TR["TreeRegressorMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
+      TYPE -->|numeric| TR["TreeRegressorMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)"]
       TYPE -->|categorical| TC["TreeClassifierMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>)"]
 
       TR --> ENC_R{{"Loop through columns in X<br/>If column is non-numeric:<br/>fit MeanEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
       TC --> ENC_C{{"Loop through columns in X<br/>If column is non-numeric:<br/>fit PCAEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
 
-      ENC_R -->|Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
+      ENC_R -->|Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[t_dtype]<br/>)"]
       ENC_C -->|Categorical X| PCA["PCAEncoder.fit(<br/>X: np.ndarray[str]<br/>y: np.ndarray[str]<br/>)"]
 
-      TR --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray] <br/>y: np.ndarray[float32]<br/>X and y without rows where y is missing<br/><br/>Fit missingness model"]
+      TR --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray] <br/>y: np.ndarray[t_dtype]<br/>X and y without rows where y is missing<br/><br/>Fit missingness model"]
       TC --> RV["ReplaceMissingWithValue.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray]<br/>y: np.ndarray[str] (missing made a category)<br/><br/>Missing categories in y replaced by marker"]
 
       RMV -->|Continue with this output| LOOP_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
@@ -61,14 +63,18 @@ flowchart TD
 
       MERGE_R --> FM_R["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
       MERGE_C --> FM_C["Convert feature dictionary to tree input matrix<br/><br/>Input:<br/>Dict[str, np.ndarray[float32]]<br/><br/>Output:<br/>np.ndarray[float32]<br/>shape: (n_samples, n_features)"]
+      FM_R --> Y32["Convert y to float32"]
 
-      FM_R --> DTR["DecisionTreeRegressor.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[float32]<br/>)"]
+      Y32 --> DTR["DecisionTreeRegressor.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[float32]<br/>)"]
       FM_C --> DTC["DecisionTreeClassifier.fit(<br/>X: np.ndarray[float32],<br/>y: np.ndarray[str]<br/>)"]
 
       DTR --> DTRA["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>leaf_ids: np.ndarray[int64]"]
       DTC --> DTCA["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>leaf_ids: np.ndarray[int64]"]
 
-      DTRA --> LS1["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[float32]<br/>)"]
+
+      DTRA --> LS1["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[t_dtype]<br/>)"]
+      RMV --> |"y: np.ndarray[t_dtype]"|LS1
+
       DTCA --> LS2["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[str]<br/>)"]
 
       LS1 --> FIT_R["TreeRegressorMethod fully fitted"]
@@ -87,6 +93,8 @@ flowchart TD
 
 <details open>
 <summary>Show/hide diagram</summary>
+
+`t_dtype` is the data type of the observed target (`y`).
 
 ```{mermaid}
 ---
@@ -110,7 +118,7 @@ flowchart TD
 
       CMT --> CONV["Convert data representation<br/><br/>X:<br/>pd.DataFrame → Dict[str, np.ndarray]"]
 
-      CONV --> TYPE{{"Stored TreeMethod type"}}
+      CONV --> TYPE{{"Stored TreeMethod type."}}
 
       TYPE -->|numeric| TR["TreeRegressorMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
       TYPE -->|categorical| TC["TreeClassifierMethod.transform(<br/>X: Dict[str, np.ndarray]<br/>)"]
@@ -133,13 +141,13 @@ flowchart TD
       FM_R --> DTR["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
       FM_C --> DTC["DecisionTreeClassifier.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
-      DTR --> LS_R["LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>y: np.ndarray[float32]"]
+      DTR --> LS_R["LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>y: np.ndarray[t_dtype]"]
       DTC --> LS_C["LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>y: np.ndarray[str]"]
 
-      LS_R --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>y: np.ndarray[float32]<br/><br/>Predict which values should be missing"]
+      LS_R --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)<br/><br/>Output:<br/>y: np.ndarray[t_dtype]<br/><br/>Predict which values should be missing"]
       LS_C --> RMV["ReplaceMissingWithValue.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[str]<br/>)<br/><br/>Output:<br/>y: np.ndarray[str]<br/><br/>Missing categories restored"]
 
-      MVP --> SR["Create pd.Series<br/>dtype: float32<br/>name: y"]
+      MVP --> SR["Create pd.Series<br/>dtype: t_dtype<br/>name: y"]
       RMV --> SC["Create pd.Series<br/>dtype: str<br/>name: y"]
 
       SR --> ADD["Add generated column to result pd.DataFrame"]
@@ -160,6 +168,7 @@ Data flows for the {class}`~synthpop.data_preparation.missing_value_handling.Mis
 <details>
 <summary>Show/hide diagram</summary>
 
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -169,10 +178,10 @@ flowchart TD
 
       subgraph input
             FEATURES[("Feature dictionary<br/>X: Dict[str, np.ndarray]<br/>Predictor columns")]
-            TARGET[("Target array<br/>y: np.ndarray[float32]<br/>May contain missing values")]
+            TARGET[("Target array<br/>y: np.ndarray[t_dtype]<br/>May contain missing values")]
       end
 
-      FEATURES --> MVP["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
+      FEATURES --> MVP["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)"]
 
       TARGET --> MVP
 
@@ -201,7 +210,7 @@ flowchart TD
 
       FITTED --> FILTER["Remove rows where y is missing<br/><br/>mask = ~pd.isna(y)"]
 
-      FILTER --> OUTPUT["Return cleaned data<br/><br/>X_filtered:<br/>Dict[str, np.ndarray]<br/><br/>y_filtered:<br/>np.ndarray[float32]<br/><br/>X and y without rows where y is missing"]
+      FILTER --> OUTPUT["Return cleaned data<br/><br/>X_filtered:<br/>Dict[str, np.ndarray]<br/><br/>y_filtered:<br/>np.ndarray[t_dtype]<br/><br/>X and y without rows where y is missing"]
 ```
 </details>
 
@@ -210,6 +219,7 @@ flowchart TD
 <details>
 <summary>Show/hide diagram</summary>
 
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -219,10 +229,10 @@ flowchart TD
 
       subgraph input
             FEATURES[("Synthetic predictor feature dictionary<br/>X: Dict[str, np.ndarray]<br/>Previously synthesised predictor columns")]
-            TARGET[("Sampled synthetic target array<br/>y: np.ndarray[float32]<br/>Output from LeafNodeSampler")]
+            TARGET[("Sampled synthetic target array<br/>y: np.ndarray[t_dtype]<br/>Output from LeafNodeSampler")]
       end
 
-      FEATURES --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
+      FEATURES --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)"]
       TARGET --> MVP
 
       MVP --> STATUS{"Missingness state<br/>from fitting?"}
@@ -248,7 +258,7 @@ flowchart TD
       STATUS -->|All y was missing| Y_MISSING["Return np.full(<br/>len(y), np.nan<br/>)"] --> OUTPUT
       STATUS -->|No y was missing| Y_OBSERVED("Return y unchanged") --> OUTPUT
 
-      RESTORE --> OUTPUT["Synthetic target with missing values restored<br/><br/>Output:<br/>y: np.ndarray<br/><br/>Observed values preserved<br/>Missing values reintroduced"]
+      RESTORE --> OUTPUT["Synthetic target with missing values restored<br/><br/>Output:<br/>y: np.ndarray[t_dtype]<br/><br/>Observed values preserved<br/>Missing values reintroduced"]
 ```
 </details>
 
@@ -259,6 +269,7 @@ The diagram below shows the flow for fitting a numeric variable using the defaul
 <details>
 <summary>Show/hide diagram</summary>
 
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -276,13 +287,13 @@ flowchart LR
 
       CMF --> CONV["Convert data representation<br/><br/>X:<br/>pd.DataFrame → Dict[str, np.ndarray]<br/><br/>y:<br/>pd.Series → np.ndarray"]
 
-      CONV --> TR["TreeRegressorMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)"]
+      CONV --> TR["TreeRegressorMethod.fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)"]
 
       TR --> ENC_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>fit MeanEncoder<br/><br/>If column is numeric:<br/>no encoder"}}
 
       ENC_R -->|Categorical X| ME["MeanEncoder.fit(<br/>X: np.ndarray[str],<br/>y: np.ndarray[float32]<br/>)"]
 
-      TR --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray] <br/>y: np.ndarray[float32]<br/>X and y without rows where y is missing<br/><br/>Fit missingness model"]
+      TR --> RMV["MissingValuePredictor.prepare_data_for_fit(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>) <br/><br/>Output:<br/>X: Dict[str, np.ndarray] <br/>y: np.ndarray[t_dtype]<br/>X and y without rows where y is missing<br/><br/>Fit missingness model"]
 
       RMV -->|Continue with this output| LOOP_R{{"Loop through columns in X<br/><br/>If column is non-numeric:<br/>transform with MeanEncoder<br/><br/>If column is numeric:<br/>pass through unchanged"}}
 
@@ -300,7 +311,9 @@ flowchart LR
 
       DTR --> DTRA["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>leaf_ids: np.ndarray[int64]"]
 
-      DTRA --> LS1["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[float32]<br/>)"]
+      DTRA --> LS1["LeafNodeSampler.fit_sampler(<br/>leaf_ids: np.ndarray[int64],<br/>y: np.ndarray[t_dtype]<br/>)"]
+      RMV -->|"y: np.ndarray[t_dtype]"| LS1
+
 
       LS1 --> FIT_R["Fully fitted numeric CART model<br/><br/>TreeRegressorMethod → CartMethod"]
 ```
@@ -366,6 +379,7 @@ The diagram below shows the flow for generating a numeric variable using the def
 <details>
 <summary>Show/hide diagram</summary>
 
+`t_dtype` is the data type of the observed target (`y`).
 ```{mermaid}
 ---
 zoom:
@@ -395,11 +409,11 @@ flowchart LR
 
       FM_R --> DTR["DecisionTreeRegressor.apply(<br/>X: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>leaf_ids: np.ndarray[int64]"]
 
-      DTR --> LS_R["LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>y: np.ndarray[float32]<br/><br/>Sample target values from leaf distributions"]
+      DTR --> LS_R["LeafNodeSampler.sample_from_leaves(<br/>leaf_ids: np.ndarray[int64]<br/>)<br/><br/>Output:<br/>y: np.ndarray[t_dtype]<br/><br/>Sample target values from leaf distributions"]
 
-      LS_R --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[float32]<br/>)<br/><br/>Output:<br/>y: np.ndarray[float32]<br/><br/>Predict which values should be missing"]
+      LS_R --> MVP["MissingValuePredictor.post_synth_transform(<br/>X: Dict[str, np.ndarray],<br/>y: np.ndarray[t_dtype]<br/>)<br/><br/>Output:<br/>y: np.ndarray[t_dtype]<br/><br/>Predict which values should be missing"]
 
-      MVP --> SERIES["Create synthetic column<br/>pd.Series<br/>dtype: float32<br/>name: target column"]
+      MVP --> SERIES["Create synthetic column<br/>pd.Series<br/>dtype: t_dtype <br/>name: target column"]
 
       SERIES --> DONE["TreeRegressorMethod.transform() completed<br/>CartMethod.transform() completed<br/><br/>Add generated column to synthetic dataset"]
 ```

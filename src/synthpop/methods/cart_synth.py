@@ -249,15 +249,15 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     --------
     ``TreeClassifierMethod`` can be used directly as follows (note that this is not the intended usage):
 
-    >>> from synthpop.methods import TreeClassifierMethod
     >>> import numpy as np
+    >>> from synthpop.methods import TreeClassifierMethod
     >>> from synthpop.utils import str_dtype
     >>>
     >>> X = {
-    ...         "column1":np.array([1.1, 2.2]),
-    ...         "column2":np.array([1.4, 1.2]),
-    ...         "column3":np.array(["a", "b"], dtype=str_dtype)
-    ...         }
+    ...     "column1": np.array([1.1, 2.2]),
+    ...     "column2": np.array([1.4, 1.2]),
+    ...     "column3": np.array(["a", "b"], dtype=str_dtype),
+    ... }
     >>> y = np.array(["x", "y"], dtype=str_dtype)
     >>>
     >>> tree_method = TreeClassifierMethod()
@@ -265,7 +265,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     TreeClassifierMethod()
     >>>
     >>> tree_method.transform(X)
-    array(['x', 'y'], dtype=StringDType(na_object=nan))
+    array(['x', 'y'], dtype=StringDType(na_object=nan))  # may vary due to randomness
 
     """
 
@@ -327,10 +327,10 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     >>> from synthpop.utils import str_dtype
     >>>
     >>> X = {
-    ...         "column1":np.array([1.1, 2.2]),
-    ...         "column2":np.array([1.4, 1.2]),
-    ...         "column3":np.array(["a", "b"], dtype=str_dtype)
-    ...         }
+    ...     "column1":np.array([1.1, 2.2]),
+    ...     "column2":np.array([1.4, 1.2]),
+    ...     "column3":np.array(["a", "b"], dtype=str_dtype),
+    ... }
     >>> y = np.array([1, 2], dtype=np.float32)
     >>>
     >>> tree_method = TreeRegressorMethod()
@@ -338,7 +338,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     TreeRegressorMethod()
     >>>
     >>> tree_method.transform(X)
-    array([1., 2.], dtype=float32)
+    array([1., 2.], dtype=float32)  # may vary due to randomness
 
     """
 
@@ -408,7 +408,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     >>> from synthpop.methods import CartMethod
     >>> from synthpop import Synthesiser
     ...
-    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CartMethod()})
+    >>> syn = Synthesiser(special_syn_method={"your_column_name": CartMethod()})
 
     ``CartMethod`` can be used directly as follows (note that this is not the intended usage):
 
@@ -425,7 +425,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     0    50.0
     1    70.0
     2    60.0
-    Name: length, dtype: float32
+    Name: length, dtype: float32  # may vary due to randomness
     >>>
     >>> method.fit(X, y_cat)
     CartMethod()
@@ -433,7 +433,7 @@ class CartMethod(base_synth.BaseSynthMethod):
     0     A
     1    AB
     2     B
-    Name: blood type, dtype: string
+    Name: blood type, dtype: string  # may vary due to randomness
     """
 
     def __init__(self,
@@ -646,9 +646,20 @@ def tune_cart(
     >>> from synthpop import Synthesiser
     >>> import pandas as pd
     >>> data = pd.DataFrame({"a": [1], "b": [2]})
+    >>> tuned_cart = tune_cart(
+    ...     min_samples_leaf=10,
+    ...     n_components=1,
+    ...     rare_categories_threshold=0,
+    ... )
     >>> synth = Synthesiser(random_seed=10,
-    ... default_syn_method=tune_cart(min_samples_leaf=10),
-    ... special_syn_method={"b": tune_cart(min_samples_leaf=20)})
+    ...     default_syn_method=tuned_cart,
+    ...     special_syn_method={"b": tune_cart(min_samples_leaf=20)},
+    ... )
+    >>> synth.fit(data)
+    <synthpop.synthesiser.Synthesiser object at 0x00000144BAA5F230>
+    >>> synth.generate()
+       a  b
+    0  1  2
 
     """
 

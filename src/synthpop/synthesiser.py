@@ -46,9 +46,9 @@ class Synthesiser:
         >>> import pandas as pd
         >>> from synthpop import Synthesiser
         >>> data = pd.DataFrame({
-        ...     "first column":[1,2,3,2,1,3],
-        ...     "second column":["a","a","b","c","b","c"],
-        ...     "third column":[0.2,-3.4,1000.3,33,0,0]
+        ...     "first column": [1, 2, 3, 2, 1],
+        ...     "second column": ["a", "a", "b", "c", "b"],
+        ...     "third column": [0.2, -3.4, 1000.3, 33, 0],
         ... })
         >>> data
         first column second column  third column
@@ -57,30 +57,28 @@ class Synthesiser:
         2             3             b        1000.3
         3             2             c          33.0
         4             1             b           0.0
-        5             3             c           0.0
         >>> synth = Synthesiser(random_seed=963214)
         >>> synth.fit(data)
-        <synthpop.synthesiser.Synthesiser object at 0x000001F4BB6B9160>
+        <synthpop.synthesiser.Synthesiser object at 0x00000144BA901160>
         >>> synth.generate()
-        first column second column  third column
-        0           1.0             a      0.200000
-        1           3.0             c      0.000000
-        2           2.0             b     33.000000
-        3           2.0             b   1000.299988
-        4           2.0             b   1000.299988
-        5           3.0             c      0.000000
+           first column second column  third column
+        0             1             b          33.0
+        1             1             b          -3.4
+        2             2             b        1000.3
+        3             1             b           0.0
+        4             1             b          -3.4
         >>> synth.generate(n=10)
-        first column second column  third column
-        0           1.0             a      0.200000
-        1           3.0             c      0.000000
-        2           2.0             b     33.000000
-        3           2.0             b   1000.299988
-        4           2.0             b   1000.299988
-        5           3.0             c      0.000000
-        6           1.0             a      0.200000
-        7           3.0             c      0.000000
-        8           1.0             a     -3.400000
-        9           1.0             a      0.200000
+           first column second column  third column
+        0             1             b          33.0
+        1             1             b          -3.4
+        2             2             b        1000.3
+        3             1             b           0.0
+        4             1             b          -3.4
+        5             2             a           0.0
+        6             2             a          33.0
+        7             1             b          33.0
+        8             2             b           0.2
+        9             3             c          33.0
 
     """
 
