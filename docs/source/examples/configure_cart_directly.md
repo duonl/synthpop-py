@@ -30,8 +30,8 @@ The defaults are slightly different for classification and regression:
 **Component** | **Default Classification** | ** Default Regression**
 --------------|--------------------|-------------------
 `tree` | {class}`sklearn.tree.DecisionTreeClassifier` | {class}`sklearn.tree.DecisionTreeRegressor`
-`encoder` | {class}`~synthpop.data_processing.encoders.PCAEncoder` | {class}`~synthpop.data_processing.encoders.MeanEncoder`
-`missing_handler` | {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue` | {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+`encoder` | {class}`~synthpop.data_preparation.encoders.PCAEncoder` | {class}`~synthpop.data_preparation.encoders.MeanEncoder`
+`missing_handler` | {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue` | {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
 `tree_sampler` | {class}`~synthpop.methods.tree_utils.LeafNodeSampler` | {class}`~synthpop.methods.tree_utils.LeafNodeSampler`
 
 for example, the following constructs a CART method using all of these defaults:
@@ -129,8 +129,8 @@ When configuring the trees directly, remember that classification and regression
 CART cannot pass categorical predictor values such as `"male"` or `"female"` directly to a scikit-learn decision tree. Categorical predictors are therefore transformed into numeric representations before they are passed to the tree.
 
 The default encoder depends on the target:
-- categorical targets use {class}`~synthpop.data_processing.encoders.PCAEncoder`;
-- numeric targets use {class}`~synthpop.data_processing.encoders.MeanEncoder`.
+- categorical targets use {class}`~synthpop.data_preparation.encoders.PCAEncoder`;
+- numeric targets use {class}`~synthpop.data_preparation.encoders.MeanEncoder`.
 
 We can configure the existing `PCAEncoder` by supplying a configured {class}`sklearn.decomposition.PCA` instance.
 
@@ -141,7 +141,7 @@ tune_cart(n_components=2)
 The equivalent using direct configuration is:
 ```python
 from sklearn.decomposition import PCA
-from synthpop.data_processing import PCAEncoder
+from synthpop.data_preparation import PCAEncoder
 
 cart = CartMethod(
         classifier=TreeClassifierMethod(
@@ -171,7 +171,7 @@ PCAEncoder(
 ```
 This is something `tune_cart` deliberately does not expose. The convenience function provides a simple interface for the most common setting, while direct configuration gives us access to the underlying estimator. For the full list of available parameters, see [sklearn.decomposition.PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html).
 
-For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: PCA encoding <411-pca-encoding>`. The `MeanEncoder` has no configuration options. For more information about how mean encoding works, see {ref}`User Guide 4.1.2: Mean encoding <412-mean-encoding>`. 
+For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: PCA encoding <411-pca-encoding>`. The `MeanEncoder` has no configuration options. For more information about how mean encoding works, see {ref}`User Guide 4.1.2: Mean encoding <412-mean-encoding>`.
 
 ## Use a different encoder
 ```{warning}
@@ -218,8 +218,8 @@ Other `scikit-learn` encoders can also be used, provided that they are compatibl
 
 ## Configure the missing value handling
 CART also has a component specifically responsible for missing value handling as `scikit-learn`'s decision trees do not predict missing values. The default strategy differs between classification and regression:
-- `TreeClassifierMethod` uses {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`;
-- `TreeRegressorMethod` uses {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`.
+- `TreeClassifierMethod` uses {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`;
+- `TreeRegressorMethod` uses {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`.
 
 `ReplaceMissingWithValue` treats missingness as another target category while fitting the tree. After synthesis, the special marker is converted back to a missing value. This means that the same tree is responsible for both predicting the target value and implicitly modelling whether that value is missing.
 
@@ -227,7 +227,7 @@ CART also has a component specifically responsible for missing value handling as
 
 The missing-value handler can also be configured directly. For example, `MissingValuePredictor` has its own encoder (`MeanEncoder`) and decision tree (`DecisionTreeClassifier`) that can be configured just like the examples above:
 ```python
-from synthpop.data_processing import MeanEncoder, MissingValuePredictor
+from synthpop.data_preparation import MeanEncoder, MissingValuePredictor
 
 missing_handler = MissingValuePredictor(
         tree=DecisionTreeClassifier(
@@ -283,7 +283,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop import Synthesiser
-from synthpop.data_processing import MissingValuePredictor, PCAEncoder
+from synthpop.data_preparation import MissingValuePredictor, PCAEncoder
 from synthpop.methods import (
         CartMethod,
         TreeClassifierMethod,
@@ -375,10 +375,10 @@ The main components are:
 **Component** | **Can be configured/replaced?** | **Examples**
 --- | --- | ---
 Decision tree | Yes | {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>`, {class}`DecisionTreeRegressor <sklearn.tree.DecisionTreeRegressor>`
-Categorical encoder | Yes | {class}`~synthpop.data_processing.encoders.PCAEncoder`, {class}`~synthpop.data_processing.encoders.MeanEncoder`, {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>`
-Missing-value handler | Yes | {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`, {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
-Missing-value prediction tree | Yes| Configure the {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>` inside {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
-Tree sampler | Yes, but is more advanced | Supply a custom `LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor`
+Categorical encoder | Yes | {class}`~synthpop.data_preparation.encoders.PCAEncoder`, {class}`~synthpop.data_preparation.encoders.MeanEncoder`, {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>`
+Missing-value handler | Yes | {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`, {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
+Missing-value prediction tree | Yes| Configure the {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>` inside {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
+Tree sampler | Yes, but is more advanced | Supply a custom `LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
 Rare-category threshold | Yes | Set the `rare_categories_threshold` parameter in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`or {class}`~synthpop.methods.cart_synth.TreeRegressorMethod`. See the [API reference](../api_reference/synthesis_methods/CART.rst) for more information.
 
 For common adjustments, {func}`~synthpop.methods.cart_synth.tune_cart` is the simpler interface. When the synthesis workflow requires a different encoder, missing-value strategy, tree configuration, or another component, constructing {class}`~synthpop.methods.cart_synth.CartMethod` directly provides the necessary flexibility.

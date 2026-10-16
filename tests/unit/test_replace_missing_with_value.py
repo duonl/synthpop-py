@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
+from synthpop.data_preparation.missing_value_handling import ReplaceMissingWithValue
 from synthpop.utils import str_dtype
 
 

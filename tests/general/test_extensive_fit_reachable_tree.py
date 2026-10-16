@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+from synthpop.data_preparation.missing_value_handling import MissingValuePredictor
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
 from synthpop.methods.tree_utils import LeafNodeSampler
 

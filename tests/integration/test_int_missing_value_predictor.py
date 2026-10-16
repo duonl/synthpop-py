@@ -3,8 +3,8 @@ import pandas as pd
 import pytest
 from sklearn.tree import DecisionTreeClassifier
 
-from synthpop.data_processing.encoders import MeanEncoder
-from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+from synthpop.data_preparation.encoders import MeanEncoder
+from synthpop.data_preparation.missing_value_handling import MissingValuePredictor
 from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
 from synthpop.utils import str_dtype
 

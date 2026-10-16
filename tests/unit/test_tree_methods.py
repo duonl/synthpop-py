@@ -10,7 +10,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 import synthpop
-from synthpop.data_processing.missing_value_handling import BaseMissingValueHandler
+from synthpop.data_preparation.missing_value_handling import BaseMissingValueHandler
 from synthpop.methods.cart_synth import (
     _AbstractTreeMethod,
     TreeClassifierMethod,

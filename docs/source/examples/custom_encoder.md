@@ -2,7 +2,7 @@
 
 Encoding of categorical input features is an important part of synthpop-py's internal {class}`~synthpop.methods.cart_synth.CartMethod` workflow. Converting categorical features to numeric representations can substantially reduce the computational cost of fitting a decision tree, as the tree can split on numeric intervals rather than considering individual category values. Without encoding, a categorical feature with $k$ categories may require up to $2^k-1$ binary partitions, which can become computationally expensive as the number of categories increases. Moreover, because the methods implemented in synthpop-py are based on `scikit-learn`, categorical variables must be encoded, as the decision tree algorithms in the current version of `scikit-learn` do not support categorical predictors directly.
 
-synthpop-py provides two built-in encoder methods: {class}`~synthpop.data_processing.encoders.MeanEncoder` is used when the target column is numeric, while {class}`~synthpop.data_processing.encoders.PCAEncoder` is used when target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>` for more theoretical background on encoding.
+synthpop-py provides two built-in encoder methods: {class}`~synthpop.data_preparation.encoders.MeanEncoder` is used when the target column is numeric, while {class}`~synthpop.data_preparation.encoders.PCAEncoder` is used when target column is categorical. See {ref}`Guide 4.1: Encoding categorical predictors <41-encoding-categorical-predictors>` for more theoretical background on encoding.
 
 In some cases, you may want to use a different encoding strategy. If you would rather use an existing alternative encoder, see [Example: Configure the CART components directly](./configure_cart_directly).
 
@@ -16,7 +16,7 @@ To integrate an encoder with synthpop-py, there are several requirements to cons
 For **developers implementing an encoder for current synthesis methods in synthpop-py**, these requirements must be met as they allow the new encoder to integrate with the existing synthesis framework. However, if you are developing an encoder for a specific use case or your own synthesis method, you may find that not all features are required to be implemented. Here, we will implement all four requirements.
 
 ### `scikit-learn` conventions
-In order for an encoder to be compatible with synthpop-py, it should also follow the `scikit-learn` estimator interface. Following these conventions provides a standard interface, allowing synthpop-py to adhere to the requirements, such as cloning. 
+In order for an encoder to be compatible with synthpop-py, it should also follow the `scikit-learn` estimator interface. Following these conventions provides a standard interface, allowing synthpop-py to adhere to the requirements, such as cloning.
 
 Generally, this implies two things:
 1. A synthpop-py encoder should inherit from the base class {class}`~sklearn.base.BaseEstimator` and the mixin class for transformers {class}`~sklearn.base.TransformerMixin`
@@ -25,7 +25,7 @@ Generally, this implies two things:
 For more information on developing `scikit-learn` estimators and using other mixins, see the [scikit-learn developer guide](https://scikit-learn.org/dev/developers/develop.html#). In this example, we explain how to create a custom encoder that maps categorical data to random numeric values while following the synthpop-py requirements.
 
 ## BaseEstimator: Cloning and `fit` method
-An estimator is an object that learns parameters from training data and can subsequently use those learned parameters to transform data or make predictions. For a custom encoder, the `fit` method is responsible for learning the mapping from categorical values to their numeric representations. 
+An estimator is an object that learns parameters from training data and can subsequently use those learned parameters to transform data or make predictions. For a custom encoder, the `fit` method is responsible for learning the mapping from categorical values to their numeric representations.
 
 To follow `scikit-learn` convention, a custom encoder should inherit from {class}`~sklearn.base.BaseEstimator`. A minimal encoder can therefore start as follows:
 
@@ -33,7 +33,7 @@ To follow `scikit-learn` convention, a custom encoder should inherit from {class
 from sklearn.base import BaseEstimator
 from typing import Self
 
-class CustomEncoder(BaseEstimator): 
+class CustomEncoder(BaseEstimator):
 
     def __init__(self) -> None:
         super().__init__()
@@ -53,7 +53,7 @@ def _new_encoder(self):
     clone(self.encoder) if self.encoder is not None else self._get_encoder()
 ```
 Here, `_get_encoder()` selects the default encoder used by {class}`~synthpop.methods.cart_synth.CartMethod`:
-{class}`~synthpop.data_processing.encoders.MeanEncoder` when the target column is numeric, and {class}`~synthpop.data_processing.encoders.PCAEncoder` when the target column is categorical.
+{class}`~synthpop.data_preparation.encoders.MeanEncoder` when the target column is numeric, and {class}`~synthpop.data_preparation.encoders.PCAEncoder` when the target column is categorical.
 
 ### The fit method
 
@@ -181,7 +181,7 @@ print(encoder.mapping_)
 
 ## TransformerMixin: define a transform method
 
-The `fit` method learns the mapping from categorical values to numeric values, but the encoder also needs a way to apply that learned mapping to incoming data. 
+The `fit` method learns the mapping from categorical values to numeric values, but the encoder also needs a way to apply that learned mapping to incoming data.
 
 With a `transform` method our encoder can therefore be extended as follows:
 
@@ -233,9 +233,9 @@ As you may have noticed, we also added `check_is_fitted` in our `transform` meth
 Even though our encoder is now fully functional, it still needs to satisfy the last synthpop-py requirement: returning the expected output shape.
 
  An encoder's `transform` method should return a two-dimensional array with shape `(N, m)`, where `N` is the number of input observations and `m` is the number of features produced by the encoder.
- 
+
  Our encoder currently produces one numeric value for each input observation, resulting in a one-dimensional array with shape `(N,)`. In this case, there is only one output feature (`m = 1`), so we need to reshape the array from `(N,)` to `(N, 1)`.
- 
+
  We can do this by adding a new axis to the output:
 
 ```python
@@ -376,7 +376,7 @@ def test(estimator, check):
 6. **Keep the encoder stateless before fitting.** Do not learn categories or mappings in `__init__`. All information derived from the input data should be learned during `fit`.
 
 ## Summary
-Custom encoders can be integrated with synthpop-py by following the standard [`scikit-learn` conventions](https://scikit-learn.org/stable/developers/develop.html). The encoder should inherit from `BaseEstimator` and `TransformerMixin`, learn its mapping during `fit`, and apply that mapping during `transform`. 
+Custom encoders can be integrated with synthpop-py by following the standard [`scikit-learn` conventions](https://scikit-learn.org/stable/developers/develop.html). The encoder should inherit from `BaseEstimator` and `TransformerMixin`, learn its mapping during `fit`, and apply that mapping during `transform`.
 
 Defining appropriate estimator tags helps communicate the encoder's input requirements to `scikit-learn` and improves compatibility with its validation tools. When implementing a custom encoder for use with `CartMethod`, it is also important to support one-dimensional, categorical input and handle missing and unseen values consistently. Additionally,
 you need to keep learned parameters separate from constructor parameters, avoid modifying input data, and remain stateless until `fit` is called. Finally, `scikit-learn`'s estimator checks can help identify compatibility issues before integrating the encoder into the synthesis workflow.

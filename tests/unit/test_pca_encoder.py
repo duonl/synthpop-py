@@ -5,7 +5,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
-from synthpop.data_processing.encoders import PCAEncoder
+from synthpop.data_preparation.encoders import PCAEncoder
 from synthpop.utils import str_dtype
 
 # ----- stubs -----

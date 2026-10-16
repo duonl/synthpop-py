@@ -6,7 +6,7 @@ This section describes how synthetic data is generated using synthpop-py, includ
 
 ## 2.1. Overview of the synthesis workflow
 
-Rather than modelling the joint distribution of all variables simultaneously, synthpop-py models **one variable at a time according to a specified column order**. Each variable is synthesised using previously generated variables as predictors, allowing the synthetic dataset to preserve complex dependencies while keeping the modelling procedure modular. Preprocessing, such as encoding categorical variables and handling missing values, is performed internally by the selected synthesis methods.
+Rather than modelling the joint distribution of all variables simultaneously, synthpop-py models **one variable at a time according to a specified column order**. Each variable is synthesised using previously generated variables as predictors, allowing the synthetic dataset to preserve complex dependencies while keeping the modelling procedure modular. Data preparation or preprocessing, such as encoding categorical variables and handling missing values, is performed internally by the selected synthesis methods.
 
 At a high level, the workflow is:
 ```{mermaid}
@@ -64,31 +64,31 @@ The central interface in synthpop-py is the {class}`~synthpop.synthesiser.Synthe
 ### 2.2.1. Key parameters
 
 During initialisation ([`Synthesiser()`](../api_reference/synthesiser_class/synthesiser.rst)):
-- **`random_seed`**  
+- **`random_seed`**
   A seed for randomness that makes both model fitting and data generation reproducible.
 
-- **`column_order`**  
-  Defines the order in which variables are synthesised.  
+- **`column_order`**
+  Defines the order in which variables are synthesised.
   This order is structurally important: each variable is generated conditional on previously generated variables.
   More information about how to choose the column order can be found in {ref}` section 2.2.4: Changing the column order <224-column-order>`.
   If not specified, the column order of the original dataset will be used.
 
-- **`default_syn_method`**  
-  The synthesis method applied to all variables unless explicitly overridden.  
+- **`default_syn_method`**
+  The synthesis method applied to all variables unless explicitly overridden.
   If not specified, {class}`~synthpop.methods.cart_synth.CartMethod` is used as the default synthesis method.
 
-- **`special_syn_method`**  
+- **`special_syn_method`**
   Dictionary mapping variable names to custom synthesis methods.
 
 During {func}`~synthpop.synthesiser.Synthesiser.fit`:
-- **`X`**  
+- **`X`**
   The original dataset used to fit the synthesiser.
 
 During {func}`~synthpop.synthesiser.Synthesiser.generate`:
-- **`n`**  
-  The number of rows to generate for the synthetic dataset.  
+- **`n`**
+  The number of rows to generate for the synthetic dataset.
   The default is the same number of rows as the original dataset.
-- **`random_seed`**  
+- **`random_seed`**
   A seed for randomness that overrides the generation seed without refitting the synthesiser.
 
 See the [`Synthesiser` API reference](../api_reference/synthesiser_class/synthesiser.rst) for the complete constructor signature and parameter documentation.
@@ -101,7 +101,7 @@ A **synthesis method** defines how each variable is modelled conditionally.
 
 The default method is **CART-based synthesis**, implemented via {class}`~synthpop.methods.cart_synth.CartMethod`, which automatically selects either:
 
-- a regression tree (for numeric variables), or  
+- a regression tree (for numeric variables), or
 - a classification tree (for categorical variables)
 
 Other available methods are:
@@ -136,11 +136,11 @@ Consider changing the order when:
 
 For many datasets, the default column order may provide satisfactory results. However, adjusting the column order is often one of the simplest ways to improve utility. A good synthesis order often allows variables that are difficult to synthesise to use as many informative predictors as possible. One way to identify such variables is to inspect the S_pMSE heatmap. Utility metrics such as {ref}`S_pMSE <531-spmse>` can help identify these variables, but other characteristics can also influence an appropriate order.
 
-For example: 
+For example:
 - **Variables with many missing values** may provide less reliable information as predictors. Placing these variables later prevents incomplete information from influencing many other variables.
 - **Variables with many (rare) categories**  can introduce uncertainty when used as predictors. Generating these variables later can reduce the propagation of errors.
 - **Variables that represent outcomes or summaries** are often better placed later because they can use information from the variables that contribute to them.
- 
+
 There is no universally optimal synthesis order. The best order depends on the structure of the dataset and the relationships between variables. In practice, changing the synthesis order and comparing utility metrics such as S_pMSE (see [Guide 5: Evaluating utility](./5_evaluating_utility.md)) can help determine whether a certain order preserves important relationships.
 
 ---

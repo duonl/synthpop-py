@@ -3,7 +3,7 @@ import pytest
 from sklearn import config_context
 from sklearn.decomposition import PCA
 
-from synthpop.data_processing.encoders import PCAEncoder
+from synthpop.data_preparation.encoders import PCAEncoder
 from synthpop.utils import str_dtype
 
 

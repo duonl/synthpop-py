@@ -73,7 +73,7 @@ class CustomSynth(BaseSynthMethod):
             self.value_ = y.value_counts().idxmax()
 
         return self
-        
+
     def transform(self, X: pd.DataFrame | None) -> pd.Series:
         return pd.Series()
 
@@ -154,7 +154,7 @@ class CustomSynth(BaseSynthMethod):
             name=self.target_name_,
             dtype=self.target_dtype_,
         )
-    
+
     def get_feature_names_out(self, input_features=None):
         return []
 ```
@@ -312,9 +312,9 @@ When implementing a custom synthesis method, consider the following:
 
 6. **Check that the model has been fitted.** Use `check_is_fitted` in `transform` and other methods that depend on parameters learned during `fit`.
 
-7. **Handle missing values explicitly.** A synthesis method should define how missing values in both predictors and the target are handled. synthpop-py provides {class}`~synthpop.data_processing.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_processing.missing_value_handling.ReplaceMissingWithValue`. However, you are free to implement your own strategy.
+7. **Handle missing values explicitly.** A synthesis method should define how missing values in both predictors and the target are handled. synthpop-py provides {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor` and {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`. However, you are free to implement your own strategy.
 
-8. **Support the data types required by your method.** If your algorithm requires numeric inputs, categorical encoding may be necessary. synthpop-py provides {class}`~synthpop.data_processing.encoders.MeanEncoder` and {class}`~synthpop.data_processing.encoders.PCAEncoder` for this purpose. Again, you are free to implement your own custom encoder; see [Example: Custom Encoder](./custom_encoder.md).
+8. **Support the data types required by your method.** If your algorithm requires numeric inputs, categorical encoding may be necessary. synthpop-py provides {class}`~synthpop.data_preparation.encoders.MeanEncoder` and {class}`~synthpop.data_preparation.encoders.PCAEncoder` for this purpose. Again, you are free to implement your own custom encoder; see [Example: Custom Encoder](./custom_encoder.md).
 
 9. **Consider cloning behaviour.** If your synthesis method accepts another estimator as a constructor parameter, ensure that it follows `scikit-learn`'s cloning conventions. In particular, store estimator parameters unchanged in `__init__` so that {class}`sklearn.base.clone` can recreate the estimator correctly.
 

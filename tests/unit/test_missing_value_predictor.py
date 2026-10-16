@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator, clone
 from sklearn.exceptions import NotFittedError
 from sklearn.tree import BaseDecisionTree
 
-from synthpop.data_processing.missing_value_handling import MissingValuePredictor
+from synthpop.data_preparation.missing_value_handling import MissingValuePredictor
 from synthpop.utils import str_dtype
 
 

@@ -11,7 +11,7 @@ from sklearn.base import TransformerMixin, clone
 from sklearn.exceptions import NotFittedError
 from sklearn.tree import DecisionTreeClassifier
 
-from synthpop.data_processing.encoders import MeanEncoder
+from synthpop.data_preparation.encoders import MeanEncoder
 from synthpop.methods import tree_utils
 from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
 from synthpop.reproducibility import RandomStateManager
@@ -40,7 +40,7 @@ class BaseMissingValueHandler(metaclass=ABCMeta):
         Process synthesised data to include missing values.
 
         :param X: The features of the target. Implementers should accept both categoric and numeric data, and should accept missing values here.
-        :param y: the target column, should not contain missing values. 
+        :param y: the target column, should not contain missing values.
 
         :return:  The synthesised target with missing values.
         """
@@ -76,26 +76,26 @@ class MissingValuePredictor(BaseMissingValueHandler):
     Then samples:
         z ~ Bernoulli(P(z=1|x))
 
-    During synthesis, the decision tree determines which leaf each observation belongs to. 
-    A :py:obj:`~synthpop.methods.tree_utils.LeafNodeSampler` then samples whether the target should be missing based on the missingness patterns observed in that leaf. 
+    During synthesis, the decision tree determines which leaf each observation belongs to.
+    A :py:obj:`~synthpop.methods.tree_utils.LeafNodeSampler` then samples whether the target should be missing based on the missingness patterns observed in that leaf.
     This means that missing values are not inserted completely at random: the probability of a value being missing depends on the characteristics of the observation.
 
     See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#predicting-missing-values>`__ for more
     in-depth information on the ``MissingValuePredictor``.
 
-    :param encoder: Default is a :class:`~synthpop.data_processing.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
+    :param encoder: Default is a :class:`~synthpop.data_preparation.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
     :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`__.
     :param tree_sampler: Leaf node sampler. Default is :py:obj:`~synthpop.methods.tree_utils.LeafNodeSampler`.
 
     Examples
     --------
 
-    To configure or change the missing value handling of a synthesis, 
+    To configure or change the missing value handling of a synthesis,
     please see example `configure CART <../../examples/configure_cart_directly.html>`__.
 
     :py:obj:`MissingValuePredictor` can be used directly as follows (note that this is not the intended usage):
 
-    >>> from synthpop.data_processing import MissingValuePredictor
+    >>> from synthpop.data_preparation import MissingValuePredictor
     >>> import numpy as np
     >>>
     >>> X = {"num": np.array([25, 30, 35, 40]), "cat": np.array(["A", "B", "A", "B"], dtype=np.dtypes.StringDType(na_object=np.nan))}
@@ -130,7 +130,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
         First constructs the missingness indicator (`z`) and then applies mean encoding. Finally, a binary decision tree classifier is trained.
 
-        :param X: the features of the target. 
+        :param X: the features of the target.
         :param y: the target column.
 
         :return: a tuple (X, y) of the original data excluding the rows where `y` is missing.
@@ -251,7 +251,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         The method only copies initialisation parameters and does not copy
         any fitted state. Similar to sklearn's ``clone()``.
 
-        :return: A new, unfitted instance of ``MissingValuePredictor()`` with the 
+        :return: A new, unfitted instance of ``MissingValuePredictor()`` with the
             same ``encoder``, ``tree`` and ``tree_sampler`` setting.
 
         Examples
@@ -282,7 +282,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
     :py:obj:`ReplaceMissingWithValue` can be used directly as follows (note that this is not the intended usage):
 
     >>> import numpy as np
-    >>> from synthpop.data_processing import ReplaceMissingWithValue
+    >>> from synthpop.data_preparation import ReplaceMissingWithValue
     >>>
     >>> X = np.array(["a","b","c","c"], dtype=np.dtypes.StringDType(na_object=np.nan))
     >>> y = np.array(["x","y",np.nan,"z"], dtype=np.dtypes.StringDType(na_object=np.nan))
@@ -308,10 +308,10 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         """
         Replaces missing values in the target with "N.a.N."
 
-        :param X: the features of the target. 
+        :param X: the features of the target.
         :param y: the target column.
 
-        :return: a tuple `(X,y)`. Leaves `X` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of `y`. 
+        :return: a tuple `(X,y)`. Leaves `X` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of `y`.
         """
 
         n_samples = X[next(iter(X))].shape[0]
@@ -360,7 +360,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
 
         Note: ``ReplaceMissingWithValue`` does not have learned attributes.
 
-        :return: A new, unfitted instance of ``ReplaceMissingWithValue()`` with the 
+        :return: A new, unfitted instance of ``ReplaceMissingWithValue()`` with the
             same ``missing_marker`` setting.
 
         Examples

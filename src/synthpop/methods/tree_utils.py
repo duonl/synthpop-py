@@ -108,7 +108,7 @@ class LeafNodeSampler:
     2. Sampling phase (``sample_from_leaves``):
         - Provide ``leaf_ids`` for new samples (`X_syn`)
         - A target value is sampled from the empirical distribution associated with that leaf, with probabilities proportional to observed counts.
-    
+
     .. rubric:: Usage
 
     One could use the tree sampler in a tree-based synthesiser method as follows:
@@ -156,14 +156,14 @@ class LeafNodeSampler:
         Fit the sampler by constructing leaf-wise target histograms.
 
         This function passes any missing or non-missing values of `y` to ``treeMethod``. However, at this point
-        in the ``CartMethod`` synthesis, `missing values are handled <../data_processing/Missing_value.html>`__. So when missing values are seen in 
-        `y`, a warning will be raised. 
+        in the ``CartMethod`` synthesis, `missing values are handled <../data_preparation/Missing_value.html>`__. So when missing values are seen in
+        `y`, a warning will be raised.
 
         :param leaf_ids: Leaf identifiers assigned to each training sample `X`. Can be any
             Array-like of shape (n_samples,).
-        :param y: Target values corresponding to the rows of `X`. Can be any 
+        :param y: Target values corresponding to the rows of `X`. Can be any
             Array-like shape (n_samples,).
-        :return: The fitted sampler instance.        
+        :return: The fitted sampler instance.
         """
 
         # input validation
@@ -211,15 +211,15 @@ class LeafNodeSampler:
         """
         Generate synthetic target values for new samples.
 
-        For each input sample (`X_syn`), the corresponding ``leaf_ids`` are given. 
-        A target value (`y_syn`) is then sampled from the empirical distribution 
+        For each input sample (`X_syn`), the corresponding ``leaf_ids`` are given.
+        A target value (`y_syn`) is then sampled from the empirical distribution
         associated with that leaf.
 
         Sampling is performed proportionally to observed frequencies:
             P(y = v | leaf) = count(v) / sum(counts in leaf)
 
         Note that calling this function twice gives the same return value.
-        See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__ 
+        See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__
         and `the API Reference on Reproducibility <../reproducibility/reproducibility.html>`__ for more information.
 
         :param leaf_ids: Leaf IDs of synthetic samples for which target values
@@ -291,7 +291,7 @@ class LeafNodeSampler:
         any fitted state (i.e., ``_leaf_map`` or ``random_state_``).
         Similar to sklearn's ``clone()``.
 
-        :return: A new, unfitted instance of :class:`LeafNodeSampler` with the 
+        :return: A new, unfitted instance of :class:`LeafNodeSampler` with the
             same ``random_state`` setting.
 
         Examples
