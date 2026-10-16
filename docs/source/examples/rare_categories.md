@@ -12,6 +12,8 @@ Although this example is deliberately constructed, similar situations can occur 
 ```
 ## Demonstration of the problem
 
+Here {data}`~synthpop.utils.str_dtype` is the categorical string dtype described in {ref}`string-dtype`. Casting numeric data to it makes the values categorical; it does not reduce their cardinality.
+
 Suppose the following happens:
 
 
