@@ -144,6 +144,19 @@ def test_prepare_data_for_fit_does_not_change_arguments():
     assert y_res[1] == "N.a.N."
 
 
+def test_prepare_data_for_fit_validates_features(mocker):
+    X = {"a": np.array([1, 2])}
+    y = np.array(["x", np.nan], dtype=str_dtype)
+    validate = mocker.patch(
+        "synthpop.data_preparation.missing_value_handling._validate_2d_dict",
+        return_value=(X, 2),
+    )
+
+    ReplaceMissingWithValue().prepare_data_for_fit(X, y)
+
+    validate.assert_called_once_with(X)
+
+
 def test_prepare_data_for_fit_error_when_nan_is_a_value():
     X = {"a": np.array(["a", "b"], dtype=str_dtype)}
     y = np.array(["x", "N.a.N.", np.nan], dtype=str_dtype)
