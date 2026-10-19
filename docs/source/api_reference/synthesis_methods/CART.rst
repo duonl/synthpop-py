@@ -16,15 +16,12 @@ CART synthesis
 .. autofunction:: tune_cart
 
 .. note::
-   Direct use of these classes is only necessary for advanced use cases that require
+   Direct use of the **TreeClassifierMethod** and **TreeRegressorMethod** is only necessary for advanced use cases that require
    custom configuration of CART's underlying components.
    For the recommended way to configure CART, see
    `User Guide 3.1.4 <../../user_guides/3_synthesis_methods.html#configuring-cart>`__
-   and `Example: Configure CART <../.../examples/configure_cart_directly.html>`__.
+   and `Example: Configure CART <../../examples/configure_cart_directly.html>`__.
    
-
-
-
 
 .. _tree-classifier-method:
 
