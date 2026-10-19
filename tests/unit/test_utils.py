@@ -1,4 +1,5 @@
 import re
+import string
 import warnings
 
 import pytest
@@ -379,6 +380,7 @@ def unique_cats(count):
 
 RARE_CATEGORIES_WARN_CASES = [
     (np.array(unique_cats(100) * 5), 6),  # all categories rare
+    (np.array(list(string.ascii_lowercase)[0:10]), 5),  # all values unique
 
     # 6*5 = 30 rows with values that occur 5 times
     # So 30% of the rows have a rare category
