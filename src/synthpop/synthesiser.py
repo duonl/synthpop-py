@@ -207,7 +207,7 @@ class Synthesiser:
         self.n_samples_ = X.shape[0]
         with synthpop.reproducibility.RandomStateManager(seed=self.random_seed):
             for i, y in enumerate(self.column_order_):
-
+                print(y)
                 if i == 0:
                     predictors = pd.DataFrame(
                         {"init": np.zeros(X.shape[0], dtype=int)})
