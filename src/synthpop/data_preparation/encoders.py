@@ -209,7 +209,7 @@ class PCAEncoder(_BaseEncoder):
         # The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val, pd.isna(y_val))
 
-        # edge case for: y is entirely nan, y is not nan but X is nan, y is nan but X is not nan.
+        # edge case for: no row where both y and X are non-missing
         if (np.isnan(y_val) | np.isnan(X_val)).all(): 
             self.mapping_ = {k: [np.nan]
                              for k in missing_contingency_table.index}
