@@ -1,4 +1,5 @@
 import re
+import string
 import warnings
 
 import pytest
@@ -378,11 +379,8 @@ def unique_cats(count):
 
 
 RARE_CATEGORIES_WARN_CASES = [
-    # one row, so unique value , and more than quarter.
-    (np.array(["a"]), 5),
-    (np.array(["a"] * 4), 5),  # rowcount below threshold.
-    (np.array(["a", "b", "c", "d", "e"]), 5),  # all values unique
     (np.array(unique_cats(100) * 5), 6),  # all categories rare
+    (np.array(list(string.ascii_lowercase)[0:10]), 5),  # all values unique
 
     # 6*5 = 30 rows with values that occur 5 times
     # So 30% of the rows have a rare category
@@ -413,8 +411,22 @@ def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
             x, threshold, name=f"column_with_threshold{threshold}")
 
 
+@pytest.mark.parametrize("x", [
+    np.array(["a"]),
+    np.array(["a"] * 4),
+    np.array(["a", "b", "c", "d", "e"]),
+    np.array(unique_cats(9)),
+])
+def test_warn_on_rare_category_does_not_warn_for_small_dataset(x):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert _warn_on_rare_category(
+            x, 5, name="small_dataset"
+        ) is None
+
+
 def test_warn_on_rare_category_no_name():
-    x_in = np.array(["a"], dtype=str_dtype)
+    x_in = np.array(["a", "b", "c"] + ["d"] * 7, dtype=str_dtype)
 
     txt_threshold = re.escape(f"fewer than 2 times")
     txt_column_name = re.escape(f"unnamed predictor")

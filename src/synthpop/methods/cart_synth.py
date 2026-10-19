@@ -55,6 +55,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to an integer, categories occurring fewer than this threshold raise an exception.
         If set to ``0``, the check is disabled.
+        This warning is disabled for datasets with fewer than 10 rows.
         .. note:: Contrary to :func:`tune_cart`, ``rare_categories_threshold`` should not be set to ``None``.
 
     """
@@ -238,6 +239,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to ``0``, the check is disabled.
         Default value is 5.
+        This warning is disabled for datasets with fewer than 10 rows.
 
     .. note:: Contrary to :func:`tune_cart`, ``rare_categories_threshold`` should not be set to ``None``.
 
@@ -311,6 +313,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
         If set to ``0``, the check is disabled.
         Default value is 5.
+        This warning is disabled for datasets with fewer than 10 rows.
 
     .. note:: Contrary to :func:`tune_cart`, ``rare_categories_threshold`` should not be set to ``None``.
 
@@ -621,6 +624,7 @@ def tune_cart(
         A warning is emitted when more than 25% of the observations in a categorical predictor belong to
         categories occurring fewer than this threshold. This warning helps prevent potential
         :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
+        This warning is disabled for datasets with fewer than 10 rows.
 
         - If set to an integer, categories occurring fewer than this threshold are considered rare.
         - If set to ``0``, the rare-category check is disabled.

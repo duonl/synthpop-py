@@ -147,6 +147,9 @@ def _to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
 
 def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None) -> None:
 
+    if x.shape[0] < 10:
+        return
+
     m_nan = pd.isna(x)
     _, counts = np.unique(x[~m_nan], return_counts=True)
     n_nan = m_nan.sum()
