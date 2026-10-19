@@ -36,7 +36,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
 
         return arr
 
-    def validate_string_array(self, x: npt.NDArray) -> npt.NDArray:
+    def _validate_string_array(self, x: npt.NDArray) -> npt.NDArray:
         """
         Transform all missing values in a string array to np.nan. It also converts dtype, reshapes and validates dimensionality.
         :param x: an array of strings.
@@ -192,8 +192,8 @@ class PCAEncoder(_BaseEncoder):
 
         self.n_features_in_ = 1
 
-        X_val = self.validate_string_array(X)
-        y_val = self.validate_string_array(y)
+        X_val = self._validate_string_array(X)
+        y_val = self._validate_string_array(y)
 
         if X_val.shape[0] == 0 or y_val.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
@@ -270,7 +270,7 @@ class PCAEncoder(_BaseEncoder):
         """
 
         check_is_fitted(self, 'mapping_')
-        X_val = self.validate_string_array(X)
+        X_val = self._validate_string_array(X)
         self._check_unseen_values(X_val)
         return self._apply_mapping(X_val)
 
@@ -337,7 +337,7 @@ class MeanEncoder(_BaseEncoder):
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
 
-        X_val = self.validate_string_array(X)
+        X_val = self._validate_string_array(X)
         y_val = self.to_1d(y)
 
         if X_val.shape[0] != y_val.shape[0]:
@@ -374,6 +374,6 @@ class MeanEncoder(_BaseEncoder):
         """
 
         check_is_fitted(self, 'mapping_')
-        X_val = self.validate_string_array(X)
+        X_val = self._validate_string_array(X)
         self._check_unseen_values(X_val)
         return self._apply_mapping(X_val)
