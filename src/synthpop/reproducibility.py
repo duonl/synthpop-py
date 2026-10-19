@@ -40,6 +40,7 @@ class RandomStateManager:
     --------
     Setting a root seed makes RNG creation reproducible:
 
+    >>> from synthpop.reproducibility import RandomStateManager
     >>> RandomStateManager.set_root_seed(42)
     >>> RandomStateManager.create_rng(seed=7).integers(0, 100, 3)
     array([48, 51, 33])
@@ -113,7 +114,7 @@ class RandomStateManager:
 
         Examples
         --------
-        >>> from reproducibility import RandomStateManager
+        >>> from synthpop.reproducibility import RandomStateManager
         >>> class UsesRandom:
         ...     def fit(self, X, y):
         ...             self.random_state_ = RandomStateManager.create_instance_seed()

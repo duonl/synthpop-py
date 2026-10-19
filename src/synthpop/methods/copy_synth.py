@@ -11,7 +11,7 @@ from synthpop.methods import base_synth
 
 class CopyMethod(base_synth.BaseSynthMethod):
     """
-    Synthesis method that copies from the target column. 
+    Synthesis method that copies from the target column.
 
     Examples
     --------
@@ -21,17 +21,17 @@ class CopyMethod(base_synth.BaseSynthMethod):
     `special synthesis method <../../examples/special_syn_method.html>`__ respectively.
 
     **Intended usage in the package is thus:**
-        
+
     >>> from synthpop.methods import CopyMethod
     >>> from synthpop import Synthesiser
-    ... 
-    >>> syn = Synthesiser(special_syn_method={"your_column_name" : CopyMethod()})
+    ...
+    >>> syn = Synthesiser(special_syn_method={"your_column_name": CopyMethod()})
 
     The ``CopyMethod`` can be used directly as follows (note that this is not the intended usage):
 
     >>> from synthpop.methods import CopyMethod
     >>> import pandas as pd
-    >>> 
+    >>>
     >>> X = pd.DataFrame({"X": [1, 2, 3]})
     >>> y = pd.Series(["a", "b", "c"], name="target_column")
     >>>
@@ -39,26 +39,26 @@ class CopyMethod(base_synth.BaseSynthMethod):
     >>> model.fit(X, y)
     CopyMethod()
     >>> model.transform(X)
-    target_column
     0             a
     1             b
     2             c
+    Name: target_column, dtype: str
 
     As ``CopyMethod`` does not use predictors to copy `y`, it can be called without `X`:
 
     >>> from synthpop.methods import CopyMethod
     >>> import pandas as pd
-    >>> 
+    >>>
     >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
     >>>
     >>> model = CopyMethod()
     >>> model.fit(None, y)
     CopyMethod()
     >>> model.transform(None)
-    new_target_column
     0             1
     1             2
     2             <NA>
+    Name: new_target_column, dtype: object
     """
 
     def __init__(self) -> None:
@@ -73,7 +73,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
         """
         if not isinstance(y, pd.Series):
             raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
-        
+
         self.y_ = y.copy()
         self.target_name_ = y.name
         self.n_samples_ = len(y)
@@ -89,7 +89,7 @@ class CopyMethod(base_synth.BaseSynthMethod):
             self.n_features_in_ = X.shape[1]
 
         return self
-    
+
     def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
         Returns an exact copy of the fitted target column.
@@ -105,13 +105,13 @@ class CopyMethod(base_synth.BaseSynthMethod):
             or not hasattr(self, "target_dtype_")
         ):
             raise NotFittedError("CopyMethod is not fitted. Call `fit` first.")
-        
+
         if X is not None:
             if len(X) != self.n_samples_:
                 raise ValueError(f"Row mismatch: expected {self.n_samples_}, got {len(X)}.")
-        
+
         return pd.Series(self.y_.values, name=self.target_name_, dtype=self.target_dtype_)
-    
+
     def get_feature_names_out(self, input_features: list[str] | None = None) -> list[str]:
         """
         Return the name of the synthesised target column.

@@ -56,7 +56,7 @@ This checks whether the implementation is fully and meaningfully validated acros
 ## 5. Reviewing the tests (quality and robustness)
 This checks whether tests are reliable, maintainable and validate behaviour rather than implementation.
 ### Coverage dimensions
-This checks whether tests ocover the full behavioural space of the system from a user and specification perspective.
+This checks whether tests cover the full behavioural space of the system from a user and specification perspective.
 - [ ] Tests reflect expected user-facing behaviour, not internal implementation details
 - [ ] Correct output type, shape, and schema are tested
 - [ ] Behaviour in trivial cases is tested (e.g. empty inputs, single values)

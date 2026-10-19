@@ -1,5 +1,5 @@
 """
-This module contains a function to visually inspect the univariate distributions. 
+This module contains a function to visually inspect the univariate distributions.
 """
 from pathlib import Path
 import tempfile
@@ -14,7 +14,7 @@ original_colour = "#004488"
 synthetic_colour = "#DDAA33"
 
 def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.Histogram]:
-    
+
     orig_non_missing = orig.dropna()
     syn_non_missing = syn.dropna()
 
@@ -28,7 +28,7 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
             go.Histogram(x=[], name="Original"),
             go.Histogram(x=[], name="Synthetic")
         )
-    
+
     is_integer = (
         pd.api.types.is_integer_dtype(orig)
         and pd.api.types.is_integer_dtype(syn)
@@ -78,7 +78,7 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
 
 def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
 
-    # set input Series to 'string' to avoid 
+    # set input Series to 'string' to avoid
     # "TypeError: Cannot setitem on a Categorical with a new category (<MISSING>)"
     # when the input is category dtype
     orig_str = orig.astype("string").fillna("<MISSING>")
@@ -259,13 +259,13 @@ def _write_html(html_content: str, save_path: str | None) -> Path:
 
 
 def plot_univariate_distributions(
-        orig_df: pd.DataFrame, 
-        syn_df: pd.DataFrame, 
+        orig_df: pd.DataFrame,
+        syn_df: pd.DataFrame,
         save_path: str | None =  None,
         interactive: bool = False,
         ) -> list[go.Figure]:
     """
-    Create interactive univariate distribution plots comparing original and 
+    Create interactive univariate distribution plots comparing original and
     synthetic datasets.
 
     For each variable in the datasets, a separate Plotly visualisation is
@@ -276,7 +276,7 @@ def plot_univariate_distributions(
     annotations.
 
     The original and synthetic datasets must contain identical columns.
-    Variables are processed independently and visualised sequentially in a 
+    Variables are processed independently and visualised sequentially in a
     single HTML document to support scrolling and browser-based search.
 
     If a saving location is provided, the generated HTML document is written
@@ -285,7 +285,7 @@ def plot_univariate_distributions(
     automatically opened in the default web browser. When no saving location
     is provided, a temporary HTML file is created and opened only when
     interactive mode is enabled.
-    
+
     :param orig_df: Original/observed dataset.
     :param syn_df: Synthetic dataset. Must contain the same columns as `orig_df`.
     :param save_path: Directory where the HTML output file will be written.
@@ -308,7 +308,7 @@ def plot_univariate_distributions(
     Examples
     --------
     Using the default parameters:
-    
+
     >>> import numpy as np
     >>> import pandas as pd
     >>> from synthpop.plotting import plot_univariate_distributions
@@ -338,8 +338,8 @@ def plot_univariate_distributions(
     ...         ),
     ...     }
     ... )
-    >>>
-    >>> orig_df.loc[:50, "age"] = np.nan # add missing
+    >>> # add missing
+    >>> orig_df.loc[:50, "age"] = np.nan
     >>> syn_df.loc[:30, "age"] = np.nan
     >>>
     >>> plots = plot_univariate_distributions(
@@ -350,7 +350,7 @@ def plot_univariate_distributions(
     ... )
     >>> for fig in plots:
     ...     fig.show()
-            
+
     """
     if not isinstance(orig_df, pd.DataFrame):
         raise ValueError(f"The original data should be a pandas DataFrame, got {type(orig_df)} instead.")
@@ -377,5 +377,5 @@ def plot_univariate_distributions(
 
     if interactive:
         webbrowser.open(html_file.resolve().as_uri())
-    
+
     return figures

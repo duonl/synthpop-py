@@ -45,7 +45,7 @@ synthesiser = Synthesiser(
 The value `20` is passed to the `min_samples_leaf` parameter of the decision trees used for:
 - {ref}`classification <tree-classifier-method>`;
 - {ref}`regression <tree-regressor-method>`; and
-- [predicting missing values](../api_reference/data_processing/Missing_value.rst).
+- [predicting missing values](../api_reference/data_preparation/Missing_value.rst).
 
 The parameter corresponds to `min_samples_leaf` in [scikit-learn's decision tree estimators](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
@@ -56,7 +56,7 @@ This affects the synthetic data because the tree's predictions are based on thes
 With a **larger** value, the tree must base its predictions on larger groups of observations. This generally produces a more generalised and less complex model, reducing the influence of individual or rare observations and potentially lowering computational costs. The trade-off is that the tree may no longer be able to capture genuine complex relationships in the data, resulting in [underfitting](https://en.wikipedia.org/wiki/Overfitting#Underfitting:~:text=training%20and%20inference.-,Underfitting,-edit).
 
 ## Change the number of principal components
-CART uses a {class}`~synthpop.data_processing.encoders.PCAEncoder` to encode categorical predictors before passing them to the classifier. This is necessary because the classifier operates on numeric features. Additionally, categorical variables can contain many levels, which can substantially increase the computational cost of the model.
+CART uses a {class}`~synthpop.data_preparation.encoders.PCAEncoder` to encode categorical predictors before passing them to the classifier. This is necessary because the classifier operates on numeric features. Additionally, categorical variables can contain many levels, which can substantially increase the computational cost of the model.
 
 The `n_components` parameter controls the number of principal components and thus how much of this encoded information is retained by PCA.
 

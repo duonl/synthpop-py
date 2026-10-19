@@ -90,16 +90,17 @@ For advanced use cases, `CartMethod` can also be used without the synthesis-meth
 
 ```python
 >>> from synthpop.methods import CartMethod
+>>> import pandas as pd
 
 >>> X = pd.DataFrame({'age': [20, 40, 60], 'profession': ['butler', 'cook', 'cook']})
->>> y = pd.Series([50.0, 60.0, 70.0], dtype='float32', name='length')
+>>> y = pd.Series([50.0, 60.0, 70.0], name='length')
 >>> method = CartMethod().fit(X, y)
 >>> method.transform(X)
 0    50.0
 1    70.0
 2    60.0
-Name: length, dtype: float32
-```    
+Name: length, dtype: float64
+```
 
 Here, `X` contains the predictor columns that have previously been synthesised, while `y` is the observed target column that the method learns to synthesise. After fitting, `transform(X)` generates values for that target column, based on the supplied predictors.
 
@@ -113,7 +114,7 @@ CART is applied sequentially to the columns of the dataset.
 For the first column, no predictors are available. In that case, CART samples directly from the empirical distribution of that column. For each subsequent target column $Y$ assigned to `CartMethod`, the following steps are performed:
 
 1. **Feature construction**
-   
+
    Use all previously synthesised columns as predictors:
    ```{math}
    X = (X_1, \dots, X_k)
@@ -128,7 +129,7 @@ For the first column, no predictors are available. In that case, CART samples di
 
 
 3. **Fit the decision tree**
-   
+
    Fit a decision tree to learn the relationship between the predictors and target:
    ```{math}
    T = \text{Tree}(X, Y)
@@ -136,7 +137,7 @@ For the first column, no predictors are available. In that case, CART samples di
    The fitted tree partitions the predictor space into regions represented by leaf nodes.
 
 4. **Assign training observations to leaves**
-   
+
    Each observed training observation is passed through the fitted tree:
    ```{math}
    \ell_i = T(X_i)
@@ -160,7 +161,7 @@ For the first column, no predictors are available. In that case, CART samples di
    This preserves the empirical variability of observations within each leaf instead of reducing the target to a single predicted value such as a mean or most likely category.
 
 6. **Generate synthetic values**
-   
+
    For each synthetic observation:
    - pass its predictor values through the fitted tree to determine the corresponding leaf;
    - sample a target value from the empirical distribution stored for that leaf.
@@ -202,7 +203,7 @@ The resulting method can be passed to {class}`~synthpop.synthesiser.Synthesiser`
 
 Currently, `tune_cart` supports:
 - `min_samples_leaf`: sets the minimum number of observations in each leaf node of the decision trees used during synthesis. It is passed to `min_samples_leaf` in each [`scikit-learn` tree](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html). Increasing this value can improve privacy by limiting the influence of individual components, but may also reduce the model's ability to capture fine-grained patterns. More information about this can be found in {ref}`Guide 6: Evaluating and improving privacy <6122-rare-categories>`.
-- `n_components`: sets the number of principal components retained by the {class}`~synthpop.data_processing.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`. 
+- `n_components`: sets the number of principal components retained by the {class}`~synthpop.data_preparation.encoders.PCAEncoder` used for categorical predictors. More information can be found in {ref}`Guide 4.1.1 <411-pca-encoding>`.
 - `rare_categories_threshold`: sets the number of observations below which a categorical predictor values is considered rare. A warning is raised when rare categories account for at least 25% of the observations. See the {class}`API reference <synthpop.methods.cart_synth.tune_cart>` or the {ref}` examples <example-rare-category-tune-cart>` for more information.
 
 For more detailed customisation, {class}`~synthpop.methods.cart_synth.CartMethod` and its underlying components can be constructed directly:
@@ -249,7 +250,7 @@ For synthesising a complete dataset, specify `SampleMethod` when creating the {c
 
 >>> synth = Synthesiser(default_syn_method=SampleMethod())
 >>> synthetic_data = synth.fit(original_data).generate()
-```  
+```
 
 This configures `SampleMethod` as the default synthesis method for the dataset. {class}`~synthpop.synthesiser.Synthesiser` is responsible for orchestrating the synthesis of the complete dataset and determining which columns are passed to each synthesis method. The method can also be configured for a specific column using `special_syn_method`. See {ref}`Guide 2.2.3: Column-level control <223-column-level-control>`.
 
@@ -302,10 +303,10 @@ For advanced use cases, `SampleMethod` can also be implemented without the synth
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = SampleMethod(random_state=10).fit(None, y)
 >>> model.transform(None)
-new_target_column
 0              <NA>
 1              <NA>
 2                 1
+Name: new_target_column, dtype: object
 ```
 
 Unlike `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` can receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.
@@ -436,10 +437,10 @@ For advanced use cases, `CopyMethod` can also be used without the synthesis-meth
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
 >>> model = CopyMethod().fit(None, y)
 >>> model.transform(None)
-new_target_column
 0             1
 1             2
 2             <NA>
+Name: new_target_column, dtype: object
 ```
 
 Here, `y` is the observed target column. `CopyMethod` does not require predictor data, so both `fit` and `transform` receive `None` for the predictors.

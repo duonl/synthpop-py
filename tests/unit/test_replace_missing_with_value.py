@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from synthpop.data_processing.missing_value_handling import ReplaceMissingWithValue
+from synthpop.data_preparation.missing_value_handling import ReplaceMissingWithValue
 from synthpop.utils import str_dtype
 
 
@@ -60,6 +60,13 @@ def get_test_data():
             np.array([1, -8, 3], dtype=np.float64),
             -8,
         ),
+
+        (
+            {"a": np.array(["a", "b", "a"], dtype=str_dtype)},
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3], dtype=np.int64),
+            -8,
+        ),
     ]
 
     return test_data_np_arrays
@@ -90,7 +97,21 @@ def get_post_synth_test_data():
                 np.array(["a", "c", "b", not_missing], dtype=str_dtype),
                 None,
             )
-            for not_missing in ["not missing", "missing", "Nan", "None"]]
+            for not_missing in ["not missing", "missing", "Nan", "None"]] + \
+        [
+            (
+                np.array([1, 2, 3, -8, 5]),
+                np.array([1, 2, 3, np.nan, 5], dtype=dtype_y),
+                -8,
+            )
+        for dtype_y in [np.float32, np.float64]] + \
+        [
+            (
+                np.array([1, 2, 3, 4, 5]),
+                np.array([1, 2, 3, 4, 5], dtype=dtype_y),
+                -8,
+            )
+            for dtype_y in [np.int64, np.int32, np.float32, np.float64]]
 
     return [(x_values, *y_val) for y_val in y_values_np_array]
 
@@ -99,8 +120,8 @@ def get_post_synth_test_data():
 
 
 @pytest.mark.parametrize(
-        "X_in, y_in, y_exp, missing_indicator",
-        get_test_data()
+    "X_in, y_in, y_exp, missing_indicator",
+    get_test_data()
 )
 def test_prepare_data_for_fit_numeric_correctness(X_in, y_in, y_exp, missing_indicator):
     replace_nan = ReplaceMissingWithValue(missing_marker=missing_indicator)
@@ -109,6 +130,7 @@ def test_prepare_data_for_fit_numeric_correctness(X_in, y_in, y_exp, missing_ind
     assert X_res is X_in
     assert np.array_equal(y_exp, y_res, equal_nan=True)
     assert y_exp.dtype == y_res.dtype
+    assert replace_nan.target_dtype_ == y_in.dtype
 
 
 def test_prepare_data_for_fit_does_not_change_arguments():
@@ -120,6 +142,19 @@ def test_prepare_data_for_fit_does_not_change_arguments():
 
     assert pd.isna(y[1])
     assert y_res[1] == "N.a.N."
+
+
+def test_prepare_data_for_fit_validates_features(mocker):
+    X = {"a": np.array([1, 2])}
+    y = np.array(["x", np.nan], dtype=str_dtype)
+    validate = mocker.patch(
+        "synthpop.data_preparation.missing_value_handling._validate_2d_dict",
+        return_value=(X, 2),
+    )
+
+    ReplaceMissingWithValue().prepare_data_for_fit(X, y)
+
+    validate.assert_called_once_with(X)
 
 
 def test_prepare_data_for_fit_error_when_nan_is_a_value():
@@ -152,6 +187,7 @@ def test_post_synth_transform_correct_on_data(x, y_in, y_exp, missing_marker):
     else:
         transform = ReplaceMissingWithValue(missing_marker=missing_marker)
 
+    transform.target_dtype_ = y_exp.dtype
     y_res = transform.post_synth_transform(x, y_in)
     assert np.array_equal(y_res, y_exp, equal_nan=True)
     assert y_res.dtype == y_exp.dtype
@@ -162,6 +198,7 @@ def test_post_synth_transform_replaces_nan():
     y = np.array(["a", "b", "N.a.N."], dtype=str_dtype)
 
     replace_nan = ReplaceMissingWithValue()
+    replace_nan.target_dtype_ = y.dtype
 
     result = replace_nan.post_synth_transform(X, y)
     assert result[0] == "a"
@@ -174,6 +211,7 @@ def test_post_synth_transform_does_nothing_when_no_nan():
     y = np.array(["a", "b"], dtype=str_dtype)
 
     replace_nan = ReplaceMissingWithValue()
+    replace_nan.target_dtype_ = y.dtype
 
     result = replace_nan.post_synth_transform(X, y)
     assert (result == y).all()
