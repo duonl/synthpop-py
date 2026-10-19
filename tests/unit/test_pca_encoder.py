@@ -293,12 +293,23 @@ def test_pca_fit_input_features_is_full_nan():
     encoder = PCAEncoder(pca_transform=stub_pca_transform)
 
     X = np.array([np.nan, np.nan])
-    y = np.array([1, 2])
+    y = np.array(['a', 'b'])
 
     encoder.fit(X, y)
 
     assert encoder.mapping_ == {}
 
+def test_pca_fit_input_features_is_reverse_nan_of_target():
+
+    stub_pca_transform = TransformStub()
+    encoder = PCAEncoder(pca_transform=stub_pca_transform)
+
+    X = np.array(['a', np.nan], dtype=str_dtype)
+    y = np.array([np.nan, 'b'], dtype=str_dtype)
+
+    encoder.fit(X, y)
+    assert encoder.n_features_out_ == 1
+    assert encoder.mapping_ == {'a': [np.nan]}
 
 def test_pca_fit_empty_input():
     """
