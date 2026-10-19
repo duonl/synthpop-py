@@ -317,7 +317,7 @@ class ReplaceMissingWithValue(BaseMissingValueHandler):
         :return: a tuple `(X,y)`. Leaves `X` unchanged. Replaces missing values in the target with "N.a.N.". Makes a copy of `y`.
         """
 
-        n_samples = X[next(iter(X))].shape[0]
+        _, n_samples = _validate_2d_dict(X)
         self.target_dtype_ = y.dtype
         y_val = _validate_1d_target(y.copy(), n_samples)
 
