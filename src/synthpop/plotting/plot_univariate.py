@@ -13,6 +13,7 @@ from plotly.io import to_html
 original_colour = "#004488"
 synthetic_colour = "#DDAA33"
 
+
 def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.Histogram]:
 
     orig_non_missing = orig.dropna()
@@ -24,7 +25,7 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
     )
 
     if len(combined) == 0:
-        return(
+        return (
             go.Histogram(x=[], name="Original"),
             go.Histogram(x=[], name="Synthetic")
         )
@@ -62,7 +63,7 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
         histnorm="probability density",
         xbins=xbins,
         opacity=0.6,
-        marker_color = original_colour,
+        marker_color=original_colour,
     )
 
     syn_hist = go.Histogram(
@@ -71,10 +72,11 @@ def _make_histograms(orig: pd.Series, syn: pd.Series) -> tuple[go.Histogram, go.
         histnorm="probability density",
         xbins=xbins,
         opacity=0.6,
-        marker_color = synthetic_colour,
+        marker_color=synthetic_colour,
     )
 
     return orig_hist, syn_hist
+
 
 def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
 
@@ -106,7 +108,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
         x=levels,
         y=orig_density,
         name="Original",
-        marker_color = original_colour,
+        marker_color=original_colour,
         customdata=[
             int(
                 (orig_str.fillna("<MISSING>") == level).sum()
@@ -125,7 +127,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
         x=levels,
         y=syn_density,
         name="Synthetic",
-        marker_color = synthetic_colour,
+        marker_color=synthetic_colour,
         customdata=[
             int(
                 (syn_str.fillna("<MISSING>") == level).sum()
@@ -141,6 +143,7 @@ def _make_bars(orig: pd.Series, syn: pd.Series) -> tuple[go.Bar, go.Bar]:
     )
 
     return orig_bar, syn_bar
+
 
 def _plot_single_distribution(orig: pd.Series, syn: pd.Series, column: str) -> go.Figure:
 
@@ -199,6 +202,7 @@ def _plot_single_distribution(orig: pd.Series, syn: pd.Series, column: str) -> g
 
     return fig
 
+
 def _build_html(figures: list[go.Figure]) -> str:
 
     html_parts = [
@@ -225,6 +229,7 @@ def _build_html(figures: list[go.Figure]) -> str:
     html_parts.append("</body></html>")
 
     return "\n".join(html_parts)
+
 
 def _write_html(html_content: str, save_path: str | None) -> Path:
 
@@ -261,9 +266,9 @@ def _write_html(html_content: str, save_path: str | None) -> Path:
 def plot_univariate_distributions(
         orig_df: pd.DataFrame,
         syn_df: pd.DataFrame,
-        save_path: str | None =  None,
+        save_path: str | None = None,
         interactive: bool = False,
-        ) -> list[go.Figure]:
+) -> list[go.Figure]:
     """
     Create interactive univariate distribution plots comparing original and
     synthetic datasets.
@@ -353,11 +358,14 @@ def plot_univariate_distributions(
 
     """
     if not isinstance(orig_df, pd.DataFrame):
-        raise ValueError(f"The original data should be a pandas DataFrame, got {type(orig_df)} instead.")
+        raise ValueError(
+            f"The original data should be a pandas DataFrame, got {type(orig_df)} instead.")
     if not isinstance(syn_df, pd.DataFrame):
-        raise ValueError(f"The synthetic data should be a pandas DataFrame, got {type(syn_df)} instead.")
+        raise ValueError(
+            f"The synthetic data should be a pandas DataFrame, got {type(syn_df)} instead.")
     if list(orig_df.columns) != list(syn_df.columns):
-        raise ValueError("Original and synthetic datasets must have identical columns.")
+        raise ValueError(
+            "Original and synthetic datasets must have identical columns.")
 
     figures = [
         _plot_single_distribution(

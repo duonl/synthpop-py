@@ -76,7 +76,8 @@ class SampleMethod(BaseSynthMethod):
         :param y: Target column.
         """
         if not isinstance(y, pd.Series):
-            raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
+            raise TypeError(
+                f"y must be a pandas Series, got {type(y)} instead.")
         self.target_name_ = y.name
         self.n_samples_ = len(y)
         self.target_dtype_ = y.dtype
@@ -117,12 +118,14 @@ class SampleMethod(BaseSynthMethod):
             or not hasattr(self, "random_state_")
             or not hasattr(self, "target_dtype_")
         ):
-            raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
+            raise NotFittedError(
+                "SampleMethod is not fitted. Call `fit` first.")
 
         n = len(X) if X is not None else self.n_samples_
         rng = RandomStateManager.create_rng(seed=self.random_state_)
 
-        sampled = synthpop.methods.tree_utils._sample_array(rng, self.counts_, self.values_, n)
+        sampled = synthpop.methods.tree_utils._sample_array(
+            rng, self.counts_, self.values_, n)
 
         return pd.Series(sampled, name=self.target_name_, dtype=self.target_dtype_)
 
@@ -145,7 +148,8 @@ class SampleMethod(BaseSynthMethod):
         :raises NotFittedError: If the estimator has not been fitted.
         """
         if not hasattr(self, "target_name_"):
-            raise NotFittedError("SampleMethod is not fitted. Call `fit` first.")
+            raise NotFittedError(
+                "SampleMethod is not fitted. Call `fit` first.")
 
         if input_features is None:
             if hasattr(self, "feature_names_in_"):

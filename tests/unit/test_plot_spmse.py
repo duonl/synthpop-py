@@ -152,6 +152,7 @@ def test_make_text_matrix_test_show_values():
 
     pd.testing.assert_frame_equal(output, matrix)
 
+
 def test_make_text_matrix_test_show_no_values():
     """
     Test that checks the text matrix
@@ -177,6 +178,7 @@ def test_make_text_matrix_test_show_no_values():
     pd.testing.assert_frame_equal(output, matrix)
 
 # ----- _get_colour_scale tests -----
+
 
 def test_get_colour_scale_structure():
     """

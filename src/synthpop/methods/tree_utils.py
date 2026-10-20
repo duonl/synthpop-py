@@ -61,14 +61,15 @@ def _fit_decision_tree_with_reachable_leaves(
 
     for _ in range(99):
         candidate = clone(decision_tree)
-        candidate.random_state=RandomStateManager.create_instance_seed()
+        candidate.random_state = RandomStateManager.create_instance_seed()
         candidate.fit(X, y)
 
         if _check_all_leaf_nodes_are_reached(tree=candidate.tree_, X_train=X):
             return candidate
 
     raise RuntimeError(
-        f"Failed to fit a decision tree with reachable leaves after 100 attempts. "  # 99+the initial attempt is 100
+        # 99+the initial attempt is 100
+        f"Failed to fit a decision tree with reachable leaves after 100 attempts. "
         "Try changing the root seed or tree parameters."
     )
 

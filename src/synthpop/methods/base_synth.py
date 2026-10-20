@@ -1,6 +1,6 @@
 """
 This module contains the base class for all synthesis methods.
-""" 
+"""
 from abc import abstractmethod, ABCMeta
 from typing import Self
 
@@ -27,7 +27,7 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     def __init__(self) -> None:
         super().__init__()
         # If an estimator is given as a parameter, it should be cloned using the clone() method.
-    
+
     @abstractmethod
     def fit(self, X: pd.DataFrame | None, y: pd.Series) -> Self:
         """
@@ -36,19 +36,19 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
 
         There should be an implementation of missing values support in case of missing values in feature columns.
         There should be a binary classifier to predict missing values if the target variable includes missing values.
-        
+
         :param X: Dataset of features, may be heterogeneous
         :param y: Target variable
         :return: A fitted model
         """
         # Using sklearn.utils.validation.validate_data, set the attribute feature_names_in_ to X and y.
-        # That method sets the attribute. 
+        # That method sets the attribute.
         # For example:
         # from sklearn.utils.validation import validate_data
         # ....
         # X, y = validate_data(self, X, y)
         pass
-    
+
     @abstractmethod
     def transform(self, X: pd.DataFrame | None) -> pd.Series:
         """
@@ -62,25 +62,25 @@ class BaseSynthMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         :return: Synthetic column.
         """
         return pd.Series()
-    
+
     def score(self, X: pd.DataFrame, y: pd.Series) -> float:
         return 0.0
-    
+
     # def get_params(self, deep: bool = True) -> dict:
     #     return super().get_params(deep)
-    
+
     # def set_params(self, **params) -> Self:
     #     return super().set_params(**params)
-    
+
     @abstractmethod
     def get_feature_names_out(self, input_features=None):
         """
         Get output feature names and category names for transformation. This method is required to support the ``set_output(transform="pandas")`` API in scikit-learn.
-        
+
         See the developer API for ``set_output`` <https://scikit-learn.org/stable/developers/develop.html#developer-api-for-set-output>`__,
         `SLEP018 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html>`__ and `SLEP007 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep007/proposal.html>`__.
-        
+
         :param input_features: array-like of str or None. Input feature names. If None, the feature names seen during ``fit`` are used.
         """
-        
+
         pass
