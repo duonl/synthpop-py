@@ -233,7 +233,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_preparation.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`
-    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils._LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
         A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold.
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
@@ -307,7 +307,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_preparation.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
-    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils._LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
         A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold.
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
