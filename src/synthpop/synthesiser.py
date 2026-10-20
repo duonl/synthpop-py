@@ -213,6 +213,7 @@ class Synthesiser:
         self.models_ = {}
         self.n_samples_ = X.shape[0]
         verbose =  not bool(self.verbose)
+        
         with synthpop.reproducibility.RandomStateManager(seed=self.random_seed), _progress_bar(disable=verbose, transient=verbose) as pbar:
             task_id = pbar.add_task(
             "Fitting",
