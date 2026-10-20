@@ -12,7 +12,7 @@ landingURL: "https://synthpop-py.readthedocs.io"
 
 # Type of software: https://yml.publiccode.tools/schema.core.html#key-softwaretype
 # The value 'library' is used when the intended audience are developers. That is not the case for this project.
-# The intended audience are datascientist, using python.
+# The intended audience are data scientists using python.
 softwareType: library
 
 platforms:
@@ -27,7 +27,7 @@ categories:
   - data-collection
   - predictive-analysis
 
-# Description of statusses: https://yml.publiccode.tools/schema.core.html#key-developmentstatus
+# Description of statuses: https://yml.publiccode.tools/schema.core.html#key-developmentstatus
 developmentStatus: stable
 
 description:
