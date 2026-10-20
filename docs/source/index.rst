@@ -12,8 +12,10 @@
    user_guides/user_guides_index
    examples/examples_index
    api_reference/synthpop
+   FAQ <faq/faq>
    developer/developer_index
    about_us/about_us
+   release_notes/index
 
 synthpop-py documentation
 ==========================

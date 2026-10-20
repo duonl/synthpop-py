@@ -36,7 +36,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
 
         return arr
 
-    def validate_string_array(self, x: npt.NDArray) -> npt.NDArray:
+    def _validate_string_array(self, x: npt.NDArray) -> npt.NDArray:
         """
         Transform all missing values in a string array to np.nan. It also converts dtype, reshapes and validates dimensionality.
         :param x: an array of strings.
@@ -96,24 +96,24 @@ class PCAEncoder(_BaseEncoder):
     """
     Transforms categorical data to one or more numeric columns.
     The user can adjust the number of principal components by passing an instance of :class:`sklearn.decomposition.PCA` to `pca_transform`.
-    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#pca-encoding>`__ 
+    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#pca-encoding>`__
     for more in-depth information on PCA encoding.
 
-    :param pca_transform: The pca transform used. The default value is :class:`sklearn.decomposition.PCA`. 
-        See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters. 
+    :param pca_transform: The pca transform used. The default value is :class:`sklearn.decomposition.PCA`.
+        See `sklearn.decomposition.PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_ for the possible parameters.
         With the default parameters, all principal components are computed and used.
 
     Examples
     --------
 
-    PCAEncoding is a dependency of the :py:obj:`~synthpop.methods.cart_synth.CartMethod`. The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA` 
+    PCAEncoding is a dependency of the :py:obj:`~synthpop.methods.cart_synth.CartMethod`. The number of components :py:attr:`n_components` in :class:`sklearn.decomposition.PCA`
     can be changed using the :py:obj:`~synthpop.methods.cart_synth.tune_cart` method.
 
     **Intended usage in this package is:**
-    
+
     >>> from synthpop.methods import tune_cart
     >>> from synthpop import Synthesiser
-    ... 
+    ...
     >>> default_syn_method = tune_cart(n_components=1)
     >>> syn = Synthesiser(default_syn_method=default_syn_method)
 
@@ -122,44 +122,44 @@ class PCAEncoder(_BaseEncoder):
     The encoder can be used directly as follows (note that this is not the intended usage):
 
     >>> import numpy as np
-    >>> from synthpop.data_processing import PCAEncoder
-    >>> X = np.array(["a", "a","b","b","c"])
-    >>> y = np.array(["x", "x","y","z","w"])
-    >>> pca_encoder = PCAEncoder() 
+    >>> from synthpop.data_preparation import PCAEncoder
+    >>> X = np.array(["a", "a", "b", "b", "c"])
+    >>> y = np.array(["x", "x", "y", "z", "w"])
+    >>> pca_encoder = PCAEncoder()
     >>> pca_encoder.fit(X=X, y=y)
     PCAEncoder()
     >>> pca_encoder.transform(X)
     array([[-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
-    [-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
-    [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
-    [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
-    [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
+       [-1.1180340e+00, -1.5000000e+00, -1.2019867e-16],
+       [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
+       [ 2.2360680e+00, -1.2953263e-15, -1.2019867e-16],
+       [-1.1180340e+00,  1.5000000e+00, -1.2019867e-16]], dtype=float32)
 
 
     with a different number of principal components (only the first):
 
     >>> import numpy as np
     >>> from sklearn.decomposition import PCA
-    >>> from synthpop.data_processing import PCAEncoder
+    >>> from synthpop.data_preparation import PCAEncoder
     >>> pca_encoder = PCAEncoder(pca_transform=PCA(n_components=1))
-    >>> X = np.array(["a", "a","b","b","c"])
-    >>> y = np.array(["x", "x","y","z","w"])
+    >>> X = np.array(["a", "a", "b", "b", "c"])
+    >>> y = np.array(["x", "x", "y", "z", "w"])
     >>> pca_encoder.fit_transform(X, y)
     array([[-1.118034],
-    [-1.118034],
-    [ 2.236068],
-    [ 2.236068],
-    [-1.118034]], dtype=float32)
+       [-1.118034],
+       [ 2.236068],
+       [ 2.236068],
+       [-1.118034]], dtype=float32)
 
     preserving 75% of variance:
 
-    >>> pca_encoder2 = PCAEncoder(pca_transform=PCA(n_components=0.75)) 
-    >>> pca_encoder2.fit_transform(X, y) 
+    >>> pca_encoder2 = PCAEncoder(pca_transform=PCA(n_components=0.75))
+    >>> pca_encoder2.fit_transform(X, y)
     array([[-1.1180340e+00, -1.5000000e+00],
-    [-1.1180340e+00, -1.5000000e+00],
-    [ 2.2360680e+00, -1.2953263e-15],
-    [ 2.2360680e+00, -1.2953263e-15],
-    [-1.1180340e+00,  1.5000000e+00]], dtype=float32)
+       [-1.1180340e+00, -1.5000000e+00],
+       [ 2.2360680e+00, -1.2953263e-15],
+       [ 2.2360680e+00, -1.2953263e-15],
+       [-1.1180340e+00,  1.5000000e+00]], dtype=float32)
 
     """
 
@@ -192,24 +192,30 @@ class PCAEncoder(_BaseEncoder):
 
         self.n_features_in_ = 1
 
-        X_val = self.validate_string_array(X)
-        y_val = self.validate_string_array(y)
+        X_val = self._validate_string_array(X)
+        y_val = self._validate_string_array(y)
 
         if X_val.shape[0] == 0 or y_val.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
         if X_val.shape[0] != y_val.shape[0]:
             raise ValueError("Number of observations in X and y do not match")
 
+        if np.isnan(X_val).all():
+            self.mapping_ = {}  # If X is fully nan, mapping_ should be an empty dictionary, just like MeanEncoder
+            self.n_features_out_ = 1
+            return self
         # the core of this implementation
 
         # The alternative to using pandas here is either use scipy or DIY.
         missing_contingency_table = pd.crosstab(X_val, pd.isna(y_val))
 
-        if np.isnan(y_val).all():   # If there are only missing values for y:
+        # edge case for: no row where both y and X are non-missing
+        if (np.isnan(y_val) | np.isnan(X_val)).all(): 
             self.mapping_ = {k: [np.nan]
                              for k in missing_contingency_table.index}
             self.n_features_out_ = 1
             return self
+
         x_such_that_y_is_not_always_missing = missing_contingency_table[
             missing_contingency_table[False] != 0].index
 
@@ -265,7 +271,7 @@ class PCAEncoder(_BaseEncoder):
         """
 
         check_is_fitted(self, 'mapping_')
-        X_val = self.validate_string_array(X)
+        X_val = self._validate_string_array(X)
         self._check_unseen_values(X_val)
         return self._apply_mapping(X_val)
 
@@ -274,7 +280,7 @@ class MeanEncoder(_BaseEncoder):
     """
     Transforms categorical data to numeric using mean encoding.
     The feature column `X` is encoded based on a numeric target column `y`.
-    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#mean-encoding>`__ 
+    See `User Guide 4: Data preparation during synthesis <../../user_guides/4_data_preparation.html#mean-encoding>`__
     for more in-depth information on mean encoding
 
     Examples
@@ -283,12 +289,13 @@ class MeanEncoder(_BaseEncoder):
 
     :py:obj:`~synthpop.encoders.MeanEncoder` can be used directly as follows (note that this is not the intended usage):
 
-    >>> from synthpop.data_processing import MeanEncoder
+    >>> from synthpop.data_preparation import MeanEncoder
     >>> X = np.array(["a", "a", "b", "b", "c"])
     >>> y = np.array([1, 0, 2, 0, 3])
     >>>
     >>> encoder = MeanEncoder()
     >>> encoder.fit(X, y)
+    MeanEncoder()
     >>> X_transformed = encoder.transform(X)
     >>> X_transformed
     array([[0.5],
@@ -331,7 +338,7 @@ class MeanEncoder(_BaseEncoder):
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
 
-        X_val = self.validate_string_array(X)
+        X_val = self._validate_string_array(X)
         y_val = self.to_1d(y)
 
         if X_val.shape[0] != y_val.shape[0]:
@@ -368,6 +375,6 @@ class MeanEncoder(_BaseEncoder):
         """
 
         check_is_fitted(self, 'mapping_')
-        X_val = self.validate_string_array(X)
+        X_val = self._validate_string_array(X)
         self._check_unseen_values(X_val)
         return self._apply_mapping(X_val)

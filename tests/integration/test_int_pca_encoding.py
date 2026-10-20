@@ -3,7 +3,7 @@ import pytest
 from sklearn import config_context
 from sklearn.decomposition import PCA
 
-from synthpop.data_processing.encoders import PCAEncoder
+from synthpop.data_preparation.encoders import PCAEncoder
 from synthpop.utils import str_dtype
 
 
@@ -99,3 +99,27 @@ def test_pca_encoding_not_broken_by_setoutput_api():
     assert np.array_equal(before, after), (
         "Scikit-learn's set_output API breaks PCA encoding"
     )
+
+
+def test_pca_encoding_fit_transform_input_and_outputs_full_nan():
+    X = np.array([np.nan, np.nan, np.nan, np.nan, np.nan], dtype=str_dtype)
+    y = np.array(["x", "x", "y", "z", "w"], dtype=str_dtype)
+
+    encoder = PCAEncoder()
+
+    result = encoder.fit_transform(X=X, y=y)
+
+    #  np.isnan solely returns true on np.nan, not pd.NA
+    assert np.isnan(result).all()
+    assert result.dtype == np.float32
+
+
+def test_pca_fit_input_features_is_nan_for_y_not_nan():
+
+    encoder = PCAEncoder()
+
+    X = np.array([np.nan, np.nan, np.nan, np.nan, 'a', np.nan, 'b', 'c', np.nan, np.nan, 'd'], dtype=str_dtype)
+    y = np.array(['e', 'e', 'e', 'f', np.nan, np.nan, np.nan, np.nan, 'e', 'e', np.nan], dtype=str_dtype)
+
+    result = encoder.fit_transform(X, y)
+    assert np.isnan(result).all()

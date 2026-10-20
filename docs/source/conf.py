@@ -32,7 +32,8 @@ html_css_files = [
 ]
 
 html_theme_options = {
-    "show_nav_level": 2,
+    "show_nav_level": 1,
+    "navigation_depth": 2,
     "icon_links": [
         {
             "name": "GitHub",
@@ -58,8 +59,10 @@ extensions = [
     'sphinx_design',
     'myst_parser',
     'sphinxcontrib.mermaid',
-    "sphinx.ext.intersphinx",
+    'sphinx.ext.intersphinx',
+    'sphinx_copybutton',
 ]
+
 myst_enable_extensions = [
     "dollarmath",
     "amsmath",
@@ -67,7 +70,7 @@ myst_enable_extensions = [
     "attrs_inline",
 ]
 
-myst_heading_anchors = 3
+myst_heading_anchors = 4
 
 autodoc_member_order = "bysource"
 
@@ -79,6 +82,10 @@ source_suffix = {
     '.txt': 'markdown',
     '.md': 'markdown',
 }
+
+copybutton_prompt_text = r">>> |\.\.\. |\$ "
+copybutton_prompt_is_regexp = True
+copybutton_remove_prompts = True
 
 intersphinx_mapping = {
     "sklearn": (

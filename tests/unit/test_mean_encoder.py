@@ -3,7 +3,7 @@ import pytest
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import NotFittedError
 
-from synthpop.data_processing.encoders import MeanEncoder
+from synthpop.data_preparation.encoders import MeanEncoder
 from synthpop.utils import str_dtype
 
 

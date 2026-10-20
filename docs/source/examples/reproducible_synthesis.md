@@ -11,7 +11,7 @@ Sometimes this is exactly what you want. However, when developing analyses, writ
 Let's start by fitting a Synthesiser without specifying a random seed.
 ```python
 from sklearn.datasets import load_diabetes
-from synthpop.synthesiser import Synthesiser
+from synthpop import Synthesiser
 
 data = load_diabetes(as_frame=True).frame
 

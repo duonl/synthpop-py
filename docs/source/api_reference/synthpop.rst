@@ -2,14 +2,14 @@ API reference
 ================
 
 This section provides the API reference for the Python modules that make up the
-data synthesis workflow. For more in-depth information, and synthpop-py in practice, see the 
+data synthesis workflow. For more in-depth information, and synthpop-py in practice, see the
 `User Guides <../user_guides/user_guides_index.html>`__
 and `Examples <../examples/examples_index.html>`__.
 
 The reference is organised by functionality to make it easier to find the
 components you need. The `Synthesiser class <synthesiser_class/synthesiser.html>`_
 provides the main interface for generating synthetic data, while the
-`Data Preparation <data_processing/Encoder.html>`_ components support the encoding
+`Data Preparation <data_preparation/Encoder.html>`_ components support the encoding
 and handling of missing values required during synthesis. The available
 `Methods <synthesis_methods/Base_Synth.html>`_ implement different approaches to
 data synthesis, and the `Utility Metrics <utility_metrics/S_pMSE.html>`_ can be
@@ -36,8 +36,8 @@ Table of contents
    :maxdepth: 4
    :caption: Data Preparation
 
-   data_processing/Encoder
-   data_processing/Missing_value
+   data_preparation/Encoder
+   data_preparation/Missing_value
 
 .. toctree::
    :maxdepth: 4

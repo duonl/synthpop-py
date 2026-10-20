@@ -1,4 +1,5 @@
 import re
+import string
 import warnings
 
 import pytest
@@ -215,9 +216,18 @@ def test_standardise_array_dtypes_numeric_output_is_ndarray(y):
 
 
 @pytest.mark.parametrize("y", get_one_var_data_num_standardise_array_dtypes())
-def test_standardise_array_dtypes_numeric_output_has_float32_dtype(y):
+def test_standardise_array_dtypes_numeric_output_has_float64_dtype(y):
+    # The only nullable (or NaNnable) numeric dtype in numpy is float32 or float64.
+    # forcing float32 is problematic, see #289.
+    # The main point is that we do not want to lose information with casting.
+
     result = _standardise_array_dtypes(y)
-    assert result.dtype == np.float32
+
+    # we cannot test for exact dtype, or conservation of dtype.
+    # The reason is a bare-python array does not have a dtype.
+    # We should not always cast to float64 either, since we could loose information there.
+    # The best we can do is check that it is a numeric dtype.
+    assert np.issubdtype(result.dtype, np.number)
 
 
 @pytest.mark.parametrize("y", get_one_var_data_num_standardise_array_dtypes())
@@ -235,7 +245,6 @@ def test_standardise_array_dtypes_preserves_2d_numeric_shape():
     result = _standardise_array_dtypes(arr)
 
     assert result.shape == (2, 2)
-    assert result.dtype == np.float32
     assert np.isnan(result[0, 1])
 
 
@@ -262,9 +271,12 @@ def test_standardise_array_dtypes_unsupported_inputs_raise(bad_input):
 def test_standardise_array_dtypes_nullable_dtype(series):
     result = _standardise_array_dtypes(series)
 
-    assert result.dtype == np.float32
+    # The only nullable (or NaNnable) numeric dtype in numpy is float32 or float64.
+    # float32 is problematic, see #289.
+    # float64 is also the default of numpy.
+    assert result.dtype == np.float64
 
-    expected = np.array([1, np.nan, 3], dtype=np.float32)
+    expected = np.array([1, np.nan, 3], dtype=np.float64)
 
     assert np.array_equal(result, expected, equal_nan=True)
 
@@ -298,9 +310,9 @@ def test_to_standardised_array_dict_returns_dict(X):
 def test_to_standardised_array_dict_standardises_numeric_columns(X):
     result = _to_standardised_array_dict(X)
 
-    assert result["a"].dtype == np.float32
+    assert result["a"].dtype == np.float64
 
-    expected = np.array([1, 2, np.nan], dtype=np.float32)
+    expected = np.array([1, 2, np.nan], dtype=np.float64)
 
     assert np.array_equal(result["a"], expected, equal_nan=True)
 
@@ -327,7 +339,11 @@ def test_to_standardised_array_dict_preserves_2d_column_shapes():
     assert result["a"].shape == (3, 1)
     assert result["b"].shape == (3, 1)
 
-    assert result["a"].dtype == np.float32
+    # we cannot test for exact dtype, or conservation of dtype.
+    # The reason is a bare-python array does not have a dtype.
+    # We should not always cast to float64 either, since we could loose information there.
+    # The best we can do is check that it is a numeric dtype.
+    assert np.issubdtype(result["a"].dtype, np.number)
     assert result["b"].dtype == str_dtype
 
 
@@ -350,7 +366,7 @@ def test_to_standardised_array_dict_with_numpy_inputs():
 
     result = _to_standardised_array_dict(X)
 
-    assert result["num"].dtype == np.float32
+    assert result["num"].dtype == np.int64
     assert result["cat"].dtype == str_dtype
 
 # ----- _warn_on_rare_category -----
@@ -363,11 +379,8 @@ def unique_cats(count):
 
 
 RARE_CATEGORIES_WARN_CASES = [
-    # one row, so unique value , and more than quarter.
-    (np.array(["a"]), 5),
-    (np.array(["a"] * 4), 5),  # rowcount below threshold.
-    (np.array(["a", "b", "c", "d", "e"]), 5),  # all values unique
     (np.array(unique_cats(100) * 5), 6),  # all categories rare
+    (np.array(list(string.ascii_lowercase)[0:10]), 5),  # all values unique
 
     # 6*5 = 30 rows with values that occur 5 times
     # So 30% of the rows have a rare category
@@ -385,6 +398,7 @@ RARE_CATEGORIES_WARN_CASES = [
 
 ]
 
+
 @pytest.mark.parametrize("x, threshold", RARE_CATEGORIES_WARN_CASES)
 def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
     txt_threshold = re.escape(f"fewer than {threshold} times")
@@ -397,8 +411,22 @@ def test_warn_on_rare_category_proportion_more_than_quarter_warns(x, threshold):
             x, threshold, name=f"column_with_threshold{threshold}")
 
 
+@pytest.mark.parametrize("x", [
+    np.array(["a"]),
+    np.array(["a"] * 4),
+    np.array(["a", "b", "c", "d", "e"]),
+    np.array(unique_cats(9)),
+])
+def test_warn_on_rare_category_does_not_warn_for_small_dataset(x):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert _warn_on_rare_category(
+            x, 5, name="small_dataset"
+        ) is None
+
+
 def test_warn_on_rare_category_no_name():
-    x_in = np.array(["a"], dtype=str_dtype)
+    x_in = np.array(["a", "b", "c"] + ["d"] * 7, dtype=str_dtype)
 
     txt_threshold = re.escape(f"fewer than 2 times")
     txt_column_name = re.escape(f"unnamed predictor")

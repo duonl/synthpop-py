@@ -111,8 +111,8 @@ def _validate_1d_target(y: npt.NDArray, n_samples: int | None) -> npt.NDArray:
 def _standardise_array_dtypes(X: npt.ArrayLike) -> npt.NDArray:
     """
     Helper to standardise a 1D or 2D array-like object to either:
-    - float32 for numeric data
-    - `StringDType(na_object = np.nan)` for non-numeric data
+    - numeric numpy dtype for numeric data (e.g. float32).
+    - `StringDType(na_object = np.nan)` for non-numeric data.
 
     Missing values are normalised to `np.nan`.
     """
@@ -131,7 +131,6 @@ def _standardise_array_dtypes(X: npt.ArrayLike) -> npt.NDArray:
     if is_numeric:
         result = np.array(
             [v if not pd.isna(v) else np.nan for v in flat],
-            dtype=np.float32,
         )
 
     else:
@@ -158,6 +157,9 @@ def _to_standardised_array_dict(X) -> Dict[str, npt.NDArray]:
 
 def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None) -> None:
 
+    if x.shape[0] < 10:
+        return
+
     m_nan = pd.isna(x)
     _, counts = np.unique(x[~m_nan], return_counts=True)
     n_nan = m_nan.sum()
@@ -173,7 +175,8 @@ def _warn_on_rare_category(x: npt.NDArray, rare_threshold: int, name: str | None
     if (0 < n_nan < rare_threshold):
         n_rows_with_rare_values += n_nan
 
-    if n_rows_with_rare_values * 4 > x.shape[0]:  # times 4 because of the 25% mark
+    # times 4 because of the 25% mark
+    if n_rows_with_rare_values * 4 > x.shape[0]:
         warnings.warn(
             f"Categorical {predictor} contains categories occurring fewer than {rare_threshold} times for more than 25% of the rows.\n "
             "This may allow the CART method to copy target values for small groups,\n "

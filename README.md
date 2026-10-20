@@ -1,4 +1,4 @@
-# Synthpop-py
+# synthpop-py
 
 **synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the established [`synthpop` R package](https://www.synthpop.org.uk/), but provides a modern python interface and software architecture specifically designed for usability, reproducibility, maintainability and extensibility.
 

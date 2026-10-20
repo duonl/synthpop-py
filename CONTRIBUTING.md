@@ -41,7 +41,7 @@ Depending on how large the project is, you may want to outsource the questioning
 > ### Legal notice <!-- omit in toc -->
 > By contributing to this project, you confirm that
 > - you have authored the contribution or have the necessary rights to submit it;
-> - you have the right to provide the contributed content under the project's [license](LICENSE.md); and
+> - you have the right to provide the contributed content under the project's [license](https://github.com/duonl/synthpop-py/blob/develop/LICENSE.md); and
 > - your contribution may be distributed under the project's license.
 
 ### AI-generated code

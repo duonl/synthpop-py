@@ -4,7 +4,7 @@ def test_read_in_synthpop_all_():
     import synthpop
 
     assert synthpop.__all__ == [
-        "data_processing",
+        "data_preparation",
         "methods",
         "plotting",
         "utility_metrics",
@@ -57,8 +57,8 @@ def test_read_in_methods_functions_all_():
     assert callable(methods.TreeClassifierMethod)
 
 
-def test_read_in_data_processing_functions_all_():
-    import synthpop.data_processing as dp
+def test_read_in_data_preparation_functions_all_():
+    import synthpop.data_preparation as dp
 
     assert dp.__all__ == [
         "PCAEncoder",
