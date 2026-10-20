@@ -424,6 +424,29 @@ def test_synthesiser_fit_throws_on_invalid_column_order(column_order, expected_m
     with pytest.raises(ValueError, match=re.escape(expected_message)):
         synth.fit(test_data)
 
+@pytest.mark.parametrize(
+        "verbose, expected_message",
+        [
+            (-1, "Synthesiser.verbose should be a positive integer. Got <class 'int'> instead."),
+            (5., "Synthesiser.verbose should be a positive integer. Got <class 'float'> instead."),
+            ([1], "Synthesiser.verbose should be a positive integer. Got <class 'list'> instead."),
+            (np.array(['3']), "Synthesiser.verbose should be a positive integer. Got <class 'numpy.ndarray'> instead."),
+            ('2', "Synthesiser.verbose should be a positive integer. Got <class 'str'> instead."),
+            (True, "Synthesiser.verbose should be a positive integer. Got <class 'bool'> instead."),
+        ]
+)
+def test_fit_verbose_datatype(verbose, expected_message):
+    test_data = pd.DataFrame({
+            "a": [1, 2],
+            "b": [3, 4],
+            "c": [5, 6],
+        })
+    synth = Synthesiser(
+        random_seed=2,
+        verbose = verbose,
+    )
+    with pytest.raises(ValueError, match=re.escape(expected_message)):
+        synth.fit(test_data)
 
 # ----- generate tests -----
 
