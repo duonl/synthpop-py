@@ -285,7 +285,9 @@ def test_pca_fit_constant_feature():
     assert result.pca_transform is stub_pca_transform
     assert not hasattr(result.pca_transform, "transform_X_")
     assert np.array_equal(
-        result.mapping_["a"], np.array([0], dtype=np.float32))
+        result.mapping_["a"],
+        np.array([0], dtype=np.float32),
+    )
 
 
 def test_pca_fit_input_features_is_full_nan():
