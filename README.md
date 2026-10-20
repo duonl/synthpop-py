@@ -138,7 +138,10 @@ Synthetic data should also be evaluated for utility. A synthetic dataset that pr
 
 ## Project status and roadmap
 
-synthpop-py is currently under active development, with the project working towards its `1.0.0` release.
+synthpop-py is currently under active development. We expect to be able to do maintenance for at least a year (end of 2027).
+We are still working on long(er) term financing/development/maintenance. 
+We expect to develop new features for at least half a year.
+synthpop-py is a relatively new open source project, with a small but growing user group. 
 
 The initial release focuses on providing a robust Python implementation of the core sequential modelling approach, with an emphasis on:
 
@@ -148,13 +151,13 @@ The initial release focuses on providing a robust Python implementation of the c
 * extensibility; and
 * integration with the Python data science ecosystem.
 
-Future development may include:
+The preliminary roadmap is as follows:
+1. adjustable "level of privacy"
+2. business rules
+3. evaluating utility
+4. evaluating privacy
 
-* additional synthesis methods;
-* privacy evaluation functionality; and
-* performance and scalability improvements.
-
-The project roadmap will continue to evolve based on user feedback and the needs of the synthetic data community.
+More details wil follow soon.
 
 ## Contributing
 
