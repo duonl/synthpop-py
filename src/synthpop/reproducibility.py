@@ -95,7 +95,7 @@ class RandomStateManager:
 
         if isinstance(seed, (list, tuple, np.ndarray)) and len(seed) == 0:
             warnings.warn(
-                "empty list has no entropy for seed. Use None for system entropy.",
+                "An empty list has been provided for a random seed. This has the same effect as providing 0 as seed. Is this intended? Use None if system entropy is intended.",
                 UserWarning)
 
         if seed is None:

@@ -360,4 +360,4 @@ def test_random_state_manager_warns_on_empty_list():
 
     assert len(record) == 1
     assert str(
-        record[0].message) == "empty list as no entropy for seed. Use None for system entropy."
+        record[0].message) == "An empty list has been provided for a random seed. This has the same effect as providing 0 as seed. Is this intended? Use None if system entropy is intended."
