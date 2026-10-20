@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import _LeafNodeSampler
 
 
 # ----- stubs -----
@@ -84,7 +84,7 @@ def test_fit_sampler_parametrized_inputs(leaf_ids, y, expected_map):
     """
     From various inputs the correct count mapping should be created.
     """
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     sampler.fit_sampler(leaf_ids, y)
 
     assert hasattr(sampler, "_leaf_map")
@@ -99,14 +99,14 @@ def test_fit_sampler_parametrized_inputs(leaf_ids, y, expected_map):
 def test_fit_sampler_raises_shape_mismatch():
     y = np.array([0, 1])
     leaf_ids = np.array([10, 10, 20])
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
 
     with pytest.raises(ValueError, match="must have the same number of samples"):
         sampler.fit_sampler(leaf_ids, y)
 
 
 def test_fit_sampler_raises_dimension_mismatch():
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     leaf_ids = [[10], [10], [20]]
     y = [0, 1, 2]
     leaf_ids2 = [10, 10, 20]
@@ -119,7 +119,7 @@ def test_fit_sampler_raises_dimension_mismatch():
 
 
 def test_fit_sampler_raises_non_empty():
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     leaf_ids = []
     y = [0, 1, 2]
     leaf_ids2 = [1, 2, 3]
@@ -142,7 +142,7 @@ def test_fit_sampler_raises_non_empty():
     ],
 )
 def test_fit_sampler_sets_y_dtype_correctly(y_input, expected_dtype_check):
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     leaf_ids = np.array([10] * len(y_input))
     sampler.fit_sampler(leaf_ids, y_input)
 
@@ -157,7 +157,7 @@ def test_fit_sampler_creates_seed_from_random_state_manager(mocker):
         return_value=333
     )
 
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     sampler.fit_sampler(X, y)
 
     assert sampler.random_state_ == 333
@@ -172,7 +172,7 @@ def test_fit_sampler_does_not_create_seed_when_seed_is_given(mocker):
         return_value=333
     )
 
-    sampler = LeafNodeSampler(random_state=123456)
+    sampler = _LeafNodeSampler(random_state=123456)
     sampler.fit_sampler(X, y)
 
     assert sampler.random_state_ == 123456
@@ -186,7 +186,7 @@ def helper_make_sampler(leaf_map, leaf_ids, random_state=42, y_dtype=np.float32)
     """
     Helper to construct a minimally fitted sampler
     """
-    sampler = LeafNodeSampler(random_state=random_state)
+    sampler = _LeafNodeSampler(random_state=random_state)
     sampler._leaf_map = leaf_map
     sampler.random_state_ = random_state
     sampler._y_dtype = np.dtype(y_dtype)
@@ -228,7 +228,7 @@ def test_sampling_deterministic_with_stub_rng(mocker):
         return_value=rng
     )
 
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     sampler._leaf_map = {10: {0: 3, 1: 1}}
     sampler.random_state_ = rng
     sampler._y_dtype = np.int64
@@ -292,7 +292,7 @@ def test_sample_from_leaves_raises_unfitted():
     """
     Missing required attributes should raise AttributeError.
     """
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     with pytest.raises(NotFittedError):
         sampler.sample_from_leaves(np.array([0]))
     sampler._leaf_map = {}
@@ -301,7 +301,7 @@ def test_sample_from_leaves_raises_unfitted():
 
 
 def test_sample_from_leaves_raises_input_val():
-    sampler = LeafNodeSampler()
+    sampler = _LeafNodeSampler()
     sampler._leaf_map = {1: {0: 1}}
     sampler.random_state_ = 42
     sampler._y_dtype = np.int64
@@ -343,7 +343,7 @@ def test_sample_from_leaves_creates_rng(mocker):
 
 
 def test_clone_works_and_fitted_sampler_does_not_preserve_state():
-    sampler = LeafNodeSampler(random_state=42)
+    sampler = _LeafNodeSampler(random_state=42)
     sampler.fit_sampler([10, 20, 30], np.array([0, 1, 1]))
 
     cloned = sampler.clone()

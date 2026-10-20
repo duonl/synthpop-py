@@ -13,7 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from synthpop.data_preparation.encoders import MeanEncoder
 from synthpop.methods import tree_utils
-from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
+from synthpop.methods.tree_utils import _LeafNodeSampler, _build_feature_matrix
 from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import _validate_1d_target, _validate_2d_dict
 
@@ -121,7 +121,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     def __init__(self, encoder: TransformerMixin | None = None,
                  tree: DecisionTreeClassifier | None = None,
-                 tree_sampler: LeafNodeSampler | None = None) -> None:
+                 tree_sampler: _LeafNodeSampler | None = None) -> None:
         super().__init__()
         self.encoder = encoder
         self.tree = tree
@@ -149,7 +149,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
         self.tree_ = clone(self.tree) if self.tree else DecisionTreeClassifier(
             min_samples_leaf=5, random_state=RandomStateManager.create_instance_seed())
         self.tree_sampler_ = self.tree_sampler.clone(
-        ) if self.tree_sampler else LeafNodeSampler()
+        ) if self.tree_sampler else _LeafNodeSampler()
 
         # implementation
         z = pd.isna(y_val)

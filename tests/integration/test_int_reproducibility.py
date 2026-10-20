@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 from synthpop.methods.cart_synth import tune_cart
 from synthpop.methods.sample_synth import SampleMethod
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import _LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 from synthpop.synthesiser import Synthesiser
 
@@ -256,13 +256,13 @@ def test_leafnode_sampler_sample_determinism_with_same_seed():
     y = np.array([0, 0, 1, 1])
     leaf_ids = np.array([10, 10, 20, 20])
 
-    sampler1 = LeafNodeSampler(
+    sampler1 = _LeafNodeSampler(
         random_state=41,
     ).fit_sampler(
         leaf_ids=leaf_ids,
         y=y,
     )
-    sampler2 = LeafNodeSampler(
+    sampler2 = _LeafNodeSampler(
         random_state=41,
     ).fit_sampler(
         leaf_ids=leaf_ids,

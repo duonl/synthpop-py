@@ -90,7 +90,7 @@ def _sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDA
     return sampled
 
 
-class LeafNodeSampler:
+class _LeafNodeSampler:
     """
     Leaf-based synthetic target sampler driven by explicit leaf IDs.
 

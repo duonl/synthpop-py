@@ -5,7 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from synthpop.data_preparation.encoders import MeanEncoder
 from synthpop.data_preparation.missing_value_handling import MissingValuePredictor
-from synthpop.methods.tree_utils import LeafNodeSampler, _build_feature_matrix
+from synthpop.methods.tree_utils import _LeafNodeSampler, _build_feature_matrix
 from synthpop.utils import str_dtype
 
 # This imports an auto-use fixture to set the seed,
@@ -18,7 +18,7 @@ def predictor():
     return MissingValuePredictor(
         encoder=MeanEncoder(),
         tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=0),
-        tree_sampler=LeafNodeSampler(),
+        tree_sampler=_LeafNodeSampler(),
     )
 
 
