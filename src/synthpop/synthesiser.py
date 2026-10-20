@@ -255,12 +255,12 @@ class Synthesiser:
             for i, y in enumerate(self.column_order_):
 
                 if i == 0:
-                    pred = pd.DataFrame(
+                    predictors = pd.DataFrame(
                         {"init": np.zeros(n_syn_rows, dtype=int)})
                 else:
-                    pred = result
+                    predictors = result
 
-                new_syn_column = self.models_[y].transform(X=pred)
+                new_syn_column = self.models_[y].transform(X=predictors)
                 result = pd.concat([result, new_syn_column],
                                    axis=1, join='outer')
 
