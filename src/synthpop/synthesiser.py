@@ -11,7 +11,7 @@ from sklearn.exceptions import NotFittedError
 from synthpop.methods.base_synth import BaseSynthMethod
 from synthpop.methods.cart_synth import CartMethod
 import synthpop.reproducibility
-from utils import _progress_bar
+from synthpop.utils import _progress_bar
 
 SynMethodCallable = Callable[[], BaseSynthMethod]
 
@@ -27,6 +27,7 @@ class Synthesiser:
         If some variables should not follow the default_syn_method, they should be indicated in a dictionary
         where keys are variable names and values are `BaseSynthMethod` instances (like :class:`CartMethod`) or zero-argument callables returning `BaseSynthMethod` instances (like :func:`tune_cart`). 
         By default, there is no special synthesis method.
+    :param verbose: The verbosity level, including progressbar. The default, zero, produces no logging.
 
 
     Both ``default_syn_method`` and the values of
@@ -92,12 +93,14 @@ class Synthesiser:
                 str,
                 BaseSynthMethod | SynMethodCallable,
             ] | None = None,
+            verbose: int = 0,
     ) -> None:
 
         self.default_syn_method = default_syn_method
         self.column_order = column_order
         self.special_syn_method = special_syn_method
         self.random_seed = random_seed
+        self.verbose = verbose
 
     def _get_model(self, column_name: str) -> BaseSynthMethod:
 
@@ -160,6 +163,11 @@ class Synthesiser:
         if len(X) == 0:
             raise ValueError("X cannot be empty.")
 
+        if (not isinstance(self.verbose, int) or isinstance(self.verbose, bool)) or self.verbose < 0:
+            raise ValueError(
+                f"Synthesiser.verbose should be a positive integer. Got {type(self.verbose)} instead."
+            )
+
         if self.column_order is None:
             self.column_order_ = X.columns.to_list()
 
@@ -204,8 +212,8 @@ class Synthesiser:
 
         self.models_ = {}
         self.n_samples_ = X.shape[0]
-        
-        with synthpop.reproducibility.RandomStateManager(seed=self.random_seed), _progress_bar() as pbar:
+        verbose =  not bool(self.verbose)
+        with synthpop.reproducibility.RandomStateManager(seed=self.random_seed), _progress_bar(disable=verbose, transient=verbose) as pbar:
             task_id = pbar.add_task(
             "Fitting",
             total=len(self.column_order_),
