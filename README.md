@@ -29,7 +29,7 @@ syn_df = synth.generate()
 
 The original data should always be provided as a `pandas.DataFrame`. The `Synthesiser` learns the data patterns using a synthesis model when `fit()` is called, after which `generate()` creates a new synthetic dataset. It is possible to generate a dataset with a different number of observations than the original data.
 
-For a complete introduction to preparing data, configuring synthesis, generating synthetic datasets, and evaluating the results, see the [Getting Started guide](https://synthpop-py.readthedocs.io/en/develop/getting_started/getting_started.html).
+For a complete introduction to preparing data, configuring synthesis, generating synthetic datasets, and evaluating the results, see the [Getting Started guide](https://synthpop-py.readthedocs.io/page/getting_started/getting_started.html).
 
 ## Installation
 ### Requirements
@@ -55,19 +55,19 @@ You can verify the installation by importing the package:
 import synthpop
 ```
 
-For installation in a virtual environment, installation from source, and troubleshooting, see the [Installation documentation](https://synthpop-py.readthedocs.io/en/latest/getting_started/installation.html).
+For installation in a virtual environment, installation from source, and troubleshooting, see the [Installation documentation](https://synthpop-py.readthedocs.io/page/getting_started/installation.html).
 
 ## Documentation
 
-The full documentation is available on [Read the Docs](https://synthpop-py.readthedocs.io/en/latest/).
+The full documentation is available on [Read the Docs](https://synthpop-py.readthedocs.io).
 
 It includes:
 
-* **[Getting Started](https://synthpop-py.readthedocs.io/en/develop/getting_started/getting_started.html)** — an introduction to generating synthetic data with `synthpop-py`.
-* **[User Guide](https://synthpop-py.readthedocs.io/en/latest/user_guides/user_guides_index.html)** — detailed guidance on data preparation, synthetic data generation, synthesis methods, and evaluation.
-* **[Examples](https://synthpop-py.readthedocs.io/en/latest/examples/examples_index.html)** - detailed examples on creating a synthesis, evaluating the data, adjusting parameters and creating custom synthesis methods.
-* **[API Reference](https://synthpop-py.readthedocs.io/en/develop/api_reference/synthpop.html)** — documentation of the Python API.
-* **[Developer documentation](https://synthpop-py.readthedocs.io/en/latest/developer/developer_index.html)** — information about the project architecture, development workflow, and contributing to the package.
+* **[Getting Started](https://synthpop-py.readthedocs.io/page/getting_started/getting_started.html)** — an introduction to generating synthetic data with `synthpop-py`.
+* **[User Guide](https://synthpop-py.readthedocs.io/page/user_guides/user_guides_index.html)** — detailed guidance on data preparation, synthetic data generation, synthesis methods, and evaluation.
+* **[Examples](https://synthpop-py.readthedocs.io/page/examples/examples_index.html)** - detailed examples on creating a synthesis, evaluating the data, adjusting parameters and creating custom synthesis methods.
+* **[API Reference](https://synthpop-py.readthedocs.io/page/api_reference/synthpop.html)** — documentation of the Python API.
+* **[Developer documentation](https://synthpop-py.readthedocs.io/page/developer/developer_index.html)** — information about the project architecture, development workflow, and contributing to the package.
 
 ## Supported data and synthesis methods
 
@@ -91,7 +91,7 @@ synthpop-py currently provides the following synthesis methods:
 
 The package is designed with extensibility in mind. Additional synthesis methods can be developed and integrated through the package's architecture, allowing users and contributors to extend the available synthesis functionality.
 
-See the [User Guide](https://synthpop-py.readthedocs.io/en/latest/user_guides/3_synthesis_methods.html) for detailed information about synthesis methods and their configuration.
+See the [User Guide](https://synthpop-py.readthedocs.io/page/user_guides/3_synthesis_methods.html) for detailed information about synthesis methods and their configuration.
 
 ## Evaluating synthetic data
 
@@ -160,7 +160,7 @@ The project roadmap will continue to evolve based on user feedback and the needs
 
 synthpop-py is intended to be an open-source project, and contributions are welcome.
 
-For information about contributing to the project, setting up a development environment, and the development workflow, see the project's [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer documentation](https://synthpop-py.readthedocs.io/en/latest/developer/developer_index.html).
+For information about contributing to the project, setting up a development environment, and the development workflow, see the project's [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer documentation](https://synthpop-py.readthedocs.io/page/developer/developer_index.html).
 
 ## License
 

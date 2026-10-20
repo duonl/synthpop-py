@@ -11,7 +11,7 @@ name: synthpop-py
 url: "https://github.com/duonl/synthpop-py"
 
 # De url naar de productieomgeving van de software.
-landingURL: "https://synthpop-py.readthedocs.io/en/develop/" # optioneel
+landingURL: "https://synthpop-py.readthedocs.io" # optioneel
 
 # Type software zoals te vinden op: https://yml.publiccode.tools/schema.core.html#key-softwaretype
 # This value is used when the intended audience are developers. That is not the case for this project.

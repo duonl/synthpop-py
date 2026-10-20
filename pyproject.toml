@@ -31,7 +31,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://synthpop-py.readthedocs.io/en/develop/"
+Documentation = "https://synthpop-py.readthedocs.io"
 Repository = "https://github.com/duonl/synthpop-py.git"
 Issues = "https://github.com/duonl/synthpop-py/issues"
 

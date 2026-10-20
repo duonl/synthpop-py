@@ -8,7 +8,7 @@ Before contributing, please read the section relevant to the type of contributio
 
 ## I have a question
 
-> Before opening a question, please consult the available [documentation](https://synthpop-py.readthedocs.io/en/develop/).
+> Before opening a question, please consult the available [documentation](https://synthpop-py.readthedocs.io/).
 
 You should also search the existing [GitHub issues](https://github.com/duonl/synthpop-py/issues), as your question may already hae been answered or discussed. If you find a relevant issue but require further clarification, you are welcome to add your question to that discussion.
 
@@ -60,7 +60,7 @@ A useful bug report allows others to understand and reproduce the problem withou
 
 In particular:
 - Make sure you are using a recent version of synthpop-py.
-- Check the [documentation](https://synthpop-py.readthedocs.io/en/develop/) to ensure that the behaviour is not caused by an incorrect configuration or unsupported usage.
+- Check the [documentation](https://synthpop-py.readthedocs.io) to ensure that the behaviour is not caused by an incorrect configuration or unsupported usage.
 - Search the existing [GitHub issues](https://github.com/duonl/synthpop-py/issues) to see whether the problem has already been reported or resolved.
 - Where appropriate, search for discussions outside the project (like Stack Overflow) that may help identify the cause of the problem.
 - Try to create a minimal reproducible example.
@@ -118,7 +118,7 @@ If a guide, example or feature would have made synthpop-py easier or more useful
 #### Before submitting an enhancement
 Before opening an enhancement request:
 - Make sure that you are using a recent version of synthpop-py.
-- Read the [documentation](https://synthpop-py.readthedocs.io/en/develop/) to determine whether the functionality already exists or can be achieved through configuration.
+- Read the [documentation](https://synthpop-py.readthedocs.io/) to determine whether the functionality already exists or can be achieved through configuration.
 - Search the existing [GitHub issues](https://github.com/duonl/synthpop-py/issues) to see whether the enhancement has already been suggested. If a similar proposal already exists, contribute to the existing discussion rather than opening a duplicate issue.
 - Consider whether the proposal fits the scope and aims of the project. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you're just targeting a minority of users, consider writing an add-on/plugin library.
 
@@ -138,7 +138,7 @@ A good enhancement request should include:
 
 Where useful, you may also include screenshots, examples, references to similar implementations or other material that helps explain the proposal.
 
-For the full process for designing and implementing a new feature, see the [develop documentation on defining a new feature](https://synthpop-py.readthedocs.io/en/develop/developer/way_of_working/Defining_a_new_feature.html).
+For the full process for designing and implementing a new feature, see the [develop documentation on defining a new feature](https://synthpop-py.readthedocs.io/page/developer/way_of_working/Defining_a_new_feature.html).
 
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
@@ -165,7 +165,7 @@ poetry install --with docs,dev
 ```
 
 #### Development workflow
-The full development workflow, including guidance on implementing new functionality, is described in the [developer documentation](https://synthpop-py.readthedocs.io/en/develop/developer/way_of_working/developing.html).
+The full development workflow, including guidance on implementing new functionality, is described in the [developer documentation](https://synthpop-py.readthedocs.io/page/developer/way_of_working/developing.html).
 
 ### Improving the documentation
 Documentation contributions are always welcome.
@@ -177,11 +177,11 @@ For larger changes, such as adding new guides or substantially restructuring exi
 ## Style guides and conventions
 Please follow the project's coding, documentation and developer conventions.
 
-The relevant guidance can be found in the [style guides and conventions](https://synthpop-py.readthedocs.io/en/develop/developer/way_of_working/code_standards_and_norms.html).
+The relevant guidance can be found in the [style guides and conventions](https://synthpop-py.readthedocs.io/page/developer/way_of_working/code_standards_and_norms.html).
 
 The project also provides checklists for both development and code review:
-- [Developer checklist](https://synthpop-py.readthedocs.io/en/develop/developer/way_of_working/checklist_for_developer.html)
-- [Review checklist](https://synthpop-py.readthedocs.io/en/develop/developer/way_of_working/checklist_for_review.html)
+- [Developer checklist](https://synthpop-py.readthedocs.io/page/developer/way_of_working/checklist_for_developer.html)
+- [Review checklist](https://synthpop-py.readthedocs.io/page/developer/way_of_working/checklist_for_review.html)
 
 ## Thank you
 Every contribution helps improve synthpop-py, whether it is a bug report, documentation correction, feature suggestion, or code contribution.
