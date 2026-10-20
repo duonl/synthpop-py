@@ -85,7 +85,7 @@ class MissingValuePredictor(BaseMissingValueHandler):
 
     :param encoder: Default is a :class:`~synthpop.data_preparation.encoders.MeanEncoder`. The encoder must have a `fit_transform` function.
     :param tree: Decision tree classifier. Default is `DecisionTreeClassifier(min_samples_leaf=5) <https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html>`__.
-    :param tree_sampler: Leaf node sampler. Default is :py:obj:`~synthpop.methods.tree_utils.LeafNodeSampler`.
+    :param tree_sampler: Leaf node sampler. Default is :py:obj:`~synthpop.methods.tree_utils._LeafNodeSampler`.
 
     Examples
     --------
