@@ -30,14 +30,14 @@ For developers, this documentation should be used during implementation and when
 
 A synthesis method should accept pandas dataframes/series and heterogeneous data.
 Making the data homogeneous should happen within the synthesis method.
-It is best to use NumPy within a synthesis method. See [#45](https://github.com/Synthpop-data/synthpop-py/issues/45).
+It is best to use NumPy within a synthesis method. See [#45](https://github.com/duonl/synthpop-py/issues/45).
 
 ### Informative issues and pull requests
 | issue/pull request number | topic |
 | ------------------------- | ----- |
-| [#1](https://github.com/Synthpop-data/synthpop-py/issues/1), [#2](https://github.com/Synthpop-data/synthpop-py/pull/2)| Missing values |
-| [#13](https://github.com/Synthpop-data/synthpop-py/issues/13), [#17](https://github.com/Synthpop-data/synthpop-py/issues/17), [#19](https://github.com/Synthpop-data/synthpop-py/pull/19), [#26](https://github.com/Synthpop-data/synthpop-py/pull/26)| user expectations|
-| [#45](https://github.com/Synthpop-data/synthpop-py/issues/45) | relation to scikit-learn |
+| [#1](https://github.com/duonl/synthpop-py/issues/1), [#2](https://github.com/duonl/synthpop-py/pull/2)| Missing values |
+| [#13](https://github.com/duonl/synthpop-py/issues/13), [#17](https://github.com/duonl/synthpop-py/issues/17), [#19](https://github.com/duonl/synthpop-py/pull/19), [#26](https://github.com/duonl/synthpop-py/pull/26)| user expectations|
+| [#45](https://github.com/duonl/synthpop-py/issues/45) | relation to scikit-learn |
 
 ## Testing philosophy
 Tests should primarily validate behaviour, not implementation details. The goal is to ensure correctness under expected usage and robustness under edge cases. Tests should:
