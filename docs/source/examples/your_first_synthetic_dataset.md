@@ -86,7 +86,7 @@ The generated dataset has the same columns as the original dataset:
 |  2 | -0.0817979  | -0.0446416 | -0.0816528  | -0.0400989  | -0.0455995 | -0.0370128 |  0.0339135 | -0.0394934  | -0.0891334 | -0.092204  |       72 |
 
 ****Congratulations, you have created your first synthetic dataset!****
-![Tada](../images/tada_emoji.gif){width=25px}
+![Tada](../_static/images/tada_emoji.gif){width=25px}
 
 The generated data are not copies of the original observations. Instead, they are newly generated values that aim to preserve the statistical properties and relationships present in the original data.
 
@@ -111,7 +111,7 @@ figures = plot_univariate_distributions(
 ```
 
 Running the code above opens the plots interactively. You will see that the first plot looks like:
-![Univariate distributions of "age"](../images/your_first_synthetic_data_univariate_distributions.png)
+![Univariate distributions of "age"](../_static/images/your_first_synthetic_data_univariate_distributions.png)
 
 As you can see, the marginal distributions overlap mostly. There are some small differences, but generally speaking, the synthesiser reproduced the variable correctly.
 
@@ -149,7 +149,7 @@ from synthpop.plotting import plot_spmse
 plot = plot_spmse(spmse, show_plot=True)
 ```
 
-![Heatmap of S_pMSE values](../images/your_first_synthetic_data_spmse.png)
+![Heatmap of S_pMSE values](../_static/images/your_first_synthetic_data_spmse.png)
 These visualisations allow us to compare variables one by one. As seen in the plot, all S_pMSE values are below 3 which suggests that there is no statistical significant difference between the synthetic and original dataset with respect to the relationship between pairs of variables.
 
 More information about this visualisation and the interpretation can be found in {ref}`User Guide 7.2: S_pMSE heatmap <72-spmse-heatmap>`.

@@ -3,7 +3,7 @@
 In the previous example, we generated a synthetic version of the Titanic dataset containing 5000 observations.
 
 When evaluating the synthetic data using the S_pMSE heatmap, you may have noticed that some relationships between variables were better preserved than others.
-![S_pMSE heatmap of the Titanic dataset](../images/syn_order_spmse_1.png)
+![S_pMSE heatmap of the Titanic dataset](../_static/images/syn_order_spmse_1.png)
 
 The S_pMSE heatmap shows us that most relationships are reproduced well. Pairwise relationships involving `embark_town` or `embarked` show slightly larger S_pMSE values, meaning that those relationships were less well preserved in the synthetic data compared to others.
 
@@ -151,7 +151,7 @@ spmse_2 = pairwise_spmse(data, synthetic_data_2)
 plot_2 = plot_spmse(spmse_2, show_plot=True)
 ```
 
-![S_pMSE heatmap of Titanic dataset with new column order](../images/syn_order_spmse_2.png)
+![S_pMSE heatmap of Titanic dataset with new column order](../_static/images/syn_order_spmse_2.png)
 The new heatmap shows that changing the synthesis order only minimally improved relationships involving `embark_town`. For example, the S_pMSE value between `embark_town` and `alone` decreased to below 3, while the relationship between `embark_town` and `embarked` stayed the same.
 
 The small improvement is not surprising in this example. In the default synthesis order, `embark_town` is already the second-to-last variable, so its synthesis model can already use almost all other variables as predictors. Moving it to the end only adds `alive` and `alone` as additional predictors. Although this additional information appears to improve the preservation of the relationship between `embark_town` and `alone`, it has little effect on the other relationships.
@@ -194,7 +194,7 @@ spmse_3 = pairwise_spmse(data, synthetic_data_3)
 
 plot_3 = plot_spmse(spmse_3, show_plot=True)
 ```
-![S_pMSE heatmap of Titanic dataset with another column order](../images/syn_order_spmse_3.png)
+![S_pMSE heatmap of Titanic dataset with another column order](../_static/images/syn_order_spmse_3.png)
 This time, the result is not an improvement. Several S_pMSE values are higher than in the previous heatmap, and the relationship between `embarked` and `embark_town` now has an S_pMSE value above 10.
 
 This demonstrates an important limitation of changing the synthesis order: giving a variable more predictors does not necessarily improve the preservation of every relationship involving that variable. The synthesis model for `embarked` now has access to many more variables, but it must use those predictors to model `embarked` conditional on the synthetic values generated for the predictors. If those predictors are strongly dependent on 'embarked', it is possible they themselves are not optimally synthesised. Changing the order therefore changes the conditional distribution being modelled and can affect the resulting relationships positively or negatively.
@@ -235,7 +235,7 @@ spmse_4 = pairwise_spmse(data, synthetic_data_4)
 
 plot_4 = plot_spmse(spmse_4, show_plot=True)
 ```
-![S_pMSE heatmap of Titanic dataset with one final column order](../images/syn_order_spmse_4.png)
+![S_pMSE heatmap of Titanic dataset with one final column order](../_static/images/syn_order_spmse_4.png)
 
 This change improves several of the S_pMSE values involving `deck`. Interestingly, the relationship between `fare` and `embark_town` is also better preserved. The univariate distribution of `embark_town`, shown by the `embark_town`-`embark_town` cell, also improves.
 
