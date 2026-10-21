@@ -51,7 +51,7 @@ description:
 
 
     shortDescription:
-      "Generating synthetic versions of sensitive tabulair microdata for statistical disclosure control" #from synthpop-R
+      "Generating synthetic versions of sensitive tabular microdata for statistical disclosure control" #from synthpop-R
     features:
       - methods for making synthetic data
       - utility evaluation tools
@@ -97,7 +97,6 @@ intendedAudience:
 
   # possible scopes: https://yml.publiccode.tools/scope-list.html#scope-list
   scope:
-    - government
     - education
     - healthcare
     - local-authorities
