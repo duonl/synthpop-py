@@ -1,7 +1,7 @@
 [project]
 name = "synthpop-py"
 version = "1.0.0"
-description = "Generating synthetic versions of sensitive tabulair microdata for statistical disclosure control" #from synthpop-R
+description = "Generating synthetic versions of sensitive tabular microdata for statistical disclosure control" #from synthpop-R
 keywords = ["synthetic data", "synthpop", "CART", "Privacy Enhancing Technology", "PET"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
