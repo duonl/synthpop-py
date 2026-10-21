@@ -175,7 +175,7 @@ For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: 
 
 ## Use a different encoder
 ```{warning}
-Using a different encoder is not yet supported in version 0.1.2. This is likely to change in a newer version.
+Using a different encoder from scikit-learn out of the box is not yet supported in version 1.0.0 for all usecases. This is likely to change in a newer version.
 ```
 We are not limited to the encoders provided by synthpop-py. The `encoder` parameter accepts a transformer that follows the expected `scikit-learn` transformer interface.
 
