@@ -270,7 +270,7 @@ Suppose we want to build a classifier that:
 
 But we want a regressor that:
 - uses the default number of observations (`CartMethod` uses 5, but `DecisionTreeRegressor` uses 1) in each main CART tree leaf, but measures the quality of the spit by minimising the L1;
-- uses one-hot encoding instead of mean encoding (not supported yet, so commented out in the code);
+- uses one-hot encoding instead of mean encoding;
 - uses a minimum leaf size of 15 for the missing-value prediction tree; and
 - uses a maximum depth of 5 for the missing-value prediction tree.
 
@@ -314,9 +314,9 @@ cart = CartMethod(
                         criterion="absolute_error",
                         random_state=1,
                 ),
-                #encoder=OneHotEncoder(
-                #        handle_unknown="ignore",
-                #),
+                encoder=OneHotEncoder(
+                       handle_unknown="ignore",
+                ),
                 missing_handler=MissingValuePredictor(
                         tree=DecisionTreeClassifier(
                                 min_samples_leaf=15,
