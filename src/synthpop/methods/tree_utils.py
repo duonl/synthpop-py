@@ -1,0 +1,328 @@
+from typing import Self
+import warnings
+
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
+from sklearn import tree
+from sklearn.base import clone
+from sklearn.exceptions import NotFittedError
+from sklearn.tree import BaseDecisionTree
+
+from synthpop.reproducibility import RandomStateManager
+
+
+def _check_all_leaf_nodes_are_reached(
+        tree: tree._tree.Tree,
+        X_train: npt.NDArray
+) -> bool:
+    """
+    Check if all leaf nodes are reached when the decision tree is applied to the same data used for fitting.
+
+    :param tree: The fitted decision tree.
+    :param X_train: The training data used to fit the tree.
+    :return: ``True`` if every leaf node is reached by at least one training sample;
+        otherwise ``False``.
+    """
+
+    is_leaf = tree.children_left == tree.children_right
+    all_leaf_nodes = np.flatnonzero(is_leaf)
+    reached_leaf_nodes = tree.apply(X_train)
+
+    return set(reached_leaf_nodes) == set(all_leaf_nodes)
+
+
+def _fit_decision_tree_with_reachable_leaves(
+        decision_tree: BaseDecisionTree,
+        X: npt.NDArray,
+        y: npt.NDArray,
+) -> BaseDecisionTree:
+    """
+    Fits a decision tree and retries fitting with different random seeds
+    if some leaf nodes are not reached by the training data.
+    This prevents difficult-to-reproduce failures during data generation.
+
+    Sampling from leaf nodes assumes that applying the fitted tree to the
+    training data reaches every leaf node. This is not always guaranteed;
+    see issue #129.
+
+    :param decision_tree: The decision tree estimator to fit.
+    :param X: The training input samples.
+    :param y: The target values.
+    :return: A fitted decision tree for which every leaf node is reached.
+    :raises RuntimeError: If no suitable decision tree is found after 100
+        fitting attempts.
+    """
+
+    decision_tree.fit(X, y)
+
+    if _check_all_leaf_nodes_are_reached(tree=decision_tree.tree_, X_train=X):
+        return decision_tree
+
+    for _ in range(99):
+        candidate = clone(decision_tree)
+        candidate.random_state = RandomStateManager.create_instance_seed()
+        candidate.fit(X, y)
+
+        if _check_all_leaf_nodes_are_reached(tree=candidate.tree_, X_train=X):
+            return candidate
+
+    raise RuntimeError(
+        # 99+the initial attempt is 100
+        f"Failed to fit a decision tree with reachable leaves after 100 attempts. "
+        "Try changing the root seed or tree parameters."
+    )
+
+
+def _sample_array(rng: np.random.Generator, counts: npt.NDArray, values: npt.NDArray, n_samples: int) -> npt.NDArray:
+    """
+    Helper function that draws samples with replacement from the empirical distribution of an array.
+
+    :param rng: A random number generator.
+    :param counts: Counts corresponding to each value.
+    :param values: Array of the distinct values corresponding to `counts`.
+    :param n_samples: Number of samples to draw.
+    :return: Sampled values.
+    """
+    cum_counts = np.cumsum(counts)
+    r = rng.integers(0, counts.sum(), size=n_samples)
+    idx = np.searchsorted(cum_counts, r, side="right")
+    sampled = values[idx]
+    return sampled
+
+
+class _LeafNodeSampler:
+    """
+    Leaf-based synthetic target sampler driven by explicit leaf IDs.
+
+    This class constructs an empirical conditional distribution of target values
+    within each leaf node of a fitted decision tree, and uses this distribution
+    to generate synthetic target values for new inputs.
+
+    The procedure consists of two phases:
+
+    1. Fitting phase (``fit_sampler``):
+        - Provide ``leaf_ids`` corresponding to each sample in `X`
+        - Construct empirical distributions of `y` per leaf
+        - The resulting mapping is stored as: leaf_id -> {target_value -> count}
+
+    2. Sampling phase (``sample_from_leaves``):
+        - Provide ``leaf_ids`` for new samples (`X_syn`)
+        - A target value is sampled from the empirical distribution associated with that leaf, with probabilities proportional to observed counts.
+
+    .. rubric:: Usage
+
+    One could use the tree sampler in a tree-based synthesiser method as follows:
+
+    >>> from sklearn.tree import BaseDecisionTree
+    ...
+    >>> class TreeMethod(BaseDecisionTree):
+    ...
+    >>>    def __init__(self, tree_sampler: LeafNodeSampler | None = None):
+    >>>        self.tree_sampler = tree_sampler
+    ...
+    >>>    def fit(self, X, y):
+    >>>        super().fit(X, y)
+    ...
+    >>>        leaf_ids = self.apply(X)
+    >>>        if self.tree_sampler is None:
+    >>>            self.tree_sampler_= LeafNodeSampler()
+    >>>        else:
+    >>>            self.tree_sampler_ = clone(self.tree_sampler)
+    >>>        self.tree_sampler_.fit_sampler(leaf_ids, y)
+    ...
+    >>>        return self
+    ...
+    >>>    def transform(self, X_syn):
+    >>>        leaf_ids = self.apply(X_syn)
+    ...
+    >>>        return self.tree_sampler_.sample_from_leaves(leaf_ids)
+    """
+
+    def __init__(self, random_state: int | np.random.Generator | None = None) -> None:
+        """
+        Initialise the sampler.
+        :param random_state: Controls the random number generation used for sampling.
+            - If ``int``, it is used as a seed to initialise a new ``numpy.random.Generator``
+                via ``np.random.default_rng``. This generator is reset with each call so output
+                is consistent between calls.
+            - If ``numpy.random.Generator``, it is used directly. This generator is not reset with each
+                call, so the state advances with each call.
+            - If ``None``, a default seed (42) is used to ensure reproducibility.
+        """
+        self.random_state = random_state
+
+    def fit_sampler(self, leaf_ids: npt.ArrayLike, y: npt.ArrayLike) -> Self:
+        """
+        Fit the sampler by constructing leaf-wise target histograms.
+
+        This function passes any missing or non-missing values of `y` to ``treeMethod``. However, at this point
+        in the ``CartMethod`` synthesis, `missing values are handled <../data_preparation/Missing_value.html>`__. So when missing values are seen in
+        `y`, a warning will be raised.
+
+        :param leaf_ids: Leaf identifiers assigned to each training sample `X`. Can be any
+            Array-like of shape (n_samples,).
+        :param y: Target values corresponding to the rows of `X`. Can be any
+            Array-like shape (n_samples,).
+        :return: The fitted sampler instance.
+        """
+
+        # input validation
+        leaf_ids = np.asarray(leaf_ids)
+        y = np.asarray(y)
+
+        if leaf_ids.ndim != 1:
+            raise ValueError(
+                f"leaf_ids must be 1-dimensional with shape (n_samples,), got shape {leaf_ids.shape} instead.")
+        if y.ndim != 1:
+            raise ValueError(
+                f"y must be 1-dimensional with shape (n_samples,), got shape {y.shape} instead.")
+        if len(leaf_ids) == 0 or len(y) == 0:
+            raise ValueError("leaf_ids and y must be non-empty.")
+        if leaf_ids.shape[0] != y.shape[0]:
+            raise ValueError(
+                f"leaf_ids and y must have the same number of samples. Got {leaf_ids.shape[0]} and {y.shape[0]} instead.")
+
+        self._leaf_map = {}
+
+        for leaf_id, target in zip(leaf_ids, y):
+            if leaf_id not in self._leaf_map:
+                self._leaf_map[leaf_id] = {}
+
+            leaf_hist = self._leaf_map[leaf_id]
+            leaf_hist[target] = leaf_hist.get(target, 0) + 1
+
+            if pd.isna(target):
+                warnings.warn(
+                    f"LeafNodeSampler sees missing values ({target}) in target `y` "
+                    "during fitting. NaN values will be included in the leaf "
+                    "distributions and may be sampled. Review your input data "
+                    "if this is unintended.")
+
+        if self.random_state is None:
+            self.random_state_ = RandomStateManager.create_instance_seed()
+        else:
+            self.random_state_ = self.random_state
+
+        self._y_dtype = np.asarray(y).dtype
+
+        return self
+
+    def sample_from_leaves(self, leaf_ids: npt.ArrayLike) -> npt.NDArray:
+        """
+        Generate synthetic target values for new samples.
+
+        For each input sample (`X_syn`), the corresponding ``leaf_ids`` are given.
+        A target value (`y_syn`) is then sampled from the empirical distribution
+        associated with that leaf.
+
+        Sampling is performed proportionally to observed frequencies:
+            P(y = v | leaf) = count(v) / sum(counts in leaf)
+
+        Note that calling this function twice gives the same return value.
+        See `User Guide 2: Synthetic data generation <../../user_guides/2_synthetic_data_generation.html>`__
+        and `the API Reference on Reproducibility <../reproducibility/reproducibility.html>`__ for more information.
+
+        :param leaf_ids: Leaf IDs of synthetic samples for which target values
+            should be generated. Array-like of shape (n_samples,)
+        :return: Synthetic target values sampled from the leaf-wise empirical
+            distributions. A np.ndarray of shape (n_samples,). The dtype is
+            the same as the input dtype.
+        """
+
+        if (
+            not hasattr(self, "_leaf_map")
+            or not hasattr(self, "random_state_")
+            or not hasattr(self, "_y_dtype")
+        ):
+            raise NotFittedError(
+                "LeafNodeSampler is not fitted. Call `fit_sampler` first.")
+
+        rng = RandomStateManager.create_rng(self.random_state_)
+
+        leaf_ids = np.asarray(leaf_ids)
+        n_samples = len(leaf_ids)
+
+        if leaf_ids.ndim != 1:
+            raise ValueError(f"leaf_ids must be 1-dimensional with shape "
+                             f"(n_samples,), got shape {leaf_ids.shape} instead.")
+        if n_samples == 0:
+            raise ValueError(f"leaf_ids must be non-empty.")
+
+        y_syn = np.empty(n_samples, dtype=self._y_dtype)
+
+        unique_leaves, inverse_indices = np.unique(
+            leaf_ids, return_inverse=True)
+        order = np.argsort(inverse_indices)
+        sorted_inv = inverse_indices[order]
+        split_points = np.flatnonzero(np.diff(sorted_inv)) + 1
+        groups = np.split(order, split_points)
+
+        for leaf_idx, leaf in enumerate(unique_leaves):
+            if leaf not in self._leaf_map:
+                raise ValueError(f"Leaf id {leaf} not seen during fitting.")
+
+            indices = groups[leaf_idx]
+
+            leaf_hist = self._leaf_map[leaf]
+            values = list(leaf_hist.keys())
+            counts = np.array(list(leaf_hist.values()))
+
+            total = counts.sum()
+            if total == 0:
+                raise ValueError(f"Leaf {leaf} has an empty leaf map. "
+                                 "This indicates a corrupted or inconsistent LeafNodeSampler state.")
+
+            sampled = _sample_array(
+                rng=rng,
+                counts=counts,
+                values=np.asarray(values, dtype=self._y_dtype),
+                n_samples=len(indices),
+            )
+
+            y_syn[indices] = sampled
+
+        return y_syn
+
+    def clone(self) -> Self:
+        """
+        Create a new instance of the sampler with the same configuration.
+
+        The method only copies initialisation parameters and does not copy
+        any fitted state (i.e., ``_leaf_map`` or ``random_state_``).
+        Similar to sklearn's ``clone()``.
+
+        :return: A new, unfitted instance of :class:`LeafNodeSampler` with the
+            same ``random_state`` setting.
+
+        Examples
+        --------
+        >>> sampler = LeafNodeSampler().clone()
+        """
+        return self.__class__(random_state=self.random_state)
+
+
+def _build_feature_matrix(X: dict[str, npt.NDArray], feature_order: list[str]) -> npt.NDArray:
+
+    if len(set(X.keys()) - set(feature_order)) > 0:
+        raise ValueError(
+            "cannot build feature matrix: received more columns than expected")
+    if len(set(feature_order) - set(X.keys())) > 0:
+        raise ValueError(
+            "cannot build feature matrix: received less columns than expected")
+    if len(X.keys()) == 0:
+        return np.empty(shape=(0, 0), dtype=np.float32)
+
+    cols = []
+
+    for k in feature_order:
+        arr = np.asarray(X[k])
+
+        if arr.ndim == 1:
+            arr = arr.reshape(-1, 1)
+
+        cols.append(arr)
+
+    matrix = np.hstack(cols).astype(np.float32)
+
+    return matrix
