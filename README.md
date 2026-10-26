@@ -2,7 +2,7 @@
 
 **synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the established [`synthpop` R package](https://www.synthpop.org.uk/), but provides a modern python interface and software architecture specifically designed for usability, reproducibility, maintainability and extensibility.
 
-Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to original or sensitive data is restricted. synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations. Properly synthesised data does not have any row-to-row relationships to the original data. As such, it may be considered non-personal data in the concept of privacy laws such as the GDPR.
+Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to original or sensitive data is restricted. synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations. Properly synthesised data does not have any row-to-row relationships to the original data. As such, it may be considered non-personal data in the context of privacy laws such as the GDPR.
 
 However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods, the settings used, and the intended use and sharing context of the synthetic data.
 
