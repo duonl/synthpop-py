@@ -96,8 +96,8 @@ class RandomStateManager:
         if isinstance(seed, (list, tuple, np.ndarray)) and len(seed) == 0:
             warnings.warn(
                 "An empty list was provided as the random seed, which makes the pRNG "
-        "reproducible. If reproducibility is not intended, use `seed=None` "
-        "to initialise the pRNG from system entropy.",
+                "reproducible. If reproducibility is not intended, use `seed=None` "
+                "to initialise the pRNG from system entropy.",
                 UserWarning)
 
         if seed is None:
