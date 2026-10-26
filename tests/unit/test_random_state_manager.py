@@ -360,4 +360,6 @@ def test_random_state_manager_warns_on_empty_list():
 
     assert len(record) == 1
     assert str(
-        record[0].message) == "An empty list has been provided for a random seed. This makes the pRNG reproducible. Is this intended? Use seed=None if system entropy for non-reproducible pRNGs is intended."
+        record[0].message) =="An empty list was provided as the random seed, which makes the pRNG "\
+                "reproducible. If reproducibility is not intended, use `seed=None` "\
+                "to initialise the pRNG from system entropy."
