@@ -315,7 +315,7 @@ cart = CartMethod(
                         random_state=1,
                 ),
                 encoder=OneHotEncoder(
-                       handle_unknown="ignore",
+                        handle_unknown="ignore",
                 ),
                 missing_handler=MissingValuePredictor(
                         tree=DecisionTreeClassifier(
