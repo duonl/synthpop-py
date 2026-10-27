@@ -162,7 +162,7 @@ The preliminary roadmap is as follows:
 3. evaluating utility
 4. evaluating privacy
 
-The roadmap will evolve as the project develops. If you have any ideas about features or improvements that would make synthpop-py more useful, please get in touch.
+The roadmap will evolve as the project develops. If you have any ideas about features or improvements that would make synthpop-py more useful, we would love to hear from you. You can share your ideas through [GitHub](https://github.com/duonl/synthpop-py/issues/new) or email us at [synthetische.data@duo.nl](mailto:synthetische.data@duo.nl).
 
 More details wil follow soon.
 

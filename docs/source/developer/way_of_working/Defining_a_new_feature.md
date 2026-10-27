@@ -2,7 +2,7 @@
 
 This guide describes the process of defining a feature, from initial idea to the start of development.
 
-We welcome ideas for new features and improvements. If you have an idea that could make synthpop-py more useful, please get in touch with us. You do not need to have a complete design, implementation plan, or code ready before starting the conversation.
+We welcome ideas for new features and improvements. If you have an idea that could make synthpop-py more useful, please get in touch with us by opening an issue on [GitHub](https://github.com/duonl/synthpop-py/issues/new). You do not need to have a complete design, implementation plan, or code ready before starting the conversation.
 
 ## What kind of new features we are looking for
 The aim of this package is to facilitate the creation of synthetic data. The primary intended audience is government institutions.

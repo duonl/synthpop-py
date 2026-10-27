@@ -83,7 +83,7 @@ Future development may include:
 
 The project roadmap will continue to evolve based on user feedback and the needs of the synthetic data community.
 
-If you have an idea for a feature, an improvement to an existing capability or a different way synthpop-py could be useful, please get in touch with us. We welcome feedback and contributions from both users and developers.
+If you have an idea for a feature, an improvement to an existing capability or a different way synthpop-py could be useful, please get in touch with us by opening an issue on [GitHub](https://github.com/duonl/synthpop-py/issues/new) or contacting us by email at [synthetische.data@duo.nl](mailto:synthetische.data@duo.nl). We welcome feedback and contributions from both users and developers.
 
 ## Relationship to the synthpop R package
 
