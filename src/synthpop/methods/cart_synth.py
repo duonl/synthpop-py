@@ -30,7 +30,7 @@ from synthpop.data_preparation.missing_value_handling import (
 )
 from synthpop.methods import base_synth
 import synthpop.methods.tree_utils as tree_utils
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import _LeafNodeSampler
 import synthpop.methods.tree_utils as tree_utils
 from synthpop.reproducibility import RandomStateManager
 
@@ -49,7 +49,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
     :param tree: a Decision Tree to construct the conditional probability distributions.
     :param encoder: a transformer object.
     :param missing_handler: handler for missing values in the target variable.
-    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils._LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold for when a categorical value is considered rare.
         If a categorical predictor contains values occurring fewer than this threshold,
         an exception is raised to prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
@@ -67,7 +67,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         tree: BaseDecisionTree | None = None,
         encoder: TransformerMixin | None = None,
         missing_handler: BaseMissingValueHandler | None = None,
-        tree_sampler: LeafNodeSampler | None = None,
+        tree_sampler: _LeafNodeSampler | None = None,
     ) -> None:
         super().__init__()
         self.encoder = encoder
@@ -83,7 +83,7 @@ class _AbstractTreeMethod(TransformerMixin, BaseEstimator, metaclass=ABCMeta):
         return self.missing_handler.clone() if self.missing_handler is not None else self._get_missing_handling()
 
     def _new_tree_sampler(self):
-        return self.tree_sampler.clone() if self.tree_sampler is not None else LeafNodeSampler()
+        return self.tree_sampler.clone() if self.tree_sampler is not None else _LeafNodeSampler()
 
     def _new_tree(self):
         return clone(self.tree) if self.tree is not None else self._get_tree()
@@ -233,7 +233,7 @@ class TreeClassifierMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeClassifier`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_preparation.encoders.PCAEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`
-    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils._LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
         A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold.
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.
@@ -307,7 +307,7 @@ class TreeRegressorMethod(_AbstractTreeMethod):
     :param tree: a Decision Tree to construct the conditional probability distributions. Default is a :class:`sklearn.tree.DecisionTreeRegressor`
     :param encoder: a transformer object to transform non-numeric data to numeric data. Default is :class:`~synthpop.data_preparation.encoders.MeanEncoder`
     :param missing_handler: handler for missing values in the target variable. Default is :class:`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
-    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils.LeafNodeSampler` object to sample from the leaves of the decision tree.
+    :param tree_sampler: a  :class:`~synthpop.methods.tree_utils._LeafNodeSampler` object to sample from the leaves of the decision tree.
     :param rare_categories_threshold: Threshold value to determine whether a category is considered rare.
         A warning is emitted when more than 25% of the observations in a categorical predictor belong to categories occurring fewer than this threshold.
         This warning helps prevent potential :ref:`unintended attribute disclosure <612-attribute-disclosure>`.

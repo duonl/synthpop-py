@@ -117,7 +117,7 @@ def _make_heatmap(
     :param matrix: pandas DataFrame of the categorised S_pMSE
     :param text_matrix: pandas DataFrame of the same shape as ``matrix``
         containing the text displayed in each heatmap cell (e.g. rounded
-        values, "CONSTANT VARIABLE" or "UNDEFINED" for unpresent combinations).
+        values, "CONSTANT VARIABLE" or "UNDEFINED" for combinations not present in the input S_pMSE data).
     :param colour_scale: Plotly-compatible colour scale applied to the heatmap.
     :param bins: Sequence of bin edges used to categorise the S_pMSE values.
     :param bin_labels: Labels corresponding to the bins, displayed on the

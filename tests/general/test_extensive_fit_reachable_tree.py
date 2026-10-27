@@ -24,7 +24,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from synthpop.data_preparation.missing_value_handling import MissingValuePredictor
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import _LeafNodeSampler
 
 from tests.integration.data_generated_for_tests import (
     get_test_data_classifier,
@@ -97,7 +97,7 @@ def test_regression_bug_129_regressor_no_empty_leaf_failure(tree_seed, data_seed
             tree=DecisionTreeClassifier(
                 min_samples_leaf=5, random_state=seeds[5]),
         ),
-        tree_sampler=LeafNodeSampler(random_state=seeds[2])
+        tree_sampler=_LeafNodeSampler(random_state=seeds[2])
     )
 
     X, y = get_test_data_regressor(
@@ -140,7 +140,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure(tree_seed, data_see
             min_impurity_decrease=1e-08,   # equivalent to cp in synthpop-r
             random_state=tree_seed,  # None#bad_tree_seed#seeds[0]
         ),
-        tree_sampler=LeafNodeSampler(random_state=0)
+        tree_sampler=_LeafNodeSampler(random_state=0)
     )
 
     X, y = get_test_data_classifier(

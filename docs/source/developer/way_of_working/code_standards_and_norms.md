@@ -1,5 +1,5 @@
 # Code Standards, Norms and Conventions
-This document defines the coding standards and conventions used throughout the Synthpop codebase. It establishes what is considered acceptable and maintainable code, ensuring consistency across all contributions.
+This document defines the coding standards and conventions used throughout the synthpop-py codebase. It establishes what is considered acceptable and maintainable code, ensuring consistency across all contributions.
 
 It covers guidelines for code structure, naming, readability, testing practices and general design principles. In addition, it describes tooling and checks that help enforce or validate these standards in practice.
 
@@ -10,7 +10,7 @@ For developers, this documentation should be used during implementation and when
 ## Language and form
 - British English
 - [PEP8](https://peps.python.org/pep-0008/)
-- Use the term "original data" to refer to the data that is not synthetic. 
+- Use the term "original data" to refer to the data that is not synthetic.
 - Use type hints where appropriate.
 - Code and documentation must use clear, unambiguous naming.
 - Avoid abbreviations unless they are widely established in the domain (e.g. "df" for DataFrame in local scope only)
@@ -19,25 +19,25 @@ For developers, this documentation should be used during implementation and when
 - Error messages should be actionable (explain what went wrong and why).
 
 ## Design and develop principles
-- Test Driven Development, with a code coverage of at least 80%. 
+- Test Driven Development, with a code coverage of at least 80%.
 - [SOLID](https://en.wikipedia.org/wiki/SOLID) principles.
-- It should always be possible to generate synthetic data within 5 lines of code. 
+- It should always be possible to generate synthetic data within 5 lines of code.
 - All classes that inherit from BaseEstimator should follow [the developer guides of scikit-learn](https://scikit-learn.org/stable/developers/develop.html)
-- Use NumPy arrays where possible. 
+- Use NumPy arrays where possible.
 - The user of this package should be able to use pandas.
 - Prefer explicit over implicit behaviour.
 - Avoid premature abstraction: prefer simple solutions until complexity justifies generalisation.
 
 A synthesis method should accept pandas dataframes/series and heterogeneous data.
 Making the data homogeneous should happen within the synthesis method.
-It is best to use NumPy within a synthesis method. See [#45](https://github.com/Synthpop-data/synthpop-py/issues/45).
+It is best to use NumPy within a synthesis method. See [#45](https://github.com/duonl/synthpop-py/issues/45).
 
 ### Informative issues and pull requests
 | issue/pull request number | topic |
 | ------------------------- | ----- |
-| [#1](https://github.com/Synthpop-data/synthpop-py/issues/1), [#2](https://github.com/Synthpop-data/synthpop-py/pull/2)| Missing values |
-| [#13](https://github.com/Synthpop-data/synthpop-py/issues/13), [#17](https://github.com/Synthpop-data/synthpop-py/issues/17), [#19](https://github.com/Synthpop-data/synthpop-py/pull/19), [#26](https://github.com/Synthpop-data/synthpop-py/pull/26)| user expectations|
-| [#45](https://github.com/Synthpop-data/synthpop-py/issues/45) | relation to scikit-learn |
+| [#1](https://github.com/duonl/synthpop-py/issues/1), [#2](https://github.com/duonl/synthpop-py/pull/2)| Missing values |
+| [#13](https://github.com/duonl/synthpop-py/issues/13), [#17](https://github.com/duonl/synthpop-py/issues/17), [#19](https://github.com/duonl/synthpop-py/pull/19), [#26](https://github.com/duonl/synthpop-py/pull/26)| user expectations|
+| [#45](https://github.com/duonl/synthpop-py/issues/45) | relation to scikit-learn |
 
 ## Testing philosophy
 Tests should primarily validate behaviour, not implementation details. The goal is to ensure correctness under expected usage and robustness under edge cases. Tests should:
@@ -116,18 +116,18 @@ Not always required, but important for data-heavy operations:
  - Same seed gives the same output
  - Controlled randomness
  - No hidden global state affecting results
- 
+
 ## Documentation expectations
 - Public classes and functions must include docstrings.
 - Docstrings should describe purpose, inputs, outputs, assumptions and limitations.
 - Complex logic should be explained inline with comments where necessary.
 - Examples in docstrings are encouraged.
 - Documentation should be updated alongside code changes.
- 
+
 ## Useful tools for testing and code quality
 
 - Code Spell Checker extension for vscode.
-- autopep8 extension for vscode. 
+- autopep8 extension for vscode.
 - pytest-cov for code coverage of the unit tests. (installed if you installed this package with the dev dependency group)
-- pylint for code feedback and code analysis. 
-    
+- pylint for code feedback and code analysis.
+

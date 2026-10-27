@@ -201,7 +201,8 @@ class PCAEncoder(_BaseEncoder):
             raise ValueError("Number of observations in X and y do not match")
 
         if np.isnan(X_val).all():
-            self.mapping_ = {}  # If X is fully nan, mapping_ should be an empty dictionary, just like MeanEncoder
+            # If X is fully nan, mapping_ should be an empty dictionary, just like MeanEncoder
+            self.mapping_ = {}
             self.n_features_out_ = 1
             return self
         # the core of this implementation
@@ -210,7 +211,7 @@ class PCAEncoder(_BaseEncoder):
         missing_contingency_table = pd.crosstab(X_val, pd.isna(y_val))
 
         # edge case for: no row where both y and X are non-missing
-        if (np.isnan(y_val) | np.isnan(X_val)).all(): 
+        if (np.isnan(y_val) | np.isnan(X_val)).all():
             self.mapping_ = {k: [np.nan]
                              for k in missing_contingency_table.index}
             self.n_features_out_ = 1

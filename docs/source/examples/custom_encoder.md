@@ -258,7 +258,7 @@ print(values)
 #  [0.        ]
 #  [0.4236616 ]]
 ```
-****Finally, we successfully managed to transform our animals into numbers!****![Tada](../images/tada_emoji.gif){width=25px}
+****Finally, we successfully managed to transform our animals into numbers!****![Tada](../_static/images/tada_emoji.gif){width=25px}
 
 
 ## Estimator tags

@@ -110,7 +110,7 @@ spmse_cart = pairwise_spmse(
 
 plot_cart = plot_spmse(spmse_cart, show_plot=True)
 ```
-![S_pMSE heatmap using the default CART synthesis method](../images/method_cart_spmse.png)
+![S_pMSE heatmap using the default CART synthesis method](../_static/images/method_cart_spmse.png)
 ```python
 spmse_sample = pairwise_spmse(
     orig_df=data,
@@ -119,7 +119,7 @@ spmse_sample = pairwise_spmse(
 
 plot_sample = plot_spmse(spmse_sample, show_plot=True)
 ```
-![S_pMSE heatmap using the Sample synthesis method](../images/method_sample_spmse.png)
+![S_pMSE heatmap using the Sample synthesis method](../_static/images/method_sample_spmse.png)
 
 As can be seen in the plots, CART generally produces lower S_pMSE values. This is because it attempts to preserve relationships between variables.
 
@@ -143,7 +143,7 @@ could be used for variables that act as fixed identifiers or structural fields t
 However, `CopyMethod` should be used carefully because copied values are directly taken from the original dataset. It does **not** provide privacy protection for that variable. It should **never** be used as the `default_syn_method`. Additionally, because values are copied directly, it cannot generate more rows than the original dataset.
 
 The S_pMSE heatmap below shows that the value for each variable pair is 0 (defined as "CONSTANT VARIABLE") because the original and the synthetic data are identical.
-![S_pMSE heatmap for synthetic dataset fully copied from the original](../images/method_copy_spmse.png)
+![S_pMSE heatmap for synthetic dataset fully copied from the original](../_static/images/method_copy_spmse.png)
 
 We will use `CopyMethod` in the next example where different synthesis methods are assigned to different columns. More information about CART synthesis can be found in {ref}`User Guide 3.3: Copy synthesis method <33-copy-synthesis>`.
 

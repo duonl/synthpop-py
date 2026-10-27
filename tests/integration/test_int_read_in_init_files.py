@@ -14,6 +14,7 @@ def test_read_in_synthpop_all_():
     assert callable(synthpop.Synthesiser)
     assert synthpop.__version__ == "1.0.0"
 
+
 def test_read_in_plotting_functions_all_():
     import synthpop.plotting as plotting
 

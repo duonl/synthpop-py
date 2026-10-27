@@ -183,9 +183,9 @@ def test_transform_uses_random_state_manager(mocker):
 
     mock_create_rng.assert_called_with(seed=123456)
     mock_sample_array.assert_called_with(
-        expected_rng, 
-        model.counts_, 
-        model.values_, 
+        expected_rng,
+        model.counts_,
+        model.values_,
         100,
     )
     assert (result == expected_result).all()

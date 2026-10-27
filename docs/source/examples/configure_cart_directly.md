@@ -32,7 +32,7 @@ The defaults are slightly different for classification and regression:
 `tree` | {class}`sklearn.tree.DecisionTreeClassifier` | {class}`sklearn.tree.DecisionTreeRegressor`
 `encoder` | {class}`~synthpop.data_preparation.encoders.PCAEncoder` | {class}`~synthpop.data_preparation.encoders.MeanEncoder`
 `missing_handler` | {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue` | {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
-`tree_sampler` | {class}`~synthpop.methods.tree_utils.LeafNodeSampler` | {class}`~synthpop.methods.tree_utils.LeafNodeSampler`
+`tree_sampler` | {class}`~synthpop.methods.tree_utils._LeafNodeSampler` | {class}`~synthpop.methods.tree_utils._LeafNodeSampler`
 
 for example, the following constructs a CART method using all of these defaults:
 ```python
@@ -174,9 +174,7 @@ This is something `tune_cart` deliberately does not expose. The convenience func
 For more information about the role of PCA in CART, see {ref}`User Guide 4.1.1: PCA encoding <411-pca-encoding>`. The `MeanEncoder` has no configuration options. For more information about how mean encoding works, see {ref}`User Guide 4.1.2: Mean encoding <412-mean-encoding>`.
 
 ## Use a different encoder
-```{warning}
-Using a different encoder is not yet supported in version 0.1.2. This is likely to change in a newer version.
-```
+
 We are not limited to the encoders provided by synthpop-py. The `encoder` parameter accepts a transformer that follows the expected `scikit-learn` transformer interface.
 
 For example, we could use `scikit-learn's` {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>` instead of `MeanEncoder`:
@@ -272,7 +270,7 @@ Suppose we want to build a classifier that:
 
 But we want a regressor that:
 - uses the default number of observations (`CartMethod` uses 5, but `DecisionTreeRegressor` uses 1) in each main CART tree leaf, but measures the quality of the spit by minimising the L1;
-- uses one-hot encoding instead of mean encoding (not supported yet, so commented out in the code);
+- uses one-hot encoding instead of mean encoding;
 - uses a minimum leaf size of 15 for the missing-value prediction tree; and
 - uses a maximum depth of 5 for the missing-value prediction tree.
 
@@ -316,9 +314,9 @@ cart = CartMethod(
                         criterion="absolute_error",
                         random_state=1,
                 ),
-                #encoder=OneHotEncoder(
-                #        handle_unknown="ignore",
-                #),
+                encoder=OneHotEncoder(
+                        handle_unknown="ignore",
+                ),
                 missing_handler=MissingValuePredictor(
                         tree=DecisionTreeClassifier(
                                 min_samples_leaf=15,
@@ -378,7 +376,7 @@ Decision tree | Yes | {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeC
 Categorical encoder | Yes | {class}`~synthpop.data_preparation.encoders.PCAEncoder`, {class}`~synthpop.data_preparation.encoders.MeanEncoder`, {class}`OneHotEncoder <sklearn.preprocessing.OneHotEncoder>`
 Missing-value handler | Yes | {class}`~synthpop.data_preparation.missing_value_handling.ReplaceMissingWithValue`, {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
 Missing-value prediction tree | Yes| Configure the {class}`DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>` inside {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
-Tree sampler | Yes, but is more advanced | Supply a custom `LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
+Tree sampler | Yes, but is more advanced | Supply a custom `_LeafNodeSampler` to the `tree_sampler` argument in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`, {class}`~synthpop.methods.cart_synth.TreeRegressorMethod` or {class}`~synthpop.data_preparation.missing_value_handling.MissingValuePredictor`
 Rare-category threshold | Yes | Set the `rare_categories_threshold` parameter in {class}`~synthpop.methods.cart_synth.TreeClassifierMethod`or {class}`~synthpop.methods.cart_synth.TreeRegressorMethod`. See the [API reference](../api_reference/synthesis_methods/CART.rst) for more information.
 
 For common adjustments, {func}`~synthpop.methods.cart_synth.tune_cart` is the simpler interface. When the synthesis workflow requires a different encoder, missing-value strategy, tree configuration, or another component, constructing {class}`~synthpop.methods.cart_synth.CartMethod` directly provides the necessary flexibility.

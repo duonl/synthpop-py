@@ -10,7 +10,7 @@ from sklearn.utils.estimator_checks import check_estimator
 from synthpop.data_preparation.encoders import PCAEncoder
 from synthpop.data_preparation.missing_value_handling import MissingValuePredictor
 from synthpop.methods.cart_synth import TreeClassifierMethod, TreeRegressorMethod
-from synthpop.methods.tree_utils import LeafNodeSampler
+from synthpop.methods.tree_utils import _LeafNodeSampler
 from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import str_dtype
 
@@ -456,7 +456,7 @@ def test_regressor_trainings_data_reaches_all_nodes():
         missing_handler=MissingValuePredictor(
             tree=DecisionTreeClassifier(min_samples_leaf=5, random_state=1),
         ),
-        tree_sampler=LeafNodeSampler(random_state=0),
+        tree_sampler=_LeafNodeSampler(random_state=0),
         rare_categories_threshold=0,
     )
 
@@ -488,7 +488,7 @@ def test_regression_bug_129_classifier_no_empty_leaf_failure():
             min_impurity_decrease=1e-08,  # equivalent to cp in synthpop-r
             random_state=tree_seed,  # seed that reproduces the bug
         ),
-        tree_sampler=LeafNodeSampler(random_state=0),
+        tree_sampler=_LeafNodeSampler(random_state=0),
         rare_categories_threshold=0,
     )
 

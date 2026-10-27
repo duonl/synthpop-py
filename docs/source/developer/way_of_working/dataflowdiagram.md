@@ -1,6 +1,6 @@
 
 # Dataflow diagrams
-This page provides a visual overview of how data moves through the Synthpop system. it is intended to help developers understand the internal architecture by showing how inputs are transformed into outputs across different stages of the pipeline.
+This page provides a visual overview of how data moves through the synthpop-py system. it is intended to help developers understand the internal architecture by showing how inputs are transformed into outputs across different stages of the pipeline.
 
 The diagrams illustrate key processes such as fitting a Synthesiser and generating synthetic data, including both numeric and categorical workflows.
 

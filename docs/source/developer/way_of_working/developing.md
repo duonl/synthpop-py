@@ -1,6 +1,6 @@
-# Developing Synthpop
+# Developing synthpop-py
 
-This document describes how development within the Synthpop project is structured and executed. It provides the foundational context needed to understand how work is planned, implemented, reviewed and released. It covers the process that guides development.
+This document describes how development within the synthpop-py project is structured and executed. It provides the foundational context needed to understand how work is planned, implemented, reviewed and released. It covers the process that guides development.
 
 For first-time contributors, this page should be read first. It provides the mental model of how the project operates and how individual tasks fit into the broader system. The other documentation, such as the developer checklist, review checklist and code standards, builds on the processes defined here.
 
@@ -8,7 +8,7 @@ For first-time contributors, this page should be read first. It provides the men
 The development team is currently small. These guidelines assume that only a few developers will be working in parallel at any given time. Bug fixes and new features are expected to be developed concurrently, while the pace of introducing new features remains modest.
 
 ## Contributing and Development Setup
-If you wish to contribute to Synthpop, start by forking the repository to your own account. Direct commit access to the main repository is restricted.
+If you wish to contribute to synthpop-py, start by forking the repository to your own account. Direct commit access to the main repository is restricted.
 
 Contributions can be done in your fork and are submitted via pull requests from your fork to the upstream repository.
 
@@ -89,31 +89,31 @@ The first step is to read the functional documentation. Is it clear what needs t
 
 1. Sync your fork with the upstream **develop** branch.
 2. Create a new branch in your fork from **develop**, named ```{ticket number}-{descriptive name}```.
-3. Apply test-driven development when implementing the feature. 
+3. Apply test-driven development when implementing the feature.
 4. Test the feature from a user perspective.
 5. Update the documentation. Add example code demonstrating how to use the feature. Verify that the examples run as expected.
 6. Push your branch to your fork.
 7. Create a pull request from your fork into the upstream **develop** branch.
 8. Resolve any merge conflict in your feature branch. In general, the development branch takes precedence.
 9. Re-test thoroughly. Verify that no functionality was lost, the example code still runs, and all automated tests pass.
-10. Request a code review and incorporate any feedback. Test again, as changes may introduce new issues. Request review again. One reviewer is enough for small things. For more complex or high-impact features it is recommended to have your code reviewed by multiple people. 
+10. Request a code review and incorporate any feedback. Test again, as changes may introduce new issues. Request review again. One reviewer is enough for small things. For more complex or high-impact features it is recommended to have your code reviewed by multiple people.
 11. If everything is in order, the pull request is squash merged into **develop** by a maintainer. Your branch can then be deleted.
 
 **Tip:** Regularly sync your fork with upstream **develop** to reduce merge conflicts.
 
 ### Releasing a new version
 
-1. Identify the commit on the **develop** branch that contains all features intended for the next release. 
+1. Identify the commit on the **develop** branch that contains all features intended for the next release.
 2. Determine the version number.
 3. Create a release branch named ```release-v{version number}```.
-4. Update the package metadata where necessary. 
+4. Update the package metadata where necessary.
 4. Run all automated tests and checks. Fix any bugs in the release branch.
 5. Use the code as a user would and fix any bugs found in the release branch.
 6. Carefully review the documentation for the new features. Ensure that it is clear and usable.
 7. Ask selected users to test the release and address any reported issues.
 8. Obtain merge approval *TODO: who needs to approve?*
 9. Squash merge the release branch into both **main** and **develop**, then close the release branch.
-10. Upload the new version to PyPi. 
+10. Upload the new version to PyPi.
 
 ## Bug Handling
 A behaviour is considered a bug when it contradicts documentation or it violates reasonable user expectations.
@@ -125,7 +125,7 @@ A valid bug report must include:
 
 The report allows us to determine whether the expected behaviour is justified. If not, the issue may indicate that documentation needs improvement rather than code.
 
-If tests pass but behaviour is wrong, the test suite is incomplete. New tests should be added to reproduce the observed behaviour. Ask yourself whether the situation that triggered the bug is realistic, and whether the impact of the bug is proportionate and logical. 
+If tests pass but behaviour is wrong, the test suite is incomplete. New tests should be added to reproduce the observed behaviour. Ask yourself whether the situation that triggered the bug is realistic, and whether the impact of the bug is proportionate and logical.
 
 For example, suppose that attempting to generate a synthetic version of a 1000x1000 table containing only the value 0 causes the system to crash. If the documentation does not specify any limits and a user encounters this scenario, there is a clear discrepancy between expected and observed behaviour. The actual behaviour is a crash, while the expected behaviour is a valid 1000x1000 table filled with zeros. This therefore constitutes a bug.
 
@@ -150,7 +150,7 @@ flowchart LR
     A3 -->|no| A2
     A3 --> |yes| A
     A[Actual behaviour is not expected behaviour] --> B{Does the actual behaviour contradict the documentation?}
-    
+
     B --> |no, but expectations are common sense| C[Proceed as bug]
     B --> |no, but the expectations are reasonable| D[Treat it like a feature request]
     B --> |no, misunderstanding| D1{Can documentation be improved?}

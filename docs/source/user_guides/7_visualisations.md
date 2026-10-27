@@ -24,7 +24,7 @@ The univariate distribution visualisation compares each variable in the original
 ```python
 >>> from synthpop.plotting import plot_univariate_distributions
 
->>>> plots = plot_univariate_distributions(
+>>> plots = plot_univariate_distributions(
 ...     original_data,
 ...     synthetic_data,
 ...     save_path=None,
@@ -55,7 +55,7 @@ Depending on the synthesis method, small deviations are expected due to sampling
 
 ### 7.1.1. Numeric variables
 
-![Histogram of age distribution comparison](../images/your_first_synthetic_data_univariate_distributions.png)
+![Histogram of age distribution comparison](../_static/images/your_first_synthetic_data_univariate_distributions.png)
 For numeric variables, the visualisation displays overlapping histograms of the original and synthetic distributions.
 
 The histograms are normalised as densities, allowing datasets with different numbers of observations to be compared directly.
@@ -76,7 +76,7 @@ Potential issues include:
 
 ### 7.1.2. Categorical variables
 
-![Bar chart of sex distribution comparison](../images/sex_distribution.png) <br>
+![Bar chart of sex distribution comparison](../_static/images/sex_distribution.png) <br>
 For categorical variables, the visualisation displays the relative frequency of each category in the original and synthetic datasets. This allows datasets with different numbers of observations to be compared directly.
 
 Categories occurring in only one of the datasets are also shown, allowing users to identify categories that were lost or introduced during synthesis.
@@ -136,7 +136,7 @@ When `interactive=False` (default), the HTML document is not opened automaticall
 
 ## 7.2. S_pMSE heatmap
 
-![S_pMSE heatmap](../images/spmse_user_guide.png)
+![S_pMSE heatmap](../_static/images/spmse_user_guide.png)
 The S_pMSE heatmap provides a visual representation of pairwise utility evaluation. It is generated using
 {func}`~synthpop.plotting.plot_spmse.plot_spmse`.
 The input is the pairwise S_pMSE table produced by

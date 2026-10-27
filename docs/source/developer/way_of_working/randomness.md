@@ -11,7 +11,7 @@ There is a mismatch between ecosystem conventions:
 
 The policy in this package is to always use `numpy.random.Generator` and never introduce new uses of `RandomState`.
 
-## Unifying NumPy, Scikit-learn and this package
+## Unifying NumPy, scikit-learn and this package
 
 Most of the recommendations of NumPy and the requirements from the functional description are implemented in `reproducibility.RandomStateManager`.
 If you are developing an estimator in this package, the guidelines by scikit-learn apply mostly. The points where we deviate are:

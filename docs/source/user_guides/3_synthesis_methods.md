@@ -301,12 +301,12 @@ For advanced use cases, `SampleMethod` can also be implemented without the synth
 >>> from synthpop.methods import SampleMethod
 
 >>> y = pd.Series([1, 2, pd.NA], name="new_target_column")
->>> model = SampleMethod(random_state=10).fit(None, y)
+>>> model = SampleMethod().fit(None, y)
 >>> model.transform(None)
 0              <NA>
 1              <NA>
 2                 1
-Name: new_target_column, dtype: object
+Name: new_target_column, dtype: object  # may vary due to randomness
 ```
 
 Unlike `CartMethod`, `SampleMethod` does not require predictor data, so both `fit` and `transform` can receive `None` for the predictors. Here, `y` is the observed target column used to estimate the empirical distribution. After fitting, `transform(None)` generates synthetic values by sampling from that distribution.

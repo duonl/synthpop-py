@@ -1,16 +1,29 @@
 # For developers
 
-This documentation is intended for developers working on the Synthpop project. It serves as a structured guide to both the development process and the quality standards expected within the codebase.
+Welcome to the developer documentation for synthpop-py!
 
-If you are new to the project, it is recommended to start with [Developing Synthpop](way_of_working/developing.md), which provides the essential context: the overall principles, workflows, branching strategy, and how features are defined, developed, and released. This page gives you the conceptual foundation needed to understand how work is organised.
+This documentation is intended for developers working on the synthpop-py project. It provides a structured guide to the development process, the architecture of the project and the quality standards expected within the codebase.
 
-Once familiar with the general workflow, you should use the [Checklist for Developers](way_of_working/checklist_for_developer.md) as a practical step-by-step guide during implementation. It outlines what to do before, during, and after development, including preparing a pull request and handling feedback. This ensures consistency and completeness.
+Whether you are making your first contribution, developing a new feature, reviewing a pull request, or simply interested in understanding how synthpop-py works, these pages should help you find your way around the project.
 
-When reviewing code (or preparing your work for review), refer to the [Checklist for Review](way_of_working/checklist_for_review.md). This document structures the review process, covering global checks, tests, code quality, and documentation, helping maintain a high standard across contributions.
+If you are new to the project, we recommend starting with [Developing synthpop-py](way_of_working/developing.md). This provides the essential context: the overall principles, workflows, branching strategy, and how features are defined, developed, and released. It gives you the conceptual foundation needed to understand how work is organised.
 
-For questions about what constitutes acceptable code, consult [Code Standards, Norms, and Conventions](way_of_working/code_standards_and_norms.md). This document defines the criteria for code quality and consistency, and acts as a tie-breaker when multiple valid approaches exist.
+Once familiar with the general workflow, use the [Checklist for Developers](way_of_working/checklist_for_developer.md) as a practical step-by-step guide during implementation. It outlines what to do before, during, and after development, including preparing a pull request and handling feedback. This helps us keep contributions consistent and complete.
 
-Finally, the [Dataflow Diagrams](way_of_working/dataflowdiagram.md) provide a visual and conceptual overview of how Synthpop operates internally. Use this as a reference when you need to understand the system's architecture or the flow of data through different components.
+When reviewing code, or preparing your own work for review, refer to the [Checklist for Review](way_of_working/checklist_for_review.md). This document structures the review process, covering global checks, tests, code quality, and documentation, and helps us maintain a high standard across contributions.
+
+For questions about what constitutes acceptable code, consult [Code Standards, Norms, and Conventions](way_of_working/code_standards_and_norms.md). This document defines the criteria for code quality and consistency, and acts as a tie-breaker when multiple valid approaches are possible.
+
+Finally, the [Dataflow Diagrams](way_of_working/dataflowdiagram.md) provide a visual and conceptual overview of how synthpop-py operates internally. Use them as a reference when you need to understand the system's architecture or the flow of data through its different components.
+
+## Want to contribute?
+We welcome contributions of all kinds. You can contribute by implementing a feature, fixing a bug, improving documentation, reviewing code, suggesting an idea, or helping us improve the development process.
+
+You do not need to know the entire codebase before getting involved. If you have an idea for an improvement or are unsure where to start, **please get in touch with us** by opening an issue on [GitHub](https://github.com/duonl/synthpop-py/issues/new) or contacting us by email at [synthetische.data@duo.nl](mailto:synthetische.data@duo.nl). Questions and discussions are welcome and we are happy to help you find a way to contribute.
+
+The [Contributing to the package](contributing_to_package.md) page provides more information about contributing to synthpop-py, including how to suggest enhancements, report bugs, improve documentation and contribute code.
+
+If there is something you would like synthpop-py to provide, let us know! Your feedback helps us understand what is useful to the community and helps shape the future development of the project.
 
 ```{toctree}
 :maxdepth: 1

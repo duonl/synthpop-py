@@ -375,6 +375,7 @@ def test_transform_rejects_missing_columns():
     ):
         cart.transform(X)
 
+
 def test_transform_rejects_datetime_predictors():
     cart = CartMethod()
 
@@ -601,6 +602,7 @@ def test_get_feature_names_out_from_n_features_in():
 
     result = model.get_feature_names_out()
     np.testing.assert_array_equal(result, ["x0", "x1", "x2"])
+
 
 def test_get_feature_names_out_raises_unfitted():
     cart = CartMethod()

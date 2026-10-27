@@ -625,7 +625,6 @@ def test_generate_does_not_raise_dataframe_fragmentation_warning():
         synth.generate(100)
 
 
-
 def test_tune_cart_applies_different_min_samples_leaf():
     data = pd.DataFrame({
         "first": range(10),

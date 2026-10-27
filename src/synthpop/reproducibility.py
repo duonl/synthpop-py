@@ -13,7 +13,8 @@ def _create_seed_from_sequence(seed_sequence: SeedSequence) -> int:
     # To guarantee independent RNGs, we need independent seeds.
     # That is why we need to generate a new seed sequence for each seed.
     new_seed_sequence = seed_sequence.spawn(1)[0]
-    new_seed = new_seed_sequence.generate_state(1)[0]  # generate_state generates a list of seeds, we need only one
+    # generate_state generates a list of seeds, we need only one
+    new_seed = new_seed_sequence.generate_state(1)[0]
     return int(new_seed)
 
 
@@ -93,7 +94,11 @@ class RandomStateManager:
         # The error messages of SeedSequence when seed is invalid are clear enough.
 
         if isinstance(seed, (list, tuple, np.ndarray)) and len(seed) == 0:
-            warnings.warn("empty list as no entropy for seed. Use None for system entropy.", UserWarning)
+            warnings.warn(
+                "An empty list was provided as the random seed, which makes the pRNG "
+                "reproducible. If reproducibility is not intended, use `seed=None` "
+                "to initialise the pRNG from system entropy.",
+                UserWarning)
 
         if seed is None:
             cls._root_seed = secrets.randbits(128)
@@ -148,7 +153,7 @@ class RandomStateManager:
             entropy = [*root_seed, seed]
         else:
             entropy = [root_seed, seed]
-        
+
         return np.random.default_rng(entropy)
 
     def __init__(self, seed: int) -> None:

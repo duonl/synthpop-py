@@ -284,7 +284,10 @@ def test_pca_fit_constant_feature():
     assert result.n_features_out_ == 1
     assert result.pca_transform is stub_pca_transform
     assert not hasattr(result.pca_transform, "transform_X_")
-    assert np.array_equal(result.mapping_["a"], np.array([0], dtype=np.float32))
+    assert np.array_equal(
+        result.mapping_["a"],
+        np.array([0], dtype=np.float32),
+    )
 
 
 def test_pca_fit_input_features_is_full_nan():
@@ -299,6 +302,7 @@ def test_pca_fit_input_features_is_full_nan():
 
     assert encoder.mapping_ == {}
 
+
 def test_pca_fit_input_features_is_reverse_nan_of_target():
 
     stub_pca_transform = TransformStub()
@@ -310,6 +314,7 @@ def test_pca_fit_input_features_is_reverse_nan_of_target():
     encoder.fit(X, y)
     assert encoder.n_features_out_ == 1
     assert encoder.mapping_ == {'a': [np.nan]}
+
 
 def test_pca_fit_empty_input():
     """

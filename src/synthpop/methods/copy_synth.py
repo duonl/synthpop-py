@@ -72,7 +72,8 @@ class CopyMethod(base_synth.BaseSynthMethod):
         :param y: The column to be copied.
         """
         if not isinstance(y, pd.Series):
-            raise TypeError(f"y must be a pandas Series, got {type(y)} instead.")
+            raise TypeError(
+                f"y must be a pandas Series, got {type(y)} instead.")
 
         self.y_ = y.copy()
         self.target_name_ = y.name
@@ -108,7 +109,8 @@ class CopyMethod(base_synth.BaseSynthMethod):
 
         if X is not None:
             if len(X) != self.n_samples_:
-                raise ValueError(f"Row mismatch: expected {self.n_samples_}, got {len(X)}.")
+                raise ValueError(
+                    f"Row mismatch: expected {self.n_samples_}, got {len(X)}.")
 
         return pd.Series(self.y_.values, name=self.target_name_, dtype=self.target_dtype_)
 
