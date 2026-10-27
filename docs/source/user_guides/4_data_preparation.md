@@ -159,7 +159,7 @@ For categorical synthesis, missing values in the target are transformed into a v
 >>> from synthpop.data_preparation import ReplaceMissingWithValue
 >>> from synthpop.utils import str_dtype
 
->>> X = {"column1": np.array(["a", "b", "c", "c"])}
+>>> X = {"column1": np.array(["a", "b", "c", "c"], dtype=str_dtype)}
 >>> y = np.array(["x", "y", np.nan, "z"], dtype=str_dtype)
 >>> replace_missing = ReplaceMissingWithValue()
 >>> x_res, y_res = replace_missing.prepare_data_for_fit(X, y)

@@ -24,7 +24,7 @@ The univariate distribution visualisation compares each variable in the original
 ```python
 >>> from synthpop.plotting import plot_univariate_distributions
 
->>>> plots = plot_univariate_distributions(
+>>> plots = plot_univariate_distributions(
 ...     original_data,
 ...     synthetic_data,
 ...     save_path=None,
