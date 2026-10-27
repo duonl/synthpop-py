@@ -146,7 +146,7 @@ synthpop-py is currently under active development. We expect to be able to do ma
 We expect to develop new features for at least half a year.
 
 synthpop-py is a relatively new open-source project, with a small but growing user group.
-We are looking forward to growing the project together with is users and contributors.
+We are looking forward to growing the project together with its users and contributors.
 
 The initial release focuses on providing a robust Python implementation of the core sequential modelling approach, with an emphasis on:
 
@@ -170,7 +170,7 @@ More details wil follow soon.
 
 We are very happy to receive contributions to synthpop-py. Whether you found a bug, spotted something that could be improved, have an idea for a new feature, want to improve the documentation or would like to contribute code, **we would love to hear from you**.
 
-You do not need to be an expert in the project to contribute. Questions, suggestions and discussions are valuable contributions too, and they help us understand how synthpop-py can better serve its users.
+You do not need to be an expert in the field of synthetic data to contribute. Questions, suggestions and discussions are valuable contributions too, and they help us understand how synthpop-py can better serve its users.
 
 For information about contributing to the project, setting up a development environment, and the development workflow, see the project's [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer documentation](https://synthpop-py.readthedocs.io/page/developer/developer_index.html).
 
