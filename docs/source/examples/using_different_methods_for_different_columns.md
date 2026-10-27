@@ -62,7 +62,7 @@ data.iloc[:, 1].equals(synthetic_data.iloc[:, 1])
 False
 ```
 
-```{warning}
+```{note}
 `CopyMethod` reproduces the original values exactly and therefore does **not** provide privacy protection for that variable. It should only be used for variables where copying the original values is acceptable.
 
 Additionally, `CopyMethod` requires the synthetic dataset to contain the same number of rows as the original dataset. It cannot be used together with `generate(n=...)` where `n` differs from the size of the original dataset.
