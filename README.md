@@ -1,6 +1,6 @@
 # synthpop-py
 
-**synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the established [`synthpop` R package](https://www.synthpop.org.uk/), but provides a modern python interface and software architecture specifically designed for usability, reproducibility, maintainability and extensibility.
+**synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods. It is based on the established [`synthpop` R package](https://www.synthpop.org.uk/), but provides a modern Python interface and software architecture specifically designed for usability, reproducibility, maintainability and extensibility.
 
 Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to original or sensitive data is restricted. synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations. Properly synthesised data does not have any row-to-row relationships to the original data. As such, it may be considered non-personal data in the context of privacy laws such as the GDPR.
 
@@ -29,7 +29,9 @@ syn_df = synth.generate()
 
 The original data should always be provided as a `pandas.DataFrame`. The `Synthesiser` learns the data patterns using a synthesis model when `fit()` is called, after which `generate()` creates a new synthetic dataset. It is possible to generate a dataset with a different number of observations than the original data.
 
-For a complete introduction to preparing data, configuring synthesis, generating synthetic datasets, and evaluating the results, see the [Getting Started guide](https://synthpop-py.readthedocs.io/page/getting_started/getting_started.html).
+Ready to explore further? For a complete introduction to preparing data, configuring synthesis, generating synthetic datasets, and evaluating the results, see the [Getting Started guide](https://synthpop-py.readthedocs.io/page/getting_started/getting_started.html).
+
+If you try synthpop-py and have feedback on your experience, we would be very interested to hear from you. Your feedback can help us improve the package and prioritise future development.
 
 ## Installation
 ### Requirements
@@ -40,7 +42,7 @@ synthpop-py requires:
 - **scikit-learn 1.8.0 or later**
 - **plotly 6.5.2 or later**
 
-The runtime dependencies are installed when installing synthpop-py from PyPI
+The runtime dependencies are installed when installing synthpop-py from PyPI.
 
 ### Install from PyPi
 The recommended installation method is through PyPI:
@@ -68,6 +70,8 @@ It includes:
 * **[Examples](https://synthpop-py.readthedocs.io/page/examples/examples_index.html)** - detailed examples on creating a synthesis, evaluating the data, adjusting parameters and creating custom synthesis methods.
 * **[API Reference](https://synthpop-py.readthedocs.io/page/api_reference/synthpop.html)** — documentation of the Python API.
 * **[Developer documentation](https://synthpop-py.readthedocs.io/page/developer/developer_index.html)** — information about the project architecture, development workflow, and contributing to the package.
+
+If you are using synthpop-py and find something unclear, missing, or difficult to follow, please let us know. Documentation improvements and suggestions for new examples are very welcome.
 
 ## Supported data and synthesis methods
 
@@ -138,10 +142,11 @@ Synthetic data should also be evaluated for utility. A synthetic dataset that pr
 
 ## Project status and roadmap
 
-synthpop-py is currently under active development. We expect to be able to do maintenance for at least a year (end of 2027).
-We are still working on long(er) term financing/development/maintenance. 
+synthpop-py is currently under active development. We expect to be able to do maintenance for at least a year (end of 2027). We are still working on long(er) term financing, development and maintenance.
 We expect to develop new features for at least half a year.
-synthpop-py is a relatively new open source project, with a small but growing user group. 
+
+synthpop-py is a relatively new open source project, with a small but growing user group.
+We are looking forward to growing the project together with is users and contributors.
 
 The initial release focuses on providing a robust Python implementation of the core sequential modelling approach, with an emphasis on:
 
@@ -157,13 +162,19 @@ The preliminary roadmap is as follows:
 3. evaluating utility
 4. evaluating privacy
 
+The roadmap will evolve as the project develops. If you have any ideas about features or improvements that would make synthpop-py more useful, please get in touch.
+
 More details wil follow soon.
 
 ## Contributing
 
-synthpop-py is intended to be an open-source project, and contributions are welcome.
+We are very happy to receive contributions to synthpop-py. Whether you found bug, spotted something that could be improved, have an idea for a new feature, want to improve the documentation or would like to contribute code, **we would love to hear from you**.
+
+You do ot need to be an expert in the project to contribute. Questions, suggestions and discussions are valuable contributions too, and they help us understand how synthpop-py can better serve its users.
 
 For information about contributing to the project, setting up a development environment, and the development workflow, see the project's [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer documentation](https://synthpop-py.readthedocs.io/page/developer/developer_index.html).
+
+Have an idea for a feature? Found something that does not work as expected? Want to contribute to the project? Please get in touch through [GitHub](https://github.com/duonl/synthpop-py).
 
 ## License
 
