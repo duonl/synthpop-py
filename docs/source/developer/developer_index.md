@@ -17,7 +17,7 @@ For questions about what constitutes acceptable code, consult [Code Standards, N
 Finally, the [Dataflow Diagrams](way_of_working/dataflowdiagram.md) provide a visual and conceptual overview of how synthpop-py operates internally. Use them as a reference when you need to understand the system's architecture or the flow of data through its different components.
 
 ## Want to contribute?
-We welcome contributions of all kinds. You can contribute by implementing a feature, fixing a bug, improving documentation, reviewing code, suggesting an idea, or helping us improve the development process
+We welcome contributions of all kinds. You can contribute by implementing a feature, fixing a bug, improving documentation, reviewing code, suggesting an idea, or helping us improve the development process.
 
 You do not need to know the entire codebase before getting involved. If you have an idea for an improvement or are unsure where to start, **please get in touch with us**. Questions and discussions are welcome and we are happy to help you find a way to contribute.
 
