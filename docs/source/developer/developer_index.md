@@ -21,7 +21,7 @@ We welcome contributions of all kinds. You can contribute by implementing a feat
 
 You do not need to know the entire codebase before getting involved. If you have an idea for an improvement or are unsure where to start, **please get in touch with us** by opening an issue on [GitHub](https://github.com/duonl/synthpop-py/issues/new) or contacting us by email at [synthetische.data@duo.nl](mailto:synthetische.data@duo.nl). Questions and discussions are welcome and we are happy to help you find a way to contribute.
 
-The [Contributing to the package](../../../CONTRIBUTING.md) page provides more information about contributing to synthpop-py, including how to suggest enhancements, report bugs, improve documentation and contribute code.
+The [Contributing to the package](contributing_to_package.md) page provides more information about contributing to synthpop-py, including how to suggest enhancements, report bugs, improve documentation and contribute code.
 
 If there is something you would like synthpop-py to provide, let us know! Your feedback helps us understand what is useful to the community and helps shape the future development of the project.
 
