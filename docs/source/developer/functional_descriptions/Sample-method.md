@@ -3,7 +3,7 @@
 ## 1. Introduction
 The Sample synthesis method is a probabilistic data generation approach that reproduces a target variable by drawing values from its empirical distribution observed in the original dataset. The method does not model relationships between variables and is therefore independent of any feature set. Typical use cases include generating synthetic baseline distributions for a variable, introducing controlled randomness into synthesis pipelines or serving as a simple probabilistic alternative to deterministic copying.
 
-Within a Synthpop synthesis, the default method for the first column is a sample.
+Within a synthpop synthesis, the default method for the first column is a sample.
 
 ## 2. Input and output
 The inputs for fitting a Sample synthesis method are:

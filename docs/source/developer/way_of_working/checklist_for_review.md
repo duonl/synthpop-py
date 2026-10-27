@@ -1,7 +1,7 @@
 # Checklist for Review
-This checklist is intended to guide reviewers in performing consistent, thorough and efficient code reviews within the Synthpop project. Its goal is to ensure that all contributions meet the agreed standards for correctness, readability, maintainability and alignment with project conventions.
+This checklist is intended to guide reviewers in performing consistent, thorough and efficient code reviews within the synthpop-py project. Its goal is to ensure that all contributions meet the agreed standards for correctness, readability, maintainability and alignment with project conventions.
 
-For first-time reviewers, it is recommended to briefly consult the [Developing Synthpop](developing.md) and [Code Standards, Norms and Conventions](code_standards_and_norms.md) documents. These provide the necessary context on workflows and quality expectations, which the checklist operationalises.
+For first-time reviewers, it is recommended to briefly consult the [Developing synthpop-py](developing.md) and [Code Standards, Norms and Conventions](code_standards_and_norms.md) documents. These provide the necessary context on workflows and quality expectations, which the checklist operationalises.
 
 A review is expected to be complete. However, if during early stages of review (e.g. scope, behaviour or method design) it becomes clear that the implementation requires major changes (such as fundamental design issues, incorrect architecture or invalid core assumptions) then:
 - You may stop the review early
