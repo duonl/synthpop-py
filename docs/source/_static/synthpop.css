@@ -1,0 +1,39 @@
+/* Main index page overview cards. Equal to NumPy styling*/
+.sd-card {
+  background-color: var(--pst-color-on-background);
+}
+
+.sd-card .sd-card-img-top {
+  height: 60px;
+  width: 60px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+}
+
+html[data-theme=dark] .sd-card img[src*='.svg'] {
+  filter: invert(1.0) saturate(0.0);
+  background: none;
+}
+
+/* Make mermaid diagram backgrounds transparent and more readable with max-width */
+.mermaid {
+    overflow-x: auto;
+    background: transparent !important;
+}
+
+.mermaid svg {
+    background: transparent;
+    max-width: none !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* Create the look of a heading, but make sure it does not show up on the right side bar*/
+.fake-h3 {
+    font-size: 1.25em;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}

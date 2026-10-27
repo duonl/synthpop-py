@@ -1,4 +1,15 @@
 *.pyc
+*.pyc.*
 /docs/api reference/
 /docs/build/
 /dist/
+*~
+.\#*
+\#*\#
+.coverage
+classes.dot
+pyproject.toml
+tests/unit/__pycache__/
+src/*.svg
+src/*.png
+poetry.lock

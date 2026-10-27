@@ -1,0 +1,119 @@
+# This repository adheres to the publiccode.yml standard by including this
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/publiccodeyml/publiccode.yml
+
+publiccodeYmlVersion: "0.7"
+
+name: synthpop-py
+url: "https://github.com/duonl/synthpop-py"
+
+
+landingURL: "https://synthpop-py.readthedocs.io" 
+
+# Type of software: https://yml.publiccode.tools/schema.core.html#key-softwaretype
+# The value 'library' is used when the intended audience are developers. That is not the case for this project.
+# The intended audience are data scientists using python.
+softwareType: library
+
+platforms:
+  - windows
+  - linux
+
+
+# possible categories: https://yml.publiccode.tools/categories-list.html#categories-list
+categories:
+  - other
+  - data-analytics
+  - data-collection
+  - predictive-analysis
+
+# Description of statuses: https://yml.publiccode.tools/schema.core.html#key-developmentstatus
+developmentStatus: stable
+
+description:
+  en:
+    longDescription: >
+      **synthpop-py** is a Python package for generating synthetic tabular data using sequential modelling methods.
+      It is based on the established synthpop` R package,
+      but provides a modern python interface and software architecture specifically designed for
+      usability, reproducibility, maintainability and extensibility.
+
+      Synthetic data can help researchers, data scientist, statisticians and organisations work with realistic datasets when access to
+      original or sensitive data is restricted.
+      synthpop-py learns statistical relationships from an original dataset and uses these relationships to generate new synthetic observations.
+      Properly synthesised data does not have any row-to-row relationships to the original data.
+      As such, it may be considered non-personal data in the concept of privacy laws such as the GDPR.
+
+      However, synthetic data does not automatically eliminate privacy risks.
+      Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data.
+      Users should therefore always carefully consider the characteristics and sensitivity of
+      the original data, the synthesis methods, the settings used, and the intended use and sharing context of the synthetic data.
+
+
+    shortDescription:
+      "Generating synthetic versions of sensitive tabular microdata for statistical disclosure control" #from synthpop-R
+    features:
+      - methods for making synthetic data
+      - utility evaluation tools
+      - visualisation tools to evaluate the synthetic data
+
+
+legal:
+  # SPDX licence: https://spdx.org/licenses/
+  license: EUPL-1.2
+  mainCopyrightOwner: Dienst Uitvoering Onderwijs (Ministry of Education, Culture and Science)
+
+
+intendedAudience:
+  countries: # all countries where the GDPR applies
+    - NL
+    - DE 
+    - BE 
+    - GB
+    - FR 
+    - ES
+    - IT 
+    - PT 
+    - IE 
+    - SE
+    - FI 
+    - DK
+    - EE
+    - LT
+    - PL
+    - CZ 
+    - SK
+    - HU
+    - AT
+    - SI
+    - HR 
+    - RO
+    - BG
+    - GR 
+    - CY 
+    - MT
+    - LI
+    - NO
+
+  # possible scopes: https://yml.publiccode.tools/scope-list.html#scope-list
+  scope:
+    - education
+    - healthcare
+    - local-authorities
+    - research
+    - science-and-technology
+    - society
+
+localisation:
+  # only values from IETF BCP 47: https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+  availableLanguages:
+    - en
+  # possibility for more translations
+  localisationReady: false
+
+maintenance:
+  type: internal
+  contacts:
+    - name: DUO 
+      email: synthetische.data@duo.nl
+      affiliation: DUO 
