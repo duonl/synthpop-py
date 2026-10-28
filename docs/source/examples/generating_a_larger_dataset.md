@@ -3,7 +3,6 @@ In the previous examples, we generated a synthetic dataset with the same number 
 
 One advantage of synthetic data is that we can generate more records than were available in the original dataset. This can be useful when testing analysis pipelines, developing software or creating datasets for simulation studies.
 
-## Loading the data
 ## Load the data
 For this example, we use the [Titanic dataset](https://github.com/mwaskom/seaborn-data/blob/master/titanic.csv) from `seaborn`. Unlike the diabetes dataset used in the previous example, this dataset contains both numeric and categorical variables making it a realistic example for demonstrating synthetic data generation.
 ```python
