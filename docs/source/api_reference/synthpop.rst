@@ -66,3 +66,9 @@ Table of contents
    :caption: Reproducibility
 
    reproducibility/reproducibility
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Utilities
+
+   utils
