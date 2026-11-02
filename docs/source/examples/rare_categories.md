@@ -42,6 +42,8 @@ X[0:3]
 
 
 
+Here {data}`~synthpop.utils.str_dtype` is the categorical string dtype; its API documentation explains how it preserves missing values.
+
 Because we 'accidentally' cast the numerical array to strings, the predictor column is now categorical with unique values.
 
 We can use a decision-tree-based synthesis method to synthesise the target:
