@@ -6,7 +6,6 @@ Synthetic data can help researchers, data scientist, statisticians and organisat
 
 However, synthetic data does not automatically eliminate privacy risks. Sensitive information or distinctive patterns from the original data may still be reproduced or inferred from synthetic data. Users should therefore always carefully consider the characteristics and sensitivity of the original data, the synthesis methods, the settings used, and the intended use and sharing context of the synthetic data.
 
-> **Project status**: synthpop-py is currently under active development and the project is working towards its `1.0.0` release
 
 ## Quick start
 
