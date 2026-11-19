@@ -50,6 +50,9 @@ dev = [
     "pytest-cov (>=7.0.0,<8.0.0)",
     "pylint (>=4.0.4,<5.0.0)",
     "pytest-mock (>=3.15.1,<4.0.0)",
+    "pre-commit (>=4.7.0,<5.0.0)",
+    "autopep8 (>=2.3.2,<3.0.0)",
+    "codespell (>=2.4.3,<3.0.0)",
 ]
 [tool.poetry]
 packages = [{include = "synthpop", from = "src"}]
@@ -66,3 +69,16 @@ addopts = [
 markers = [
     "noautofixt: disable the autouse fixtures that stub production functionality",
 ]
+
+[tool.autopep8]
+in-place = true # Make edits in the files
+recursive = true #run recursively over directories;
+aggressive = 3
+
+[tool.codespell]
+count = true
+quiet-level = 3
+check-filenames = true
+write-changes = true # write changes to files
+builtin = "clear,rare,names,informal,usage,en_to_en-OX"
+ignore-words = "words.txt"
