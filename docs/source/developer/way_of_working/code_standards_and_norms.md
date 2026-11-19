@@ -26,7 +26,7 @@ For developers, this documentation should be used during implementation and when
 - Use NumPy arrays where possible.
 - The user of this package should be able to use pandas.
 - Prefer explicit over implicit behaviour.
-- Avoid premature abstraction: prefer simple solutions until complexity justifies generalisation.
+- Avoid premature abstraction: prefer simple solutions until complexity justifies generalization.
 
 A synthesis method should accept pandas dataframes/series and heterogeneous data.
 Making the data homogeneous should happen within the synthesis method.
@@ -131,3 +131,5 @@ Not always required, but important for data-heavy operations:
 - pytest-cov for code coverage of the unit tests. (installed if you installed this package with the dev dependency group)
 - pylint for code feedback and code analysis.
 
+CodeSpell and autopep8 are configured as pre-commit hooks. 
+Words that CodeSpell should ignore are in `words.txt`
