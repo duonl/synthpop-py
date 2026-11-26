@@ -87,8 +87,8 @@ Ensure robustness under extreme or unusual inputs.
 #### 4. Input validation and consistency
 Ensure the function behaves correctly when inputs are invalid or inconsistent.
 - Missing or optional arguments (e.g. one input specifies the output file, a second input specifies output format. What happens if an output format is given but no output file?)
-- Mismatched input dimensions
-- Incompatible types between inputs
+- Mismatched input dimensoins
+- Incompatible types beteen inputs
 - Conflicting parameters (e.g. two mutually exclusive settings such as one input that specifies the number of principle components and a second input that specifies a threshold to select principle components. What happens when both are given?)
 - Assumptions between inputs being violated
 
@@ -131,5 +131,5 @@ Not always required, but important for data-heavy operations:
 - pytest-cov for code coverage of the unit tests. (installed if you installed this package with the dev dependency group)
 - pylint for code feedback and code analysis.
 
-CodeSpell and autopep8 are configured as pre-commit hooks. 
+CodeSpell and autopep8 are configured as pre-commit hooks.
 Words that CodeSpell should ignore are in `words.txt`
