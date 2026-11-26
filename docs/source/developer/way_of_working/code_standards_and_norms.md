@@ -26,7 +26,7 @@ For developers, this documentation should be used during implementation and when
 - Use NumPy arrays where possible.
 - The user of this package should be able to use pandas.
 - Prefer explicit over implicit behaviour.
-- Avoid premature abstraction: prefer simple solutions until complexity justifies generalization.
+- Avoid premature abstraction: prefer simple solutions until complexity justifies generalisation.
 
 A synthesis method should accept pandas dataframes/series and heterogeneous data.
 Making the data homogeneous should happen within the synthesis method.

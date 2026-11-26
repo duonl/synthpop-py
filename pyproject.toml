@@ -80,5 +80,5 @@ count = true
 quiet-level = 3
 check-filenames = true
 write-changes = true  # make edits in the files
-builtin = "clear,rare,names,informal,usage,en_to_en-OX"
+builtin = "clear,rare,names,informal,usage"
 ignore-words = "words.txt"
