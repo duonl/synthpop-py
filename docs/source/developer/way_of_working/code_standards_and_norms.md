@@ -88,8 +88,8 @@ Ensure robustness under extreme or unusual inputs.
 Ensure the function behaves correctly when inputs are invalid or inconsistent.
 - Missing or optional arguments (e.g. one input specifies the output file, a second input specifies output format. What happens if an output format is given but no output file?)
 - Mismatched input dimensoins
-- Incompatible types beteen inputs
-- Conflicting parameters (e.g. two mutually exclusive settings such as one input that specifies the number of principle components and a second input that specifies a threshold to select principle components. What happens when both are given?)
+- Incompatible types between inputs
+- Conflicting parameters (e.g. two mutually exclusive settings such as one input that specifies the number of principal components and a second input that specifies a threshold to select principle components. What happens when both are given?)
 - Assumptions between inputs being violated
 
 behaviour.
