@@ -92,6 +92,8 @@ Ensure the function behaves correctly when inputs are invalid or inconsistent.
 - Conflicting parameters (e.g. two mutually exclusive settings such as one input that specifies the number of principle components and a second input that specifies a threshold to select principle components. What happens when both are given?)
 - Assumptions between inputs being violated
 
+behaviour.
+
 #### 5. Integration and interaction behaviour
 Verify correctness when components interact.
 - End-to-end pipeline correctness
