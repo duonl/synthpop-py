@@ -17,14 +17,14 @@ SynMethodCallable = Callable[[], BaseSynthMethod]
 
 class Synthesiser:
     """
-    Delegates synthesis tasks to the appropriate synthesis method classes. 
+    Delegates synthesis tasks to the appropriate synthesis method classes.
 
     :param random_seed: A seed for randomness that makes both model fitting and data generation reproducible.
     :param column_order: list of variable names or list of indexes to define the order in which the columns will be synthesised. Default is the column order of the original dataset.
-    :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartMethod. 
-    :param special_syn_method: Dictionary of special synthesis method per variable. 
+    :param default_syn_method: Synthesis method to apply to each column, the ones defined in special_syn_method. Default synthesis method is CartMethod.
+    :param special_syn_method: Dictionary of special synthesis method per variable.
         If some variables should not follow the default_syn_method, they should be indicated in a dictionary
-        where keys are variable names and values are `BaseSynthMethod` instances (like :class:`CartMethod`) or zero-argument callables returning `BaseSynthMethod` instances (like :func:`tune_cart`). 
+        where keys are variable names and values are `BaseSynthMethod` instances (like :class:`CartMethod`) or zero-argument callables returning `BaseSynthMethod` instances (like :func:`tune_cart`).
         By default, there is no special synthesis method.
 
 
@@ -36,7 +36,7 @@ class Synthesiser:
     the synthesiser's random-state context. This allows synthesis-method
     factories to create internally randomised estimators using
     ``RandomStateManager`` while retaining reproducibility from
-    ``Synthesiser(random_seed=...)``. 
+    ``Synthesiser(random_seed=...)``.
 
     If a value of default_syn_method is callable, it is called once for each column that does not have a special synthesis method.
     If a value of special_syn_method is callable, it is called once when that column is fitted.
@@ -82,16 +82,14 @@ class Synthesiser:
 
     """
 
-    def __init__(
-            self,
-            random_seed: int | None = None,
-            column_order: list[str] | list[int] | None = None,
-            default_syn_method: BaseSynthMethod | SynMethodCallable | None = None,
-            special_syn_method: Dict[
-                str,
-                BaseSynthMethod | SynMethodCallable,
-            ] | None = None,
-    ) -> None:
+    def __init__(self,
+                 random_seed: int | None = None,
+                 column_order: list[str] | list[int] | None = None,
+                 default_syn_method: BaseSynthMethod | SynMethodCallable | None = None,
+                 special_syn_method: Dict[str,
+                                          BaseSynthMethod | SynMethodCallable,
+                                          ] | None = None,
+                 ) -> None:
 
         self.default_syn_method = default_syn_method
         self.column_order = column_order
@@ -132,7 +130,8 @@ class Synthesiser:
 
         return clone(method)
 
-    def _validate_column_order_unique(self, column_order: list[str] | list[int]):
+    def _validate_column_order_unique(
+            self, column_order: list[str] | list[int]):
         unique_column_order = np.unique_counts(column_order)
 
         if (unique_column_order.counts > 1).any():
@@ -176,12 +175,14 @@ class Synthesiser:
             out_of_bounds = (array_columns >= len(X.columns))
             if out_of_bounds.any():
                 raise ValueError(
-                    f"The following indices of Synthesiser.column_order are out of bounds: {array_columns[out_of_bounds]}")
+                    f"The following indices of Synthesiser.column_order are out of bounds: {
+                        array_columns[out_of_bounds]}")
 
             negative_indices = array_columns < 0
             if negative_indices.any():
                 raise ValueError(
-                    f"The following indices of Synthesiser.column_order are negative: {array_columns[negative_indices]}")
+                    f"The following indices of Synthesiser.column_order are negative: {
+                        array_columns[negative_indices]}")
 
             self.column_order_ = X.columns[self.column_order].to_list()
 
@@ -191,7 +192,8 @@ class Synthesiser:
             columns_not_in_df = set(self.column_order) - set(X.columns)
             if len(columns_not_in_df) > 0:
                 raise ValueError(
-                    f"The following columns of Synthesiser.column_order are not in the dataframe: {sorted(columns_not_in_df)}")
+                    f"The following columns of Synthesiser.column_order are not in the dataframe: {
+                        sorted(columns_not_in_df)}")
             self.column_order_ = self.column_order
 
         else:
@@ -205,7 +207,7 @@ class Synthesiser:
         self.n_samples_ = X.shape[0]
         with synthpop.reproducibility.RandomStateManager(seed=self.random_seed):
             for i, y in enumerate(self.column_order_):
-
+                # with structlog.contextvars.bound_contextvars(column=y):
                 if i == 0:
                     predictors = pd.DataFrame(
                         {"init": np.zeros(X.shape[0], dtype=int)})
@@ -221,9 +223,12 @@ class Synthesiser:
 
         return self
 
-    def generate(self, n: int | None = None, random_seed: int | None = None) -> pd.DataFrame:
+    def generate(
+            self,
+            n: int | None = None,
+            random_seed: int | None = None) -> pd.DataFrame:
         """
-        Generate a synthetic dataset of ``n`` rows. 
+        Generate a synthetic dataset of ``n`` rows.
 
         This method loops through the columns of ``X``, following ``column_order``, and calls the :py:meth:`transform` function of the synthesis method objects as used in ``fit``.
 
@@ -253,6 +258,7 @@ class Synthesiser:
 
         with synthpop.reproducibility.RandomStateManager(seed=seed_to_use):
             for i, y in enumerate(self.column_order_):
+                # with structlog.contextvars.bound_contextvars(column=y):
 
                 if i == 0:
                     predictors = pd.DataFrame(

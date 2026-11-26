@@ -1,3 +1,4 @@
+import logging
 import warnings
 
 import pandas as pd
@@ -9,6 +10,16 @@ from typing import Dict
 from rich.progress import Progress
 
 str_dtype = np.dtypes.StringDType(na_object=np.nan)
+
+
+def configure_output(columns: list[str] | None = None,
+                     include_general: bool = True,
+                     level: int = logging.WARNING,
+                     # TODO: is this right?
+                     format: str = 'col: %(column)s -  %(message)s',
+                     show_progressbar: bool = True,
+                     file_name: str | None = None) -> None:
+    pass
 
 
 def _to_stringdtype_array(x):

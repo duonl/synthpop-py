@@ -12,9 +12,12 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
 from sklearn.utils.validation import check_is_fitted
+import structlog
 
 from synthpop.reproducibility import RandomStateManager
 from synthpop.utils import _to_stringdtype_array
+
+logger = structlog.getLogger()
 
 
 class _BaseEncoder(TransformerMixin, BaseEstimator):
@@ -31,7 +34,8 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         if arr.ndim > 1:
             if arr.shape[1] != 1:
                 raise ValueError(
-                    f"Expected a 1D or a 2D array with exactly one column. Received shape {arr.shape}.")
+                    f"Expected a 1D or a 2D array with exactly one column. Received shape {
+                        arr.shape}.")
             return arr.reshape(-1)
 
         return arr
@@ -54,7 +58,8 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         unseen = observed - seen
         if unseen:
             raise ValueError(
-                f"transform received categories that were not observed during fitting. Unseen values: {sorted(unseen)}. Ensure input was fitted")
+                f"transform received categories that were not observed during fitting. Unseen values: {
+                    sorted(unseen)}. Ensure input was fitted")
 
     def _apply_mapping(self, X_val: npt.NDArray) -> npt.NDArray[np.float32]:
 
@@ -77,7 +82,8 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         # >>> unique_vals[rev_index]
         # >>> array(['a', 'a', 'b', 'b', 'c', 'c', 'c'], dtype=StringDType(na_object=nan))
         # The only differences between the reconstruction and the original are the missing values.
-        # So to avoid searching X_val again to create a reverse index, we use this one instead and correct the missing values.
+        # So to avoid searching X_val again to create a reverse index, we use
+        # this one instead and correct the missing values.
 
         mapped_vals = np.array([self.mapping_[v]
                                for v in unique_vals], dtype=np.float32)
@@ -201,7 +207,8 @@ class PCAEncoder(_BaseEncoder):
             raise ValueError("Number of observations in X and y do not match")
 
         if np.isnan(X_val).all():
-            # If X is fully nan, mapping_ should be an empty dictionary, just like MeanEncoder
+            # If X is fully nan, mapping_ should be an empty dictionary, just
+            # like MeanEncoder
             self.mapping_ = {}
             self.n_features_out_ = 1
             return self
@@ -245,7 +252,8 @@ class PCAEncoder(_BaseEncoder):
         pca_result = self.pca_transform_.fit_transform(X=pca_input, y=None)
 
         # sklearn.decomposition.PCA implements the set_output api
-        # that means that the user might configure globally that all transformers return pandas dataframes.
+        # that means that the user might configure globally that all
+        # transformers return pandas dataframes.
         if isinstance(pca_result, pd.DataFrame):
             pca_result = pca_result.to_numpy()
 
@@ -255,11 +263,16 @@ class PCAEncoder(_BaseEncoder):
         mapping_for_missing = {
             k: [np.nan] * self.n_features_out_ for k in x_such_that_y_is_always_missing}
 
-        value_mapping = {contingency_table.index[i]: pca_result[i] for i in range(
-            contingency_table.shape[0])}
+        value_mapping = {
+            contingency_table.index[i]: pca_result[i] for i in range(
+                contingency_table.shape[0])}
 
         self.mapping_ = value_mapping | mapping_for_missing
 
+        # We emit the log message saying that the fitting of the encoder is completed in the encoder class instead of the calling class (CartMethod)
+        # This way the log message is still correct, even if the encoder is
+        # used in a completely different context than CartMethod.
+        logger.info("PCAEncoder.fit completed")
         return self
 
     # float32 is optimal for decision trees.
@@ -274,7 +287,10 @@ class PCAEncoder(_BaseEncoder):
         check_is_fitted(self, 'mapping_')
         X_val = self._validate_string_array(X)
         self._check_unseen_values(X_val)
-        return self._apply_mapping(X_val)
+        result = self._apply_mapping(X_val)
+
+        logger.info("PCAEncoder.fit completed")
+        return result
 
 
 class MeanEncoder(_BaseEncoder):
@@ -334,7 +350,8 @@ class MeanEncoder(_BaseEncoder):
 
         if not pd.api.types.is_numeric_dtype(y):
             raise ValueError(
-                f"MeanEncoder requires numeric target array y. Received dtype={y.dtype}")
+                f"MeanEncoder requires numeric target array y. Received dtype={
+                    y.dtype}")
 
         if X.shape[0] == 0 or y.shape[0] == 0:
             raise ValueError("Cannot fit encoder: X and y must be non-empty.")
