@@ -26,23 +26,14 @@ git merge upstream/develop
 ```
 
 ### Prerequisites
-The project uses `pipx` and `Poetry` for dependency management. Below are Windows-specific instructions to install both.
+The project uses `Poetry` for dependency management.
+See the [website](https://python-poetry.org/docs/#installation) of `Poetry` for instructions on installing `Poetry`
 
-1. Open a terminal in the root of the repository.
-2. Install pipx: `py -m pip install --user pipx`
-3. Navigate to the Scripts folder (path shown in the warning): `cd <USER folder>\AppData\Roaming\Python\Python<VERSION>\Scripts`
-4. Add pipx to your PATH: `.\pipx.exe ensurepath`
-5. Restart your terminal.
-6. Verify installation: `pipx --version`
-7. Install Poetry: `pipx install poetry`
-8. Restart your terminal again.
-9. Verify installation: `poetry --version`
+### Installing the Project
+If you want to contribute to the docs or build the documentation, you can install synthpop-py with the `docs` dependency group: `poetry install --with=docs`
+If you want to contribute to the code, we recommend that you include the development dependencies: `poetry install --with dev,docs`.
 
-### Installing Project Dependencies
-1. Open a terminal in the root of the repository.
-2. Install all dependencies: `poetry install --with=docs`
-3. Navigate to the docs folder: `cd docs`
-4. Build the documentation: `poetry run sphinx-build source build`
+We recommend to install the pre-commit hooks to improve code quality: `pre-commit install`.
 
 ### Updating the Documentation
 After modifying documentation, open a terminal in the root of the repository. Run the following commands to update the rendered documentation:

@@ -131,3 +131,5 @@ Not always required, but important for data-heavy operations:
 - pytest-cov for code coverage of the unit tests. (installed if you installed this package with the dev dependency group)
 - pylint for code feedback and code analysis.
 
+CodeSpell and autopep8 are configured as pre-commit hooks. 
+Words that CodeSpell should ignore are in `words.txt`
